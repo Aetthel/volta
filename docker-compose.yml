@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: volta-db
+    restart: always
+    environment:
+      POSTGRES_USER: volta_user
+      POSTGRES_PASSWORD: volta_password
+      POSTGRES_DB: volta_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: volta-app
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - wwebjs-auth:/app/.wwebjs_auth
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  wwebjs-auth:
