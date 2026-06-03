@@ -1,20 +1,20 @@
 ## 1. Database & Schema Updates
 
-- [ ] 1.1 Update `prisma/schema.prisma` with `BusinessRole` enum and new fields (email, password, role, welcomeMessage, reminderMessage)
-- [ ] 1.2 Create and run a Prisma migration to apply changes to the database
-- [ ] 1.3 Create a seed script to create the initial `ADMIN` user account
+- [x] 1.1 Update `prisma/schema.prisma` with `BusinessRole` enum and new fields (email, password, role, welcomeMessage, reminderMessage)
+- [x] 1.2 Create and run a Prisma migration to apply changes to the database
+- [x] 1.3 Create a seed script to create the initial `ADMIN` user account
 
 ## 2. Next.js Project Initialization
 
-- [ ] 2.1 Setup Next.js in the project root with App Router, Tailwind CSS, and TypeScript/JavaScript
-- [ ] 2.2 Install core dependencies: `next-auth`, `bcryptjs`, `lucide-react`, `shadcn/ui`
-- [ ] 2.3 Configure `Auth.js` (NextAuth) with Prisma adapter and JWT strategy
+- [x] 2.1 Setup Next.js in the project root with App Router, Tailwind CSS, and TypeScript/JavaScript
+- [x] 2.2 Install core dependencies: `next-auth`, `bcryptjs`, `lucide-react`, `shadcn/ui`
+- [x] 2.3 Configure `Auth.js` (NextAuth) with Prisma adapter and JWT strategy
 
 ## 3. Authentication & Authorization
 
-- [ ] 3.1 Implement the Login page UI using shadcn/ui
-- [ ] 3.2 Configure Auth.js callbacks to include `role` and `businessId` in the session/JWT
-- [ ] 3.3 Implement middleware to protect `/admin` (Admin only) and `/dashboard` (Business only) routes
+- [x] 3.1 Implement the Login page UI using shadcn/ui
+- [x] 3.2 Configure Auth.js callbacks to include `role` and `businessId` in the session/JWT
+- [x] 3.3 Implement middleware to protect `/admin` (Admin only) and `/dashboard` (Business only) routes
 
 ## 4. Admin Dashboard (Super-Admin)
 
