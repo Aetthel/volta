@@ -24,8 +24,8 @@ Thumbs.db
 /src/generated/
 
 # WhatsApp Web JS
-.wwebjs_auth/
-.wwebjs_cache/
+/.wwebjs_auth/
+/.wwebjs_cache/
 
 # Editor/IDE
 .vscode/
