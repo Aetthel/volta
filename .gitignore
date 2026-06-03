@@ -1,12 +1,26 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Environment variables
+# Next.js
+.next/
+out/
+build/
+
+# Production
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Gemini CLI / Agent specific
+.agents/
+.gemini/
+.geminiignore
+memory/
+*.agent.md
 
 # Logs
 logs
@@ -18,7 +32,7 @@ pnpm-debug.log*
 
 # OS files
 .DS_Store
-Thumbs.db
+*.pem
 
 # Prisma
 /src/generated/
@@ -27,11 +41,18 @@ Thumbs.db
 /.wwebjs_auth/
 /.wwebjs_cache/
 
+# Testing
+coverage/
+
 # Editor/IDE
 .vscode/
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
 
 # Docker
 .docker/
+
+# Turbopack
+.turbo/

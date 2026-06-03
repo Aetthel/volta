@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Business {
+  id              String         @id @default(uuid())
+  name            String
+  phone           String         // Business phone for WhatsApp linkage
+  email           String         @unique
+  password        String         // Hashed password
+  role            BusinessRole   @default(BUSINESS)
+  welcomeMessage  String?        // Custom welcome message template
+  reminderMessage String?        // Custom reminder message template
+  whatsappStatus  WhatsAppStatus @default(DISCONNECTED)
+  qrCode          String?        // Current QR code for pairing
+  appointments    Appointment[]
+}
+
+enum BusinessRole {
+  ADMIN
+  BUSINESS
+}
+
+enum WhatsAppStatus {
+  CONNECTED
+  DISCONNECTED
+  WAITING_QR
+}
+
+model Appointment {
+  id              String           @id @default(uuid())
+  clientName      String
+  clientPhone     String           // International format (e.g., 34600000000)
+  appointmentDate DateTime
+  status          AppointmentStatus @default(PENDING)
+  businessId      String
+  business        Business         @relation(fields: [businessId], references: [id])
+}
+
+enum AppointmentStatus {
+  PENDING
+  SENT
+  ERROR
+}

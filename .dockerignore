@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+.env
+.env.local
+.git
+.agents
+.gemini
+frontend/.next
+frontend/node_modules
+backend/node_modules
