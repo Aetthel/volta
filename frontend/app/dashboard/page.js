@@ -1,17 +1,19 @@
 import { auth } from "@/auth";
 import prisma from "backend/db";
-import AgendaTimeline from "@/components/dashboard/agenda-timeline";
-import QuickAddButton from "@/components/dashboard/quick-add-button";
+import { VoltaCalendar } from "@/components/dashboard/volta-ui/calendar";
+import { VoltaAgenda } from "@/components/dashboard/volta-ui/agenda";
+import { VoltaFAB } from "@/components/dashboard/volta-ui/fab";
 
 export default async function BusinessDashboard() {
   const session = await auth();
   
-  // Obtener citas de hoy
+  // Obtener citas de hoy (Server side data fetch)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const endOfDay = new Date(today);
   endOfDay.setHours(23, 59, 59, 999);
 
+  // Mantenemos la lógica de negocio pero el UI ahora es Volta
   const appointments = await prisma.appointment.findMany({
     where: {
       businessId: session.user.id,
@@ -24,16 +26,34 @@ export default async function BusinessDashboard() {
   });
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700 pb-24">
-      <header className="flex items-end justify-between border-b border-neutral-100 dark:border-neutral-900 pb-8">
-        <div className="space-y-2">
-          <h2 className="text-sm uppercase tracking-[0.3em] text-neutral-400">Hoy</h2>
-          <h1 className="text-5xl font-display font-bold">Tu Agenda</h1>
+    <div className="relative">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        {/* Sidebar Column: Calendar */}
+        <div className="lg:col-span-4 flex flex-col gap-8 sticky top-12">
+          <VoltaCalendar />
+          
+          <div className="bg-teal-600 rounded-[2rem] p-8 text-white">
+            <h3 className="text-xl font-bold mb-2">Resumen Semanal</h3>
+            <p className="text-teal-50 text-sm font-medium opacity-90">
+              Tienes 24 citas programadas para esta semana. 
+            </p>
+            <div className="mt-6 h-2 w-full bg-teal-800/50 rounded-full overflow-hidden">
+              <div className="h-full bg-white w-2/3 rounded-full" />
+            </div>
+            <p className="mt-3 text-xs font-bold text-teal-100 uppercase tracking-wider">
+              60% Capacidad alcanzada
+            </p>
+          </div>
         </div>
-        <QuickAddButton businessId={session.user.id} />
-      </header>
 
-      <AgendaTimeline initialAppointments={appointments} />
+        {/* Main Column: Agenda */}
+        <div className="lg:col-span-8">
+          <VoltaAgenda appointments={appointments} />
+        </div>
+      </div>
+
+      {/* Floating Action Button */}
+      <VoltaFAB />
     </div>
   );
 }

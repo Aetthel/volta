@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import prisma from "backend/db";
-import WhatsAppStatusCard from "./status-card";
+import { VoltaWhatsAppCard } from "@/components/dashboard/volta-ui/whatsapp-card";
 
 export default async function WhatsAppPage() {
   const session = await auth();
@@ -13,15 +13,16 @@ export default async function WhatsAppPage() {
   });
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <header className="space-y-2">
-        <h2 className="text-sm uppercase tracking-[0.3em] text-neutral-400">Conexión</h2>
-        <h1 className="text-5xl font-display font-bold">WhatsApp</h1>
-      </header>
-
-      <div className="max-w-2xl">
-        <WhatsAppStatusCard initialData={business} />
+    <div className="py-8">
+      <div className="mb-10">
+        <h2 className="text-sm font-bold text-teal-600 uppercase tracking-[0.2em] mb-2">Canal de Comunicación</h2>
+        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Automatización</h1>
       </div>
+
+      <VoltaWhatsAppCard 
+        status={business?.whatsappStatus} 
+        qrCode={business?.qrCode} 
+      />
     </div>
   );
 }

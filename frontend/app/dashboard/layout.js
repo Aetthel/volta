@@ -1,11 +1,11 @@
-import BusinessSidebar from "@/components/dashboard/sidebar";
+import { VoltaNavigationDrawer } from "@/components/dashboard/volta-ui/navigation-drawer";
 
 export default function BusinessLayout({ children }) {
   return (
-    <div className="flex h-screen bg-[#F9F9F9] dark:bg-[#0A0A0A]">
-      <BusinessSidebar />
-      <main className="flex-1 overflow-y-auto p-12">
-        <div className="max-w-6xl mx-auto">
+    <div className="flex min-h-screen bg-slate-50">
+      <VoltaNavigationDrawer />
+      <main className="flex-1 p-8 md:p-14 lg:p-20 overflow-y-auto">
+        <div className="max-w-5xl mx-auto">
           {children}
         </div>
       </main>

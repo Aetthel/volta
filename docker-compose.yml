@@ -25,9 +25,9 @@ services:
       - PORT=3001
     volumes:
       - .:/app
-      - root_node_modules:/app/node_modules
-      - frontend_node_modules:/app/frontend/node_modules
-      - backend_node_modules:/app/backend/node_modules
+      - /app/node_modules
+      - /app/frontend/node_modules
+      - /app/backend/node_modules
       - wwebjs-auth:/app/.wwebjs_auth
     ports:
       - "3001:3001"
@@ -46,9 +46,9 @@ services:
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
     volumes:
       - .:/app
-      - root_node_modules:/app/node_modules
-      - frontend_node_modules:/app/frontend/node_modules
-      - backend_node_modules:/app/backend/node_modules
+      - /app/node_modules
+      - /app/frontend/node_modules
+      - /app/backend/node_modules
     ports:
       - "3000:3000"
     command: npm run dev --workspace=frontend
@@ -56,6 +56,3 @@ services:
 volumes:
   postgres_data:
   wwebjs-auth:
-  root_node_modules:
-  frontend_node_modules:
-  backend_node_modules:

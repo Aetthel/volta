@@ -2,11 +2,14 @@
 
 This project follows strict UI and architectural standards to ensure quality, scalability, and consistency.
 
-## UI Standards (shadcn/ui)
+## UI Standards (shadcn/ui & Volta UI)
 
-We use **shadcn/ui** with the **base-nova** style and **lucide** icons.
-Detailed rules are maintained in the `@shadcn` skill:
+We use **shadcn/ui** for generic components and **Volta UI** for the core branded interface.
+Standard design tokens and principles are documented in: `frontend/DESIGN.md`
 
+- **Visual Style**: Volta UI "Zoomed-In" (Base 18px, Lighter font weights).
+- **Typography**: Prefer `semibold`/`medium`. Avoid `black`/`bold` on large elements.
+- **Components**: Use atomic Volta components from `frontend/components/ui/volta-ui.js`.
 - **Form Layout**: Always use `FieldGroup` and `Field`. Never use raw `div` with `space-y-*`.
 - **Inputs**: Use `InputGroup` for inputs with addons or buttons.
 - **Composition**: Use full Card composition (`CardHeader`, `CardContent`, etc.).

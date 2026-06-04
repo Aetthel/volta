@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Scissors, Mail, Lock, LogIn, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -30,7 +27,7 @@ export default function LoginPage() {
       if (result.error) {
         setError("Credenciales inválidas");
       } else {
-        router.push("/dashboard"); // El middleware redirigirá a /admin si es necesario
+        router.push("/dashboard");
       }
     } catch (err) {
       setError("Algo salió mal. Inténtalo de nuevo.");
@@ -40,62 +37,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-sm space-y-12">
-        <header className="space-y-4 text-center">
-          <h1 className="text-6xl font-display font-bold tracking-tight">
-            Volta
-          </h1>
-          <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground font-sans">
-            Gestión de Agenda
-          </p>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-md flex flex-col gap-10">
+        <header className="flex flex-col items-center text-center gap-4">
+          <div className="size-16 bg-teal-600 rounded-[1.5rem] flex items-center justify-center text-white">
+            <Scissors className="size-8 stroke-[2.5]" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">Volta</h1>
+            <p className="text-sm font-bold text-teal-600 uppercase tracking-[0.2em] mt-1">Gestión de Agenda</p>
+          </div>
         </header>
 
-        <main className="space-y-8">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] uppercase tracking-widest text-muted-foreground ml-1">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="hola@tuempresa.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="rounded-none border-t-0 border-x-0 border-b border-border bg-transparent px-1 pb-3 h-auto text-lg focus-visible:ring-0 focus-visible:border-solar transition-colors"
-                />
+        <main className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6">
+              {/* Outlined Input: Email */}
+              <div className="relative group">
+                <div className="absolute left-4 -top-2.5 px-2 bg-white text-xs font-semibold text-teal-600 group-focus-within:text-teal-600 transition-colors z-10">
+                  Email
+                </div>
+                <div className="relative flex items-center">
+                  <Mail className="absolute left-4 size-5 text-slate-400" />
+                  <input 
+                    type="email" 
+                    placeholder="hola@tuempresa.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full h-14 pl-12 pr-4 rounded-xl border border-slate-200 outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600 transition-all text-slate-900 bg-transparent font-medium"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[10px] uppercase tracking-widest text-muted-foreground ml-1">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="rounded-none border-t-0 border-x-0 border-b border-border bg-transparent px-1 pb-3 h-auto text-lg focus-visible:ring-0 focus-visible:border-solar transition-colors"
-                />
+
+              {/* Outlined Input: Password */}
+              <div className="relative group">
+                <div className="absolute left-4 -top-2.5 px-2 bg-white text-xs font-semibold text-slate-500 group-focus-within:text-teal-600 transition-colors z-10">
+                  Contraseña
+                </div>
+                <div className="relative flex items-center">
+                  <Lock className="absolute left-4 size-5 text-slate-400" />
+                  <input 
+                    type="password" 
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full h-14 pl-12 pr-4 rounded-xl border border-slate-200 outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600 transition-all text-slate-900 bg-transparent font-medium"
+                  />
+                </div>
               </div>
             </div>
             
             {error && (
-              <p className="text-[10px] uppercase tracking-widest text-red-500 text-center animate-in fade-in duration-300">{error}</p>
+              <div className="flex items-center gap-3 p-4 bg-red-50 rounded-2xl border border-red-100 text-red-700 text-sm font-bold animate-shake">
+                <AlertCircle className="size-5 shrink-0" />
+                {error}
+              </div>
             )}
 
-            <Button
+            <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:opacity-90 rounded-none h-14 text-[10px] uppercase tracking-[0.2em] font-bold"
+              className="w-full h-16 bg-teal-600 text-white font-black rounded-2xl hover:bg-teal-700 active:scale-[0.98] disabled:bg-slate-200 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
             >
-              {loading ? "Cargando..." : "Entrar al Sistema"}
-            </Button>
+              {loading ? (
+                <div className="size-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <LogIn className="size-5 stroke-[2.5]" />
+              )}
+              {loading ? "Iniciando sesión..." : "Entrar al Sistema"}
+            </button>
           </form>
         </main>
 
-        <footer className="text-center pt-8 border-t border-border/50">
-          <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
-            ¿Problemas para acceder? Contacta con soporte.
+        <footer className="text-center">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            ¿Problemas para acceder? <br/>
+            <span className="text-teal-600 cursor-pointer hover:underline">Contacta con soporte</span>
           </p>
         </footer>
       </div>

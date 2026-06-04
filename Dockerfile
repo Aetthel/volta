@@ -1,9 +1,10 @@
-FROM node:20-slim
+FROM node:22-slim
 
-# Install Chromium for whatsapp-web.js
+# Install Chromium for whatsapp-web.js and build tools for native modules
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    python3 make g++ \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
