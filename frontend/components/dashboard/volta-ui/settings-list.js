@@ -5,7 +5,7 @@ import {
   Bell, 
   Clock, 
   MapPin, 
-  Scissors, 
+  Sparkles, 
   ShieldCheck, 
   Smartphone,
   ChevronRight
@@ -23,7 +23,7 @@ const SETTINGS_GROUPS = [
     title: "Gestión del Local",
     items: [
       { id: 'hours', icon: Clock, label: "Horario Comercial", description: "Lunes a Sábado de 09:00 a 20:00", type: "link" },
-      { id: 'services', icon: Scissors, label: "Catálogo de Servicios", description: "12 servicios activos", type: "link" },
+      { id: 'services', icon: Sparkles, label: "Catálogo de Servicios", description: "12 servicios activos", type: "link" },
       { id: 'location', icon: MapPin, label: "Ubicación y Datos", description: "Calle Principal 123, Madrid", type: "link" },
     ]
   },
@@ -45,14 +45,14 @@ export function VoltaSettingsList() {
   return (
     <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 w-full max-w-2xl overflow-hidden">
       <div className="p-8 border-b border-slate-50">
-        <h2 className="text-2xl font-bold text-slate-900 leading-tight">Ajustes</h2>
-        <p className="text-slate-500 mt-1">Personaliza tu experiencia y la de tus clientes</p>
+        <h2 className="text-2xl font-semibold text-slate-900 leading-tight">Ajustes</h2>
+        <p className="text-slate-500 mt-1 font-medium">Personaliza tu experiencia y la de tus clientes</p>
       </div>
 
       <div className="flex flex-col">
         {SETTINGS_GROUPS.map((group, gIndex) => (
           <div key={group.title} className="flex flex-col">
-            <h3 className="px-8 pt-6 pb-2 text-xs font-bold uppercase tracking-[0.15em] text-teal-600/80">
+            <h3 className="px-8 pt-6 pb-2 text-xs font-semibold uppercase tracking-[0.15em] text-teal-600/80">
               {group.title}
             </h3>
             
@@ -64,10 +64,10 @@ export function VoltaSettingsList() {
                 >
                   <div className="flex items-center gap-5">
                     <div className="size-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-500 group-hover:text-teal-600 group-hover:bg-white transition-all border border-slate-100">
-                      <item.icon className="size-5" />
+                      <item.icon className="size-5 stroke-[1.5]" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 leading-tight">{item.label}</h4>
+                      <h4 className="font-semibold text-slate-900 leading-tight">{item.label}</h4>
                       <p className="text-sm text-slate-500 font-medium">{item.description}</p>
                     </div>
                   </div>

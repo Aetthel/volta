@@ -8,7 +8,7 @@ import {
   MessageSquare, 
   Settings, 
   LogOut,
-  Scissors,
+  Zap,
   LayoutDashboard,
   Users,
   ShieldCheck
@@ -37,16 +37,11 @@ export function VoltaNavigationDrawer({ customMenu, brandName = "Volta" }) {
   return (
     <aside className="w-80 h-screen sticky top-0 bg-white border-r border-slate-100 flex flex-col p-8 z-40">
       {/* Brand Header */}
-      <div className="flex items-center gap-4 px-2 py-12">
-        <div className="size-14 bg-teal-600 rounded-[1.5rem] flex items-center justify-center text-white">
-          <Scissors className="size-8 stroke-[2.5]" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none">{brandName}</h1>
-          <p className="text-xs font-medium text-teal-600 uppercase tracking-[0.2em] mt-2">
-            {brandName.includes('Admin') ? 'Panel Maestro' : 'Salon Pro'}
-          </p>
-        </div>
+      <div className="px-2 py-12">
+        <h1 className="text-3xl font-semibold text-slate-900 tracking-tight leading-none">{brandName}</h1>
+        <p className="text-xs font-medium text-teal-600 uppercase tracking-[0.2em] mt-3">
+          {brandName.includes('Admin') ? 'Panel Maestro' : 'Business Pro'}
+        </p>
       </div>
 
       {/* Navigation Items */}

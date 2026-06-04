@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Scissors, Mail, Lock, LogIn, AlertCircle } from "lucide-react";
+import { Zap, Mail, Lock, LogIn, AlertCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,15 +37,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-[18px]">
       <div className="w-full max-w-md flex flex-col gap-10">
-        <header className="flex flex-col items-center text-center gap-4">
-          <div className="size-16 bg-teal-600 rounded-[1.5rem] flex items-center justify-center text-white">
-            <Scissors className="size-8 stroke-[2.5]" />
-          </div>
+        <header className="flex flex-col items-center text-center gap-4 py-4">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight">Volta</h1>
-            <p className="text-sm font-bold text-teal-600 uppercase tracking-[0.2em] mt-1">Gestión de Agenda</p>
+            <h1 className="text-4xl font-semibold text-slate-900 tracking-tight leading-none">Volta</h1>
+            <p className="text-sm font-medium text-teal-600 uppercase tracking-[0.2em] mt-3">Gestión de Agenda</p>
           </div>
         </header>
 
@@ -54,11 +51,11 @@ export default function LoginPage() {
             <div className="flex flex-col gap-6">
               {/* Outlined Input: Email */}
               <div className="relative group">
-                <div className="absolute left-4 -top-2.5 px-2 bg-white text-xs font-semibold text-teal-600 group-focus-within:text-teal-600 transition-colors z-10">
+                <div className="absolute left-4 -top-2.5 px-2 bg-white text-xs font-semibold text-teal-600 group-focus-within:text-teal-600 transition-colors z-10 uppercase tracking-widest">
                   Email
                 </div>
                 <div className="relative flex items-center">
-                  <Mail className="absolute left-4 size-5 text-slate-400" />
+                  <Mail className="absolute left-4 size-5 text-slate-400 stroke-[1.5]" />
                   <input 
                     type="email" 
                     placeholder="hola@tuempresa.com"
@@ -72,11 +69,11 @@ export default function LoginPage() {
 
               {/* Outlined Input: Password */}
               <div className="relative group">
-                <div className="absolute left-4 -top-2.5 px-2 bg-white text-xs font-semibold text-slate-500 group-focus-within:text-teal-600 transition-colors z-10">
+                <div className="absolute left-4 -top-2.5 px-2 bg-white text-xs font-semibold text-slate-500 group-focus-within:text-teal-600 transition-colors z-10 uppercase tracking-widest">
                   Contraseña
                 </div>
                 <div className="relative flex items-center">
-                  <Lock className="absolute left-4 size-5 text-slate-400" />
+                  <Lock className="absolute left-4 size-5 text-slate-400 stroke-[1.5]" />
                   <input 
                     type="password" 
                     placeholder="••••••••"
@@ -99,12 +96,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-16 bg-teal-600 text-white font-black rounded-2xl hover:bg-teal-700 active:scale-[0.98] disabled:bg-slate-200 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+              className="w-full h-16 bg-teal-600 text-white font-semibold rounded-2xl hover:bg-teal-700 active:scale-[0.98] disabled:bg-slate-200 transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
             >
               {loading ? (
                 <div className="size-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <LogIn className="size-5 stroke-[2.5]" />
+                <LogIn className="size-5 stroke-[2]" />
               )}
               {loading ? "Iniciando sesión..." : "Entrar al Sistema"}
             </button>
