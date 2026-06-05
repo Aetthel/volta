@@ -38,11 +38,11 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     <aside className="h-full w-[240px] hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-6 z-50">
       {/* Brand logo & styling */}
       <div className="px-4 mb-8">
-        <h1 className="font-title-lg text-title-lg font-bold text-primary tracking-tight">
-          Volta
+        <h1 className="font-title-lg text-title-lg font-bold text-primary tracking-tight truncate" title={session?.user?.name || "Volta"}>
+          {session?.user?.name || "Volta"}
         </h1>
         <p className="text-label-md font-label-md text-on-surface-variant">
-          Admin Pro
+          {role === "ADMIN" ? "Administrador" : "Salón de Belleza"}
         </p>
       </div>
 

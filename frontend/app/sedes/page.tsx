@@ -120,7 +120,7 @@ export default function SedesPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
           {/* Header Action Section */}
           <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>

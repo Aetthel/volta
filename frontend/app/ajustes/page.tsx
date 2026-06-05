@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { 
   Store, 
   Clock, 
@@ -10,31 +11,65 @@ import {
   Phone, 
   Mail, 
   CheckCircle,
-  Save
+  Save,
+  Scissors,
+  Palette,
+  Sparkles,
+  ShieldCheck,
+  Lock,
+  Plus
 } from "lucide-react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
+import NewAppointmentModal from "@/components/NewAppointmentModal";
 
 export default function AjustesPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+
+  const handleSaveAppointment = (data: any) => {
+    console.log("Appointment booked from settings:", data);
+  };
+
+  const { data: session } = useSession();
 
   // Business profile state
   const [profile, setProfile] = useState({
-    name: "Volta",
+    name: "Estilo & Spa (Ejemplo)",
     email: "contacto@volta.com",
     phone: "+34 912 345 678",
     address: "Calle de Velázquez, 45, Madrid",
   });
+
+  useEffect(() => {
+    if (session?.user) {
+      setProfile((prev) => ({
+        ...prev,
+        name: session.user.name || "Estilo & Spa (Ejemplo)",
+        email: session.user.email || "contacto@volta.com"
+      }));
+    }
+  }, [session]);
 
   const [hours, setHours] = useState([
     { days: "Lunes - Viernes", time: "09:00 - 20:00", closed: false },
     { days: "Sábados", time: "10:00 - 18:00", closed: false },
     { days: "Domingos", time: "Cerrado", closed: true },
   ]);
+
+  const services = [
+    { name: "Corte & Estilo", duration: "45 min", price: "35€", icon: Scissors },
+    { name: "Color Total", duration: "120 min", price: "85€", icon: Palette },
+    { name: "Tratamiento Hidratante", duration: "60 min", price: "50€", icon: Sparkles },
+  ];
+
+  const filteredServices = services.filter((s) =>
+    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +81,7 @@ export default function AjustesPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       {/* Sidebar navigation */}
-      <Sidebar onNewAppointmentClick={() => {}} />
+      <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
@@ -58,7 +93,7 @@ export default function AjustesPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
+        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           
           {/* Toast Notification Banner */}
           {showToast && (
@@ -116,7 +151,7 @@ export default function AjustesPage() {
                   <div className="relative group shrink-0">
                     <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
                       <img 
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmGwl5sSkDjII2ExHnKM-5w4xy8w1SwV7jmU_AGtfMYMvJW92nfb7_P7sIs2RY5k0DpUodJhZQawwXknszPW1dRn4WZy17eaeYxtkOsozqAt9hGy18BfqOOeJaTKGSOUt6bBtJgWSIHUz2gL0oLZx73xl_FnxP-NJGfQycadSFiOb12mX-M3ABJyV8kHWcJlTwP8ZeRW5oyzCgynNR8DICpqxU4Zj22rfcnl257Yv9jclsPc_2_mUFmRbnRbF4azoHbXRqq-Fb5Q" 
+                        src="/logo.png" 
                         alt="Logo de la Peluquería" 
                         className="w-full h-full object-cover"
                       />
@@ -242,27 +277,118 @@ export default function AjustesPage() {
               </div>
             </div>
 
-            {/* Operating Hours Card (Spans 5 cols) */}
-            <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
-              <h3 className="font-title-md text-title-md text-primary font-semibold mb-6 flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                <span>Horario de Apertura</span>
-              </h3>
-              
-              <div className="flex flex-col gap-4 font-medium text-body-md text-on-surface-variant">
-                {hours.map((hourRow, idx) => (
-                  <div key={idx} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
-                    <span>{hourRow.days}</span>
-                    <span className={`font-semibold ${hourRow.closed ? "text-error" : "text-primary"}`}>
-                      {hourRow.time}
-                    </span>
-                  </div>
-                ))}
+            {/* Operating Hours Card (Spans 4 cols) */}
+            <div className="lg:col-span-4 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+              <div>
+                <h3 className="font-title-md text-title-md text-primary font-semibold mb-6 flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  <span>Horario de Apertura</span>
+                </h3>
+                
+                <div className="flex flex-col gap-4 font-medium text-body-md text-on-surface-variant">
+                  {hours.map((hourRow, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
+                      <span>{hourRow.days}</span>
+                      <span className={`font-semibold ${hourRow.closed ? "text-error" : "text-primary"}`}>
+                        {hourRow.time}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
               
               <button className="mt-8 w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
-                Editar horario de apertura
+                Modificar Horarios
               </button>
+            </div>
+
+            {/* Featured Services Card (Spans 8 cols) */}
+            <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
+                    <Scissors className="w-5 h-5 text-primary" />
+                    <span>Servicios Destacados</span>
+                  </h3>
+                  <a href="#" className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all hover:underline">
+                    Ver todos
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  {filteredServices.map((service, idx) => {
+                    const Icon = service.icon;
+                    return (
+                      <div key={idx} className="bg-surface-container-low flex items-center gap-4 p-4 rounded-xl">
+                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                            {service.name}
+                          </p>
+                          <p className="font-body-md text-body-md text-on-surface-variant">
+                            {service.duration} · {service.price}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Add Service (Dashed border button) */}
+                  <div className="border border-dashed border-outline-variant hover:border-primary flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer hover:bg-surface-variant/20 transition-all">
+                    <Plus className="w-5 h-5 text-primary" />
+                    <span className="font-label-lg text-label-lg font-semibold text-primary">
+                      Añadir Servicio
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Account Security Card (Spans 12 cols) */}
+            <div className="lg:col-span-12 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant mt-2">
+              <h3 className="font-title-lg text-title-lg text-primary font-semibold mb-6 flex items-center gap-2">
+                <span>Seguridad de la Cuenta</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Password card */}
+                <div className="border border-outline-variant rounded-xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Lock className="w-6 h-6 text-on-surface-variant shrink-0" />
+                    <div>
+                      <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                        Contraseña
+                      </p>
+                      <p className="font-body-md text-body-md text-on-surface-variant">
+                        Actualizada hace 3 meses
+                      </p>
+                    </div>
+                  </div>
+                  <button className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold cursor-pointer hover:underline">
+                    Cambiar
+                  </button>
+                </div>
+
+                {/* 2FA card */}
+                <div className="border border-outline-variant rounded-xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <ShieldCheck className="w-6 h-6 text-on-surface-variant shrink-0" />
+                    <div>
+                      <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                        Verificación en dos pasos
+                      </p>
+                      <p className="font-body-md text-body-md text-primary font-semibold">
+                        Activada
+                      </p>
+                    </div>
+                  </div>
+                  <button className="text-error hover:text-error/80 font-label-lg text-label-lg font-semibold cursor-pointer hover:underline">
+                    Desactivar
+                  </button>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -271,6 +397,13 @@ export default function AjustesPage() {
         {/* Mobile bottom nav */}
         <BottomNav />
       </div>
+
+      {/* Appointment booking Modal */}
+      <NewAppointmentModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => setIsAppointmentModalOpen(false)}
+        onSave={handleSaveAppointment}
+      />
     </div>
   );
 }

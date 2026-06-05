@@ -133,13 +133,29 @@ exports.Prisma.BusinessScalarFieldEnum = {
   qrCode: 'qrCode'
 };
 
+exports.Prisma.ClientScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  surname: 'surname',
+  email: 'email',
+  phone: 'phone',
+  lastVisit: 'lastVisit',
+  frequentService: 'frequentService',
+  lopdStatus: 'lopdStatus',
+  avatarUrl: 'avatarUrl',
+  businessId: 'businessId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.AppointmentScalarFieldEnum = {
   id: 'id',
   clientName: 'clientName',
   clientPhone: 'clientPhone',
   appointmentDate: 'appointmentDate',
   status: 'status',
-  businessId: 'businessId'
+  businessId: 'businessId',
+  clientId: 'clientId'
 };
 
 exports.Prisma.SortOrder = {
@@ -175,6 +191,7 @@ exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
 
 exports.Prisma.ModelName = {
   Business: 'Business',
+  Client: 'Client',
   Appointment: 'Appointment'
 };
 

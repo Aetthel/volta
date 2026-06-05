@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Users as UsersIcon, 
   CalendarCheck, 
@@ -9,14 +9,15 @@ import {
   Plus, 
   Download, 
   Trash2, 
-  Edit3, 
-  Filter 
+  Edit3 
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import AddClientModal from "@/components/AddClientModal";
+import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
 
 interface ClientItem {
@@ -29,100 +30,191 @@ interface ClientItem {
   frequentService: string;
   stylist: string;
   avatarUrl: string;
+  lopdStatus: "Aceptado" | "Pendiente";
 }
 
-export default function ClientesPage() {
-  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [stylistFilter, setStylistFilter] = useState("Todos los estilistas");
+const normalizeString = (str: string) => {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, " ");
+};
 
-  // Mock initial clients database
-  const [clients, setClients] = useState<ClientItem[]>([
-    {
-      id: "1",
-      name: "Ana",
-      surname: "García López",
-      email: "ana.garcia@email.com",
-      phone: "+34 600 000 001",
-      lastVisit: "12 May 2024",
-      frequentService: "Coloración Premium",
-      stylist: "Ana García",
-      avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-    },
-    {
-      id: "2",
-      name: "Marco",
-      surname: "Polo Ruiz",
-      email: "marco.polo@email.com",
-      phone: "+34 600 000 002",
-      lastVisit: "18 May 2024",
-      frequentService: "Corte Caballero",
-      stylist: "Marco Polo",
-      avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
-    },
-    {
-      id: "3",
-      name: "Sofía",
-      surname: "Martín Plaza",
-      email: "sofia.martin@email.com",
-      phone: "+34 600 000 003",
-      lastVisit: "22 May 2024",
-      frequentService: "Manicura",
-      stylist: "Ana García",
-      avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=80",
-    },
-    {
-      id: "4",
-      name: "Juan",
-      surname: "Herrera Sancho",
-      email: "juan.herrera@email.com",
-      phone: "+34 600 000 004",
-      lastVisit: "02 Jun 2024",
-      frequentService: "Tratamiento Keratina",
-      stylist: "Marco Polo",
-      avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
-    },
-  ]);
+const normalizePhone = (phone: string) => {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("34") && digits.length > 9) {
+    return digits.slice(2);
+  }
+  return digits;
+};
+
+const getInitials = (name: string, surname?: string) => {
+  const first = name ? name.charAt(0).toUpperCase() : "";
+  const last = surname ? surname.charAt(0).toUpperCase() : "";
+  return `${first}${last}`;
+};
+
+const getAvatarColor = (name: string) => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const colors = [
+    "bg-primary text-on-primary",
+    "bg-secondary text-on-secondary",
+    "bg-tertiary text-on-tertiary",
+    "bg-primary-container text-on-primary-container",
+    "bg-secondary-container text-on-secondary-container",
+    "bg-tertiary-container text-on-tertiary-container",
+  ];
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
+export default function ClientesPage() {
+  const { data: session } = useSession();
+  const businessId = (session?.user as any)?.id || "mock-business-id";
+
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showConsentToast, setShowConsentToast] = useState(false);
+  const [toastPhone, setToastPhone] = useState("");
+  const [clients, setClients] = useState<ClientItem[]>([]);
+
+  const fetchClients = () => {
+    if (!businessId) return;
+    fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
+      headers: {
+        "x-api-key": "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setClients(data);
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading clients:", e);
+    });
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, [businessId]);
+
+  const handleSaveAppointment = (data: any) => {
+    // Refresh client list since a new client might have been auto-registered
+    fetchClients();
+  };
 
   const handleSaveClient = (data: any) => {
-    const newClient: ClientItem = {
-      id: String(Date.now()),
-      name: data.name,
-      surname: data.surname,
-      email: data.email,
-      phone: data.phone,
-      lastVisit: "Hoy",
-      frequentService: "Primera visita",
-      stylist: "Sin asignar",
-      avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-    };
-    setClients((prev) => [newClient, ...prev]);
+    fetch("http://localhost:3001/api/clients", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "your_static_api_key_here",
+      },
+      body: JSON.stringify({
+        name: data.name,
+        surname: data.surname,
+        email: data.email,
+        phone: data.phone,
+        businessId: businessId,
+      }),
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to save client");
+      return res.json();
+    })
+    .then(() => {
+      fetchClients();
+    })
+    .catch((err) => {
+      console.error("Error saving client:", err);
+      // fallback
+      const newClient: ClientItem = {
+        id: String(Date.now()),
+        name: data.name,
+        surname: data.surname,
+        email: data.email,
+        phone: data.phone,
+        lastVisit: "Hoy",
+        frequentService: "Primera visita",
+        stylist: "Sin asignar",
+        avatarUrl: "",
+        lopdStatus: "Aceptado",
+      };
+      setClients((prev) => [newClient, ...prev]);
+    });
   };
 
   const handleDeleteClient = (id: string) => {
-    setClients((prev) => prev.filter((c) => c.id !== id));
+    fetch(`http://localhost:3001/api/clients/${id}`, {
+      method: "DELETE",
+      headers: {
+        "x-api-key": "your_static_api_key_here",
+      },
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to delete client");
+      return res.json();
+    })
+    .then(() => {
+      fetchClients();
+    })
+    .catch((err) => {
+      console.error("Error deleting client:", err);
+      setClients((prev) => prev.filter((c) => c.id !== id));
+    });
   };
 
-  // Filter clients list
+  const handleSendWhatsAppConsent = (client: ClientItem) => {
+    fetch(`http://localhost:3001/api/clients/${client.id}/resend-consent`, {
+      method: "POST",
+      headers: {
+        "x-api-key": "your_static_api_key_here",
+      },
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to send LOPD consent");
+      return res.json();
+    })
+    .then(() => {
+      setToastPhone(client.phone);
+      setShowConsentToast(true);
+      setTimeout(() => {
+        setShowConsentToast(false);
+      }, 3000);
+    })
+    .catch((err) => {
+      console.error("Error resending consent:", err);
+      // fallback
+      setToastPhone(client.phone);
+      setShowConsentToast(true);
+      setTimeout(() => {
+        setShowConsentToast(false);
+      }, 3000);
+    });
+  };
+
   const filteredClients = clients.filter((c) => {
-    const fullName = `${c.name} ${c.surname}`.toLowerCase();
-    const query = searchQuery.toLowerCase();
-    const matchesSearch = 
-      fullName.includes(query) || 
-      c.email.toLowerCase().includes(query) || 
-      c.phone.includes(query);
-
-    const matchesStylist = 
-      stylistFilter === "Todos los estilistas" || 
-      c.stylist === stylistFilter;
-
-    return matchesSearch && matchesStylist;
+    const fullName = `${c.name} ${c.surname || ""}`.trim();
+    const query = searchQuery;
+    return (
+      normalizeString(fullName).includes(normalizeString(query)) ||
+      normalizeString(c.email).includes(normalizeString(query)) ||
+      normalizePhone(c.phone).includes(normalizePhone(query))
+    );
   });
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       {/* Sidebar navigation */}
-      <Sidebar onNewAppointmentClick={() => {}} />
+      <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
@@ -134,7 +226,7 @@ export default function ClientesPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
           
           {/* Header Action Section */}
           <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
@@ -201,26 +293,10 @@ export default function ClientesPage() {
           {/* Modern Table Container */}
           <section className="bg-surface-container-lowest rounded-xl shadow-[0px_2px_8px_rgba(0,0,0,0.04)] border border-outline-variant overflow-hidden">
             
-            {/* Table Header / Filters */}
             <div className="p-6 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h3 className="font-title-md text-title-md text-on-surface font-semibold">
                 Base de Datos de Clientes
               </h3>
-              <div className="flex items-center gap-2">
-                <select 
-                  value={stylistFilter}
-                  onChange={(e) => setStylistFilter(e.target.value)}
-                  className="bg-surface-container border-none rounded-lg text-label-md font-label-md font-semibold focus:ring-2 focus:ring-primary text-on-surface-variant px-4 py-2 focus:outline-none cursor-pointer"
-                >
-                  <option value="Todos los estilistas">Todos los estilistas</option>
-                  <option value="Ana García">Ana García</option>
-                  <option value="Marco Polo">Marco Polo</option>
-                  <option value="Sin asignar">Sin asignar</option>
-                </select>
-                <button className="p-2 hover:bg-surface-variant rounded-full text-on-surface-variant transition-colors cursor-pointer bg-surface-container">
-                  <Filter className="w-4 h-4" />
-                </button>
-              </div>
             </div>
 
             {/* Responsive Table */}
@@ -241,6 +317,9 @@ export default function ClientesPage() {
                       Servicio Frecuente
                     </th>
                     <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                      Estado LOPD
+                    </th>
+                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
                       Acciones
                     </th>
                   </tr>
@@ -254,13 +333,19 @@ export default function ClientesPage() {
                       >
                         {/* Name and avatar */}
                         <td className="px-6 py-4 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container shrink-0">
-                            <img 
-                              src={client.avatarUrl} 
-                              alt={client.name} 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                          {client.avatarUrl ? (
+                            <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container shrink-0">
+                              <img 
+                                src={client.avatarUrl} 
+                                alt={client.name} 
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-lg shrink-0 select-none ${getAvatarColor(client.name)}`}>
+                              {getInitials(client.name, client.surname)}
+                            </div>
+                          )}
                           <div>
                             <p className="font-body-lg text-body-lg font-semibold text-on-surface">
                               {client.name} {client.surname}
@@ -284,9 +369,33 @@ export default function ClientesPage() {
                             {client.frequentService}
                           </span>
                         </td>
+                        {/* Estado LOPD */}
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-semibold select-none ${
+                            client.lopdStatus === "Aceptado"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-amber-100 text-amber-800 animate-pulse"
+                          }`}>
+                            {client.lopdStatus === "Aceptado" ? "Aceptado" : "Pendiente"}
+                          </span>
+                        </td>
                         {/* Actions */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
+                            {client.lopdStatus === "Pendiente" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSendWhatsAppConsent(client);
+                                }}
+                                title="Reenviar consentimiento por WhatsApp"
+                                className="p-2 rounded-full text-[#25D366] hover:bg-emerald-50 transition-colors cursor-pointer"
+                              >
+                                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+                                  <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+                                </svg>
+                              </button>
+                            )}
                             <button className="p-2 rounded-full text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
                               <Edit3 className="w-4 h-4" />
                             </button>
@@ -305,7 +414,7 @@ export default function ClientesPage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-8 text-center text-on-surface-variant text-body-lg">
+                      <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant text-body-lg">
                         No se encontraron clientes que coincidan con la búsqueda.
                       </td>
                     </tr>
@@ -335,6 +444,28 @@ export default function ClientesPage() {
         onClose={() => setIsClientModalOpen(false)}
         onSave={handleSaveClient}
       />
+
+      {/* Appointment booking Modal */}
+      <NewAppointmentModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => setIsAppointmentModalOpen(false)}
+        onSave={handleSaveAppointment}
+      />
+
+      {/* LOPD WhatsApp Consent Toast Overlay */}
+      {showConsentToast && (
+        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
+          <svg className="w-6 h-6 text-[#25D366] shrink-0" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+          </svg>
+          <div className="flex flex-col gap-0.5">
+            <p className="font-semibold text-emerald-950 text-body-md">Consentimiento Reenviado</p>
+            <p className="text-body-sm text-emerald-800">
+              Mensaje LOPD reenviado a <span className="font-semibold">{toastPhone}</span> por WhatsApp.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

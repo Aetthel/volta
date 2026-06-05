@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Calendar as CalendarIcon, 
   UserPlus, 
@@ -11,6 +11,7 @@ import {
   Filter, 
   Plus 
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
@@ -31,87 +32,107 @@ interface AppointmentItem {
 }
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
+  const businessId = (session?.user as any)?.id || "mock-business-id";
+
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"week" | "day">("week");
+  const [selectedDayIndex, setSelectedDayIndex] = useState(2); // Wednesday (MIÉ) is mock today
   const [searchQuery, setSearchQuery] = useState("");
+  const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
 
-  // Mock appointments state
-  const [appointments, setAppointments] = useState<AppointmentItem[]>([
-    {
-      id: "1",
-      clientName: "Marco R.",
-      serviceName: "Corte Caballero",
-      dayIndex: 0,
-      timeSlot: "09:00",
-      duration: 1,
-      colorClass: "bg-primary-container text-on-primary-container border-primary",
-    },
-    {
-      id: "2",
-      clientName: "Lucía M.",
-      serviceName: "Coloración Premium",
-      dayIndex: 1,
-      timeSlot: "10:00",
-      duration: 1,
-      colorClass: "bg-tertiary-container text-on-tertiary-container border-tertiary",
-    },
-    {
-      id: "3",
-      clientName: "Elena G.",
-      serviceName: "Tratamiento Keratina",
-      dayIndex: 2,
-      timeSlot: "10:00",
-      duration: 1,
-      colorClass: "bg-secondary-container text-on-secondary-container border-secondary",
-    },
-    {
-      id: "4",
-      clientName: "Carla S.",
-      serviceName: "Manicura",
-      dayIndex: 3,
-      timeSlot: "11:00",
-      duration: 1,
-      colorClass: "bg-primary-container text-on-primary-container border-primary",
-    },
-  ]);
+  const colorClasses = [
+    "bg-primary-container text-on-primary-container border-primary",
+    "bg-secondary-container text-on-secondary-container border-secondary",
+    "bg-tertiary-container text-on-tertiary-container border-tertiary"
+  ];
+
+  const mapDbAppointments = (dbApps: any[]) => {
+    return dbApps.map((app) => {
+      const dateObj = new Date(app.appointmentDate);
+      const day = isNaN(dateObj.getDay()) ? 2 : (dateObj.getDay() + 6) % 7; // Convert to Mon-Sun (0-6)
+      
+      let hoursVal = dateObj.getHours();
+      // Clamp to standard calendar time slots: 09:00 to 14:00
+      if (hoursVal < 9) hoursVal = 9;
+      if (hoursVal > 14) hoursVal = 14;
+      const timeSlot = `${hoursVal.toString().padStart(2, '0')}:00`;
+
+      const service = app.client?.frequentService || "Corte Caballero";
+      let hash = 0;
+      for (let i = 0; i < service.length; i++) {
+        hash = service.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const colorClass = colorClasses[Math.abs(hash) % colorClasses.length];
+
+      return {
+        id: app.id,
+        clientName: app.clientName,
+        serviceName: service,
+        dayIndex: day,
+        timeSlot: timeSlot,
+        duration: 1,
+        colorClass: colorClass
+      };
+    });
+  };
+
+  const fetchAppointments = () => {
+    if (!businessId) return;
+    fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
+      headers: {
+        "x-api-key": "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setAppointments(mapDbAppointments(data));
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading appointments:", e);
+      setAppointments([]);
+    });
+  };
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [businessId]);
+
+  const handlePrev = () => {
+    if (viewMode === "day") {
+      setSelectedDayIndex((prev) => (prev === 0 ? 6 : prev - 1));
+    }
+  };
+
+  const handleNext = () => {
+    if (viewMode === "day") {
+      setSelectedDayIndex((prev) => (prev === 6 ? 0 : prev + 1));
+    }
+  };
+
+  const handleGoToday = () => {
+    setSelectedDayIndex(2);
+  };
 
   const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
   const weekDays = [
-    { name: "LUN", num: 16, current: false },
-    { name: "MAR", num: 17, current: false },
-    { name: "MIÉ", num: 18, current: true }, // Current active day in mockup
-    { name: "JUE", num: 19, current: false },
-    { name: "VIE", num: 20, current: false },
-    { name: "SÁB", num: 21, current: false },
-    { name: "DOM", num: 22, current: false },
+    { name: "LUN", num: 16, current: false, closed: false },
+    { name: "MAR", num: 17, current: false, closed: false },
+    { name: "MIÉ", num: 18, current: true, closed: false }, // Current active day in mockup
+    { name: "JUE", num: 19, current: false, closed: false },
+    { name: "VIE", num: 20, current: false, closed: false },
+    { name: "SÁB", num: 21, current: false, closed: false },
+    { name: "DOM", num: 22, current: false, closed: true },
   ];
 
   const handleSaveAppointment = (data: any) => {
-    // Parse time index and day index
-    const dateObj = new Date(data.date);
-    // Standard mock date map
-    const day = isNaN(dateObj.getDay()) ? 2 : (dateObj.getDay() + 6) % 7; // Convert to Mon-Sun (0-6)
-
-    const colorClasses = [
-      "bg-primary-container text-on-primary-container border-primary",
-      "bg-secondary-container text-on-secondary-container border-secondary",
-      "bg-tertiary-container text-on-tertiary-container border-tertiary"
-    ];
-    const randomColor = colorClasses[Math.floor(Math.random() * colorClasses.length)];
-
-    const newApp: AppointmentItem = {
-      id: String(Date.now()),
-      clientName: data.clientName,
-      serviceName: data.service,
-      dayIndex: day,
-      timeSlot: data.time,
-      duration: 1,
-      colorClass: randomColor,
-    };
-
-    setAppointments((prev) => [...prev, newApp]);
+    fetchAppointments();
   };
+
+  const gridColsClass = viewMode === "week" ? "grid-cols-[80px_repeat(7,_1fr)]" : "grid-cols-[80px_1fr]";
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
@@ -128,12 +149,12 @@ export default function DashboardPage() {
         />
 
         {/* Inner Content Canvas */}
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
           {/* Quick Metrics Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <MetricCard
               title="Citas Hoy"
-              value="24"
+              value={String(appointments.filter((app) => app.dayIndex === selectedDayIndex).length)}
               change="+12%"
               trend="up"
               icon={<CalendarIcon className="w-5 h-5" />}
@@ -171,13 +192,22 @@ export default function DashboardPage() {
                   Septiembre 2024
                 </h3>
                 <div className="flex items-center bg-surface-container-low rounded-lg p-1 text-on-surface-variant border border-outline-variant/30">
-                  <button className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer">
+                  <button 
+                    onClick={handlePrev}
+                    className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer"
+                  >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button className="px-2 text-label-md font-label-md font-semibold cursor-pointer">
+                  <button 
+                    onClick={handleGoToday}
+                    className="px-2 text-label-md font-label-md font-semibold cursor-pointer"
+                  >
                     Hoy
                   </button>
-                  <button className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer">
+                  <button 
+                    onClick={handleNext}
+                    className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer"
+                  >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -212,81 +242,153 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-
             {/* Calendar Calendar Content */}
             <div className="overflow-x-auto custom-scrollbar">
               <div className="min-w-[800px]">
                 
-                {/* Weekdays Header Row */}
-                <div className="grid grid-cols-[80px_repeat(7,_1fr)] bg-surface-container-low border-b border-outline-variant font-medium select-none">
-                  {/* Empty left corner */}
-                  <div className="p-4 border-r border-outline-variant"></div>
-                  {/* Days */}
-                  {weekDays.map((day, idx) => {
-                    const isToday = day.current;
-                    return (
-                      <div 
-                        key={idx} 
-                        className={`p-4 text-center border-r border-outline-variant ${
-                          isToday ? "bg-primary-container/10 text-primary" : "text-on-surface-variant"
-                        }`}
-                      >
-                        <p className={`text-label-md font-label-md ${isToday ? "font-bold" : ""}`}>
-                          {day.name}
-                        </p>
-                        <p className={`text-title-md font-title-md ${isToday ? "font-bold text-lg" : ""}`}>
-                          {day.num}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* Main Scroll Container containing both Header and Body */}
+                <div className="relative h-[560px] overflow-y-auto custom-scrollbar">
+                  
+                  {/* Weekdays Header Row (Sticky at the top) */}
+                  <div className={`grid ${gridColsClass} bg-surface-container-low border-b border-outline-variant font-medium select-none sticky top-0 z-20`}>
+                    {/* Empty left corner */}
+                    <div className="p-4 border-r border-outline-variant bg-surface-container-low"></div>
+                    {/* Days */}
+                    {viewMode === "week" ? (
+                      weekDays.map((day, idx) => {
+                        const isToday = day.current;
+                        return (
+                          <div 
+                            key={idx} 
+                            onClick={() => {
+                              setSelectedDayIndex(idx);
+                              setViewMode("day");
+                            }}
+                            className={`p-4 text-center border-r border-outline-variant cursor-pointer hover:bg-surface-variant/40 transition-colors ${
+                              isToday 
+                                ? "bg-primary-container/10 text-primary" 
+                                : day.closed 
+                                  ? "bg-error-container/10" 
+                                  : "text-on-surface-variant bg-surface-container-low"
+                            }`}
+                          >
+                            <p className={`text-label-md font-label-md ${isToday ? "font-bold" : ""} ${day.closed && !isToday ? "text-error/70" : ""}`}>
+                              {day.name}
+                            </p>
+                            <p className={`text-title-md font-title-md ${isToday ? "font-bold text-lg" : ""} ${day.closed && !isToday ? "text-error font-medium" : ""}`}>
+                              {day.num}
+                            </p>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      (() => {
+                        const day = weekDays[selectedDayIndex];
+                        const isToday = day.current;
+                        return (
+                          <div 
+                            className={`p-4 text-center border-r border-outline-variant ${
+                              isToday 
+                                ? "bg-primary-container/10 text-primary" 
+                                : day.closed 
+                                  ? "bg-error-container/10" 
+                                  : "text-on-surface-variant bg-surface-container-low"
+                            }`}
+                          >
+                            <p className={`text-label-md font-label-md ${isToday ? "font-bold" : ""} ${day.closed && !isToday ? "text-error/70" : ""}`}>
+                              {day.name}
+                            </p>
+                            <p className={`text-title-md font-title-md ${isToday ? "font-bold text-lg" : ""} ${day.closed && !isToday ? "text-error font-medium" : ""}`}>
+                              {day.num}
+                            </p>
+                          </div>
+                        );
+                      })()
+                    )}
+                  </div>
 
-                {/* Calendar Body Rows */}
-                <div className="relative h-[480px] overflow-y-auto custom-scrollbar">
+                  {/* Calendar Body Rows */}
                   {timeSlots.map((time) => {
                     return (
-                      <div key={time} className="grid grid-cols-[80px_repeat(7,_1fr)] h-20 border-b border-outline-variant/60 relative">
+                      <div key={time} className={`grid ${gridColsClass} h-20 border-b border-outline-variant/60 relative`}>
                         {/* Time labels column */}
                         <div className="text-center py-3 text-label-md font-label-md text-on-surface-variant border-r border-outline-variant font-semibold select-none flex items-center justify-center bg-surface-container-low/35">
                           {time}
                         </div>
 
-                        {/* 7 Day slots columns */}
-                        {Array.from({ length: 7 }).map((_, dayIndex) => {
-                          // Filter appointments matching this time and day
-                          const cellAppointments = appointments.filter(
-                            (app) => app.dayIndex === dayIndex && app.timeSlot === time
-                          );
+                        {/* Day slots columns */}
+                        {viewMode === "week" ? (
+                          Array.from({ length: 7 }).map((_, dayIndex) => {
+                            const cellAppointments = appointments.filter(
+                              (app) => 
+                                app.dayIndex === dayIndex && 
+                                app.timeSlot === time &&
+                                (searchQuery === "" || 
+                                 app.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                 app.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
+                            );
 
-                          return (
-                            <div 
-                              key={dayIndex} 
-                              className="border-r border-outline-variant/60 relative p-1 group hover:bg-surface-container-low/20 transition-all"
-                            >
-                              {cellAppointments.map((app) => (
-                                <div
-                                  key={app.id}
-                                  className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-2 border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
-                                >
-                                  <div>
-                                    <p className="text-label-md font-bold truncate">
-                                      {app.serviceName}
-                                    </p>
-                                    <p className="text-[10px] opacity-80 font-medium">
-                                      {app.clientName}
-                                    </p>
+                            return (
+                              <div 
+                                key={dayIndex} 
+                                className="border-r border-outline-variant/60 relative p-1 group hover:bg-surface-container-low/20 transition-all"
+                              >
+                                {cellAppointments.map((app) => (
+                                  <div
+                                    key={app.id}
+                                    className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-2 border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
+                                  >
+                                    <div>
+                                      <p className="text-label-md font-bold truncate">
+                                        {app.serviceName}
+                                      </p>
+                                      <p className="text-[10px] opacity-80 font-medium">
+                                        {app.clientName}
+                                      </p>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
+                                ))}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          (() => {
+                            const cellAppointments = appointments.filter(
+                              (app) => 
+                                app.dayIndex === selectedDayIndex && 
+                                app.timeSlot === time &&
+                                (searchQuery === "" || 
+                                 app.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                 app.serviceName.toLowerCase().includes(searchQuery.toLowerCase()))
+                            );
+
+                            return (
+                              <div 
+                                className="border-r border-outline-variant/60 relative p-1 group hover:bg-surface-container-low/20 transition-all"
+                              >
+                                {cellAppointments.map((app) => (
+                                  <div
+                                    key={app.id}
+                                    className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-2 border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
+                                  >
+                                    <div>
+                                      <p className="text-label-md font-bold truncate">
+                                        {app.serviceName}
+                                      </p>
+                                      <p className="text-[10px] opacity-80 font-medium">
+                                        {app.clientName}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()
+                        )}
                       </div>
                     );
                   })}
                 </div>
-
               </div>
             </div>
 

@@ -18,7 +18,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (credentials.email === "contacto@volta.com" && credentials.password === "123456") {
           return {
             id: "mock-business-id",
-            name: "Volta",
+            name: "Estilo & Spa (Ejemplo)",
             email: "contacto@volta.com",
             role: "BUSINESS",
           };

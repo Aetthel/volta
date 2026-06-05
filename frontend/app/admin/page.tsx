@@ -39,6 +39,10 @@ export default function AdminPage() {
     { rank: 3, name: "Sede Sarrià - Barcelona", revenue: "€6,000", change: "-2%" },
   ];
 
+  const filteredRankings = rankings.filter((branch) =>
+    branch.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       {/* Sidebar navigation */}
@@ -54,7 +58,7 @@ export default function AdminPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
           
           {/* Dashboard Header & Range Selector */}
           <section className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
@@ -181,7 +185,7 @@ export default function AdminPage() {
               {/* List */}
               <div className="flex-1 overflow-y-auto custom-scrollbar">
                 <ul className="flex flex-col divide-y divide-outline-variant/65">
-                  {rankings.map((branch, idx) => (
+                  {filteredRankings.map((branch, idx) => (
                     <li 
                       key={idx}
                       className="flex items-center justify-between p-6 hover:bg-surface-container-low transition-colors cursor-pointer group"
