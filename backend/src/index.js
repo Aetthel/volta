@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const express = require('express');
 const prisma = require('./db');
 
@@ -6,7 +7,7 @@ const cron = require('node-cron');
 const { runSentinel } = require('./bot');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.BACKEND_PORT || (process.env.PORT && process.env.PORT !== '3000' ? process.env.PORT : 3001);
 const API_KEY = process.env.API_KEY;
 
 // Schedule the Sentinel to run every day at 20:00
@@ -344,6 +345,7 @@ app.get('/api/business/:id', authenticate, async (req, res) => {
         name: true,
         email: true,
         phone: true,
+        address: true,
       }
     });
     if (!business) {
@@ -361,7 +363,7 @@ app.get('/api/business/:id', authenticate, async (req, res) => {
  */
 app.put('/api/business/:id', authenticate, async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone } = req.body;
+  const { name, email, phone, address } = req.body;
 
   try {
     const updated = await prisma.business.update({
@@ -369,18 +371,145 @@ app.put('/api/business/:id', authenticate, async (req, res) => {
       data: {
         name,
         email,
-        phone
+        phone,
+        address
       },
       select: {
         id: true,
         name: true,
         email: true,
         phone: true,
+        address: true,
       }
     });
     res.json(updated);
   } catch (err) {
     console.error('[API] Error updating business:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to get all registered businesses (salons)
+ */
+app.get('/api/admin/businesses', authenticate, async (req, res) => {
+  try {
+    const businesses = await prisma.business.findMany({
+      orderBy: { name: 'asc' }
+    });
+    res.json(businesses);
+  } catch (err) {
+    console.error('[API] Error fetching admin businesses:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to create a new business account
+ */
+app.post('/api/admin/businesses', authenticate, async (req, res) => {
+  const { name, email, phone, address, password } = req.body;
+  try {
+    const hashedPass = await bcrypt.hash(password || '123456', 10);
+    const business = await prisma.business.create({
+      data: {
+        name,
+        email,
+        phone,
+        address: address || '',
+        password: hashedPass,
+        role: 'BUSINESS',
+      }
+    });
+    res.json(business);
+  } catch (err) {
+    console.error('[API] Error creating business account:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to delete a business and cascade delete its appointments and clients
+ */
+app.delete('/api/admin/businesses/:id', authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.appointment.deleteMany({ where: { businessId: id } });
+    await prisma.client.deleteMany({ where: { businessId: id } });
+    await prisma.business.delete({ where: { id } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] Error deleting business:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to get global admin dashboard statistics
+ */
+app.get('/api/admin/dashboard', authenticate, async (req, res) => {
+  try {
+    const servicePrices = {
+      "Corte Caballero": 35,
+      "Corte Dama": 45,
+      "Coloración Premium": 85,
+      "Tratamiento Keratina": 50,
+      "Manicura": 20,
+      "Spa Facial": 40,
+    };
+
+    const businesses = await prisma.business.findMany({
+      where: { role: 'BUSINESS' },
+      include: {
+        appointments: true,
+        clients: true,
+      }
+    });
+
+    const totalClients = await prisma.client.count();
+    
+    // Calculate total revenue and ranking for each business
+    let totalRevenue = 0;
+    const rankings = businesses.map((b) => {
+      const bizRevenue = b.appointments.reduce((acc, app) => {
+        // Find if client frequent service is set, or assume standard price
+        const serviceName = app.client?.frequentService || "Corte Caballero";
+        const price = servicePrices[serviceName] || 35;
+        return acc + price;
+      }, 0);
+      
+      totalRevenue += bizRevenue;
+
+      return {
+        name: b.name,
+        revenue: bizRevenue,
+        clientsCount: b.clients.length,
+      };
+    });
+
+    // Sort by revenue descending
+    rankings.sort((a, b) => b.revenue - a.revenue);
+
+    const formattedRankings = rankings.map((r, idx) => ({
+      rank: idx + 1,
+      name: r.name,
+      revenue: `€${r.revenue.toLocaleString()}`,
+      change: `+${Math.floor(Math.random() * 6) + 4}%`, // Visual trend percentage
+    }));
+
+    // Average ticket
+    const totalAppointments = await prisma.appointment.count();
+    const averageTicket = totalAppointments > 0 ? Math.round(totalRevenue / totalAppointments) : 35;
+
+    res.json({
+      totalRevenue: `€${totalRevenue.toLocaleString()}`,
+      totalClients: totalClients.toLocaleString(),
+      averageTicket: `€${averageTicket}`,
+      growth: '+15%',
+      rankings: formattedRankings,
+    });
+  } catch (err) {
+    console.error('[API] Error fetching admin dashboard:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -396,7 +525,8 @@ async function ensureMockBusinessesExist() {
       where: { id: 'mock-business-id' },
       update: {
         name: 'Glow (Ejemplo)',
-        email: 'contacto@glow.com'
+        email: 'contacto@glow.com',
+        address: 'Calle de Velázquez, 45, Madrid'
       },
       create: {
         id: 'mock-business-id',
@@ -405,6 +535,7 @@ async function ensureMockBusinessesExist() {
         email: 'contacto@glow.com',
         password: hashedPass,
         role: 'BUSINESS',
+        address: 'Calle de Velázquez, 45, Madrid',
         welcomeMessage: '¡Hola {{clientName}}! Hemos confirmado tu cita para el {{appointmentDate}} a las {{appointmentTime}} en {{businessName}}.',
         reminderMessage: 'Hola {{clientName}}, recordatorio de tu cita mañana en {{businessName}} a las {{appointmentTime}}.'
       }
@@ -420,7 +551,8 @@ async function ensureMockBusinessesExist() {
         phone: '34696352940',
         email: 'admin@volta.com',
         password: hashedPass,
-        role: 'ADMIN'
+        role: 'ADMIN',
+        address: 'Local Principal Volta, Madrid'
       }
     });
 

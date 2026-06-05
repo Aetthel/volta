@@ -1178,6 +1178,7 @@ export namespace Prisma {
     email: string | null
     password: string | null
     role: $Enums.BusinessRole | null
+    address: string | null
     welcomeMessage: string | null
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus | null
@@ -1191,6 +1192,7 @@ export namespace Prisma {
     email: string | null
     password: string | null
     role: $Enums.BusinessRole | null
+    address: string | null
     welcomeMessage: string | null
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus | null
@@ -1204,6 +1206,7 @@ export namespace Prisma {
     email: number
     password: number
     role: number
+    address: number
     welcomeMessage: number
     reminderMessage: number
     whatsappStatus: number
@@ -1219,6 +1222,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
+    address?: true
     welcomeMessage?: true
     reminderMessage?: true
     whatsappStatus?: true
@@ -1232,6 +1236,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
+    address?: true
     welcomeMessage?: true
     reminderMessage?: true
     whatsappStatus?: true
@@ -1245,6 +1250,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
+    address?: true
     welcomeMessage?: true
     reminderMessage?: true
     whatsappStatus?: true
@@ -1331,6 +1337,7 @@ export namespace Prisma {
     email: string
     password: string
     role: $Enums.BusinessRole
+    address: string | null
     welcomeMessage: string | null
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus
@@ -1361,6 +1368,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    address?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1377,6 +1385,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    address?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1390,6 +1399,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    address?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1403,13 +1413,14 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    address?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
     qrCode?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "password" | "role" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "password" | "role" | "address" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -1431,6 +1442,7 @@ export namespace Prisma {
       email: string
       password: string
       role: $Enums.BusinessRole
+      address: string | null
       welcomeMessage: string | null
       reminderMessage: string | null
       whatsappStatus: $Enums.WhatsAppStatus
@@ -1866,6 +1878,7 @@ export namespace Prisma {
     readonly email: FieldRef<"Business", 'String'>
     readonly password: FieldRef<"Business", 'String'>
     readonly role: FieldRef<"Business", 'BusinessRole'>
+    readonly address: FieldRef<"Business", 'String'>
     readonly welcomeMessage: FieldRef<"Business", 'String'>
     readonly reminderMessage: FieldRef<"Business", 'String'>
     readonly whatsappStatus: FieldRef<"Business", 'WhatsAppStatus'>
@@ -4650,6 +4663,7 @@ export namespace Prisma {
     email: 'email',
     password: 'password',
     role: 'role',
+    address: 'address',
     welcomeMessage: 'welcomeMessage',
     reminderMessage: 'reminderMessage',
     whatsappStatus: 'whatsappStatus',
@@ -4816,6 +4830,7 @@ export namespace Prisma {
     email?: StringFilter<"Business"> | string
     password?: StringFilter<"Business"> | string
     role?: EnumBusinessRoleFilter<"Business"> | $Enums.BusinessRole
+    address?: StringNullableFilter<"Business"> | string | null
     welcomeMessage?: StringNullableFilter<"Business"> | string | null
     reminderMessage?: StringNullableFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusFilter<"Business"> | $Enums.WhatsAppStatus
@@ -4831,6 +4846,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    address?: SortOrderInput | SortOrder
     welcomeMessage?: SortOrderInput | SortOrder
     reminderMessage?: SortOrderInput | SortOrder
     whatsappStatus?: SortOrder
@@ -4849,6 +4865,7 @@ export namespace Prisma {
     phone?: StringFilter<"Business"> | string
     password?: StringFilter<"Business"> | string
     role?: EnumBusinessRoleFilter<"Business"> | $Enums.BusinessRole
+    address?: StringNullableFilter<"Business"> | string | null
     welcomeMessage?: StringNullableFilter<"Business"> | string | null
     reminderMessage?: StringNullableFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusFilter<"Business"> | $Enums.WhatsAppStatus
@@ -4864,6 +4881,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    address?: SortOrderInput | SortOrder
     welcomeMessage?: SortOrderInput | SortOrder
     reminderMessage?: SortOrderInput | SortOrder
     whatsappStatus?: SortOrder
@@ -4883,6 +4901,7 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"Business"> | string
     password?: StringWithAggregatesFilter<"Business"> | string
     role?: EnumBusinessRoleWithAggregatesFilter<"Business"> | $Enums.BusinessRole
+    address?: StringNullableWithAggregatesFilter<"Business"> | string | null
     welcomeMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
     reminderMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusWithAggregatesFilter<"Business"> | $Enums.WhatsAppStatus
@@ -5057,6 +5076,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -5072,6 +5092,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -5087,6 +5108,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -5102,6 +5124,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -5117,6 +5140,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -5130,6 +5154,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -5143,6 +5168,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -5401,6 +5427,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    address?: SortOrder
     welcomeMessage?: SortOrder
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
@@ -5414,6 +5441,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    address?: SortOrder
     welcomeMessage?: SortOrder
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
@@ -5427,6 +5455,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    address?: SortOrder
     welcomeMessage?: SortOrder
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
@@ -6108,6 +6137,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -6122,6 +6152,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -6180,6 +6211,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -6194,6 +6226,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -6224,6 +6257,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -6238,6 +6272,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: $Enums.BusinessRole
+    address?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -6303,6 +6338,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -6317,6 +6353,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: EnumBusinessRoleFieldUpdateOperationsInput | $Enums.BusinessRole
+    address?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus

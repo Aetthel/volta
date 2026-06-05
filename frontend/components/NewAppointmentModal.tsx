@@ -51,7 +51,7 @@ export default function NewAppointmentModal({ isOpen, onClose, onSave }: NewAppo
     if (isOpen && businessId) {
       fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
         headers: {
-          "x-api-key": "your_static_api_key_here"
+          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
         }
       })
       .then((res) => res.json())
@@ -125,7 +125,7 @@ export default function NewAppointmentModal({ isOpen, onClose, onSave }: NewAppo
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "your_static_api_key_here",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({
         clientName: formData.clientName,

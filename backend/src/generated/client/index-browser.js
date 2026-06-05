@@ -127,6 +127,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   email: 'email',
   password: 'password',
   role: 'role',
+  address: 'address',
   welcomeMessage: 'welcomeMessage',
   reminderMessage: 'reminderMessage',
   whatsappStatus: 'whatsappStatus',

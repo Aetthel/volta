@@ -50,7 +50,7 @@ export default function AjustesPage() {
     if (!businessId) return;
     fetch(`http://localhost:3001/api/business/${businessId}`, {
       headers: {
-        "x-api-key": "your_static_api_key_here"
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
       }
     })
     .then((res) => res.json())
@@ -61,6 +61,7 @@ export default function AjustesPage() {
           name: data.name,
           email: data.email,
           phone: data.phone,
+          address: data.address || prev.address,
         }));
       }
     })
@@ -102,12 +103,13 @@ export default function AjustesPage() {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "your_static_api_key_here",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({
         name: profile.name,
         email: profile.email,
-        phone: profile.phone
+        phone: profile.phone,
+        address: profile.address
       })
     })
     .then((res) => {

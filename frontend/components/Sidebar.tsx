@@ -25,7 +25,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const navigationItems = role === "ADMIN"
     ? [
         { name: "Control Global", href: "/admin", icon: BarChart3 },
-        { name: "Sedes", href: "/sedes", icon: Store },
+        { name: "Locales", href: "/sedes", icon: Store },
         { name: "Ajustes", href: "/ajustes", icon: Settings },
       ]
     : [

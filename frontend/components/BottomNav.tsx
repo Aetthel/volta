@@ -20,7 +20,7 @@ export default function BottomNav() {
   const navItems = role === "ADMIN"
     ? [
         { name: "Inicio", href: "/admin", icon: BarChart3 },
-        { name: "Sedes", href: "/sedes", icon: Store },
+        { name: "Locales", href: "/sedes", icon: Store },
         { name: "Ajustes", href: "/ajustes", icon: Settings },
       ]
     : [

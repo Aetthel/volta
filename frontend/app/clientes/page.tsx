@@ -96,7 +96,7 @@ export default function ClientesPage() {
     // Fetch Clients
     fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
       headers: {
-        "x-api-key": "your_static_api_key_here"
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
       }
     })
     .then((res) => res.json())
@@ -112,7 +112,7 @@ export default function ClientesPage() {
     // Fetch Appointments
     fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
       headers: {
-        "x-api-key": "your_static_api_key_here"
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
       }
     })
     .then((res) => res.json())
@@ -146,7 +146,7 @@ export default function ClientesPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "your_static_api_key_here",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({
         name: data.name,
@@ -186,7 +186,7 @@ export default function ClientesPage() {
     fetch(`http://localhost:3001/api/clients/${id}`, {
       method: "DELETE",
       headers: {
-        "x-api-key": "your_static_api_key_here",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
     })
     .then((res) => {
@@ -206,7 +206,7 @@ export default function ClientesPage() {
     fetch(`http://localhost:3001/api/clients/${client.id}/resend-consent`, {
       method: "POST",
       headers: {
-        "x-api-key": "your_static_api_key_here",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
     })
     .then((res) => {
@@ -239,7 +239,7 @@ export default function ClientesPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": "your_static_api_key_here",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({ message: msg })
     })

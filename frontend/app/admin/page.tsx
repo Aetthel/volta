@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -24,6 +24,43 @@ export default function AdminPage() {
   const [selectedRange, setSelectedRange] = useState("Últimos 30 días");
   const [activeBar, setActiveBar] = useState<string | null>(null);
 
+  const [kpis, setKpis] = useState({
+    totalRevenue: "€0",
+    totalClients: "0",
+    averageTicket: "€0",
+    growth: "+0%",
+  });
+  const [rankings, setRankings] = useState<any[]>([]);
+
+  const fetchAdminData = () => {
+    fetch("http://localhost:3001/api/admin/dashboard", {
+      headers: {
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data && !data.error) {
+        setKpis({
+          totalRevenue: data.totalRevenue,
+          totalClients: data.totalClients,
+          averageTicket: data.averageTicket,
+          growth: data.growth,
+        });
+        if (Array.isArray(data.rankings)) {
+          setRankings(data.rankings);
+        }
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading admin stats:", e);
+    });
+  };
+
+  useEffect(() => {
+    fetchAdminData();
+  }, []);
+
   const chartData = [
     { month: "Ene", val: 28000, label: "€28.0k", pct: "h-[30%]" },
     { month: "Feb", val: 32000, label: "€32.0k", pct: "h-[45%]" },
@@ -31,12 +68,6 @@ export default function AdminPage() {
     { month: "Abr", val: 38000, label: "€38.0k", pct: "h-[60%]" },
     { month: "May", val: 35000, label: "€35.0k", pct: "h-[55%]" },
     { month: "Jun", val: 45200, label: "€45.2k", pct: "h-[85%]" },
-  ];
-
-  const rankings = [
-    { rank: 1, name: "Sede Centro - Madrid", revenue: "€22,400", change: "+14%" },
-    { rank: 2, name: "Sede Velázquez - Madrid", revenue: "€16,800", change: "+9%" },
-    { rank: 3, name: "Sede Sarrià - Barcelona", revenue: "€6,000", change: "-2%" },
   ];
 
   const filteredRankings = rankings.filter((branch) =>
@@ -85,28 +116,28 @@ export default function AdminPage() {
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               title="Ingresos Totales"
-              value="€45,200"
+              value={kpis.totalRevenue}
               change="+12% vs mes anterior"
               trend="up"
               icon={<TrendingUp className="w-5 h-5" />}
             />
             <MetricCard
               title="Clientes Totales"
-              value="5,400"
+              value={kpis.totalClients}
               change="+8% vs mes anterior"
               trend="up"
               icon={<Group className="w-5 h-5" />}
             />
             <MetricCard
               title="Ticket Promedio"
-              value="€32"
+              value={kpis.averageTicket}
               change="+5% vs mes anterior"
               trend="up"
               icon={<CreditCard className="w-5 h-5" />}
             />
             <MetricCard
               title="Crecimiento Mensual"
-              value="+15%"
+              value={kpis.growth}
               change="Objetivo: +10% superado"
               trend="stable"
               icon={<Rocket className="w-5 h-5" />}
@@ -175,7 +206,7 @@ export default function AdminPage() {
             <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px]">
               <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
-                  Ranking de Sedes
+                  Ranking de Locales
                 </h3>
                 <span className="font-label-md text-primary bg-secondary-container/50 rounded-full px-2 py-[2px] font-bold">
                   Top 3
@@ -200,7 +231,7 @@ export default function AdminPage() {
                           </p>
                           <p className="text-[12px] text-on-surface-variant font-medium flex items-center gap-1">
                             <Store className="w-3.5 h-3.5" />
-                            <span>Sucursal activa</span>
+                            <span>Local activo</span>
                           </p>
                         </div>
                       </div>

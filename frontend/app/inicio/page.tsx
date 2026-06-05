@@ -122,7 +122,7 @@ export default function DashboardPage() {
     // Fetch Appointments
     fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
       headers: {
-        "x-api-key": "your_static_api_key_here"
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
       }
     })
     .then((res) => res.json())
@@ -139,7 +139,7 @@ export default function DashboardPage() {
     // Fetch Clients
     fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
       headers: {
-        "x-api-key": "your_static_api_key_here"
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
       }
     })
     .then((res) => res.json())

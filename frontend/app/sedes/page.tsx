@@ -1,109 +1,137 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { 
   Store, 
   MapPin, 
   Phone, 
-  Clock, 
   Plus, 
   X, 
-  ExternalLink, 
-  Sparkles, 
-  Search, 
-  Trash2 
+  Trash2, 
+  Mail, 
+  Lock, 
+  Sparkles
 } from "lucide-react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 
-interface BranchItem {
+interface BusinessItem {
   id: string;
   name: string;
-  address: string;
+  email: string;
   phone: string;
-  hours: string;
-  status: "Activa" | "Mantenimiento" | "Cerrada";
+  address: string;
+  role: string;
 }
 
 export default function SedesPage() {
+  const { data: session } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [newBranch, setNewBranch] = useState({
+  const [newBusiness, setNewBusiness] = useState({
     name: "",
-    address: "",
+    email: "",
     phone: "",
-    hours: "Lunes - Sábado: 09:00 - 20:00",
-    status: "Activa" as const,
+    address: "",
+    password: "",
   });
 
-  // Mock branches database
-  const [branches, setBranches] = useState<BranchItem[]>([
-    {
-      id: "1",
-      name: "Sede Centro - Madrid",
-      address: "Calle Mayor, 14, 28013 Madrid",
-      phone: "+34 911 234 567",
-      hours: "Lunes - Sábado: 09:00 - 20:00",
-      status: "Activa",
-    },
-    {
-      id: "2",
-      name: "Sede Velázquez - Madrid",
-      address: "Calle de Velázquez, 45, 28001 Madrid",
-      phone: "+34 912 345 678",
-      hours: "Lunes - Sábado: 09:00 - 20:00",
-      status: "Activa",
-    },
-    {
-      id: "3",
-      name: "Sede Sarrià - Barcelona",
-      address: "Carrer de Major de Sarrià, 22, 08017 Barcelona",
-      phone: "+34 931 987 654",
-      hours: "Lunes - Viernes: 10:00 - 19:30",
-      status: "Mantenimiento",
-    },
-  ]);
+  const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
 
-  const handleSaveBranch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const branch: BranchItem = {
-      id: String(Date.now()),
-      ...newBranch,
-    };
-    setBranches((prev) => [...prev, branch]);
-    setNewBranch({
-      name: "",
-      address: "",
-      phone: "",
-      hours: "Lunes - Sábado: 09:00 - 20:00",
-      status: "Activa",
+  const fetchBusinesses = () => {
+    fetch("http://localhost:3001/api/admin/businesses", {
+      headers: {
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setBusinesses(data);
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading businesses:", e);
     });
-    setIsModalOpen(false);
   };
 
-  const handleDeleteBranch = (id: string) => {
-    setBranches((prev) => prev.filter((b) => b.id !== id));
+  useEffect(() => {
+    fetchBusinesses();
+  }, []);
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      document.title = `Locales - ${session.user.name} - Volta`;
+    }
+  }, [session]);
+
+  const handleSaveBusiness = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    fetch("http://localhost:3001/api/admin/businesses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
+      },
+      body: JSON.stringify(newBusiness)
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to save business");
+      return res.json();
+    })
+    .then(() => {
+      fetchBusinesses();
+      setNewBusiness({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        password: "",
+      });
+      setIsModalOpen(false);
+    })
+    .catch((err) => {
+      console.error("Error saving business:", err);
+      alert("Error al guardar el negocio. Asegúrate de que el email sea único.");
+    });
   };
 
-  const filteredBranches = branches.filter(
+  const handleDeleteBusiness = (id: string) => {
+    if (session?.user && (session.user as any).id === id) {
+      alert("No puedes eliminar tu propia cuenta de administrador.");
+      return;
+    }
+    const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este local? Se borrarán de forma permanente todas sus citas y clientes de la base de datos.");
+    if (!confirmDelete) return;
+
+    fetch(`http://localhost:3001/api/admin/businesses/${id}`, {
+      method: "DELETE",
+      headers: {
+        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
+      }
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to delete business");
+      return res.json();
+    })
+    .then(() => {
+      fetchBusinesses();
+    })
+    .catch((err) => {
+      console.error("Error deleting business:", err);
+    });
+  };
+
+  const filteredBusinesses = businesses.filter(
     (b) =>
       b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getStatusBadge = (status: BranchItem["status"]) => {
-    switch (status) {
-      case "Activa":
-        return "bg-secondary-container text-on-secondary-container";
-      case "Mantenimiento":
-        return "bg-error-container text-on-error-container";
-      case "Cerrada":
-      default:
-        return "bg-surface-container text-on-surface-variant";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
@@ -114,7 +142,7 @@ export default function SedesPage() {
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
         {/* Top Header */}
         <Header 
-          searchPlaceholder="Buscar sedes..." 
+          searchPlaceholder="Buscar salones..." 
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
         />
@@ -125,10 +153,10 @@ export default function SedesPage() {
           <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
-                Gestión de Sedes
+                Gestión de Locales
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
-                Administra las sucursales de tu negocio de forma centralizada.
+                Registra y administra las cuentas de salones en la plataforma.
               </p>
             </div>
             
@@ -137,16 +165,16 @@ export default function SedesPage() {
               className="flex items-center gap-1 px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer self-start"
             >
               <Plus className="w-4 h-4" />
-              <span>Añadir Sede</span>
+              <span>Añadir Local</span>
             </button>
           </section>
 
-          {/* Grid Layout of Branches */}
+          {/* Grid Layout of Businesses */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBranches.length > 0 ? (
-              filteredBranches.map((branch) => (
+            {filteredBusinesses.length > 0 ? (
+              filteredBusinesses.map((biz) => (
                 <div 
-                  key={branch.id}
+                  key={biz.id}
                   className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:border-primary-fixed-dim transition-colors group"
                 >
                   <div>
@@ -157,40 +185,41 @@ export default function SedesPage() {
                           <Store className="w-5 h-5" />
                         </div>
                         <h3 className="font-title-md text-title-md text-on-surface font-semibold">
-                          {branch.name}
+                          {biz.name}
                         </h3>
                       </div>
-                      <span className={`inline-block px-2 py-[2px] rounded-full text-[11px] font-bold uppercase tracking-wider ${getStatusBadge(branch.status)}`}>
-                        {branch.status}
+                      <span className={`inline-block px-2 py-[2px] rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container`}>
+                        {biz.role}
                       </span>
                     </div>
 
                     {/* Details list */}
                     <div className="flex flex-col gap-2 text-body-md text-on-surface-variant font-medium mt-6">
                       <div className="flex items-start gap-2 leading-relaxed">
-                        <MapPin className="w-4 h-4 text-outline shrink-0 mt-0.5" />
-                        <span>{branch.address}</span>
+                        <Mail className="w-4 h-4 text-outline shrink-0 mt-0.5" />
+                        <span className="truncate">{biz.email}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-outline shrink-0" />
-                        <span>{branch.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-outline shrink-0" />
-                        <span>{branch.hours}</span>
-                      </div>
+                      {biz.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-outline shrink-0" />
+                          <span>{biz.phone}</span>
+                        </div>
+                      )}
+                      {biz.address && (
+                        <div className="flex items-start gap-2 leading-relaxed">
+                          <MapPin className="w-4 h-4 text-outline shrink-0 mt-0.5" />
+                          <span>{biz.address}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Actions buttons */}
-                  <div className="flex justify-between items-center gap-4 mt-8 pt-6 border-t border-outline-variant/65">
-                    <button className="flex items-center gap-1 text-primary font-label-md text-label-md font-semibold hover:underline transition-all cursor-pointer">
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Gestionar Sede</span>
-                    </button>
+                  <div className="flex justify-end items-center gap-4 mt-8 pt-6 border-t border-outline-variant/65">
                     <button 
-                      onClick={() => handleDeleteBranch(branch.id)}
+                      onClick={() => handleDeleteBusiness(biz.id)}
                       className="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full transition-colors cursor-pointer"
+                      title="Eliminar salón permanentemente"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -199,7 +228,7 @@ export default function SedesPage() {
               ))
             ) : (
               <div className="col-span-full py-8 text-center text-on-surface-variant text-body-lg">
-                No se encontraron sedes activas que coincidan con la búsqueda.
+                No se encontraron locales de negocio registrados que coincidan con la búsqueda.
               </div>
             )}
           </section>
@@ -217,7 +246,7 @@ export default function SedesPage() {
         <BottomNav />
       </div>
 
-      {/* Add Branch Modal Dialog */}
+      {/* Add Business Modal Dialog */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
@@ -232,7 +261,7 @@ export default function SedesPage() {
             <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
               <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                <span>Añadir Nueva Sede</span>
+                <span>Añadir Nuevo Local</span>
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
@@ -243,66 +272,79 @@ export default function SedesPage() {
             </div>
 
             {/* Form Body */}
-            <form onSubmit={handleSaveBranch} className="p-6 flex flex-col gap-6">
+            <form onSubmit={handleSaveBusiness} className="p-6 flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="branchName">
-                  Nombre de la Sede
+                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizName">
+                  Nombre Comercial
                 </label>
                 <input
-                  id="branchName"
+                  id="bizName"
                   type="text"
                   required
-                  placeholder="Ej. Sede Retiro - Madrid"
-                  value={newBranch.name}
-                  onChange={(e) => setNewBranch((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Ej. Glow Estética"
+                  value={newBusiness.name}
+                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, name: e.target.value }))}
                   className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="branchAddress">
-                  Dirección
+                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizEmail">
+                  Email de acceso
                 </label>
                 <input
-                  id="branchAddress"
-                  type="text"
+                  id="bizEmail"
+                  type="email"
                   required
-                  placeholder="Calle de Alcalá, 12, Madrid"
-                  value={newBranch.address}
-                  onChange={(e) => setNewBranch((prev) => ({ ...prev, address: e.target.value }))}
+                  placeholder="contacto@glow.com"
+                  value={newBusiness.email}
+                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, email: e.target.value }))}
                   className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="branchPhone">
-                  Teléfono de contacto
+                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizPassword">
+                  Contraseña de acceso
                 </label>
                 <input
-                  id="branchPhone"
+                  id="bizPassword"
+                  type="password"
+                  required
+                  placeholder="Mínimo 6 caracteres"
+                  value={newBusiness.password}
+                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, password: e.target.value }))}
+                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizPhone">
+                  Teléfono de WhatsApp
+                </label>
+                <input
+                  id="bizPhone"
                   type="tel"
                   required
-                  placeholder="+34 913 456 789"
-                  value={newBranch.phone}
-                  onChange={(e) => setNewBranch((prev) => ({ ...prev, phone: e.target.value }))}
+                  placeholder="34600000000 (sin símbolos)"
+                  value={newBusiness.phone}
+                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, phone: e.target.value }))}
                   className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="branchStatus">
-                  Estado Inicial
+                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizAddress">
+                  Dirección Física
                 </label>
-                <select
-                  id="branchStatus"
-                  value={newBranch.status}
-                  onChange={(e) => setNewBranch((prev) => ({ ...prev, status: e.target.value as any }))}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface cursor-pointer"
-                >
-                  <option value="Activa">Activa</option>
-                  <option value="Mantenimiento">Mantenimiento</option>
-                  <option value="Cerrada">Cerrada</option>
-                </select>
+                <input
+                  id="bizAddress"
+                  type="text"
+                  placeholder="Calle de Serrano, 10, Madrid"
+                  value={newBusiness.address}
+                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, address: e.target.value }))}
+                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                />
               </div>
 
               {/* Footer Actions */}
@@ -318,7 +360,7 @@ export default function SedesPage() {
                   type="submit"
                   className="px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer font-semibold"
                 >
-                  Crear Sede
+                  Crear Local
                 </button>
               </div>
             </form>
