@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const callbackUrl = email === "admin@volta.com" ? "/admin" : "/dashboard";
+      const callbackUrl = email === "admin@volta.com" ? "/admin" : "/inicio";
       
       const result = await signIn("credentials", {
         email,
@@ -30,7 +30,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Credenciales incorrectas. Usa contacto@volta.com / 123456");
+        setError("Credenciales incorrectas. Usa contacto@glow.com / 123456");
         setIsLoading(false);
       } else {
         router.push(callbackUrl);
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 Volta
               </h1>
               <p className="font-body-md text-body-md text-on-surface-variant font-medium">
-                Admin Pro
+                Gestión de Salones
               </p>
             </div>
 

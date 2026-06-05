@@ -14,23 +14,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Mock accounts for quick UI testing
-        if (credentials.email === "contacto@volta.com" && credentials.password === "123456") {
-          return {
-            id: "mock-business-id",
-            name: "Estilo & Spa (Ejemplo)",
-            email: "contacto@volta.com",
-            role: "BUSINESS",
-          };
-        }
-        if (credentials.email === "admin@volta.com" && credentials.password === "123456") {
-          return {
-            id: "mock-admin-id",
-            name: "Admin Global",
-            email: "admin@volta.com",
-            role: "ADMIN",
-          };
-        }
+        // Database check
+
 
         // Database fallback
         try {

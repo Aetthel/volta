@@ -35,7 +35,8 @@ export default function AjustesPage() {
     console.log("Appointment booked from settings:", data);
   };
 
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
+  const businessId = (session?.user as any)?.id || "mock-business-id";
 
   // Business profile state
   const [profile, setProfile] = useState({
@@ -45,13 +46,36 @@ export default function AjustesPage() {
     address: "Calle de Velázquez, 45, Madrid",
   });
 
+  const fetchProfile = () => {
+    if (!businessId) return;
+    fetch(`http://localhost:3001/api/business/${businessId}`, {
+      headers: {
+        "x-api-key": "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data && !data.error) {
+        setProfile((prev) => ({
+          ...prev,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+        }));
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading business profile:", e);
+    });
+  };
+
   useEffect(() => {
-    if (session?.user) {
-      setProfile((prev) => ({
-        ...prev,
-        name: session.user.name || "Estilo & Spa (Ejemplo)",
-        email: session.user.email || "contacto@volta.com"
-      }));
+    fetchProfile();
+  }, [businessId]);
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      document.title = `Ajustes - ${session.user.name} - Volta`;
     }
   }, [session]);
 
@@ -73,9 +97,44 @@ export default function AjustesPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsEditing(false);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+
+    fetch(`http://localhost:3001/api/business/${businessId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "your_static_api_key_here",
+      },
+      body: JSON.stringify({
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone
+      })
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to update business profile");
+      return res.json();
+    })
+    .then(async (data) => {
+      setIsEditing(false);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      
+      // Update NextAuth session state so header/sidebar updates automatically
+      if (update) {
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            name: data.name,
+            email: data.email
+          }
+        });
+      }
+    })
+    .catch((err) => {
+      console.error("Error updating business profile:", err);
+      setIsEditing(false);
+    });
   };
 
   return (
@@ -264,7 +323,7 @@ export default function AjustesPage() {
               <div className="flex flex-col gap-2">
                 <h3 className="font-title-md text-title-md font-semibold flex items-center gap-1">
                   <CreditCard className="w-5 h-5 text-on-primary" />
-                  <span>Plan Admin Pro</span>
+                  <span>Plan Profesional</span>
                 </h3>
                 <p className="font-body-md text-body-md opacity-90 leading-relaxed">
                   Tu suscripción está activa hasta el 12 de Octubre, 2024.

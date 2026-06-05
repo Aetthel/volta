@@ -31,6 +31,31 @@ interface AppointmentItem {
   colorClass: string;
 }
 
+const getWeekDates = () => {
+  const today = new Date();
+  const currentDay = today.getDay(); // 0: Sun, 1: Mon, etc.
+  const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + distanceToMonday);
+
+  const days = [];
+  const dayNames = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    
+    days.push({
+      name: dayNames[i],
+      num: date.getDate(),
+      dateString: date.toISOString().split("T")[0],
+      current: date.toDateString() === today.toDateString(),
+      closed: i === 6 // Sunday is closed
+    });
+  }
+  return days;
+};
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const businessId = (session?.user as any)?.id || "mock-business-id";
@@ -38,9 +63,13 @@ export default function DashboardPage() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"week" | "day">("week");
-  const [selectedDayIndex, setSelectedDayIndex] = useState(2); // Wednesday (MIÉ) is mock today
+  
+  const todayDayIndex = (new Date().getDay() + 6) % 7; // Convert 0-6 (Sun-Sat) to 0-6 (Mon-Sun)
+  const [selectedDayIndex, setSelectedDayIndex] = useState(todayDayIndex);
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
 
   const colorClasses = [
     "bg-primary-container text-on-primary-container border-primary",
@@ -49,37 +78,48 @@ export default function DashboardPage() {
   ];
 
   const mapDbAppointments = (dbApps: any[]) => {
-    return dbApps.map((app) => {
-      const dateObj = new Date(app.appointmentDate);
-      const day = isNaN(dateObj.getDay()) ? 2 : (dateObj.getDay() + 6) % 7; // Convert to Mon-Sun (0-6)
-      
-      let hoursVal = dateObj.getHours();
-      // Clamp to standard calendar time slots: 09:00 to 14:00
-      if (hoursVal < 9) hoursVal = 9;
-      if (hoursVal > 14) hoursVal = 14;
-      const timeSlot = `${hoursVal.toString().padStart(2, '0')}:00`;
+    const weekDates = getWeekDates();
+    const startOfWeekStr = weekDates[0].dateString;
+    const endOfWeekStr = weekDates[6].dateString;
 
-      const service = app.client?.frequentService || "Corte Caballero";
-      let hash = 0;
-      for (let i = 0; i < service.length; i++) {
-        hash = service.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const colorClass = colorClasses[Math.abs(hash) % colorClasses.length];
+    return dbApps
+      .filter((app) => {
+        const dateStr = app.appointmentDate.split("T")[0];
+        return dateStr >= startOfWeekStr && dateStr <= endOfWeekStr;
+      })
+      .map((app) => {
+        const dateObj = new Date(app.appointmentDate);
+        const day = (dateObj.getDay() + 6) % 7; // Convert Sun=0, Mon=1... to Mon=0, Tue=1... Sun=6
+        
+        let hoursVal = dateObj.getHours();
+        // Clamp to standard calendar time slots: 09:00 to 14:00
+        if (hoursVal < 9) hoursVal = 9;
+        if (hoursVal > 14) hoursVal = 14;
+        const timeSlot = `${hoursVal.toString().padStart(2, '0')}:00`;
 
-      return {
-        id: app.id,
-        clientName: app.clientName,
-        serviceName: service,
-        dayIndex: day,
-        timeSlot: timeSlot,
-        duration: 1,
-        colorClass: colorClass
-      };
-    });
+        const service = app.client?.frequentService || "Corte Caballero";
+        let hash = 0;
+        for (let i = 0; i < service.length; i++) {
+          hash = service.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colorClass = colorClasses[Math.abs(hash) % colorClasses.length];
+
+        return {
+          id: app.id,
+          clientName: app.clientName,
+          serviceName: service,
+          dayIndex: day,
+          timeSlot: timeSlot,
+          duration: 1,
+          colorClass: colorClass
+        };
+      });
   };
 
-  const fetchAppointments = () => {
+  const fetchDashboardData = () => {
     if (!businessId) return;
+
+    // Fetch Appointments
     fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
       headers: {
         "x-api-key": "your_static_api_key_here"
@@ -95,11 +135,34 @@ export default function DashboardPage() {
       console.error("Error loading appointments:", e);
       setAppointments([]);
     });
+
+    // Fetch Clients
+    fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
+      headers: {
+        "x-api-key": "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setClients(data);
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading clients:", e);
+      setClients([]);
+    });
   };
 
   useEffect(() => {
-    fetchAppointments();
+    fetchDashboardData();
   }, [businessId]);
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      document.title = `Inicio - ${session.user.name} - Volta`;
+    }
+  }, [session]);
 
   const handlePrev = () => {
     if (viewMode === "day") {
@@ -114,23 +177,54 @@ export default function DashboardPage() {
   };
 
   const handleGoToday = () => {
-    setSelectedDayIndex(2);
+    setSelectedDayIndex(todayDayIndex);
   };
 
   const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
-  const weekDays = [
-    { name: "LUN", num: 16, current: false, closed: false },
-    { name: "MAR", num: 17, current: false, closed: false },
-    { name: "MIÉ", num: 18, current: true, closed: false }, // Current active day in mockup
-    { name: "JUE", num: 19, current: false, closed: false },
-    { name: "VIE", num: 20, current: false, closed: false },
-    { name: "SÁB", num: 21, current: false, closed: false },
-    { name: "DOM", num: 22, current: false, closed: true },
-  ];
+  const weekDays = getWeekDates();
 
   const handleSaveAppointment = (data: any) => {
-    fetchAppointments();
+    fetchDashboardData();
   };
+
+  // Dynamic stats calculation
+  const appointmentsTodayCount = appointments.filter((app) => app.dayIndex === selectedDayIndex).length;
+
+  const newClientsCount = clients.filter((c) => {
+    const createdDate = new Date(c.createdAt);
+    const diffTime = Math.abs(new Date().getTime() - createdDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 30; // registered in the last 30 days
+  }).length;
+
+  const servicePrices: Record<string, number> = {
+    "Corte Caballero": 35,
+    "Corte Dama": 45,
+    "Coloración Premium": 85,
+    "Tratamiento Keratina": 50,
+    "Manicura": 20,
+    "Spa Facial": 40,
+  };
+  
+  const estimatedIncome = appointments
+    .filter((app) => app.dayIndex === selectedDayIndex)
+    .reduce((acc, app) => acc + (servicePrices[app.serviceName] || 35), 0);
+
+  const occupiedSlots = new Set(
+    appointments
+      .filter((app) => app.dayIndex === selectedDayIndex)
+      .map((app) => app.timeSlot)
+  ).size;
+  const occupancyPercentage = timeSlots.length > 0 
+    ? Math.round((occupiedSlots / timeSlots.length) * 100) 
+    : 0;
+
+  const todayDate = new Date();
+  const monthNames = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+  const currentMonthYear = `${monthNames[todayDate.getMonth()]} ${todayDate.getFullYear()}`;
 
   const gridColsClass = viewMode === "week" ? "grid-cols-[80px_repeat(7,_1fr)]" : "grid-cols-[80px_1fr]";
 
@@ -154,30 +248,30 @@ export default function DashboardPage() {
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <MetricCard
               title="Citas Hoy"
-              value={String(appointments.filter((app) => app.dayIndex === selectedDayIndex).length)}
-              change="+12%"
-              trend="up"
+              value={String(appointmentsTodayCount)}
+              change={`${appointmentsTodayCount > 0 ? "+" : ""}${appointmentsTodayCount * 10}%`}
+              trend={appointmentsTodayCount > 0 ? "up" : "stable"}
               icon={<CalendarIcon className="w-5 h-5" />}
             />
             <MetricCard
               title="Nuevos Clientes"
-              value="8"
-              change="+5%"
-              trend="up"
+              value={String(newClientsCount)}
+              change={`${newClientsCount > 0 ? "+" : ""}${newClientsCount * 5}%`}
+              trend={newClientsCount > 0 ? "up" : "stable"}
               icon={<UserPlus className="w-5 h-5" />}
             />
             <MetricCard
               title="Ingresos Estimados"
-              value="€1,420"
-              change="+8%"
-              trend="up"
+              value={`€${estimatedIncome}`}
+              change={estimatedIncome > 0 ? "+15%" : "Estable"}
+              trend={estimatedIncome > 0 ? "up" : "stable"}
               icon={<Euro className="w-5 h-5" />}
             />
             <MetricCard
               title="Ocupación"
-              value="88%"
-              change="Estable"
-              trend="stable"
+              value={`${occupancyPercentage}%`}
+              change={occupancyPercentage > 50 ? "Alta" : "Estable"}
+              trend={occupancyPercentage > 50 ? "up" : "stable"}
               icon={<Activity className="w-5 h-5" />}
             />
           </section>
@@ -189,7 +283,7 @@ export default function DashboardPage() {
             <div className="px-6 py-4 border-b border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-4">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
-                  Septiembre 2024
+                  {currentMonthYear}
                 </h3>
                 <div className="flex items-center bg-surface-container-low rounded-lg p-1 text-on-surface-variant border border-outline-variant/30">
                   <button 

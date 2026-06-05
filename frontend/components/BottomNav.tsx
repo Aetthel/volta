@@ -24,7 +24,7 @@ export default function BottomNav() {
         { name: "Ajustes", href: "/ajustes", icon: Settings },
       ]
     : [
-        { name: "Inicio", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
         { name: "Clientes", href: "/clientes", icon: Users },
         { name: "Ajustes", href: "/ajustes", icon: Settings },
       ];

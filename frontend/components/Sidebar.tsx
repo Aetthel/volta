@@ -29,7 +29,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         { name: "Ajustes", href: "/ajustes", icon: Settings },
       ]
     : [
-        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
         { name: "Clientes", href: "/clientes", icon: Users },
         { name: "Ajustes", href: "/ajustes", icon: Settings },
       ];

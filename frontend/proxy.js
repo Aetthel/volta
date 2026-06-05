@@ -12,8 +12,8 @@ export default auth((req) => {
 
   // Defined routes per role
   const adminRoutes = ["/admin", "/sedes", "/ajustes"];
-  const businessRoutes = ["/dashboard", "/clientes", "/ajustes"];
-  const allProtectedRoutes = ["/dashboard", "/clientes", "/sedes", "/ajustes", "/admin"];
+  const businessRoutes = ["/inicio", "/clientes", "/ajustes"];
+  const allProtectedRoutes = ["/inicio", "/clientes", "/sedes", "/ajustes", "/admin"];
 
   const isProtectedRoute = allProtectedRoutes.some(route => pathname.startsWith(route));
 
@@ -25,7 +25,7 @@ export default auth((req) => {
   // 2. If logged in and on the login page, redirect to their home page
   if (isLoggedIn && isLoginRoute) {
     const role = req.auth.user.role;
-    return Response.redirect(new URL(role === "ADMIN" ? "/admin" : "/dashboard", nextUrl));
+    return Response.redirect(new URL(role === "ADMIN" ? "/admin" : "/inicio", nextUrl));
   }
 
   // 3. If logged in, enforce role restrictions on protected routes
@@ -40,7 +40,7 @@ export default auth((req) => {
     } else { // default to BUSINESS
       const isAllowed = businessRoutes.some(route => pathname.startsWith(route));
       if (!isAllowed) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+        return Response.redirect(new URL("/inicio", nextUrl));
       }
     }
   }

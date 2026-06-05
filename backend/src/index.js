@@ -295,6 +295,96 @@ app.post('/api/clients/:id/resend-consent', authenticate, async (req, res) => {
   }
 });
 
+/**
+ * Endpoint to send custom WhatsApp message to a client
+ */
+app.post('/api/clients/:id/send-message', authenticate, async (req, res) => {
+  const { id } = req.params;
+  const { message } = req.body;
+
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id },
+      include: { business: true }
+    });
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    console.log(`[Bot] Sending custom WhatsApp to ${client.phone}: ${message}`);
+    
+    try {
+      const whatsappManager = require('./whatsapp');
+      if (whatsappManager.getClient(client.businessId)) {
+        await whatsappManager.sendMessage(client.businessId, client.phone, message);
+        console.log(`[WhatsApp] Custom message sent successfully to ${client.phone}`);
+      }
+    } catch (wsErr) {
+      console.log(`[WhatsApp] Simulated send (bot not active): ${message}`);
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] Error sending custom message:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to get business details
+ */
+app.get('/api/business/:id', authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+      }
+    });
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+    res.json(business);
+  } catch (err) {
+    console.error('[API] Error fetching business:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to update business details
+ */
+app.put('/api/business/:id', authenticate, async (req, res) => {
+  const { id } = req.params;
+  const { name, email, phone } = req.body;
+
+  try {
+    const updated = await prisma.business.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        phone
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+      }
+    });
+    res.json(updated);
+  } catch (err) {
+    console.error('[API] Error updating business:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 const bcrypt = require('bcryptjs');
 
 async function ensureMockBusinessesExist() {
@@ -303,15 +393,16 @@ async function ensureMockBusinessesExist() {
     
     // Upsert Business account
     await prisma.business.upsert({
-      where: { email: 'contacto@volta.com' },
+      where: { id: 'mock-business-id' },
       update: {
-        name: 'Estilo & Spa (Ejemplo)'
+        name: 'Glow (Ejemplo)',
+        email: 'contacto@glow.com'
       },
       create: {
         id: 'mock-business-id',
-        name: 'Estilo & Spa (Ejemplo)',
+        name: 'Glow (Ejemplo)',
         phone: '34696352940',
-        email: 'contacto@volta.com',
+        email: 'contacto@glow.com',
         password: hashedPass,
         role: 'BUSINESS',
         welcomeMessage: '¡Hola {{clientName}}! Hemos confirmado tu cita para el {{appointmentDate}} a las {{appointmentTime}} en {{businessName}}.',

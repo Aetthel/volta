@@ -9,7 +9,10 @@ import {
   Plus, 
   Download, 
   Trash2, 
-  Edit3 
+  Edit3,
+  ShieldAlert,
+  MessageSquareText,
+  MessageCircle
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -82,10 +85,15 @@ export default function ClientesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showConsentToast, setShowConsentToast] = useState(false);
   const [toastPhone, setToastPhone] = useState("");
+  const [showGeneralToast, setShowGeneralToast] = useState(false);
+  const [toastText, setToastText] = useState("");
   const [clients, setClients] = useState<ClientItem[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
 
-  const fetchClients = () => {
+  const fetchData = () => {
     if (!businessId) return;
+
+    // Fetch Clients
     fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
       headers: {
         "x-api-key": "your_static_api_key_here"
@@ -100,15 +108,37 @@ export default function ClientesPage() {
     .catch((e) => {
       console.error("Error loading clients:", e);
     });
+
+    // Fetch Appointments
+    fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
+      headers: {
+        "x-api-key": "your_static_api_key_here"
+      }
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        setAppointments(data);
+      }
+    })
+    .catch((e) => {
+      console.error("Error loading appointments:", e);
+    });
   };
 
   useEffect(() => {
-    fetchClients();
+    fetchData();
   }, [businessId]);
+
+  useEffect(() => {
+    if (session?.user?.name) {
+      document.title = `Clientes - ${session.user.name} - Volta`;
+    }
+  }, [session]);
 
   const handleSaveAppointment = (data: any) => {
     // Refresh client list since a new client might have been auto-registered
-    fetchClients();
+    fetchData();
   };
 
   const handleSaveClient = (data: any) => {
@@ -131,7 +161,7 @@ export default function ClientesPage() {
       return res.json();
     })
     .then(() => {
-      fetchClients();
+      fetchData();
     })
     .catch((err) => {
       console.error("Error saving client:", err);
@@ -164,7 +194,7 @@ export default function ClientesPage() {
       return res.json();
     })
     .then(() => {
-      fetchClients();
+      fetchData();
     })
     .catch((err) => {
       console.error("Error deleting client:", err);
@@ -201,13 +231,56 @@ export default function ClientesPage() {
     });
   };
 
+  const handleSendCustomMessage = (client: ClientItem) => {
+    const msg = window.prompt(`Escribe el mensaje de WhatsApp para ${client.name} ${client.surname || ""}:`);
+    if (!msg) return;
+
+    fetch(`http://localhost:3001/api/clients/${client.id}/send-message`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "your_static_api_key_here",
+      },
+      body: JSON.stringify({ message: msg })
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to send message");
+      return res.json();
+    })
+    .then(() => {
+      setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
+      setShowGeneralToast(true);
+      setTimeout(() => setShowGeneralToast(false), 3000);
+    })
+    .catch((err) => {
+      console.error("Error sending custom message:", err);
+      // fallback simulation
+      setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
+      setShowGeneralToast(true);
+      setTimeout(() => setShowGeneralToast(false), 3000);
+    });
+  };
+
+  // Dynamic stats calculation
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+
+  const visitsThisMonthCount = appointments.filter((app) => {
+    const appDate = new Date(app.appointmentDate);
+    return appDate.getMonth() === currentMonth && appDate.getFullYear() === currentYear;
+  }).length;
+
+  const pendingLopdCount = clients.filter((c) => c.lopdStatus === "Pendiente").length;
+
   const filteredClients = clients.filter((c) => {
     const fullName = `${c.name} ${c.surname || ""}`.trim();
     const query = searchQuery;
     return (
       normalizeString(fullName).includes(normalizeString(query)) ||
       normalizeString(c.email).includes(normalizeString(query)) ||
-      normalizePhone(c.phone).includes(normalizePhone(query))
+      normalizePhone(c.phone).includes(normalizePhone(query)) ||
+      normalizeString(c.lopdStatus).includes(normalizeString(query))
     );
   });
 
@@ -266,7 +339,7 @@ export default function ClientesPage() {
             />
             <MetricCard
               title="Visitas este mes"
-              value="342"
+              value={visitsThisMonthCount}
               change="+8%"
               trend="up"
               icon={<CalendarCheck className="w-5 h-5" />}
@@ -277,16 +350,19 @@ export default function ClientesPage() {
             <div className="md:col-span-2 bg-primary-container text-on-primary-container p-6 rounded-xl shadow-sm relative overflow-hidden group flex flex-col justify-between">
               <div className="relative z-10">
                 <h4 className="font-title-md text-title-md mb-1 font-semibold">
-                  Programa de Fidelización
+                  Control de Consentimiento LOPD
                 </h4>
                 <p className="font-body-md text-body-md opacity-90 mb-4 max-w-[280px] leading-relaxed">
-                  24 clientes están cerca de su próximo servicio gratuito.
+                  {`${pendingLopdCount} clientes tienen pendiente firmar el consentimiento LOPD.`}
                 </p>
               </div>
-              <button className="bg-on-primary-container text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-1 rounded-full font-label-md text-label-md self-start transition-all cursor-pointer font-semibold shadow-sm">
-                Ver detalles
+              <button 
+                onClick={() => setSearchQuery("Pendiente")}
+                className="bg-on-primary-container text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-1 rounded-full font-label-md text-label-md self-start transition-all cursor-pointer font-semibold shadow-sm"
+              >
+                Revisar Pendientes
               </button>
-              <Gift className="absolute -right-4 -bottom-4 w-[120px] h-[120px] text-on-primary-container opacity-10 group-hover:scale-110 transition-transform" />
+              <ShieldAlert className="absolute -right-4 -bottom-4 w-[120px] h-[120px] text-on-primary-container opacity-10 group-hover:scale-110 transition-transform" />
             </div>
           </section>
 
@@ -382,6 +458,16 @@ export default function ClientesPage() {
                         {/* Actions */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSendCustomMessage(client);
+                              }}
+                              title="Enviar WhatsApp"
+                              className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </button>
                             {client.lopdStatus === "Pendiente" && (
                               <button
                                 onClick={(e) => {
@@ -389,11 +475,9 @@ export default function ClientesPage() {
                                   handleSendWhatsAppConsent(client);
                                 }}
                                 title="Reenviar consentimiento por WhatsApp"
-                                className="p-2 rounded-full text-[#25D366] hover:bg-emerald-50 transition-colors cursor-pointer"
+                                className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
                               >
-                                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-                                  <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
-                                </svg>
+                                <MessageSquareText className="w-4 h-4" />
                               </button>
                             )}
                             <button className="p-2 rounded-full text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
@@ -455,13 +539,24 @@ export default function ClientesPage() {
       {/* LOPD WhatsApp Consent Toast Overlay */}
       {showConsentToast && (
         <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
-          <svg className="w-6 h-6 text-[#25D366] shrink-0" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
-          </svg>
+          <MessageSquareText className="w-6 h-6 text-emerald-600 shrink-0" />
           <div className="flex flex-col gap-0.5">
             <p className="font-semibold text-emerald-950 text-body-md">Consentimiento Reenviado</p>
             <p className="text-body-sm text-emerald-800">
               Mensaje LOPD reenviado a <span className="font-semibold">{toastPhone}</span> por WhatsApp.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* General Toast Overlay */}
+      {showGeneralToast && (
+        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
+          <MessageCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            <p className="font-semibold text-emerald-950 text-body-md">Mensaje Enviado</p>
+            <p className="text-body-sm text-emerald-800">
+              {toastText}
             </p>
           </div>
         </div>

@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'Volta - Admin Pro',
+  title: 'Volta - Gestión de Salones',
   description: 'Gestión clínica para salones de belleza de alto rendimiento.',
 };
 
