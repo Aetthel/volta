@@ -82,6 +82,7 @@ export default function ClientesPage() {
 
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<ClientItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showConsentToast, setShowConsentToast] = useState(false);
   const [toastPhone, setToastPhone] = useState("");
@@ -142,6 +143,35 @@ export default function ClientesPage() {
   };
 
   const handleSaveClient = (data: any) => {
+    // Edit mode: PUT request
+    if (data.id) {
+      fetch(`http://localhost:3001/api/clients/${data.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
+        },
+        body: JSON.stringify({
+          name: data.name,
+          surname: data.surname,
+          email: data.email,
+          phone: data.phone,
+          frequentService: data.frequency,
+        }),
+      })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to update client");
+        return res.json();
+      })
+      .then(() => {
+        fetchData();
+        setEditingClient(null);
+      })
+      .catch((err) => console.error("Error updating client:", err));
+      return;
+    }
+
+    // Create mode: POST request
     fetch("http://localhost:3001/api/clients", {
       method: "POST",
       headers: {
@@ -165,7 +195,6 @@ export default function ClientesPage() {
     })
     .catch((err) => {
       console.error("Error saving client:", err);
-      // fallback
       const newClient: ClientItem = {
         id: String(Date.now()),
         name: data.name,
@@ -182,7 +211,8 @@ export default function ClientesPage() {
     });
   };
 
-  const handleDeleteClient = (id: string) => {
+  const handleDeleteClient = (id: string, name: string) => {
+    if (!window.confirm(`¿Eliminar a ${name}? Esta acción no se puede deshacer.`)) return;
     fetch(`http://localhost:3001/api/clients/${id}`, {
       method: "DELETE",
       headers: {
@@ -480,14 +510,23 @@ export default function ClientesPage() {
                                 <MessageSquareText className="w-4 h-4" />
                               </button>
                             )}
-                            <button className="p-2 rounded-full text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer">
-                              <Edit3 className="w-4 h-4" />
-                            </button>
-                            <button 
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteClient(client.id);
+                                setEditingClient(client);
+                                setIsClientModalOpen(true);
                               }}
+                              title="Editar cliente"
+                              className="p-2 rounded-full text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClient(client.id, `${client.name} ${client.surname}`);
+                              }}
+                              title="Eliminar cliente"
                               className="p-2 rounded-full text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -522,11 +561,12 @@ export default function ClientesPage() {
         <BottomNav />
       </div>
 
-      {/* Add Client Modal */}
+      {/* Add / Edit Client Modal */}
       <AddClientModal
         isOpen={isClientModalOpen}
-        onClose={() => setIsClientModalOpen(false)}
+        onClose={() => { setIsClientModalOpen(false); setEditingClient(null); }}
         onSave={handleSaveClient}
+        clientToEdit={editingClient}
       />
 
       {/* Appointment booking Modal */}

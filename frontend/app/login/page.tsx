@@ -42,9 +42,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-margin-mobile md:p-gutter bg-surface">
+    <div className="min-h-screen flex flex-col justify-center md:items-center md:p-gutter bg-surface-container-lowest md:bg-surface">
       {/* Main Container - Split Layout */}
-      <div className="w-full max-w-6xl h-[920px] md:h-[820px] min-h-[600px] flex rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-surface-container-lowest border border-outline-variant">
+      <div className="w-full max-w-6xl flex flex-col md:flex-row md:h-[820px] md:min-h-[600px] md:rounded-2xl md:overflow-hidden md:shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-surface-container-lowest md:border md:border-outline-variant">
 
         
         {/* Left Side: Image / Branding */}
@@ -90,18 +90,11 @@ export default function LoginPage() {
         {/* Right Side: Login Form */}
         <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-[64px] bg-surface-container-lowest relative z-20">
           <div className="max-w-md w-full mx-auto">
-            {/* Mobile Header (Visible only on small screens) */}
-            <div className="md:hidden text-center mb-8">
-              <h1 className="font-display text-headline-lg-mobile text-primary font-semibold mb-1">
-                Volta
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant font-medium">
-                Gestión de Salones
-              </p>
-            </div>
-
             {/* Form Header */}
             <div className="mb-6">
+              <span className="md:hidden block text-[11px] tracking-widest uppercase font-bold text-primary mb-1">
+                Volta
+              </span>
               <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
                 Iniciar Sesión
               </h2>

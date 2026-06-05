@@ -64,8 +64,8 @@ export default function DashboardPage() {
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"week" | "day">("week");
   
-  const todayDayIndex = (new Date().getDay() + 6) % 7; // Convert 0-6 (Sun-Sat) to 0-6 (Mon-Sun)
-  const [selectedDayIndex, setSelectedDayIndex] = useState(todayDayIndex);
+  const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
@@ -176,7 +176,14 @@ export default function DashboardPage() {
     }
   };
 
+  useEffect(() => {
+    setIsMounted(true);
+    const todayDayIndex = (new Date().getDay() + 6) % 7;
+    setSelectedDayIndex(todayDayIndex);
+  }, []);
+
   const handleGoToday = () => {
+    const todayDayIndex = (new Date().getDay() + 6) % 7;
     setSelectedDayIndex(todayDayIndex);
   };
 
@@ -350,7 +357,7 @@ export default function DashboardPage() {
                     {/* Days */}
                     {viewMode === "week" ? (
                       weekDays.map((day, idx) => {
-                        const isToday = day.current;
+                        const isToday = isMounted && day.current;
                         return (
                           <div 
                             key={idx} 
@@ -378,7 +385,7 @@ export default function DashboardPage() {
                     ) : (
                       (() => {
                         const day = weekDays[selectedDayIndex];
-                        const isToday = day.current;
+                        const isToday = isMounted && day.current;
                         return (
                           <div 
                             className={`p-4 text-center border-r border-outline-variant ${

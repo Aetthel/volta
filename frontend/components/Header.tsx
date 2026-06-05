@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { Search, HelpCircle, Settings, LogOut, Phone, MessageSquare, MessageSquareText } from "lucide-react";
+import { Search, HelpCircle, Settings, LogOut, Bell } from "lucide-react";
 
 interface HeaderProps {
   searchPlaceholder?: string;
@@ -19,7 +19,6 @@ export default function Header({
   hasNotifications = true,
 }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isContactOpen, setIsContactOpen] = useState(false);
   const { data: session } = useSession();
 
   return (
@@ -49,60 +48,15 @@ export default function Header({
       {/* Right side actions */}
       <div className="flex items-center gap-4">
         {/* Notification Bell */}
-        {/* Contact Dropdown */}
-        <div className="relative">
-          <button 
-            onClick={() => setIsContactOpen(!isContactOpen)}
-            className="p-3 hover:bg-surface-variant rounded-full transition-colors cursor-pointer text-on-surface-variant hover:text-primary relative focus:outline-none"
-            aria-label="Contacto de soporte"
-          >
-            <MessageSquare className="w-5 h-5" />
-          </button>
-
-          {isContactOpen && (
-            <>
-              {/* Backdrop overlay */}
-              <div 
-                className="fixed inset-0 z-30" 
-                onClick={() => setIsContactOpen(false)}
-              />
-              
-              <div className="absolute right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
-                <div className="px-4 py-2 border-b border-outline-variant mb-1">
-                  <p className="text-body-sm font-semibold text-on-surface">Contacto de Soporte</p>
-                </div>
-                
-                {/* Call Link */}
-                <a 
-                  href="tel:+34696352940"
-                  onClick={() => setIsContactOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-label-md font-semibold text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left"
-                >
-                  <Phone className="w-4 h-4 text-on-surface-variant" />
-                  <div className="flex flex-col">
-                    <span>Llamar por Teléfono</span>
-                    <span className="text-body-xs text-on-surface-variant font-normal">+34 696 35 29 40</span>
-                  </div>
-                </a>
-                
-                {/* WhatsApp Link */}
-                <a 
-                  href="https://wa.me/34696352940"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsContactOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-label-md font-semibold text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left"
-                >
-                  <MessageSquareText className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <div className="flex flex-col">
-                    <span>Enviar WhatsApp</span>
-                    <span className="text-body-xs text-on-surface-variant font-normal">Contactar por chat</span>
-                  </div>
-                </a>
-              </div>
-            </>
+        <button 
+          className="p-3 hover:bg-surface-variant rounded-full transition-colors cursor-pointer text-on-surface-variant hover:text-primary relative focus:outline-none"
+          aria-label="Notificaciones"
+        >
+          <Bell className="w-5 h-5" />
+          {hasNotifications && (
+            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-surface"></span>
           )}
-        </div>
+        </button>
 
         {/* Help Icon */}
         <button className="p-3 hover:bg-surface-variant rounded-full transition-colors cursor-pointer text-on-surface-variant hover:text-primary">
