@@ -6,22 +6,43 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const { nextUrl } = req;
+  const pathname = nextUrl.pathname;
 
-  const isAdminRoute = nextUrl.pathname.startsWith("/admin");
-  const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
-  const isLoginRoute = nextUrl.pathname === "/login";
+  const isLoginRoute = pathname === "/login";
 
+  // Defined routes per role
+  const adminRoutes = ["/admin", "/sedes", "/ajustes"];
+  const businessRoutes = ["/dashboard", "/clientes", "/ajustes"];
+  const allProtectedRoutes = ["/dashboard", "/clientes", "/sedes", "/ajustes", "/admin"];
+
+  const isProtectedRoute = allProtectedRoutes.some(route => pathname.startsWith(route));
+
+  // 1. If not logged in and trying to access a protected route, redirect to /login
+  if (!isLoggedIn && isProtectedRoute) {
+    return Response.redirect(new URL("/login", nextUrl));
+  }
+
+  // 2. If logged in and on the login page, redirect to their home page
   if (isLoggedIn && isLoginRoute) {
     const role = req.auth.user.role;
     return Response.redirect(new URL(role === "ADMIN" ? "/admin" : "/dashboard", nextUrl));
   }
 
-  if (!isLoggedIn && (isAdminRoute || isDashboardRoute)) {
-    return Response.redirect(new URL("/login", nextUrl));
-  }
+  // 3. If logged in, enforce role restrictions on protected routes
+  if (isLoggedIn && isProtectedRoute) {
+    const role = req.auth.user.role;
 
-  if (isLoggedIn && isAdminRoute && req.auth.user.role !== "ADMIN") {
-    return Response.redirect(new URL("/dashboard", nextUrl));
+    if (role === "ADMIN") {
+      const isAllowed = adminRoutes.some(route => pathname.startsWith(route));
+      if (!isAllowed) {
+        return Response.redirect(new URL("/admin", nextUrl));
+      }
+    } else { // default to BUSINESS
+      const isAllowed = businessRoutes.some(route => pathname.startsWith(route));
+      if (!isAllowed) {
+        return Response.redirect(new URL("/dashboard", nextUrl));
+      }
+    }
   }
 
   return null;

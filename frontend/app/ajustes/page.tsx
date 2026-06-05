@@ -24,8 +24,8 @@ export default function AjustesPage() {
 
   // Business profile state
   const [profile, setProfile] = useState({
-    name: "Glow Studio & Spa",
-    email: "contacto@glowstudio.com",
+    name: "Volta",
+    email: "contacto@volta.com",
     phone: "+34 912 345 678",
     address: "Calle de Velázquez, 45, Madrid",
   });
@@ -62,7 +62,7 @@ export default function AjustesPage() {
           
           {/* Toast Notification Banner */}
           {showToast && (
-            <div className="fixed top-6 right-6 z-50 flex items-center gap-sm bg-secondary-container text-on-secondary-container border border-outline-variant px-lg py-md rounded-xl shadow-lg animate-in fade-in slide-in-from-top-4 duration-200">
+            <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-secondary-container text-on-secondary-container border border-outline-variant px-6 py-4 rounded-xl shadow-lg animate-in fade-in slide-in-from-top-4 duration-200">
               <CheckCircle className="w-5 h-5 text-primary shrink-0" />
               <span className="font-label-lg text-label-lg font-semibold">
                 ¡Ajustes guardados correctamente!
@@ -71,8 +71,8 @@ export default function AjustesPage() {
           )}
 
           {/* Page Title */}
-          <div className="mb-xl">
-            <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-xs">
+          <div className="mb-8">
+            <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
               Configuración General
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant font-medium">
@@ -81,13 +81,13 @@ export default function AjustesPage() {
           </div>
 
           {/* Bento Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Business Profile Card (Spans 8 cols) */}
-            <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant flex flex-col justify-between">
+            <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
               <div>
-                <div className="flex items-center justify-between mb-lg">
-                  <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
                     <Store className="w-5 h-5" />
                     <span>Información del Negocio</span>
                   </h3>
@@ -103,7 +103,7 @@ export default function AjustesPage() {
                     <button 
                       type="submit"
                       form="profile-form"
-                      className="flex items-center gap-xs px-md py-sm bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
+                      className="flex items-center gap-1 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
                     >
                       <Save className="w-4 h-4" />
                       <span>Guardar</span>
@@ -111,7 +111,7 @@ export default function AjustesPage() {
                   )}
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-xl items-start">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
                   {/* Logo container */}
                   <div className="relative group shrink-0">
                     <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
@@ -129,8 +129,8 @@ export default function AjustesPage() {
                   {/* Form fields */}
                   <form id="profile-form" onSubmit={handleSave} className="flex-1 w-full">
                     {!isEditing ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-xl">
-                        <div className="flex flex-col gap-xs">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="flex flex-col gap-1">
                           <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
                             Nombre Comercial
                           </span>
@@ -138,7 +138,7 @@ export default function AjustesPage() {
                             {profile.name}
                           </p>
                         </div>
-                        <div className="flex flex-col gap-xs">
+                        <div className="flex flex-col gap-1">
                           <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
                             Correo Electrónico
                           </span>
@@ -146,7 +146,7 @@ export default function AjustesPage() {
                             {profile.email}
                           </p>
                         </div>
-                        <div className="flex flex-col gap-xs">
+                        <div className="flex flex-col gap-1">
                           <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
                             Teléfono
                           </span>
@@ -154,7 +154,7 @@ export default function AjustesPage() {
                             {profile.phone}
                           </p>
                         </div>
-                        <div className="flex flex-col gap-xs">
+                        <div className="flex flex-col gap-1">
                           <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
                             Dirección
                           </span>
@@ -164,9 +164,9 @@ export default function AjustesPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                        <div className="flex flex-col gap-xs">
-                          <label className="font-label-md text-label-md text-on-surface-variant px-xs" htmlFor="profile-name">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1">
+                          <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-name">
                             Nombre Comercial
                           </label>
                           <input
@@ -175,11 +175,11 @@ export default function AjustesPage() {
                             required
                             value={profile.name}
                             onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-                            className="w-full border border-outline-variant rounded-lg px-md py-sm text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                           />
                         </div>
-                        <div className="flex flex-col gap-xs">
-                          <label className="font-label-md text-label-md text-on-surface-variant px-xs" htmlFor="profile-email">
+                        <div className="flex flex-col gap-1">
+                          <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-email">
                             Correo Electrónico
                           </label>
                           <input
@@ -188,11 +188,11 @@ export default function AjustesPage() {
                             required
                             value={profile.email}
                             onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                            className="w-full border border-outline-variant rounded-lg px-md py-sm text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                           />
                         </div>
-                        <div className="flex flex-col gap-xs">
-                          <label className="font-label-md text-label-md text-on-surface-variant px-xs" htmlFor="profile-phone">
+                        <div className="flex flex-col gap-1">
+                          <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-phone">
                             Teléfono
                           </label>
                           <input
@@ -201,11 +201,11 @@ export default function AjustesPage() {
                             required
                             value={profile.phone}
                             onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
-                            className="w-full border border-outline-variant rounded-lg px-md py-sm text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                           />
                         </div>
-                        <div className="flex flex-col gap-xs">
-                          <label className="font-label-md text-label-md text-on-surface-variant px-xs" htmlFor="profile-address">
+                        <div className="flex flex-col gap-1">
+                          <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-address">
                             Dirección
                           </label>
                           <input
@@ -214,7 +214,7 @@ export default function AjustesPage() {
                             required
                             value={profile.address}
                             onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
-                            className="w-full border border-outline-variant rounded-lg px-md py-sm text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                           />
                         </div>
                       </div>
@@ -225,9 +225,9 @@ export default function AjustesPage() {
             </div>
 
             {/* Account Settings Small Card (Spans 4 cols) */}
-            <div className="lg:col-span-4 bg-primary text-on-primary rounded-xl p-xl shadow-md flex flex-col justify-between">
-              <div className="flex flex-col gap-sm">
-                <h3 className="font-title-md text-title-md font-semibold flex items-center gap-xs">
+            <div className="lg:col-span-4 bg-primary text-on-primary rounded-xl p-6 shadow-md flex flex-col justify-between">
+              <div className="flex flex-col gap-2">
+                <h3 className="font-title-md text-title-md font-semibold flex items-center gap-1">
                   <CreditCard className="w-5 h-5 text-on-primary" />
                   <span>Plan Admin Pro</span>
                 </h3>
@@ -235,23 +235,23 @@ export default function AjustesPage() {
                   Tu suscripción está activa hasta el 12 de Octubre, 2024.
                 </p>
               </div>
-              <div className="mt-lg">
-                <button className="bg-on-primary text-primary hover:bg-primary-fixed hover:text-on-primary-fixed font-label-lg text-label-lg font-bold w-full py-sm rounded-lg transition-colors cursor-pointer shadow-sm">
+              <div className="mt-6">
+                <button className="bg-on-primary text-primary hover:bg-primary-fixed hover:text-on-primary-fixed font-label-lg text-label-lg font-bold w-full py-2 rounded-lg transition-colors cursor-pointer shadow-sm">
                   Gestionar Facturación
                 </button>
               </div>
             </div>
 
             {/* Operating Hours Card (Spans 5 cols) */}
-            <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant">
-              <h3 className="font-title-md text-title-md text-primary font-semibold mb-lg flex items-center gap-sm">
+            <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant">
+              <h3 className="font-title-md text-title-md text-primary font-semibold mb-6 flex items-center gap-2">
                 <Clock className="w-5 h-5" />
                 <span>Horario de Apertura</span>
               </h3>
               
-              <div className="space-y-md font-medium text-body-md text-on-surface-variant">
+              <div className="flex flex-col gap-4 font-medium text-body-md text-on-surface-variant">
                 {hours.map((hourRow, idx) => (
-                  <div key={idx} className="flex items-center justify-between py-xs border-b border-outline-variant/65">
+                  <div key={idx} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
                     <span>{hourRow.days}</span>
                     <span className={`font-semibold ${hourRow.closed ? "text-error" : "text-primary"}`}>
                       {hourRow.time}
@@ -260,7 +260,7 @@ export default function AjustesPage() {
                 ))}
               </div>
               
-              <button className="mt-xl w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-sm rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
+              <button className="mt-8 w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
                 Editar horario de apertura
               </button>
             </div>

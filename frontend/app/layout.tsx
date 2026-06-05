@@ -1,4 +1,5 @@
 import { Inter } from 'next/font/google';
+import { SessionProvider } from "next-auth/react";
 import './globals.css';
 
 const inter = Inter({
@@ -8,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'Glow Studio - Admin Pro',
+  title: 'Volta - Admin Pro',
   description: 'Gestión clínica para salones de belleza de alto rendimiento.',
 };
 
@@ -20,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable}`}>
       <body className="min-h-screen font-sans font-normal bg-surface text-on-surface antialiased">
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

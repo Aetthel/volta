@@ -2,22 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { 
   LayoutDashboard, 
   Users, 
   Store, 
-  Settings 
+  Settings,
+  BarChart3
 } from "lucide-react";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  
+  const role = (session?.user as any)?.role || "BUSINESS";
 
-  const navItems = [
-    { name: "Inicio", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Clientes", href: "/clientes", icon: Users },
-    { name: "Sedes", href: "/sedes", icon: Store },
-    { name: "Ajustes", href: "/ajustes", icon: Settings },
-  ];
+  const navItems = role === "ADMIN"
+    ? [
+        { name: "Inicio", href: "/admin", icon: BarChart3 },
+        { name: "Sedes", href: "/sedes", icon: Store },
+        { name: "Ajustes", href: "/ajustes", icon: Settings },
+      ]
+    : [
+        { name: "Inicio", href: "/dashboard", icon: LayoutDashboard },
+        { name: "Clientes", href: "/clientes", icon: Users },
+        { name: "Ajustes", href: "/ajustes", icon: Settings },
+      ];
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-surface border-t border-outline-variant shadow-lg flex justify-around items-center h-16 pb-safe">

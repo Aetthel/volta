@@ -15,19 +15,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials?.password) return null;
 
         // Mock accounts for quick UI testing
-        if (credentials.email === "contacto@glowstudio.com" && credentials.password === "123456") {
+        if (credentials.email === "contacto@volta.com" && credentials.password === "123456") {
           return {
             id: "mock-business-id",
-            name: "Glow Studio",
-            email: "contacto@glowstudio.com",
+            name: "Volta",
+            email: "contacto@volta.com",
             role: "BUSINESS",
           };
         }
-        if (credentials.email === "admin@glowstudio.com" && credentials.password === "123456") {
+        if (credentials.email === "admin@volta.com" && credentials.password === "123456") {
           return {
             id: "mock-admin-id",
             name: "Admin Global",
-            email: "admin@glowstudio.com",
+            email: "admin@volta.com",
             role: "ADMIN",
           };
         }

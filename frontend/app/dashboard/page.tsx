@@ -130,7 +130,7 @@ export default function DashboardPage() {
         {/* Inner Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           {/* Quick Metrics Grid */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-xl">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <MetricCard
               title="Citas Hoy"
               value="24"
@@ -165,30 +165,30 @@ export default function DashboardPage() {
           <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
             
             {/* Calendar Header Controls */}
-            <div className="px-lg py-md border-b border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-md">
-              <div className="flex items-center gap-md">
+            <div className="px-6 py-4 border-b border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-4">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                   Septiembre 2024
                 </h3>
-                <div className="flex items-center bg-surface-container-low rounded-lg p-xs text-on-surface-variant border border-outline-variant/30">
-                  <button className="p-xs hover:bg-surface-variant rounded transition-colors cursor-pointer">
+                <div className="flex items-center bg-surface-container-low rounded-lg p-1 text-on-surface-variant border border-outline-variant/30">
+                  <button className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer">
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <button className="px-sm text-label-md font-label-md font-semibold cursor-pointer">
+                  <button className="px-2 text-label-md font-label-md font-semibold cursor-pointer">
                     Hoy
                   </button>
-                  <button className="p-xs hover:bg-surface-variant rounded transition-colors cursor-pointer">
+                  <button className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer">
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
               {/* View Switches */}
-              <div className="flex items-center gap-sm">
+              <div className="flex items-center gap-2">
                 <div className="flex rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low p-[2px]">
                   <button 
                     onClick={() => setViewMode("week")}
-                    className={`px-md py-xs text-label-md font-label-md font-semibold rounded-md transition-all cursor-pointer ${
+                    className={`px-4 py-1 text-label-md font-label-md font-semibold rounded-md transition-all cursor-pointer ${
                       viewMode === "week" 
                         ? "bg-secondary-container text-on-secondary-container shadow-sm" 
                         : "text-on-surface-variant hover:bg-surface-variant"
@@ -198,7 +198,7 @@ export default function DashboardPage() {
                   </button>
                   <button 
                     onClick={() => setViewMode("day")}
-                    className={`px-md py-xs text-label-md font-label-md font-semibold rounded-md transition-all cursor-pointer ${
+                    className={`px-4 py-1 text-label-md font-label-md font-semibold rounded-md transition-all cursor-pointer ${
                       viewMode === "day" 
                         ? "bg-secondary-container text-on-secondary-container shadow-sm" 
                         : "text-on-surface-variant hover:bg-surface-variant"
@@ -207,7 +207,7 @@ export default function DashboardPage() {
                     Día
                   </button>
                 </div>
-                <button className="p-sm border border-outline-variant rounded-lg hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer bg-surface-container-low">
+                <button className="p-2 border border-outline-variant rounded-lg hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer bg-surface-container-low">
                   <Filter className="w-4 h-4" />
                 </button>
               </div>
@@ -220,14 +220,14 @@ export default function DashboardPage() {
                 {/* Weekdays Header Row */}
                 <div className="grid grid-cols-[80px_repeat(7,_1fr)] bg-surface-container-low border-b border-outline-variant font-medium select-none">
                   {/* Empty left corner */}
-                  <div className="p-md border-r border-outline-variant"></div>
+                  <div className="p-4 border-r border-outline-variant"></div>
                   {/* Days */}
                   {weekDays.map((day, idx) => {
                     const isToday = day.current;
                     return (
                       <div 
                         key={idx} 
-                        className={`p-md text-center border-r border-outline-variant ${
+                        className={`p-4 text-center border-r border-outline-variant ${
                           isToday ? "bg-primary-container/10 text-primary" : "text-on-surface-variant"
                         }`}
                       >
@@ -267,7 +267,7 @@ export default function DashboardPage() {
                               {cellAppointments.map((app) => (
                                 <div
                                   key={app.id}
-                                  className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-sm border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
+                                  className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-2 border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
                                 >
                                   <div>
                                     <p className="text-label-md font-bold truncate">
@@ -296,7 +296,7 @@ export default function DashboardPage() {
         {/* Mobile floating FAB action */}
         <button
           onClick={() => setIsAppointmentModalOpen(true)}
-          className="md:hidden fixed bottom-20 right-6 z-40 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container p-lg rounded-full shadow-lg active:scale-95 transition-all cursor-pointer"
+          className="md:hidden fixed bottom-20 right-6 z-40 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container p-4 rounded-full shadow-lg active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="w-6 h-6" />
         </button>

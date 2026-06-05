@@ -17,12 +17,12 @@ export default function Header({
   hasNotifications = true,
 }: HeaderProps) {
   return (
-    <header className="flex justify-between items-center px-6 py-2 w-full md:pl-[264px] bg-surface sticky top-0 z-40 shrink-0">
+    <header className="flex justify-between items-center px-6 py-4 w-full bg-surface sticky top-0 z-40 shrink-0">
       {/* Search Input / Mobile branding */}
       <div className="flex items-center gap-4 flex-1">
         {/* Mobile-only logo */}
         <div className="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">
-          Glow Studio
+          Volta
         </div>
 
         {/* Desktop search bar */}

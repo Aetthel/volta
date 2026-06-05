@@ -57,9 +57,9 @@ export default function AdminPage() {
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           
           {/* Dashboard Header & Range Selector */}
-          <section className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-xl gap-md">
+          <section className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
             <div>
-              <h1 className="font-display text-headline-lg text-on-surface font-semibold tracking-tight mb-xs">
+              <h1 className="font-display text-headline-lg text-on-surface font-semibold tracking-tight mb-1">
                 Panel de Control Global
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
@@ -69,7 +69,7 @@ export default function AdminPage() {
             
             {/* Range dropdown */}
             <div className="relative group cursor-pointer">
-              <div className="flex items-center gap-sm px-md py-sm bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container transition-colors shadow-sm select-none">
+              <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container transition-colors shadow-sm select-none">
                 <Calendar className="w-5 h-5 text-on-surface-variant" />
                 <span className="font-label-lg text-on-surface font-semibold">{selectedRange}</span>
                 <ChevronDown className="w-5 h-5 text-on-surface-variant" />
@@ -78,7 +78,7 @@ export default function AdminPage() {
           </section>
 
           {/* Grid KPIs */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg mb-xl">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               title="Ingresos Totales"
               value="€45,200"
@@ -110,24 +110,24 @@ export default function AdminPage() {
           </section>
 
           {/* Bento Chart and Rankings Grid */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Custom Chart Panel (Spans 8 cols) */}
             <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between">
-              <div className="p-lg border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+              <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                   Evolución de Ingresos
                 </h3>
-                <button className="p-xs rounded-md hover:bg-surface-container transition-colors text-on-surface-variant cursor-pointer">
+                <button className="p-1 rounded-md hover:bg-surface-container transition-colors text-on-surface-variant cursor-pointer">
                   <MoreVertical className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Graphical representation */}
-              <div className="flex-1 p-lg relative flex items-end gap-md select-none bg-surface-container-lowest">
+              <div className="flex-1 p-6 relative flex items-end gap-4 select-none bg-surface-container-lowest">
                 
                 {/* CSS Bars Container */}
-                <div className="w-full flex justify-between items-end h-[240px] pt-xl z-10 px-md">
+                <div className="w-full flex justify-between items-end h-[240px] pt-8 z-10 px-4">
                   {chartData.map((data, idx) => {
                     const isLast = idx === chartData.length - 1;
                     const isHovered = activeBar === data.month;
@@ -144,7 +144,7 @@ export default function AdminPage() {
                         }`}
                       >
                         {/* Custom Tooltip */}
-                        <div className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-md px-sm py-[2px] rounded text-[11px] whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
+                        <div className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-md px-2 py-[2px] rounded text-[11px] whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
                           isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
                         }`}>
                           {data.month}: {data.label}
@@ -160,7 +160,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Dashed Grid Helper Lines */}
-                <div className="absolute inset-x-lg top-lg bottom-xl border-t border-b border-dashed border-outline-variant/30 flex flex-col justify-between pointer-events-none">
+                <div className="absolute inset-x-6 top-6 bottom-8 border-t border-b border-dashed border-outline-variant/30 flex flex-col justify-between pointer-events-none">
                   <div className="border-t border-dashed border-outline-variant/20 w-full"></div>
                   <div className="border-t border-dashed border-outline-variant/20 w-full"></div>
                 </div>
@@ -169,11 +169,11 @@ export default function AdminPage() {
 
             {/* Rankings Panel (Spans 4 cols) */}
             <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px]">
-              <div className="p-lg border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+              <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                   Ranking de Sedes
                 </h3>
-                <span className="font-label-md text-primary bg-secondary-container/50 rounded-full px-sm py-[2px] font-bold">
+                <span className="font-label-md text-primary bg-secondary-container/50 rounded-full px-2 py-[2px] font-bold">
                   Top 3
                 </span>
               </div>
@@ -184,9 +184,9 @@ export default function AdminPage() {
                   {rankings.map((branch, idx) => (
                     <li 
                       key={idx}
-                      className="flex items-center justify-between p-lg hover:bg-surface-container-low transition-colors cursor-pointer group"
+                      className="flex items-center justify-between p-6 hover:bg-surface-container-low transition-colors cursor-pointer group"
                     >
-                      <div className="flex items-center gap-sm">
+                      <div className="flex items-center gap-2">
                         <span className="font-title-md text-title-md font-bold text-outline group-hover:text-primary transition-colors">
                           #{branch.rank}
                         </span>
@@ -194,7 +194,7 @@ export default function AdminPage() {
                           <p className="font-body-md text-body-md font-semibold text-on-surface">
                             {branch.name}
                           </p>
-                          <p className="text-[12px] text-on-surface-variant font-medium flex items-center gap-xs">
+                          <p className="text-[12px] text-on-surface-variant font-medium flex items-center gap-1">
                             <Store className="w-3.5 h-3.5" />
                             <span>Sucursal activa</span>
                           </p>
@@ -205,7 +205,7 @@ export default function AdminPage() {
                         <p className="font-body-lg text-body-lg font-bold text-primary">
                           {branch.revenue}
                         </p>
-                        <span className={`text-label-md font-bold inline-flex items-center gap-xs ${
+                        <span className={`text-label-md font-bold inline-flex items-center gap-1 ${
                           branch.change.startsWith("+") ? "text-tertiary" : "text-error"
                         }`}>
                           <ArrowUpRight className="w-3.5 h-3.5" />
