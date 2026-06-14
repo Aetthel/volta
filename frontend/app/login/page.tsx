@@ -26,7 +26,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const callbackUrl = email === "admin@volta.com" ? "/admin" : "/inicio";
+      const callbackUrl = email === "admin@test.com" ? "/admin" : "/inicio";
       
       const result = await signIn("credentials", {
         email,
