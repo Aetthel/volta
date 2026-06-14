@@ -11,9 +11,14 @@ build/
 # Production
 .env
 .env.local
+.env.prod
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Cloudflare Tunnel credentials (contain secrets — never commit)
+cloudflared/*.json
+
 
 # Gemini CLI / Agent specific
 .agents/
