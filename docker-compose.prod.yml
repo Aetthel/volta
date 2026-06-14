@@ -27,6 +27,7 @@ services:
       - BACKEND_INTERNAL_URL=http://backend:3001
       - NODE_ENV=production
       - AUTH_TRUST_HOST=true
+      - PORT=3000
     ports:
       - "127.0.0.1:3000:3000"
     command: npm run --workspace=frontend start
