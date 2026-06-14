@@ -22,6 +22,7 @@ import Header from "@/components/Header";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
+import { Badge } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -98,7 +99,7 @@ const getAvatarColor = (name: string) => {
 
 export default function ClientesPage() {
   const { data: session } = useSession();
-  const businessId = (session?.user as any)?.id || "mock-business-id";
+  const businessId = session?.user?.id || "mock-business-id";
 
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
@@ -115,11 +116,7 @@ export default function ClientesPage() {
     if (!businessId) return;
 
     // Fetch Clients
-    fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/clients?businessId=${businessId}`)
     .then((res) => res.json())
     .then((data) => {
       if (Array.isArray(data)) {
@@ -131,11 +128,7 @@ export default function ClientesPage() {
     });
 
     // Fetch Appointments
-    fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/appointments?businessId=${businessId}`)
     .then((res) => res.json())
     .then((data) => {
       if (Array.isArray(data)) {
@@ -165,11 +158,10 @@ export default function ClientesPage() {
   const handleSaveClient = (data: any) => {
     // Edit mode: PUT request
     if (data.id) {
-      fetch(`http://localhost:3001/api/clients/${data.id}`, {
+      fetch(`/api/backend/clients/${data.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
         },
         body: JSON.stringify({
           name: data.name,
@@ -192,11 +184,10 @@ export default function ClientesPage() {
     }
 
     // Create mode: POST request
-    fetch("http://localhost:3001/api/clients", {
+    fetch("/api/backend/clients", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({
         name: data.name,
@@ -233,11 +224,8 @@ export default function ClientesPage() {
 
   const handleDeleteClient = (id: string, name: string) => {
     if (!window.confirm(`¿Eliminar a ${name}? Esta acción no se puede deshacer.`)) return;
-    fetch(`http://localhost:3001/api/clients/${id}`, {
+    fetch(`/api/backend/clients/${id}`, {
       method: "DELETE",
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
-      },
     })
     .then((res) => {
       if (!res.ok) throw new Error("Failed to delete client");
@@ -253,11 +241,8 @@ export default function ClientesPage() {
   };
 
   const handleSendWhatsAppConsent = (client: ClientItem) => {
-    fetch(`http://localhost:3001/api/clients/${client.id}/resend-consent`, {
+    fetch(`/api/backend/clients/${client.id}/resend-consent`, {
       method: "POST",
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
-      },
     })
     .then((res) => {
       if (!res.ok) throw new Error("Failed to send LOPD consent");
@@ -285,11 +270,10 @@ export default function ClientesPage() {
     const msg = window.prompt(`Escribe el mensaje de WhatsApp para ${client.name} ${client.surname || ""}:`);
     if (!msg) return;
 
-    fetch(`http://localhost:3001/api/clients/${client.id}/send-message`, {
+    fetch(`/api/backend/clients/${client.id}/send-message`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({ message: msg })
     })
@@ -491,19 +475,18 @@ export default function ClientesPage() {
                         </td>
                         {/* Frequent Service */}
                         <td className="px-6 py-4">
-                          <span className="inline-block px-2 py-[2px] rounded-full text-label-md font-semibold bg-surface-container text-primary">
+                          <Badge variant="secondary">
                             {client.frequentService}
-                          </span>
+                          </Badge>
                         </td>
                         {/* Estado LOPD */}
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-semibold select-none ${
-                            client.lopdStatus === "Aceptado"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : "bg-amber-100 text-amber-800 animate-pulse"
-                          }`}>
+                          <Badge 
+                            variant={client.lopdStatus === "Aceptado" ? "default" : "error"}
+                            className={client.lopdStatus === "Pendiente" ? "animate-pulse" : ""}
+                          >
                             {client.lopdStatus === "Aceptado" ? "Aceptado" : "Pendiente"}
-                          </span>
+                          </Badge>
                         </td>
                         {/* Actions */}
                         <td className="px-6 py-4">

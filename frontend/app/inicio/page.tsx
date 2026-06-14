@@ -58,7 +58,7 @@ const getWeekDates = () => {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const businessId = (session?.user as any)?.id || "mock-business-id";
+  const businessId = session?.user?.id || "mock-business-id";
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -120,11 +120,7 @@ export default function DashboardPage() {
     if (!businessId) return;
 
     // Fetch Appointments
-    fetch(`http://localhost:3001/api/appointments?businessId=${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/appointments?businessId=${businessId}`)
     .then((res) => res.json())
     .then((data) => {
       if (Array.isArray(data)) {
@@ -137,11 +133,7 @@ export default function DashboardPage() {
     });
 
     // Fetch Clients
-    fetch(`http://localhost:3001/api/clients?businessId=${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/clients?businessId=${businessId}`)
     .then((res) => res.json())
     .then((data) => {
       if (Array.isArray(data)) {

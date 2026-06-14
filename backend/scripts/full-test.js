@@ -5,12 +5,23 @@ async function runFullTest() {
   console.log('--- Starting Full Lifecycle Test ---');
 
   // 1. Get our test business
-  const business = await prisma.business.findFirst();
+  const business = await prisma.business.findFirst({
+    where: { role: 'BUSINESS' }
+  });
   if (!business) {
     console.error('Error: No business found. Seed the database first.');
     return;
   }
   console.log(`Using Business: ${business.name} (${business.id})`);
+  
+  // Ensure business has templates configured for test
+  await prisma.business.update({
+    where: { id: business.id },
+    data: {
+      welcomeMessage: '¡Hola {{clientName}}! Hemos confirmado tu cita para el {{appointmentDate}} a las {{appointmentTime}} en {{businessName}}.',
+      reminderMessage: 'Hola {{clientName}}, recordatorio de tu cita mañana en {{businessName}} a las {{appointmentTime}}.'
+    }
+  });
 
   // 2. Create an appointment for TOMORROW
   const tomorrow = new Date();
@@ -19,12 +30,35 @@ async function runFullTest() {
 
   console.log(`Creating test appointment for tomorrow: ${tomorrow.toLocaleString()}`);
   
+  // Ensure we have a client with LOPD status 'Aceptado' to pass the Sentinel check
+  let client = await prisma.client.findFirst({
+    where: {
+      businessId: business.id,
+      lopdStatus: 'Aceptado'
+    }
+  });
+
+  if (!client) {
+    console.log('Creating a mock client with LOPD Aceptado status...');
+    client = await prisma.client.create({
+      data: {
+        name: 'Test',
+        surname: 'Client',
+        email: 'test.client@email.com',
+        phone: '34696352940',
+        lopdStatus: 'Aceptado',
+        businessId: business.id
+      }
+    });
+  }
+
   const appointment = await prisma.appointment.create({
     data: {
-      clientName: 'Test Client',
-      clientPhone: '34696352940', // Your number
+      clientName: `${client.name} ${client.surname}`,
+      clientPhone: client.phone,
       appointmentDate: tomorrow,
       businessId: business.id,
+      clientId: client.id,
       status: 'PENDING'
     }
   });

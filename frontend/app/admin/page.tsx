@@ -33,11 +33,7 @@ export default function AdminPage() {
   const [rankings, setRankings] = useState<any[]>([]);
 
   const fetchAdminData = () => {
-    fetch("http://localhost:3001/api/admin/dashboard", {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch("/api/backend/admin/dashboard")
     .then((res) => res.json())
     .then((data) => {
       if (data && !data.error) {

@@ -49,6 +49,8 @@ model Client {
   appointments    Appointment[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  @@index([businessId])
 }
 
 model Appointment {
@@ -61,6 +63,9 @@ model Appointment {
   business        Business          @relation(fields: [businessId], references: [id])
   clientId        String?
   client          Client?           @relation(fields: [clientId], references: [id])
+
+  @@index([businessId])
+  @@index([clientId])
 }
 
 enum AppointmentStatus {

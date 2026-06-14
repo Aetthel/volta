@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Phone, Mail, Pencil, Sparkles } from "lucide-react";
+import { FieldGroup, Field, FieldLabel, InputGroup } from "@/components/ui/volta-ui";
 
 interface ClientToEdit {
   id: string;
@@ -108,11 +109,9 @@ export default function AddClientModal({
                 Información de contacto
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="name">
-                  Nombre
-                </label>
+            <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel htmlFor="name">Nombre</FieldLabel>
                 <input
                   id="name"
                   type="text"
@@ -122,12 +121,10 @@ export default function AddClientModal({
                   onChange={handleChange}
                   className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
-              </div>
+              </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="surname">
-                  Apellidos
-                </label>
+              <Field>
+                <FieldLabel htmlFor="surname">Apellidos</FieldLabel>
                 <input
                   id="surname"
                   type="text"
@@ -137,13 +134,11 @@ export default function AddClientModal({
                   onChange={handleChange}
                   className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
-              </div>
+              </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="phone">
-                  Teléfono
-                </label>
-                <div className="relative">
+              <Field>
+                <FieldLabel htmlFor="phone">Teléfono</FieldLabel>
+                <InputGroup>
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
                     <Phone className="w-5 h-5" />
                   </div>
@@ -156,14 +151,12 @@ export default function AddClientModal({
                     onChange={handleChange}
                     className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
-                </div>
-              </div>
+                </InputGroup>
+              </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="email">
-                  Correo electrónico
-                </label>
-                <div className="relative">
+              <Field>
+                <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
+                <InputGroup>
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
                     <Mail className="w-5 h-5" />
                   </div>
@@ -175,9 +168,9 @@ export default function AddClientModal({
                     onChange={handleChange}
                     className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
-                </div>
-              </div>
-            </div>
+                </InputGroup>
+              </Field>
+            </FieldGroup>
           </div>
 
           {/* Section: Preferences */}
@@ -187,11 +180,9 @@ export default function AddClientModal({
                 Perfil y Preferencias
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="frequency">
-                  Frecuencia estimada
-                </label>
+            <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel htmlFor="frequency">Frecuencia estimada</FieldLabel>
                 <select
                   id="frequency"
                   value={formData.frequency}
@@ -203,12 +194,10 @@ export default function AddClientModal({
                   <option value="Ocasional">Ocasional</option>
                   <option value="Primera visita">Primera visita</option>
                 </select>
-              </div>
+              </Field>
 
-              <div className="md:col-span-2 flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="notes">
-                  Notas de estilo y alergias
-                </label>
+              <Field className="md:col-span-2">
+                <FieldLabel htmlFor="notes">Notas de estilo y alergias</FieldLabel>
                 <textarea
                   id="notes"
                   rows={3}
@@ -217,8 +206,8 @@ export default function AddClientModal({
                   onChange={handleChange}
                   className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface resize-none"
                 />
-              </div>
-            </div>
+              </Field>
+            </FieldGroup>
           </div>
 
           {/* Footer Actions */}

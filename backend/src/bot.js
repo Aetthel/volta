@@ -125,5 +125,27 @@ async function runSentinel() {
   }
 }
 
-module.exports = { runSentinel, sendWelcomeMessage };
+/**
+ * Sends an automatic LOPD consent message to a client
+ */
+async function sendConsentMessage(businessId, client) {
+  const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
+  const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
+  
+  console.log(`[Bot] Triggering LOPD consent message for client ${client.name} (${client.phone})...`);
+  
+  try {
+    if (whatsappManager.getClient(businessId)) {
+      await whatsappManager.sendMessage(businessId, client.phone, message);
+      console.log(`[WhatsApp] LOPD consent message sent to ${client.phone}`);
+    } else {
+      console.log(`[WhatsApp] Simulated LOPD send (bot not active): ${message}`);
+    }
+  } catch (wsErr) {
+    console.error(`[WhatsApp] Failed to send LOPD consent message to ${client.phone}:`, wsErr);
+  }
+}
+
+module.exports = { runSentinel, sendWelcomeMessage, sendConsentMessage };
 

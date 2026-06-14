@@ -32,6 +32,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
+import { FieldGroup, Field, FieldLabel, Badge } from "@/components/ui/volta-ui";
 
 export default function AjustesPage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -62,7 +63,7 @@ export default function AjustesPage() {
   };
 
   const { data: session, update } = useSession();
-  const businessId = (session?.user as any)?.id || "mock-business-id";
+  const businessId = session?.user?.id || "mock-business-id";
 
   // Business profile state
   const [profile, setProfile] = useState({
@@ -74,11 +75,7 @@ export default function AjustesPage() {
 
   const fetchProfile = () => {
     if (!businessId) return;
-    fetch(`http://localhost:3001/api/business/${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/business/${businessId}`)
     .then((res) => res.json())
     .then((data) => {
       if (data && !data.error) {
@@ -98,11 +95,7 @@ export default function AjustesPage() {
 
   const fetchWhatsappStatus = () => {
     if (!businessId) return;
-    fetch(`http://localhost:3001/api/whatsapp/status?businessId=${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data && !data.error) {
@@ -120,11 +113,7 @@ export default function AjustesPage() {
 
   const fetchTemplates = () => {
     if (!businessId) return;
-    fetch(`http://localhost:3001/api/whatsapp/templates?businessId=${businessId}`, {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch(`/api/backend/whatsapp/templates?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data && !data.error) {
@@ -147,11 +136,7 @@ export default function AjustesPage() {
     if (!pollingActive || !businessId) return;
 
     const interval = setInterval(() => {
-      fetch(`http://localhost:3001/api/whatsapp/status?businessId=${businessId}`, {
-        headers: {
-          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-        }
-      })
+      fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
         .then((res) => res.json())
         .then((data) => {
           if (data && !data.error) {
@@ -180,11 +165,10 @@ export default function AjustesPage() {
 
   const handleConnectWhatsapp = () => {
     setLoadingQr(true);
-    fetch("http://localhost:3001/api/whatsapp/init", {
+    fetch("/api/backend/whatsapp/init", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({ businessId })
     })
@@ -203,11 +187,10 @@ export default function AjustesPage() {
   const handleDisconnectWhatsapp = () => {
     if (!window.confirm("¿Seguro que deseas desconectar tu cuenta de WhatsApp? Se detendrán los mensajes automáticos.")) return;
     
-    fetch("http://localhost:3001/api/whatsapp/disconnect", {
+    fetch("/api/backend/whatsapp/disconnect", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({ businessId })
     })
@@ -228,11 +211,10 @@ export default function AjustesPage() {
   const handleSaveTemplates = (e: React.FormEvent) => {
     e.preventDefault();
     setSavingTemplates(true);
-    fetch("http://localhost:3001/api/whatsapp/templates", {
+    fetch("/api/backend/whatsapp/templates", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({
         businessId,
@@ -277,11 +259,10 @@ export default function AjustesPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
 
-    fetch(`http://localhost:3001/api/business/${businessId}`, {
+    fetch(`/api/backend/business/${businessId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify({
         name: profile.name,
@@ -464,11 +445,9 @@ export default function AjustesPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="flex flex-col gap-1">
-                            <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-name">
-                              Nombre Comercial
-                            </label>
+                        <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Field>
+                            <FieldLabel htmlFor="profile-name">Nombre Comercial</FieldLabel>
                             <input
                               id="profile-name"
                               type="text"
@@ -477,11 +456,9 @@ export default function AjustesPage() {
                               onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
                               className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-email">
-                              Correo Electrónico
-                            </label>
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor="profile-email">Correo Electrónico</FieldLabel>
                             <input
                               id="profile-email"
                               type="email"
@@ -490,11 +467,9 @@ export default function AjustesPage() {
                               onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
                               className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-phone">
-                              Teléfono
-                            </label>
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor="profile-phone">Teléfono</FieldLabel>
                             <input
                               id="profile-phone"
                               type="tel"
@@ -503,11 +478,9 @@ export default function AjustesPage() {
                               onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
                               className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="profile-address">
-                              Dirección
-                            </label>
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor="profile-address">Dirección</FieldLabel>
                             <input
                               id="profile-address"
                               type="text"
@@ -516,8 +489,8 @@ export default function AjustesPage() {
                               onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
                               className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
-                          </div>
-                        </div>
+                          </Field>
+                        </FieldGroup>
                       )}
                     </form>
                   </div>
@@ -833,41 +806,39 @@ export default function AjustesPage() {
                   </div>
 
                   <form className="flex flex-col gap-6">
-                    {/* Welcome Message Template */}
-                    <div className="flex flex-col gap-2">
-                      <label className="font-label-lg text-label-lg text-on-surface font-semibold flex justify-between">
-                        <span>Mensaje de Bienvenida / Confirmación</span>
-                        <span className="text-[11px] font-normal text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
-                          Inmediato
-                        </span>
-                      </label>
-                      <textarea
-                        disabled={!isEditingTemplates}
-                        rows={3}
-                        value={templates.welcomeMessage}
-                        onChange={(e) => setTemplates(prev => ({ ...prev, welcomeMessage: e.target.value }))}
-                        className="w-full border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface disabled:opacity-75 disabled:cursor-not-allowed resize-none custom-scrollbar"
-                        placeholder="Escribe el mensaje de confirmación..."
-                      />
-                    </div>
+                    <FieldGroup className="gap-6">
+                      {/* Welcome Message Template */}
+                      <Field>
+                        <div className="flex justify-between items-center w-full">
+                          <FieldLabel>Mensaje de Bienvenida / Confirmación</FieldLabel>
+                          <Badge variant="secondary">Inmediato</Badge>
+                        </div>
+                        <textarea
+                          disabled={!isEditingTemplates}
+                          rows={3}
+                          value={templates.welcomeMessage}
+                          onChange={(e) => setTemplates(prev => ({ ...prev, welcomeMessage: e.target.value }))}
+                          className="w-full border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface disabled:opacity-75 disabled:cursor-not-allowed resize-none custom-scrollbar"
+                          placeholder="Escribe el mensaje de confirmación..."
+                        />
+                      </Field>
 
-                    {/* Reminder Message Template */}
-                    <div className="flex flex-col gap-2">
-                      <label className="font-label-lg text-label-lg text-on-surface font-semibold flex justify-between">
-                        <span>Mensaje de Recordatorio</span>
-                        <span className="text-[11px] font-normal text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
-                          Sentinel (24h antes)
-                        </span>
-                      </label>
-                      <textarea
-                        disabled={!isEditingTemplates}
-                        rows={3}
-                        value={templates.reminderMessage}
-                        onChange={(e) => setTemplates(prev => ({ ...prev, reminderMessage: e.target.value }))}
-                        className="w-full border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface disabled:opacity-75 disabled:cursor-not-allowed resize-none custom-scrollbar"
-                        placeholder="Escribe el mensaje de recordatorio..."
-                      />
-                    </div>
+                      {/* Reminder Message Template */}
+                      <Field>
+                        <div className="flex justify-between items-center w-full">
+                          <FieldLabel>Mensaje de Recordatorio</FieldLabel>
+                          <Badge variant="secondary">Sentinel (24h antes)</Badge>
+                        </div>
+                        <textarea
+                          disabled={!isEditingTemplates}
+                          rows={3}
+                          value={templates.reminderMessage}
+                          onChange={(e) => setTemplates(prev => ({ ...prev, reminderMessage: e.target.value }))}
+                          className="w-full border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface disabled:opacity-75 disabled:cursor-not-allowed resize-none custom-scrollbar"
+                          placeholder="Escribe el mensaje de recordatorio..."
+                        />
+                      </Field>
+                    </FieldGroup>
 
                     {/* Variables Helper Box */}
                     <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/50">

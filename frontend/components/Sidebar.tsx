@@ -20,7 +20,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   
-  const role = (session?.user as any)?.role || "BUSINESS";
+  const role = session?.user?.role || "BUSINESS";
 
   const navigationItems = role === "ADMIN"
     ? [

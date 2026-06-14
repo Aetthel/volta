@@ -17,7 +17,7 @@ export default function LOPDConsentPage() {
   useEffect(() => {
     if (!clientId) return;
 
-    fetch(`http://localhost:3001/api/lopd/${clientId}`)
+    fetch(`/api/backend/lopd/${clientId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Cliente no encontrado o enlace inválido.");
         return res.json();
@@ -38,7 +38,7 @@ export default function LOPDConsentPage() {
 
   const handleAccept = () => {
     setSubmitting(true);
-    fetch(`http://localhost:3001/api/lopd/${clientId}/accept`, {
+    fetch(`/api/backend/lopd/${clientId}/accept`, {
       method: "POST",
     })
       .then((res) => {

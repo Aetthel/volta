@@ -7,8 +7,8 @@ services:
       POSTGRES_USER: volta_user
       POSTGRES_PASSWORD: volta_password
       POSTGRES_DB: volta_db
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -44,6 +44,7 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - BACKEND_INTERNAL_URL=http://backend:3001
     volumes:
       - .:/app
       - /app/node_modules

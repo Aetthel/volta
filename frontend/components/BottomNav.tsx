@@ -15,7 +15,7 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
   
-  const role = (session?.user as any)?.role || "BUSINESS";
+  const role = session?.user?.role || "BUSINESS";
 
   const navItems = role === "ADMIN"
     ? [

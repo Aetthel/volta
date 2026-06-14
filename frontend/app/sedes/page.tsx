@@ -17,6 +17,7 @@ import {
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
+import { FieldGroup, Field, FieldLabel, Badge } from "@/components/ui/volta-ui";
 
 interface BusinessItem {
   id: string;
@@ -42,11 +43,7 @@ export default function SedesPage() {
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
 
   const fetchBusinesses = () => {
-    fetch("http://localhost:3001/api/admin/businesses", {
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
-    })
+    fetch("/api/backend/admin/businesses")
     .then((res) => res.json())
     .then((data) => {
       if (Array.isArray(data)) {
@@ -71,11 +68,10 @@ export default function SedesPage() {
   const handleSaveBusiness = (e: React.FormEvent) => {
     e.preventDefault();
     
-    fetch("http://localhost:3001/api/admin/businesses", {
+    fetch("/api/backend/admin/businesses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here",
       },
       body: JSON.stringify(newBusiness)
     })
@@ -101,18 +97,15 @@ export default function SedesPage() {
   };
 
   const handleDeleteBusiness = (id: string) => {
-    if (session?.user && (session.user as any).id === id) {
+    if (session?.user && session.user.id === id) {
       alert("No puedes eliminar tu propia cuenta de administrador.");
       return;
     }
     const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este local? Se borrarán de forma permanente todas sus citas y clientes de la base de datos.");
     if (!confirmDelete) return;
 
-    fetch(`http://localhost:3001/api/admin/businesses/${id}`, {
+    fetch(`/api/backend/admin/businesses/${id}`, {
       method: "DELETE",
-      headers: {
-        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || "your_static_api_key_here"
-      }
     })
     .then((res) => {
       if (!res.ok) throw new Error("Failed to delete business");
@@ -188,9 +181,9 @@ export default function SedesPage() {
                           {biz.name}
                         </h3>
                       </div>
-                      <span className={`inline-block px-2 py-[2px] rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container`}>
+                      <Badge variant="secondary">
                         {biz.role}
-                      </span>
+                      </Badge>
                     </div>
 
                     {/* Details list */}
@@ -272,80 +265,72 @@ export default function SedesPage() {
             </div>
 
             {/* Form Body */}
-            <form onSubmit={handleSaveBusiness} className="p-6 flex flex-col gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizName">
-                  Nombre Comercial
-                </label>
-                <input
-                  id="bizName"
-                  type="text"
-                  required
-                  placeholder="Ej. Glow Estética"
-                  value={newBusiness.name}
-                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, name: e.target.value }))}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                />
-              </div>
+            <form onSubmit={handleSaveBusiness} className="p-6">
+              <FieldGroup className="gap-4">
+                <Field>
+                  <FieldLabel htmlFor="bizName">Nombre Comercial</FieldLabel>
+                  <input
+                    id="bizName"
+                    type="text"
+                    required
+                    placeholder="Ej. Glow Estética"
+                    value={newBusiness.name}
+                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, name: e.target.value }))}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  />
+                </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizEmail">
-                  Email de acceso
-                </label>
-                <input
-                  id="bizEmail"
-                  type="email"
-                  required
-                  placeholder="contacto@glow.com"
-                  value={newBusiness.email}
-                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, email: e.target.value }))}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                />
-              </div>
+                <Field>
+                  <FieldLabel htmlFor="bizEmail">Email de acceso</FieldLabel>
+                  <input
+                    id="bizEmail"
+                    type="email"
+                    required
+                    placeholder="contacto@glow.com"
+                    value={newBusiness.email}
+                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, email: e.target.value }))}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  />
+                </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizPassword">
-                  Contraseña de acceso
-                </label>
-                <input
-                  id="bizPassword"
-                  type="password"
-                  required
-                  placeholder="Mínimo 6 caracteres"
-                  value={newBusiness.password}
-                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, password: e.target.value }))}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                />
-              </div>
+                <Field>
+                  <FieldLabel htmlFor="bizPassword">Contraseña de acceso</FieldLabel>
+                  <input
+                    id="bizPassword"
+                    type="password"
+                    required
+                    placeholder="Mínimo 6 caracteres"
+                    value={newBusiness.password}
+                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, password: e.target.value }))}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  />
+                </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizPhone">
-                  Teléfono de WhatsApp
-                </label>
-                <input
-                  id="bizPhone"
-                  type="tel"
-                  required
-                  placeholder="34600000000 (sin símbolos)"
-                  value={newBusiness.phone}
-                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, phone: e.target.value }))}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                />
-              </div>
+                <Field>
+                  <FieldLabel htmlFor="bizPhone">Teléfono de WhatsApp</FieldLabel>
+                  <input
+                    id="bizPhone"
+                    type="tel"
+                    required
+                    placeholder="34600000000 (sin símbolos)"
+                    value={newBusiness.phone}
+                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, phone: e.target.value }))}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  />
+                </Field>
 
-              <div className="flex flex-col gap-1">
-                <label className="font-label-md text-label-md text-on-surface-variant px-1" htmlFor="bizAddress">
-                  Dirección Física
-                </label>
-                <input
-                  id="bizAddress"
-                  type="text"
-                  placeholder="Calle de Serrano, 10, Madrid"
-                  value={newBusiness.address}
-                  onChange={(e) => setNewBusiness((prev) => ({ ...prev, address: e.target.value }))}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                />
-              </div>
+                <Field>
+                  <FieldLabel htmlFor="bizAddress">Dirección Física</FieldLabel>
+                  <input
+                    id="bizAddress"
+                    type="text"
+                    placeholder="Calle de Serrano, 10, Madrid"
+                    value={newBusiness.address}
+                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, address: e.target.value }))}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  />
+                </Field>
+              </FieldGroup>
 
               {/* Footer Actions */}
               <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant">
