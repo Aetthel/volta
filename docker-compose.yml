@@ -45,6 +45,9 @@ services:
     environment:
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001
+      # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
+      # header set by Cloudflare Tunnel / any reverse proxy, avoiding redirect loops.
+      - AUTH_TRUST_HOST=true
     volumes:
       - .:/app
       - /app/node_modules

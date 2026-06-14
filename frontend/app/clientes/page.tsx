@@ -346,14 +346,14 @@ export default function ClientesPage() {
               </p>
             </div>
             
-            <div className="flex items-center gap-2">
-              <button className="flex items-center gap-1 px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
+            <div className="hidden md:flex items-center gap-2">
+              <button className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
                 <Download className="w-4 h-4" />
                 <span>Exportar</span>
               </button>
               <button 
                 onClick={() => setIsClientModalOpen(true)}
-                className="flex items-center gap-1 px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer"
+                className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Añadir Cliente</span>
@@ -362,14 +362,14 @@ export default function ClientesPage() {
           </section>
 
           {/* Stats Bento Grid */}
-          <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
             <MetricCard
               title="Clientes Totales"
               value={clients.length}
               change="+12%"
               trend="up"
               icon={<UsersIcon className="w-5 h-5" />}
-              className="md:col-span-1"
+              className="col-span-1"
             />
             <MetricCard
               title="Visitas este mes"
@@ -377,13 +377,13 @@ export default function ClientesPage() {
               change="+8%"
               trend="up"
               icon={<CalendarCheck className="w-5 h-5" />}
-              className="md:col-span-1"
+              className="col-span-1"
             />
             
             {/* Custom Banner Card (Bento Style) */}
-            <div className="md:col-span-2 bg-primary-container text-on-primary-container p-6 rounded-xl shadow-sm relative overflow-hidden group flex flex-col justify-between">
+            <div className="col-span-2 bg-primary-container text-on-primary-container p-4 sm:p-6 rounded-xl shadow-sm relative overflow-hidden group flex flex-col justify-between min-h-[140px]">
               <div className="relative z-10">
-                <h4 className="font-title-md text-title-md mb-1 font-semibold">
+                <h4 className="font-title-md text-title-md mb-1 font-semibold text-on-primary-container">
                   Control de Consentimiento LOPD
                 </h4>
                 <p className="font-body-md text-body-md opacity-90 mb-4 max-w-[280px] leading-relaxed">

@@ -226,6 +226,7 @@ export default function DashboardPage() {
   const currentMonthYear = `${monthNames[todayDate.getMonth()]} ${todayDate.getFullYear()}`;
 
   const gridColsClass = viewMode === "week" ? "grid-cols-[80px_repeat(7,_1fr)]" : "grid-cols-[80px_1fr]";
+  const minWidthClass = viewMode === "week" ? "min-w-[800px]" : "min-w-0 w-full";
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
@@ -337,10 +338,10 @@ export default function DashboardPage() {
             </div>
             {/* Calendar Calendar Content */}
             <div className="overflow-x-auto custom-scrollbar">
-              <div className="min-w-[800px]">
+              <div className={minWidthClass}>
                 
                 {/* Main Scroll Container containing both Header and Body */}
-                <div className="relative h-[560px] overflow-y-auto custom-scrollbar">
+                <div className="relative h-auto md:h-[560px] overflow-y-visible md:overflow-y-auto custom-scrollbar">
                   
                   {/* Weekdays Header Row (Sticky at the top) */}
                   <div className={`grid ${gridColsClass} bg-surface-container-low border-b border-outline-variant font-medium select-none sticky top-0 z-20`}>

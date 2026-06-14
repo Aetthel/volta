@@ -116,6 +116,7 @@ export default function AjustesPage() {
         if (data && !data.error) {
           setWhatsappStatus(data.status);
           setQrCode(data.qrCode);
+          // Auto-activate polling if QR is already waiting (e.g. after page refresh)
           if (data.status === "WAITING_QR") {
             setPollingActive(true);
           } else {
@@ -445,17 +446,17 @@ export default function AjustesPage() {
           )}
 
           {/* Page Title */}
-          <div className="mb-6">
-            <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="font-display text-2xl sm:text-headline-lg text-on-surface font-semibold mb-1">
               Configuración
             </h1>
-            <p className="font-body-md text-body-md text-on-surface-variant font-medium">
+            <p className="font-body-md text-body-sm sm:text-body-md text-on-surface-variant font-medium">
               Gestiona tu identidad de marca, horarios, servicios y mensajería automatizada.
             </p>
           </div>
 
           {/* Tab Navigation (Task 2.1) */}
-          <div className="flex border-b border-outline-variant/65 mb-8 gap-6">
+          <div className="flex border-b border-outline-variant/65 mb-6 sm:mb-8 gap-4 sm:gap-6">
             <button
               onClick={() => setActiveTab("general")}
               className={`pb-3 font-label-lg text-label-lg font-semibold border-b-2 transition-all cursor-pointer ${
@@ -481,11 +482,11 @@ export default function AjustesPage() {
           {/* Tab Contents */}
           {activeTab === "general" ? (
             /* Bento Grid Layout - General */
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
               
               {/* Business Profile Card (Spans 8 cols) */}
               {isEditing ? (
-                <form onSubmit={handleSave} className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+                <form onSubmit={handleSave} className="sm:col-span-2 lg:col-span-8 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
@@ -514,7 +515,7 @@ export default function AjustesPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center md:items-start">
                       {/* Logo container */}
                       <div className="relative group shrink-0">
                         <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
@@ -531,7 +532,7 @@ export default function AjustesPage() {
 
                       {/* Form fields */}
                       <div className="flex-1 w-full">
-                        <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <Field>
                             <FieldLabel htmlFor="profile-name">Nombre Comercial</FieldLabel>
                             <input
@@ -582,7 +583,7 @@ export default function AjustesPage() {
                   </div>
                 </form>
               ) : (
-                <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+                <div className="sm:col-span-2 lg:col-span-8 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
@@ -599,7 +600,7 @@ export default function AjustesPage() {
                       </button>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center md:items-start">
                       {/* Logo container */}
                       <div className="relative group shrink-0">
                         <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
@@ -616,7 +617,7 @@ export default function AjustesPage() {
 
                       {/* Form fields */}
                       <div className="flex-1 w-full">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
                           <div className="flex flex-col gap-1">
                             <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
                               Nombre Comercial
@@ -657,7 +658,7 @@ export default function AjustesPage() {
               )}
 
             {/* Account Settings Small Card (Spans 4 cols) */}
-            <div className="lg:col-span-4 bg-primary text-on-primary rounded-xl p-6 shadow-md flex flex-col justify-between">
+            <div className="sm:col-span-1 lg:col-span-4 bg-primary text-on-primary rounded-xl p-4 sm:p-6 shadow-md flex flex-col justify-between">
               <div className="flex flex-col gap-2">
                 <h3 className="font-title-md text-title-md font-semibold flex items-center gap-1">
                   <CreditCard className="w-5 h-5 text-on-primary" />
@@ -675,7 +676,7 @@ export default function AjustesPage() {
             </div>
 
             {/* Operating Hours Card (Spans 4 cols) */}
-            <div className="lg:col-span-4 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+            <div className="sm:col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
               <div>
                 <h3 className="font-title-md text-title-md text-primary font-semibold mb-6 flex items-center gap-2">
                   <Clock className="w-5 h-5" />
@@ -687,7 +688,7 @@ export default function AjustesPage() {
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                   </div>
                 ) : !isEditingHours ? (
-                  <div className="flex flex-col gap-4 font-medium text-body-md text-on-surface-variant">
+                  <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant">
                     {hours.map((hourRow) => (
                       <div key={hourRow.dayOfWeek} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
                         <span>{dayNames[hourRow.dayOfWeek]}</span>
@@ -790,7 +791,7 @@ export default function AjustesPage() {
             </div>
 
             {/* Featured Services Card (Spans 8 cols) */}
-            <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+            <div className="sm:col-span-2 lg:col-span-8 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
@@ -807,7 +808,7 @@ export default function AjustesPage() {
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                     {filteredServices.map((service, idx) => (
                       <div key={idx} className="bg-surface-container-low flex items-center justify-between p-4 rounded-xl group/service relative">
                         <div className="flex items-center gap-4">
@@ -824,8 +825,8 @@ export default function AjustesPage() {
                           </div>
                         </div>
                         
-                        {/* Hover actions */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover/service:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2 bg-surface-container-low pl-2">
+                        {/* Hover actions / Mobile visible actions */}
+                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/service:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2 bg-surface-container-low pl-2">
                           <button
                             type="button"
                             onClick={() => {
@@ -868,15 +869,15 @@ export default function AjustesPage() {
             </div>
 
             {/* Account Security Card (Spans 12 cols) */}
-            <div className="lg:col-span-12 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant mt-2">
+            <div className="sm:col-span-2 lg:col-span-12 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant mt-2">
               <h3 className="font-title-lg text-title-lg text-primary font-semibold mb-6 flex items-center gap-2">
                 <span>Seguridad de la Cuenta</span>
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {/* Password card */}
-                <div className="border border-outline-variant rounded-xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="border border-outline-variant rounded-xl p-3 sm:p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     <Lock className="w-6 h-6 text-on-surface-variant shrink-0" />
                     <div>
                       <p className="font-body-lg text-body-lg font-semibold text-on-surface">
@@ -893,8 +894,8 @@ export default function AjustesPage() {
                 </div>
 
                 {/* 2FA card */}
-                <div className="border border-outline-variant rounded-xl p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="border border-outline-variant rounded-xl p-3 sm:p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2 sm:gap-4">
                     <ShieldCheck className="w-6 h-6 text-on-surface-variant shrink-0" />
                     <div>
                       <p className="font-body-lg text-body-lg font-semibold text-on-surface">
@@ -915,17 +916,17 @@ export default function AjustesPage() {
           </div>
           ) : (
             /* Bento Grid Layout - Messaging & WhatsApp (Task 2.1) */
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
               
               {/* WhatsApp Connection Card (Spans 5 cols) (Task 2.2) */}
-              <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between min-h-[420px]">
+              <div className="sm:col-span-2 lg:col-span-5 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant flex flex-col justify-between min-h-0 sm:min-h-[420px]">
                 <div>
                   <h3 className="font-title-md text-title-md text-primary font-semibold mb-6 flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-primary" />
                     <span>Canal de WhatsApp</span>
                   </h3>
 
-                  <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-4 sm:gap-6">
                     {/* Status Indicator */}
                     <div className="flex items-center gap-3 bg-surface-container-low p-4 rounded-xl border border-outline-variant/50">
                       {whatsappStatus === "CONNECTED" ? (
@@ -1009,7 +1010,7 @@ export default function AjustesPage() {
                   </div>
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-4 sm:mt-8">
                   {whatsappStatus === "CONNECTED" ? (
                     <button
                       onClick={handleDisconnectWhatsapp}
@@ -1046,7 +1047,7 @@ export default function AjustesPage() {
               </div>
 
               {/* Message Templates Editor Card (Spans 7 cols) (Task 2.3) */}
-              <div className="lg:col-span-7 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+              <div className="sm:col-span-2 lg:col-span-7 bg-surface-container-lowest rounded-xl p-4 sm:p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
@@ -1088,8 +1089,8 @@ export default function AjustesPage() {
                     )}
                   </div>
 
-                  <form className="flex flex-col gap-6">
-                    <FieldGroup className="gap-6">
+                  <form className="flex flex-col gap-4 sm:gap-6">
+                    <FieldGroup className="gap-4 sm:gap-6">
                       {/* Welcome Message Template */}
                       <Field>
                         <div className="flex justify-between items-center w-full">

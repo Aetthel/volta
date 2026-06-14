@@ -2,6 +2,9 @@ export const authConfig = {
   pages: {
     signIn: "/login",
   },
+  // trustHost allows NextAuth to work behind proxies and tunnels (Cloudflare Tunnel,
+  // ngrok, etc.) without needing to set NEXTAUTH_URL / AUTH_URL explicitly.
+  trustHost: true,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

@@ -126,26 +126,35 @@ async function runSentinel() {
 }
 
 /**
- * Sends an automatic LOPD consent message to a client
+ * Sends an automatic LOPD consent message to a client.
+ *
+ * Uses initClient() + waitForReady() so the message is sent only after Puppeteer
+ * has fully initialized — previously the message was attempted before the client
+ * was ready, causing an 'evaluate' error that silently fell back to simulation.
  */
 async function sendConsentMessage(businessId, client) {
   const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
   const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
-  
+
   console.log(`[Bot] Triggering LOPD consent message for client ${client.name} (${client.phone})...`);
-  
+
   try {
-    if (whatsappManager.getClient(businessId)) {
-      await whatsappManager.sendMessage(businessId, client.phone, message);
-      console.log(`[WhatsApp] LOPD consent message sent to ${client.phone}`);
-    } else {
-      console.log(`[WhatsApp] Simulated LOPD send (bot not active): ${message}`);
-    }
+    // Ensure the client is initialised (restores session from disk after a restart)
+    await whatsappManager.initClient(businessId);
+
+    // Wait until Puppeteer is fully ready before attempting to send.
+    // If the QR hasn't been scanned yet this will timeout and throw, which is the
+    // correct behaviour — we do NOT want to silently simulate the send.
+    await whatsappManager.waitForReady(businessId, 45000);
+
+    await whatsappManager.sendMessage(businessId, client.phone, message);
+    console.log(`[WhatsApp] LOPD consent message sent to ${client.phone}`);
   } catch (wsErr) {
-    console.error(`[WhatsApp] Failed to send LOPD consent message to ${client.phone}:`, wsErr);
+    console.error(`[WhatsApp] Failed to send LOPD consent message to ${client.phone}:`, wsErr.message);
+    console.error(`[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`);
   }
 }
 
-module.exports = { runSentinel, sendWelcomeMessage, sendConsentMessage };
 
+module.exports = { runSentinel, sendWelcomeMessage, sendConsentMessage };

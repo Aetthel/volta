@@ -21,13 +21,17 @@ export default function Header({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { data: session } = useSession();
 
+  const displayName = session?.user?.name
+    ? session.user.name.replace(/\s*\([^)]*\)/g, "")
+    : "Volta";
+
   return (
     <header className="flex justify-between items-center px-6 py-4 w-full bg-surface sticky top-0 z-40 shrink-0">
       {/* Search Input / Mobile branding */}
       <div className="flex items-center gap-4 flex-1">
         {/* Mobile-only logo */}
-        <div className="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary truncate max-w-[180px]" title={session?.user?.name || "Volta"}>
-          {session?.user?.name || "Volta"}
+        <div className="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary truncate max-w-[130px] min-[375px]:max-w-[180px] min-[410px]:max-w-[220px]" title={session?.user?.name || "Volta"}>
+          {displayName}
         </div>
 
         {/* Desktop search bar */}

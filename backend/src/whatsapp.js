@@ -5,6 +5,8 @@ const prisma = require('./db');
 class WhatsAppManager {
   constructor() {
     this.clients = new Map();
+    // Track which businessIds have a fully-ready client
+    this.readyClients = new Set();
   }
 
   async updateStatus(businessId, status, qr = null) {
@@ -40,20 +42,26 @@ class WhatsAppManager {
       return this.clients.get(businessId);
     }
 
-    // Check if business status is DISCONNECTED in database, and delete stale session if so
-    try {
-      const business = await prisma.business.findUnique({
-        where: { id: businessId },
-        select: { whatsappStatus: true }
-      });
-      if (business && business.whatsappStatus === 'DISCONNECTED') {
-        this.deleteSession(businessId);
+    console.log(`[WhatsApp] Initializing client for business: ${businessId}`);
+
+    // Remove Chromium's Singleton lock files if they exist from a previous crashed/killed process.
+    // This happens when Docker recreates the container with a new hostname but the volume
+    // persists — Chromium thinks the profile is "in use by another computer".
+    // Note: process.cwd() in the backend workspace resolves to /app/backend.
+    const fs = require('fs');
+    const sessionDir = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
+    for (const lockFile of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
+      const lockPath = path.join(sessionDir, lockFile);
+      if (fs.existsSync(lockPath)) {
+        try {
+          fs.unlinkSync(lockPath);
+          console.log(`[WhatsApp] Removed stale ${lockFile} for business: ${businessId}`);
+        } catch (e) {
+          console.warn(`[WhatsApp] Could not remove ${lockFile}:`, e.message);
+        }
       }
-    } catch (dbErr) {
-      console.error(`[WhatsApp] Error checking business status on init:`, dbErr);
     }
 
-    console.log(`[WhatsApp] Initializing client for business: ${businessId}`);
 
     const client = new Client({
       authStrategy: new LocalAuth({
@@ -83,6 +91,7 @@ class WhatsAppManager {
 
     client.on('ready', () => {
       console.log(`[WhatsApp] Client is ready for business: ${businessId}`);
+      this.readyClients.add(businessId);
       this.updateStatus(businessId, 'CONNECTED', null);
     });
 
@@ -92,12 +101,14 @@ class WhatsAppManager {
 
     client.on('auth_failure', (msg) => {
       console.error(`[WhatsApp] Authentication failure for business ${businessId}:`, msg);
+      this.readyClients.delete(businessId);
       this.updateStatus(businessId, 'DISCONNECTED', null);
       this.deleteSession(businessId);
     });
 
     client.on('disconnected', (reason) => {
       console.log(`[WhatsApp] Client disconnected for business ${businessId}:`, reason);
+      this.readyClients.delete(businessId);
       this.updateStatus(businessId, 'DISCONNECTED', null);
       this.clients.delete(businessId);
     });
@@ -105,6 +116,7 @@ class WhatsAppManager {
     this.clients.set(businessId, client);
     client.initialize().catch(err => {
       console.error(`[WhatsApp] Failed to initialize client for ${businessId}:`, err);
+      this.readyClients.delete(businessId);
       this.updateStatus(businessId, 'DISCONNECTED', null);
     });
 
@@ -113,6 +125,56 @@ class WhatsAppManager {
 
   getClient(businessId) {
     return this.clients.get(businessId);
+  }
+
+  isReady(businessId) {
+    return this.readyClients.has(businessId);
+  }
+
+  /**
+   * Waits until the WhatsApp client for a business is fully ready (fired the 'ready' event).
+   * Resolves immediately if already ready.
+   * Rejects with a timeout error if the client doesn't become ready within `timeoutMs`.
+   */
+  waitForReady(businessId, timeoutMs = 45000) {
+    if (this.readyClients.has(businessId)) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const client = this.clients.get(businessId);
+      if (!client) {
+        return reject(new Error(`No client found for business ${businessId}`));
+      }
+
+      const timer = setTimeout(() => {
+        reject(new Error(`[WhatsApp] Timeout waiting for client to be ready (business: ${businessId})`));
+      }, timeoutMs);
+
+      const cleanup = () => clearTimeout(timer);
+
+      client.once('ready', () => {
+        cleanup();
+        resolve();
+      });
+
+      // Fail fast: if a QR is requested it means the session expired and
+      // the user needs to re-scan — no point waiting the full timeout.
+      client.once('qr', () => {
+        cleanup();
+        reject(new Error(`[WhatsApp] Session expired — QR re-scan required (business: ${businessId})`));
+      });
+
+      client.once('auth_failure', () => {
+        cleanup();
+        reject(new Error(`[WhatsApp] Auth failure while waiting for ready (business: ${businessId})`));
+      });
+
+      client.once('disconnected', () => {
+        cleanup();
+        reject(new Error(`[WhatsApp] Client disconnected while waiting for ready (business: ${businessId})`));
+      });
+    });
   }
 
   cleanPhoneForWhatsApp(phone) {
@@ -128,22 +190,22 @@ class WhatsAppManager {
   async sendMessage(businessId, phone, message) {
     const client = this.clients.get(businessId);
     if (!client) throw new Error("Bot no inicializado");
-    
+
     const cleanPhone = this.cleanPhoneForWhatsApp(phone);
     const chatId = `${cleanPhone}@c.us`;
-    
+
     try {
       console.log(`[WhatsApp] Sending message to ${chatId}...`);
       return await client.sendMessage(chatId, message);
     } catch (err) {
       console.error(`[WhatsApp] Failed to send message to ${chatId}:`, err.message);
-      
-      // If in non-production or if Puppeteer fails because of missing session evaluation,
-      // simulate the message sending to prevent process crashes.
-      if (process.env.NODE_ENV !== 'production' || err.message.includes('evaluate') || err.message.includes('null')) {
+
+      // Only simulate in non-production environments to avoid masking real failures
+      if (process.env.NODE_ENV !== 'production') {
         console.log(`[WhatsApp] [SIMULATION] Mock message sent: "${message}"`);
         return { simulated: true, messageId: `mock-msg-${Date.now()}` };
       }
+
       throw err;
     }
   }

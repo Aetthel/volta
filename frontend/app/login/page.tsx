@@ -48,10 +48,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col md:flex-row bg-surface overflow-hidden">
+    <div className="w-screen h-screen flex flex-col sm:flex-row bg-surface overflow-hidden">
       
       {/* Left Column: Welcome & Branding Banner (Hidden on mobile) */}
-      <div className="hidden md:flex flex-col w-1/2 h-full bg-surface-container-low p-10 lg:p-14 select-none overflow-y-auto">
+      <div className="hidden sm:flex flex-col w-1/2 h-full bg-surface-container-low p-10 lg:p-14 select-none overflow-y-auto">
         {/* Top welcome message */}
         <div className="font-display text-display-lg font-medium text-primary tracking-tight">
           ¡Bienvenido!
@@ -94,7 +94,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Column: Clean Login Form */}
-      <div className="w-full md:w-1/2 h-full bg-surface-container-lowest flex flex-col justify-center items-center p-8 md:p-12 lg:p-16 overflow-y-auto relative">
+      <div className="w-full sm:w-1/2 h-full bg-surface-container-lowest flex flex-col justify-center items-center p-8 sm:p-10 lg:p-16 overflow-y-auto relative">
         {/* Top-Right Register Link */}
         <div className="absolute top-6 right-8 md:top-8 md:right-12 text-body-sm text-on-surface-variant font-medium">
           ¿Aún no eres miembro?{" "}
