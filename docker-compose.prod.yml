@@ -39,9 +39,9 @@ services:
     restart: always
     depends_on:
       - frontend
-    volumes:
-      - ./cloudflared:/etc/cloudflared
-    command: tunnel --config /etc/cloudflared/config.yml run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    command: tunnel --no-autoupdate run
 
 volumes:
   wwebjs-auth:
