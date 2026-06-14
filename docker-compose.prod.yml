@@ -17,9 +17,7 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    image: ghcr.io/kore29/volta:latest
     container_name: volta-backend
     restart: always
     depends_on:
@@ -33,13 +31,10 @@ services:
       - NODE_ENV=production
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
-    # No ports exposed — backend only accessible within Docker network
     command: npm run --workspace=backend start
 
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
+    image: ghcr.io/kore29/volta:latest
     container_name: volta-frontend
     restart: always
     depends_on:
@@ -55,7 +50,7 @@ services:
       - NODE_ENV=production
       - AUTH_TRUST_HOST=true
     ports:
-      - "127.0.0.1:3000:3000"  # Only listen on loopback — Cloudflare Tunnel connects from localhost
+      - "127.0.0.1:3000:3000"
     command: npm run --workspace=frontend start
 
   cloudflared:
@@ -67,8 +62,6 @@ services:
     volumes:
       - ./cloudflared:/etc/cloudflared
     command: tunnel --config /etc/cloudflared/config.yml run
-    networks:
-      - default
 
 volumes:
   postgres_data:
