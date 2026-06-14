@@ -69,6 +69,7 @@ app.use('/api/clients', require('./routes/clients'));
 app.use('/api/whatsapp', require('./routes/whatsapp'));
 app.use('/api/lopd', publicLimiter, require('./routes/lopd'));
 app.use('/api/business', require('./routes/business'));
+app.use('/api/services', require('./routes/services'));
 app.use('/api/admin', require('./routes/admin'));
 
 const bcrypt = require('bcryptjs');
@@ -240,11 +241,33 @@ async function ensureMockBusinessesExist() {
   }
 }
 
+// Initialize whatsapp clients for already connected businesses on startup
+async function initActiveWhatsappClients() {
+  try {
+    const whatsappManager = require('./whatsapp');
+    const connectedBusinesses = await prisma.business.findMany({
+      where: { whatsappStatus: 'CONNECTED' },
+      select: { id: true }
+    });
+    if (connectedBusinesses.length > 0) {
+      console.log(`[WhatsApp] Auto-initializing ${connectedBusinesses.length} connected clients on startup...`);
+      for (const biz of connectedBusinesses) {
+        await whatsappManager.initClient(biz.id).catch(err => {
+          console.error(`[WhatsApp] Auto-init failed for ${biz.id}:`, err);
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[WhatsApp] Error auto-initializing clients on startup:', err);
+  }
+}
+
 // Start server (only if not required as a module)
 if (require.main === module) {
   ensureMockBusinessesExist().then(() => {
     app.listen(PORT, () => {
       console.log(`[API] Server running on port ${PORT}`);
+      initActiveWhatsappClients();
     });
   });
 }

@@ -24,7 +24,9 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
-  Check
+  Check,
+  Pencil,
+  X
 } from "lucide-react";
 
 
@@ -32,6 +34,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
+import AddServiceModal from "@/components/AddServiceModal";
 import { FieldGroup, Field, FieldLabel, Badge } from "@/components/ui/volta-ui";
 
 export default function AjustesPage() {
@@ -43,6 +46,18 @@ export default function AjustesPage() {
 
   // Custom tabs
   const [activeTab, setActiveTab] = useState("general");
+
+  const [services, setServices] = useState<any[]>([]);
+  const [loadingServices, setLoadingServices] = useState(false);
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
+  const [serviceToEdit, setServiceToEdit] = useState<any | null>(null);
+
+  const [hours, setHours] = useState<any[]>([]);
+  const [loadingHours, setLoadingHours] = useState(false);
+  const [isEditingHours, setIsEditingHours] = useState(false);
+  const [savingHours, setSavingHours] = useState(false);
+
+  const dayNames = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
   // WhatsApp connection states
   const [whatsappStatus, setWhatsappStatus] = useState("DISCONNECTED");
@@ -130,6 +145,8 @@ export default function AjustesPage() {
     fetchProfile();
     fetchWhatsappStatus();
     fetchTemplates();
+    fetchServices();
+    fetchHours();
   }, [businessId]);
 
   useEffect(() => {
@@ -240,17 +257,115 @@ export default function AjustesPage() {
   };
 
 
-  const [hours, setHours] = useState([
-    { days: "Lunes - Viernes", time: "09:00 - 20:00", closed: false },
-    { days: "Sábados", time: "10:00 - 18:00", closed: false },
-    { days: "Domingos", time: "Cerrado", closed: true },
-  ]);
+  const fetchServices = () => {
+    if (!businessId) return;
+    setLoadingServices(true);
+    fetch(`/api/backend/services?businessId=${businessId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setServices(data);
+        }
+        setLoadingServices(false);
+      })
+      .catch((e) => {
+        console.error("Error loading services:", e);
+        setLoadingServices(false);
+      });
+  };
 
-  const services = [
-    { name: "Corte & Estilo", duration: "45 min", price: "35€", icon: Scissors },
-    { name: "Color Total", duration: "120 min", price: "85€", icon: Palette },
-    { name: "Tratamiento Hidratante", duration: "60 min", price: "50€", icon: Sparkles },
-  ];
+  const fetchHours = () => {
+    if (!businessId) return;
+    setLoadingHours(true);
+    fetch(`/api/backend/business/${businessId}/hours`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setHours(data);
+        }
+        setLoadingHours(false);
+      })
+      .catch((e) => {
+        console.error("Error loading hours:", e);
+        setLoadingHours(false);
+      });
+  };
+
+  const handleSaveService = (serviceData: any) => {
+    const isEdit = !!serviceData.id;
+    const url = isEdit ? `/api/backend/services/${serviceData.id}` : `/api/backend/services`;
+    const method = isEdit ? "PUT" : "POST";
+    
+    fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...serviceData,
+        businessId
+      })
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to save service");
+        return res.json();
+      })
+      .then(() => {
+        fetchServices();
+        setToastText(isEdit ? "Servicio actualizado correctamente." : "Servicio añadido correctamente.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      })
+      .catch((err) => console.error("Error saving service:", err));
+  };
+
+  const handleDeleteService = (serviceId: string) => {
+    if (!window.confirm("¿Seguro que deseas eliminar este servicio?")) return;
+    
+    fetch(`/api/backend/services/${serviceId}`, {
+      method: "DELETE"
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete service");
+        return res.json();
+      })
+      .then(() => {
+        fetchServices();
+        setToastText("Servicio eliminado correctamente.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      })
+      .catch((err) => console.error("Error deleting service:", err));
+  };
+
+  const handleSaveHours = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingHours(true);
+    
+    fetch(`/api/backend/business/${businessId}/hours`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(hours)
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to save hours");
+        return res.json();
+      })
+      .then((data) => {
+        setHours(data);
+        setIsEditingHours(false);
+        setSavingHours(false);
+        setToastText("Horario de apertura guardado correctamente.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      })
+      .catch((err) => {
+        console.error("Error saving hours:", err);
+        setSavingHours(false);
+      });
+  };
 
   const filteredServices = services.filter((s) =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -277,6 +392,7 @@ export default function AjustesPage() {
     })
     .then(async (data) => {
       setIsEditing(false);
+      setToastText("¡Ajustes guardados correctamente!");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
       
@@ -294,6 +410,9 @@ export default function AjustesPage() {
     })
     .catch((err) => {
       console.error("Error updating business profile:", err);
+      setToastText("Error al guardar los ajustes. Por favor, inténtelo de nuevo.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
       setIsEditing(false);
     });
   };
@@ -365,86 +484,53 @@ export default function AjustesPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
               
               {/* Business Profile Card (Spans 8 cols) */}
-              <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
-                      <Store className="w-5 h-5" />
-                      <span>Información del Negocio</span>
-                    </h3>
-                    
-                    {!isEditing ? (
-                      <button 
-                        onClick={() => setIsEditing(true)}
-                        className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
-                      >
-                        Editar perfil
-                      </button>
-                    ) : (
-                      <button 
-                        type="submit"
-                        form="profile-form"
-                        className="flex items-center gap-1 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
-                      >
-                        <Save className="w-4 h-4" />
-                        <span>Guardar</span>
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col md:flex-row gap-8 items-start">
-                    {/* Logo container */}
-                    <div className="relative group shrink-0">
-                      <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
-                        <img 
-                          src="/logo.png" 
-                          alt="Logo de la Peluquería" 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer">
-                        <Camera className="w-6 h-6 text-white" />
+              {isEditing ? (
+                <form onSubmit={handleSave} className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
+                        <Store className="w-5 h-5" />
+                        <span>Información del Negocio</span>
+                      </h3>
+                      
+                      <div className="flex gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            setIsEditing(false);
+                            fetchProfile();
+                          }}
+                          className="px-4 py-2 border border-outline rounded-lg font-label-md text-label-md hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
+                        >
+                          Cancelar
+                        </button>
+                        <button 
+                          type="submit"
+                          className="flex items-center gap-1 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>Guardar</span>
+                        </button>
                       </div>
                     </div>
 
-                    {/* Form fields */}
-                    <form id="profile-form" onSubmit={handleSave} className="flex-1 w-full">
-                      {!isEditing ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div className="flex flex-col gap-1">
-                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                              Nombre Comercial
-                            </span>
-                            <p className="font-body-lg text-body-lg font-medium text-on-surface">
-                              {profile.name}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                              Correo Electrónico
-                            </span>
-                            <p className="font-body-lg text-body-lg font-medium text-on-surface">
-                              {profile.email}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                              Teléfono
-                            </span>
-                            <p className="font-body-lg text-body-lg font-medium text-on-surface">
-                              {profile.phone}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                              Dirección
-                            </span>
-                            <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed">
-                              {profile.address}
-                            </p>
-                          </div>
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                      {/* Logo container */}
+                      <div className="relative group shrink-0">
+                        <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
+                          <img 
+                            src="/logo.png" 
+                            alt="Logo de la Peluquería" 
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                      ) : (
+                        <div className="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer">
+                          <Camera className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Form fields */}
+                      <div className="flex-1 w-full">
                         <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <Field>
                             <FieldLabel htmlFor="profile-name">Nombre Comercial</FieldLabel>
@@ -491,11 +577,84 @@ export default function AjustesPage() {
                             />
                           </Field>
                         </FieldGroup>
-                      )}
-                    </form>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              ) : (
+                <div className="lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-title-md text-title-md text-primary font-semibold flex items-center gap-2">
+                        <Store className="w-5 h-5" />
+                        <span>Información del Negocio</span>
+                      </h3>
+                      
+                      <button 
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
+                      >
+                        Editar perfil
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                      {/* Logo container */}
+                      <div className="relative group shrink-0">
+                        <div className="w-32 h-32 rounded-xl overflow-hidden bg-surface-container border border-outline-variant">
+                          <img 
+                            src="/logo.png" 
+                            alt="Logo de la Peluquería" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer">
+                          <Camera className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+
+                      {/* Form fields */}
+                      <div className="flex-1 w-full">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                              Nombre Comercial
+                            </span>
+                            <p className="font-body-lg text-body-lg font-medium text-on-surface">
+                              {profile.name}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                              Correo Electrónico
+                            </span>
+                            <p className="font-body-lg text-body-lg font-medium text-on-surface">
+                              {profile.email}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                              Teléfono
+                            </span>
+                            <p className="font-body-lg text-body-lg font-medium text-on-surface">
+                              {profile.phone}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                              Dirección
+                            </span>
+                            <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed">
+                              {profile.address}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
             {/* Account Settings Small Card (Spans 4 cols) */}
             <div className="lg:col-span-4 bg-primary text-on-primary rounded-xl p-6 shadow-md flex flex-col justify-between">
@@ -523,21 +682,111 @@ export default function AjustesPage() {
                   <span>Horario de Apertura</span>
                 </h3>
                 
-                <div className="flex flex-col gap-4 font-medium text-body-md text-on-surface-variant">
-                  {hours.map((hourRow, idx) => (
-                    <div key={idx} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
-                      <span>{hourRow.days}</span>
-                      <span className={`font-semibold ${hourRow.closed ? "text-error" : "text-primary"}`}>
-                        {hourRow.time}
-                      </span>
+                {loadingHours ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : !isEditingHours ? (
+                  <div className="flex flex-col gap-4 font-medium text-body-md text-on-surface-variant">
+                    {hours.map((hourRow) => (
+                      <div key={hourRow.dayOfWeek} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
+                        <span>{dayNames[hourRow.dayOfWeek]}</span>
+                        <span className={`font-semibold ${hourRow.isClosed ? "text-error" : "text-primary"}`}>
+                          {hourRow.isClosed ? "Cerrado" : `${hourRow.openTime} - ${hourRow.closeTime}`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSaveHours} className="flex flex-col gap-4">
+                    {hours.map((hourRow, idx) => (
+                      <div key={hourRow.dayOfWeek} className="flex flex-col gap-2 pb-2 border-b border-outline-variant/40">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-body-md text-on-surface">
+                            {dayNames[hourRow.dayOfWeek]}
+                          </span>
+                          <label className="flex items-center gap-2 cursor-pointer text-xs text-on-surface-variant select-none">
+                            <input
+                              type="checkbox"
+                              checked={hourRow.isClosed}
+                              onChange={(e) => {
+                                  const updatedHours = [...hours];
+                                  updatedHours[idx] = {
+                                    ...updatedHours[idx],
+                                    isClosed: e.target.checked
+                                  };
+                                  setHours(updatedHours);
+                              }}
+                              className="rounded border-outline-variant text-primary focus:ring-primary"
+                            />
+                            Cerrado
+                          </label>
+                        </div>
+                        {!hourRow.isClosed && (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="time"
+                              value={hourRow.openTime}
+                              onChange={(e) => {
+                                  const updatedHours = [...hours];
+                                  updatedHours[idx] = {
+                                    ...updatedHours[idx],
+                                    openTime: e.target.value
+                                  };
+                                  setHours(updatedHours);
+                              }}
+                              className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
+                            />
+                            <span className="text-xs text-on-surface-variant">a</span>
+                            <input
+                              type="time"
+                              value={hourRow.closeTime}
+                              onChange={(e) => {
+                                  const updatedHours = [...hours];
+                                  updatedHours[idx] = {
+                                    ...updatedHours[idx],
+                                    closeTime: e.target.value
+                                  };
+                                  setHours(updatedHours);
+                              }}
+                              className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-outline-variant/35">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingHours(false);
+                          fetchHours();
+                        }}
+                        className="px-3 py-1.5 border border-outline rounded text-xs hover:bg-surface-variant/20 transition-all font-semibold cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={savingHours}
+                        className="px-3 py-1.5 bg-primary text-on-primary rounded text-xs hover:bg-primary-container transition-all font-semibold cursor-pointer flex items-center gap-1"
+                      >
+                        {savingHours && <Loader2 className="w-3 h-3 animate-spin" />}
+                        <span>Guardar</span>
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </form>
+                )}
               </div>
               
-              <button className="mt-8 w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
-                Modificar Horarios
-              </button>
+              {!isEditingHours && !loadingHours && (
+                <button 
+                  onClick={() => setIsEditingHours(true)}
+                  className="mt-8 w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer"
+                >
+                  Modificar Horarios
+                </button>
+              )}
             </div>
 
             {/* Featured Services Card (Spans 8 cols) */}
@@ -548,39 +797,73 @@ export default function AjustesPage() {
                     <Scissors className="w-5 h-5 text-primary" />
                     <span>Servicios Destacados</span>
                   </h3>
-                  <a href="#" className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all hover:underline">
-                    Ver todos
-                  </a>
+                  <span className="text-body-sm text-on-surface-variant font-medium">
+                    {services.length} servicios registrados
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                  {filteredServices.map((service, idx) => {
-                    const Icon = service.icon;
-                    return (
-                      <div key={idx} className="bg-surface-container-low flex items-center gap-4 p-4 rounded-xl">
-                        <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
-                          <Icon className="w-5 h-5" />
+                {loadingServices ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    {filteredServices.map((service, idx) => (
+                      <div key={idx} className="bg-surface-container-low flex items-center justify-between p-4 rounded-xl group/service relative">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
+                            <Scissors className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                              {service.name}
+                            </p>
+                            <p className="font-body-md text-body-md text-on-surface-variant">
+                              {service.duration} min · {service.price}€
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                            {service.name}
-                          </p>
-                          <p className="font-body-md text-body-md text-on-surface-variant">
-                            {service.duration} · {service.price}
-                          </p>
+                        
+                        {/* Hover actions */}
+                        <div className="flex items-center gap-1 opacity-0 group-hover/service:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2 bg-surface-container-low pl-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setServiceToEdit(service);
+                              setIsAddServiceModalOpen(true);
+                            }}
+                            className="p-2 hover:bg-surface-variant rounded-lg text-primary transition-all cursor-pointer"
+                            title="Editar servicio"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteService(service.id)}
+                            className="p-2 hover:bg-surface-variant rounded-lg text-error transition-all cursor-pointer"
+                            title="Eliminar servicio"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
 
-                  {/* Add Service (Dashed border button) */}
-                  <div className="border border-dashed border-outline-variant hover:border-primary flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer hover:bg-surface-variant/20 transition-all">
-                    <Plus className="w-5 h-5 text-primary" />
-                    <span className="font-label-lg text-label-lg font-semibold text-primary">
-                      Añadir Servicio
-                    </span>
+                    {/* Add Service (Dashed border button) */}
+                    <div 
+                      onClick={() => {
+                        setServiceToEdit(null);
+                        setIsAddServiceModalOpen(true);
+                      }}
+                      className="border border-dashed border-outline-variant hover:border-primary flex items-center justify-center gap-2 p-4 rounded-xl cursor-pointer hover:bg-surface-variant/20 transition-all min-h-[80px]"
+                    >
+                      <Plus className="w-5 h-5 text-primary" />
+                      <span className="font-label-lg text-label-lg font-semibold text-primary">
+                        Añadir Servicio
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -893,6 +1176,17 @@ export default function AjustesPage() {
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
         onSave={handleSaveAppointment}
+      />
+
+      {/* Services CRUD Modal */}
+      <AddServiceModal
+        isOpen={isAddServiceModalOpen}
+        onClose={() => {
+          setIsAddServiceModalOpen(false);
+          setServiceToEdit(null);
+        }}
+        onSave={handleSaveService}
+        serviceToEdit={serviceToEdit}
       />
     </div>
   );

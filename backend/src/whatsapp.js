@@ -22,9 +22,35 @@ class WhatsAppManager {
     }
   }
 
+  deleteSession(businessId) {
+    const fs = require('fs');
+    const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
+    if (fs.existsSync(sessionPath)) {
+      console.log(`[WhatsApp] Deleting session directory for business: ${businessId}`);
+      try {
+        fs.rmSync(sessionPath, { recursive: true, force: true });
+      } catch (rmErr) {
+        console.error(`[WhatsApp] Failed to delete session directory for ${businessId}:`, rmErr);
+      }
+    }
+  }
+
   async initClient(businessId) {
     if (this.clients.has(businessId)) {
       return this.clients.get(businessId);
+    }
+
+    // Check if business status is DISCONNECTED in database, and delete stale session if so
+    try {
+      const business = await prisma.business.findUnique({
+        where: { id: businessId },
+        select: { whatsappStatus: true }
+      });
+      if (business && business.whatsappStatus === 'DISCONNECTED') {
+        this.deleteSession(businessId);
+      }
+    } catch (dbErr) {
+      console.error(`[WhatsApp] Error checking business status on init:`, dbErr);
     }
 
     console.log(`[WhatsApp] Initializing client for business: ${businessId}`);
@@ -67,6 +93,7 @@ class WhatsAppManager {
     client.on('auth_failure', (msg) => {
       console.error(`[WhatsApp] Authentication failure for business ${businessId}:`, msg);
       this.updateStatus(businessId, 'DISCONNECTED', null);
+      this.deleteSession(businessId);
     });
 
     client.on('disconnected', (reason) => {

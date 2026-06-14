@@ -36,7 +36,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Credenciales incorrectas. Usa contacto@glow.com / 123456");
+        setError("Correo electrónico o contraseña incorrectos");
         setIsLoading(false);
       } else {
         router.push(callbackUrl);

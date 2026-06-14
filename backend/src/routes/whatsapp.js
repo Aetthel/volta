@@ -62,6 +62,7 @@ router.post('/disconnect', authenticate, validateId('businessId'), async (req, r
       }
       whatsappManager.clients.delete(businessId);
     }
+    whatsappManager.deleteSession(businessId);
     await whatsappManager.updateStatus(businessId, 'DISCONNECTED', null);
     res.json({ success: true, message: 'WhatsApp disconnected successfully' });
   } catch (err) {

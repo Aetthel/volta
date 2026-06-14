@@ -34,6 +34,30 @@ async function main() {
     },
   });
   console.log('Business user created:', business);
+
+  // 3. Create default Services
+  await prisma.service.createMany({
+    data: [
+      { businessId: 'mock-business-id', name: 'Corte & Estilo', duration: 45, price: 35.0 },
+      { businessId: 'mock-business-id', name: 'Color Total', duration: 120, price: 85.0 },
+      { businessId: 'mock-business-id', name: 'Tratamiento Hidratante', duration: 60, price: 50.0 },
+    ]
+  });
+  console.log('Default services created for mock business');
+
+  // 4. Create default Business Hours
+  await prisma.businessHours.createMany({
+    data: [
+      { businessId: 'mock-business-id', dayOfWeek: 1, openTime: '09:00', closeTime: '20:00', isClosed: false },
+      { businessId: 'mock-business-id', dayOfWeek: 2, openTime: '09:00', closeTime: '20:00', isClosed: false },
+      { businessId: 'mock-business-id', dayOfWeek: 3, openTime: '09:00', closeTime: '20:00', isClosed: false },
+      { businessId: 'mock-business-id', dayOfWeek: 4, openTime: '09:00', closeTime: '20:00', isClosed: false },
+      { businessId: 'mock-business-id', dayOfWeek: 5, openTime: '09:00', closeTime: '20:00', isClosed: false },
+      { businessId: 'mock-business-id', dayOfWeek: 6, openTime: '10:00', closeTime: '18:00', isClosed: false },
+      { businessId: 'mock-business-id', dayOfWeek: 0, openTime: '09:00', closeTime: '20:00', isClosed: true },
+    ]
+  });
+  console.log('Default operating hours created for mock business');
 }
 
 main()

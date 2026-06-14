@@ -1,5 +1,5 @@
-const prisma = require('./db');
-const whatsappManager = require('./whatsapp');
+const prisma = require('../src/db');
+const whatsappManager = require('../src/whatsapp');
 
 /**
  * Test script to verify WhatsApp initialization for the seeded business

@@ -16,6 +16,7 @@ const createBusinessSchema = z.object({
 router.get('/businesses', authenticate, async (req, res) => {
   try {
     const businesses = await prisma.business.findMany({
+      where: { role: 'BUSINESS' },
       orderBy: { name: 'asc' }
     });
     res.json(businesses);

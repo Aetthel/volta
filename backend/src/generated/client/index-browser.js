@@ -156,7 +156,30 @@ exports.Prisma.AppointmentScalarFieldEnum = {
   appointmentDate: 'appointmentDate',
   status: 'status',
   businessId: 'businessId',
-  clientId: 'clientId'
+  clientId: 'clientId',
+  serviceId: 'serviceId',
+  serviceName: 'serviceName'
+};
+
+exports.Prisma.BusinessHoursScalarFieldEnum = {
+  id: 'id',
+  businessId: 'businessId',
+  dayOfWeek: 'dayOfWeek',
+  openTime: 'openTime',
+  closeTime: 'closeTime',
+  isClosed: 'isClosed'
+};
+
+exports.Prisma.ServiceScalarFieldEnum = {
+  id: 'id',
+  businessId: 'businessId',
+  name: 'name',
+  description: 'description',
+  duration: 'duration',
+  price: 'price',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -193,7 +216,9 @@ exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
 exports.Prisma.ModelName = {
   Business: 'Business',
   Client: 'Client',
-  Appointment: 'Appointment'
+  Appointment: 'Appointment',
+  BusinessHours: 'BusinessHours',
+  Service: 'Service'
 };
 
 /**

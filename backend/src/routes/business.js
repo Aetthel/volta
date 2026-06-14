@@ -62,4 +62,74 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSc
   }
 });
 
+const defaultHours = [
+  { dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false },
+  { dayOfWeek: 2, openTime: "09:00", closeTime: "20:00", isClosed: false },
+  { dayOfWeek: 3, openTime: "09:00", closeTime: "20:00", isClosed: false },
+  { dayOfWeek: 4, openTime: "09:00", closeTime: "20:00", isClosed: false },
+  { dayOfWeek: 5, openTime: "09:00", closeTime: "20:00", isClosed: false },
+  { dayOfWeek: 6, openTime: "10:00", closeTime: "18:00", isClosed: false },
+  { dayOfWeek: 0, openTime: "09:00", closeTime: "20:00", isClosed: true }
+];
+
+const updateHoursSchema = z.array(z.object({
+  dayOfWeek: z.number().min(0).max(6),
+  openTime: z.string(),
+  closeTime: z.string(),
+  isClosed: z.boolean()
+}));
+
+router.get('/:id/hours', authenticate, validateId('id'), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const hours = await prisma.businessHours.findMany({
+      where: { businessId: id },
+      orderBy: { dayOfWeek: 'asc' }
+    });
+    if (hours.length === 0) {
+      return res.json(defaultHours);
+    }
+    res.json(hours);
+  } catch (err) {
+    console.error('[API] Error fetching business hours:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.put('/:id/hours', authenticate, validateId('id'), validateBody(updateHoursSchema), async (req, res) => {
+  const { id } = req.params;
+  const hoursData = req.body;
+
+  try {
+    const business = await prisma.business.findUnique({ where: { id } });
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.businessHours.deleteMany({
+        where: { businessId: id }
+      });
+      await tx.businessHours.createMany({
+        data: hoursData.map(h => ({
+          businessId: id,
+          dayOfWeek: h.dayOfWeek,
+          openTime: h.openTime,
+          closeTime: h.closeTime,
+          isClosed: h.isClosed
+        }))
+      });
+    });
+
+    const updatedHours = await prisma.businessHours.findMany({
+      where: { businessId: id },
+      orderBy: { dayOfWeek: 'asc' }
+    });
+    res.json(updatedHours);
+  } catch (err) {
+    console.error('[API] Error updating business hours:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

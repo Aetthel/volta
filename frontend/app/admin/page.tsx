@@ -144,7 +144,7 @@ export default function AdminPage() {
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Custom Chart Panel (Spans 8 cols) */}
-            <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between">
+            <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between overflow-hidden">
               <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                   Evolución de Ingresos
@@ -199,7 +199,7 @@ export default function AdminPage() {
             </div>
 
             {/* Rankings Panel (Spans 4 cols) */}
-            <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px]">
+            <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] overflow-hidden">
               <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                   Ranking de Locales

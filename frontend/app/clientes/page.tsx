@@ -498,7 +498,7 @@ export default function ClientesPage() {
                                   handleSendCustomMessage(client);
                                 }}
                                 title="Enviar WhatsApp"
-                                className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
+                                className="p-2 rounded-full text-outline hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
                               >
                                 <MessageCircle className="w-4 h-4" />
                               </button>
@@ -510,16 +510,16 @@ export default function ClientesPage() {
                                   handleSendWhatsAppConsent(client);
                                 }}
                                 title="Enviar consentimiento LOPD"
-                                className="p-2 rounded-full text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
+                                className="p-2 rounded-full text-outline hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
                               >
                                 <ShieldCheck className="w-4 h-4" />
                               </button>
                             )}
                             <button
                               onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingClient(client);
-                                setIsClientModalOpen(true);
+                                  e.stopPropagation();
+                                  setEditingClient(client);
+                                  setIsClientModalOpen(true);
                               }}
                               title="Editar cliente"
                               className="p-2 rounded-full text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
@@ -528,8 +528,8 @@ export default function ClientesPage() {
                             </button>
                             <button
                               onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteClient(client.id, `${client.name} ${client.surname}`);
+                                  e.stopPropagation();
+                                  handleDeleteClient(client.id, `${client.name} ${client.surname}`);
                               }}
                               title="Eliminar cliente"
                               className="p-2 rounded-full text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer"

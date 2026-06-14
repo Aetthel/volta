@@ -48,21 +48,21 @@ export default function MetricCard({
 
   return (
     <div
-      className={`bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col gap-3 hover:border-primary-fixed-dim transition-colors ${className}`}
+      className={`bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col gap-2 sm:gap-3 hover:border-primary-fixed-dim transition-colors ${className}`}
     >
       <div className="flex justify-between items-start">
         {/* Metric Icon Wrapper */}
-        <div className="p-1.5 bg-surface-container text-primary rounded-lg shrink-0">
+        <div className="p-1 sm:p-1.5 bg-surface-container text-primary rounded-lg shrink-0">
           {icon}
         </div>
         
         {/* Trend Indicator */}
         {change && (
           <div
-            className={`flex items-center gap-1 px-3 py-[2px] rounded-full text-label-md font-bold ${trendStyles.bgColor} ${trendStyles.textColor}`}
+            className={`flex items-center gap-0.5 sm:gap-1 px-2 py-[1px] sm:px-3 sm:py-[2px] rounded-full text-label-sm sm:text-label-md font-bold ${trendStyles.bgColor} ${trendStyles.textColor}`}
           >
             {trend !== "neutral" && trend !== "stable" && (
-              <TrendIcon className="w-3.5 h-3.5" />
+              <TrendIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             )}
             <span>{change}</span>
           </div>
@@ -70,11 +70,11 @@ export default function MetricCard({
       </div>
 
       {/* Label and Value */}
-      <div className="mt-1">
-        <p className="text-on-surface-variant font-label-md text-label-md">
+      <div className="mt-0.5 sm:mt-1">
+        <p className="text-on-surface-variant font-label-sm sm:font-label-md text-label-sm sm:text-label-md">
           {title}
         </p>
-        <h3 className="text-headline-lg font-headline-lg font-semibold text-on-surface mt-1">
+        <h3 className="text-headline-md sm:text-headline-lg font-headline-md sm:font-headline-lg font-semibold text-on-surface mt-0.5 sm:mt-1">
           {value}
         </h3>
       </div>

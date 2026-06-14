@@ -244,7 +244,7 @@ export default function DashboardPage() {
         {/* Inner Content Canvas */}
         <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
           {/* Quick Metrics Grid */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
             <MetricCard
               title="Citas Hoy"
               value={String(appointmentsTodayCount)}
