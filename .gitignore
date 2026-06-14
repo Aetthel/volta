@@ -35,11 +35,11 @@ pnpm-debug.log*
 *.pem
 
 # Prisma
-/src/generated/
+src/generated/
 
 # WhatsApp Web JS
-/.wwebjs_auth/
-/.wwebjs_cache/
+.wwebjs_auth/
+.wwebjs_cache/
 
 # Testing
 coverage/

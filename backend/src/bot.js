@@ -25,10 +25,18 @@ async function sendWelcomeMessage(appointmentId) {
   try {
     const appt = await prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: { business: true }
+      include: {
+        business: true,
+        client: true
+      }
     });
 
     if (!appt || !appt.business.welcomeMessage) return;
+
+    if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
+      console.log(`[Bot] Skipping welcome message to ${appt.clientPhone} (LOPD status: ${appt.client?.lopdStatus || 'unknown'})`);
+      return;
+    }
 
     const message = formatMessage(appt.business.welcomeMessage, {
       clientName: appt.clientName,
@@ -68,7 +76,8 @@ async function runSentinel() {
         }
       },
       include: {
-        business: true
+        business: true,
+        client: true
       }
     });
 
@@ -76,6 +85,11 @@ async function runSentinel() {
 
     for (const appt of appointments) {
       try {
+        if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
+          console.log(`[Sentinel] Skipping reminder to ${appt.clientPhone} (LOPD status: ${appt.client?.lopdStatus || 'unknown'})`);
+          continue;
+        }
+
         if (!appt.business.reminderMessage) {
           console.log(`[Sentinel] No reminder template for ${appt.business.name}, skipping.`);
           continue;
@@ -112,3 +126,4 @@ async function runSentinel() {
 }
 
 module.exports = { runSentinel, sendWelcomeMessage };
+

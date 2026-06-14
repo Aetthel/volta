@@ -11,7 +11,7 @@ import {
   Trash2, 
   Edit3,
   ShieldAlert,
-  MessageSquareText,
+  ShieldCheck,
   MessageCircle
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -51,6 +51,26 @@ const normalizePhone = (phone: string) => {
     return digits.slice(2);
   }
   return digits;
+};
+
+const formatPhoneForDisplay = (phone: string) => {
+  if (!phone) return "";
+  const clean = phone.replace(/\s+/g, "");
+  const digits = clean.replace(/\D/g, "");
+
+  if (digits.length === 9 && (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))) {
+    return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
+  }
+
+  if (digits.length === 11 && digits.startsWith("34")) {
+    return `+34 ${digits.slice(2, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+  }
+
+  if (clean.startsWith("+34") && digits.length === 11) {
+    return `+34 ${digits.slice(2, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)} ${digits.slice(9, 11)}`;
+  }
+
+  return phone;
 };
 
 const getInitials = (name: string, surname?: string) => {
@@ -205,7 +225,7 @@ export default function ClientesPage() {
         frequentService: "Primera visita",
         stylist: "Sin asignar",
         avatarUrl: "",
-        lopdStatus: "Aceptado",
+        lopdStatus: "Pendiente",
       };
       setClients((prev) => [newClient, ...prev]);
     });
@@ -463,7 +483,7 @@ export default function ClientesPage() {
                         </td>
                         {/* Phone */}
                         <td className="px-6 py-4 text-body-lg text-on-surface font-medium">
-                          {client.phone}
+                          {formatPhoneForDisplay(client.phone)}
                         </td>
                         {/* Last Visit */}
                         <td className="px-6 py-4 text-body-lg text-on-surface font-medium">
@@ -488,26 +508,28 @@ export default function ClientesPage() {
                         {/* Actions */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSendCustomMessage(client);
-                              }}
-                              title="Enviar WhatsApp"
-                              className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
-                            >
-                              <MessageCircle className="w-4 h-4" />
-                            </button>
+                            {client.lopdStatus === "Aceptado" && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSendCustomMessage(client);
+                                }}
+                                title="Enviar WhatsApp"
+                                className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
+                              >
+                                <MessageCircle className="w-4 h-4" />
+                              </button>
+                            )}
                             {client.lopdStatus === "Pendiente" && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleSendWhatsAppConsent(client);
                                 }}
-                                title="Reenviar consentimiento por WhatsApp"
-                                className="p-2 rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
+                                title="Enviar consentimiento LOPD"
+                                className="p-2 rounded-full text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
                               >
-                                <MessageSquareText className="w-4 h-4" />
+                                <ShieldCheck className="w-4 h-4" />
                               </button>
                             )}
                             <button
@@ -579,7 +601,7 @@ export default function ClientesPage() {
       {/* LOPD WhatsApp Consent Toast Overlay */}
       {showConsentToast && (
         <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
-          <MessageSquareText className="w-6 h-6 text-emerald-600 shrink-0" />
+          <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
           <div className="flex flex-col gap-0.5">
             <p className="font-semibold text-emerald-950 text-body-md">Consentimiento Reenviado</p>
             <p className="text-body-sm text-emerald-800">

@@ -4,11 +4,12 @@ const express = require('express');
 const prisma = require('./db');
 
 const cron = require('node-cron');
-const { runSentinel } = require('./bot');
+const { runSentinel, sendWelcomeMessage } = require('./bot');
 
 const app = express();
 const PORT = process.env.BACKEND_PORT || (process.env.PORT && process.env.PORT !== '3000' ? process.env.PORT : 3001);
 const API_KEY = process.env.API_KEY;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Schedule the Sentinel to run every day at 20:00
 cron.schedule('0 20 * * *', () => {
@@ -153,12 +154,39 @@ app.post('/api/appointments', authenticate, async (req, res) => {
       }
     });
 
+    // Send welcome message or LOPD consent request (Task 1.4)
+    if (client.lopdStatus === 'Aceptado') {
+      sendWelcomeMessage(appointment.id).catch((err) => {
+        console.error('[API] Error sending welcome message on appointment creation:', err);
+      });
+    } else {
+      const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
+      const consentMessage = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
+      console.log(`[Bot] Triggering automatic LOPD consent message for ${client.name} (${client.phone})...`);
+      
+      const whatsappManager = require('./whatsapp');
+      // Asynchronous to avoid blocking the HTTP response
+      (async () => {
+        try {
+          if (whatsappManager.getClient(businessId)) {
+            await whatsappManager.sendMessage(businessId, client.phone, consentMessage);
+            console.log(`[WhatsApp] Auto LOPD consent message sent to ${client.phone}`);
+          } else {
+            console.log(`[WhatsApp] Simulated auto LOPD send (bot not active): ${consentMessage}`);
+          }
+        } catch (wsErr) {
+          console.error(`[WhatsApp] Failed to send auto LOPD consent message to ${client.phone}:`, wsErr);
+        }
+      })();
+    }
+
     res.status(201).json(appointment);
   } catch (err) {
     console.error('[API] Error creating appointment:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 /**
  * Endpoint to get all clients for a business
@@ -198,10 +226,29 @@ app.post('/api/clients', authenticate, async (req, res) => {
         surname: surname || "",
         email,
         phone,
-        lopdStatus: "Aceptado", // Manually added clients default to Aceptado
+        lopdStatus: "Pendiente", // Manually added clients default to Pendiente for LOPD consent flow
         businessId
       }
     });
+    // Send LOPD consent message automatically (Task 1.4 equivalent for manual registration)
+    const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
+    const consentMessage = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
+    console.log(`[Bot] Triggering automatic LOPD consent message for manually created client ${client.name} (${client.phone})...`);
+    
+    const whatsappManager = require('./whatsapp');
+    (async () => {
+      try {
+        if (whatsappManager.getClient(businessId)) {
+          await whatsappManager.sendMessage(businessId, client.phone, consentMessage);
+          console.log(`[WhatsApp] Auto LOPD consent message sent to ${client.phone}`);
+        } else {
+          console.log(`[WhatsApp] Simulated auto LOPD send (bot not active): ${consentMessage}`);
+        }
+      } catch (wsErr) {
+        console.error(`[WhatsApp] Failed to send auto LOPD consent message to ${client.phone}:`, wsErr);
+      }
+    })();
+
     res.status(201).json(client);
   } catch (err) {
     console.error('[API] Error creating client:', err);
@@ -275,7 +322,8 @@ app.post('/api/clients/:id/resend-consent', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Client not found' });
     }
 
-    const message = `¡Hola ${client.name}! Para cumplir con la LOPD y enviarte recordatorios, por favor acepta nuestra política de privacidad aquí: https://volta.com/lopd/${client.id}`;
+    const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
+    const message = `¡Hola ${client.name}! Para cumplir con la LOPD y enviarte recordatorios, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
     
     console.log(`[Bot] Sending LOPD consent WhatsApp to ${client.phone}: ${message}`);
     
@@ -333,9 +381,222 @@ app.post('/api/clients/:id/send-message', authenticate, async (req, res) => {
 });
 
 /**
+ * Endpoint to initialize a WhatsApp-Web session for a business
+ */
+app.post('/api/whatsapp/init', authenticate, async (req, res) => {
+  const { businessId } = req.body;
+  if (!businessId) {
+    return res.status(400).json({ error: 'Missing businessId in request body' });
+  }
+
+  try {
+    const whatsappManager = require('./whatsapp');
+    await whatsappManager.initClient(businessId);
+    res.json({ success: true, message: 'WhatsApp initialization started' });
+  } catch (err) {
+    console.error('[API] Error initializing WhatsApp client:', err);
+    res.status(500).json({ error: 'Failed to initialize WhatsApp client' });
+  }
+});
+
+/**
+ * Endpoint to get WhatsApp connection status and current QR code
+ */
+app.get('/api/whatsapp/status', authenticate, async (req, res) => {
+  const { businessId } = req.query;
+  if (!businessId) {
+    return res.status(400).json({ error: 'Missing businessId query parameter' });
+  }
+
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: {
+        whatsappStatus: true,
+        qrCode: true
+      }
+    });
+
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+
+    res.json({
+      status: business.whatsappStatus,
+      qrCode: business.qrCode
+    });
+  } catch (err) {
+    console.error('[API] Error fetching WhatsApp status:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to disconnect and destroy WhatsApp session
+ */
+app.post('/api/whatsapp/disconnect', authenticate, async (req, res) => {
+  const { businessId } = req.body;
+  if (!businessId) {
+    return res.status(400).json({ error: 'Missing businessId in request body' });
+  }
+
+  try {
+    const whatsappManager = require('./whatsapp');
+    const client = whatsappManager.getClient(businessId);
+    if (client) {
+      try {
+        await client.destroy();
+      } catch (destroyErr) {
+        console.error('[API] Warning: error during client destroy:', destroyErr);
+      }
+      whatsappManager.clients.delete(businessId);
+    }
+    await whatsappManager.updateStatus(businessId, 'DISCONNECTED', null);
+    res.json({ success: true, message: 'WhatsApp disconnected successfully' });
+  } catch (err) {
+    console.error('[API] Error disconnecting WhatsApp client:', err);
+    res.status(500).json({ error: 'Failed to disconnect WhatsApp client' });
+  }
+});
+
+/**
+ * Endpoint to get message templates for a business
+ */
+app.get('/api/whatsapp/templates', authenticate, async (req, res) => {
+  const { businessId } = req.query;
+  if (!businessId) {
+    return res.status(400).json({ error: 'Missing businessId query parameter' });
+  }
+
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: {
+        welcomeMessage: true,
+        reminderMessage: true
+      }
+    });
+
+    if (!business) {
+      return res.status(404).json({ error: 'Business not found' });
+    }
+
+    res.json({
+      welcomeMessage: business.welcomeMessage,
+      reminderMessage: business.reminderMessage
+    });
+  } catch (err) {
+    console.error('[API] Error fetching templates:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Endpoint to update message templates for a business
+ */
+app.post('/api/whatsapp/templates', authenticate, async (req, res) => {
+  const { businessId, welcomeMessage, reminderMessage } = req.body;
+  if (!businessId) {
+    return res.status(400).json({ error: 'Missing businessId in request body' });
+  }
+
+  try {
+    const updated = await prisma.business.update({
+      where: { id: businessId },
+      data: {
+        welcomeMessage,
+        reminderMessage
+      },
+      select: {
+        welcomeMessage: true,
+        reminderMessage: true
+      }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('[API] Error updating templates:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+/**
+ * Public endpoint to get client and business details for LOPD consent page (unauthenticated)
+ */
+app.get('/api/lopd/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const client = await prisma.client.findUnique({
+      where: { id },
+      include: { business: true }
+    });
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+    res.json({
+      clientName: client.name,
+      businessName: client.business.name,
+      lopdStatus: client.lopdStatus
+    });
+  } catch (err) {
+    console.error('[API] Error fetching client LOPD details:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Public endpoint to accept LOPD consent for a client (unauthenticated)
+ */
+app.post('/api/lopd/:id/accept', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const client = await prisma.client.findUnique({
+
+      where: { id },
+      include: { business: true }
+    });
+
+    if (!client) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    // Update status to Aceptado
+    const updatedClient = await prisma.client.update({
+      where: { id },
+      data: { lopdStatus: 'Aceptado' }
+    });
+
+    console.log(`[API] Client ${client.name} (${client.phone}) accepted LOPD consent. Status updated to Aceptado.`);
+
+    // Retroactively send welcome message for future appointments (Task 1.6)
+    const futureAppointments = await prisma.appointment.findMany({
+      where: {
+        clientId: id,
+        appointmentDate: { gte: new Date() },
+        status: 'PENDING'
+      }
+    });
+
+    console.log(`[API] Found ${futureAppointments.length} future pending appointments for client ${id}. Triggering welcome messages...`);
+
+    for (const appt of futureAppointments) {
+      await sendWelcomeMessage(appt.id);
+    }
+
+    res.json({ success: true, client: updatedClient });
+  } catch (err) {
+    console.error('[API] Error accepting LOPD consent:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * Endpoint to get business details
  */
 app.get('/api/business/:id', authenticate, async (req, res) => {
+
   const { id } = req.params;
   try {
     const business = await prisma.business.findUnique({

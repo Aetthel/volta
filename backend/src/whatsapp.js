@@ -88,11 +88,23 @@ class WhatsAppManager {
     return this.clients.get(businessId);
   }
 
+  cleanPhoneForWhatsApp(phone) {
+    if (!phone) return "";
+    const digits = phone.replace(/\D/g, "");
+    // If it's a 9-digit Spanish phone number, prepend the 34 country code
+    if (digits.length === 9 && (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))) {
+      return `34${digits}`;
+    }
+    return digits;
+  }
+
   async sendMessage(businessId, phone, message) {
     const client = this.clients.get(businessId);
     if (!client) throw new Error("Bot no inicializado");
     
-    const chatId = `${phone}@c.us`;
+    const cleanPhone = this.cleanPhoneForWhatsApp(phone);
+    const chatId = `${cleanPhone}@c.us`;
+    console.log(`[WhatsApp] Sending message to ${chatId}...`);
     return await client.sendMessage(chatId, message);
   }
 }
