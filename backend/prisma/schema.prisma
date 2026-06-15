@@ -15,6 +15,10 @@ model Business {
   password        String         // Hashed password
   role            BusinessRole   @default(BUSINESS)
   address         String?        // Commercial address
+  logoUrl         String?        // Profile photo URL
+  coverUrl        String?        // Business photo URL
+  description     String?        // About you description
+  ownerName       String?        // Owner / Professional name
   welcomeMessage  String?        // Custom welcome message template
   reminderMessage String?        // Custom reminder message template
   whatsappStatus  WhatsAppStatus @default(DISCONNECTED)

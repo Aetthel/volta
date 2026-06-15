@@ -14,6 +14,8 @@ interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (appointmentData: any) => void;
+  initialDate?: string;
+  initialTime?: string;
 }
 
 const normalizeString = (str: string) => {
@@ -37,6 +39,8 @@ export default function NewAppointmentModal({
   isOpen,
   onClose,
   onSave,
+  initialDate,
+  initialTime,
 }: NewAppointmentModalProps) {
   const { data: session } = useSession();
   const businessId = session?.user?.id || "mock-business-id";
@@ -49,6 +53,17 @@ export default function NewAppointmentModal({
     time: "10:00",
     stylist: "Volta",
   });
+
+  // Prefill date and time when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData((prev) => ({
+        ...prev,
+        date: initialDate || new Date().toISOString().split("T")[0],
+        time: initialTime || "10:00",
+      }));
+    }
+  }, [isOpen, initialDate, initialTime]);
 
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -127,7 +142,9 @@ export default function NewAppointmentModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const appointmentDateStr = `${formData.date}T${formData.time}:00`;
+    // Parse as local browser date/time and convert to ISO string to handle timezone offsets correctly
+    const localDate = new Date(`${formData.date}T${formData.time}:00`);
+    const appointmentDateStr = localDate.toISOString();
 
     fetch("/api/backend/appointments", {
       method: "POST",
@@ -199,6 +216,20 @@ export default function NewAppointmentModal({
     "Spa Facial",
   ];
 
+  const [selectedHour, selectedMin] = (formData.time || "10:00").split(":");
+
+  const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const h = e.target.value;
+    const [, currentMin] = (formData.time || "10:00").split(":");
+    setFormData((prev) => ({ ...prev, time: `${h}:${currentMin || "00"}` }));
+  };
+
+  const handleMinChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const m = e.target.value;
+    const [currentHour] = (formData.time || "10:00").split(":");
+    setFormData((prev) => ({ ...prev, time: `${currentHour || "10"}:${m}` }));
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -261,7 +292,7 @@ export default function NewAppointmentModal({
                       className="fixed inset-0 z-40"
                       onClick={() => setShowSuggestions(false)}
                     />
-                    <div className="absolute left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar z-50 py-1">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar z-50 py-1">
                       {suggestions.map((client) => (
                         <button
                           key={client.id}
@@ -339,41 +370,39 @@ export default function NewAppointmentModal({
 
             <Field>
               <FieldLabel htmlFor="time">Hora</FieldLabel>
-              <select
-                id="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-              >
-                {[
-                  "09:00",
-                  "09:30",
-                  "10:00",
-                  "10:30",
-                  "11:00",
-                  "11:30",
-                  "12:00",
-                  "12:30",
-                  "13:00",
-                  "13:30",
-                  "14:00",
-                  "14:30",
-                  "15:00",
-                  "15:30",
-                  "16:00",
-                  "16:30",
-                  "17:00",
-                  "17:30",
-                  "18:00",
-                  "18:30",
-                  "19:00",
-                  "19:30",
-                ].map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <div className="relative flex items-center w-full">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant z-10">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <select
+                    id="hour"
+                    value={selectedHour || "10"}
+                    onChange={handleHourChange}
+                    className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  >
+                    {["09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"].map((h) => (
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="relative flex items-center w-full">
+                  <select
+                    id="minute"
+                    value={selectedMin || "00"}
+                    onChange={handleMinChange}
+                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                  >
+                    {["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"].map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </Field>
           </FieldGroup>
 

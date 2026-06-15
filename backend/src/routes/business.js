@@ -8,7 +8,11 @@ const updateBusinessSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres").optional(),
   email: z.string().email("Formato de email no válido").optional(),
   phone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido").optional(),
-  address: z.string().optional().nullable()
+  address: z.string().optional().nullable(),
+  logoUrl: z.string().optional().nullable(),
+  coverUrl: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  ownerName: z.string().optional().nullable()
 });
 
 router.get('/:id', authenticate, validateId('id'), async (req, res) => {
@@ -22,6 +26,10 @@ router.get('/:id', authenticate, validateId('id'), async (req, res) => {
         email: true,
         phone: true,
         address: true,
+        logoUrl: true,
+        coverUrl: true,
+        description: true,
+        ownerName: true,
       }
     });
     if (!business) {
@@ -36,7 +44,7 @@ router.get('/:id', authenticate, validateId('id'), async (req, res) => {
 
 router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSchema), async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address } = req.body;
+  const { name, email, phone, address, logoUrl, coverUrl, description, ownerName } = req.body;
 
   try {
     const updated = await prisma.business.update({
@@ -45,7 +53,11 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSc
         name,
         email,
         phone,
-        address
+        address,
+        logoUrl,
+        coverUrl,
+        description,
+        ownerName
       },
       select: {
         id: true,
@@ -53,6 +65,10 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSc
         email: true,
         phone: true,
         address: true,
+        logoUrl: true,
+        coverUrl: true,
+        description: true,
+        ownerName: true,
       }
     });
     res.json(updated);

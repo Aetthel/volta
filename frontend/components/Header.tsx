@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Search, HelpCircle, Settings, LogOut, Bell } from "lucide-react";
@@ -20,6 +20,21 @@ export default function Header({
 }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { data: session } = useSession();
+  const [workerPhoto, setWorkerPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPhoto = () => {
+      if (typeof window !== "undefined") {
+        const savedPhoto = localStorage.getItem("stylist_worker_photo");
+        setWorkerPhoto(savedPhoto || null);
+      }
+    };
+    loadPhoto();
+    window.addEventListener("stylist_worker_photo_changed", loadPhoto);
+    return () => {
+      window.removeEventListener("stylist_worker_photo_changed", loadPhoto);
+    };
+  }, []);
 
   const displayName = session?.user?.name
     ? session.user.name.replace(/\s*\([^)]*\)/g, "")
@@ -77,7 +92,7 @@ export default function Header({
             className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all shrink-0 focus:outline-none flex items-center justify-center"
           >
             <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw"
+              src={workerPhoto || "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw"}
               alt="Avatar del Estilista"
               className="w-full h-full object-cover"
             />

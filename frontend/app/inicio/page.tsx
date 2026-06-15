@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Calendar as CalendarIcon,
   UserPlus,
@@ -29,17 +29,133 @@ interface AppointmentItem {
   timeSlot: string; // e.g., "09:00"
   duration: number; // in slots (1 slot = 1 hour)
   colorClass: string;
+  dateObj?: Date;
 }
 
-const getWeekDates = () => {
-  const today = new Date();
-  const currentDay = today.getDay(); // 0: Sun, 1: Mon, etc.
+const serviceDurations: Record<string, number> = {
+  "Corte Caballero": 30,
+  "Corte Dama": 45,
+  "Coloración Premium": 90,
+  "Tratamiento Keratina": 60,
+  Manicura: 30,
+  "Spa Facial": 45,
+};
+
+function calculateOverlaps(dayApps: any[]) {
+  if (dayApps.length === 0) return [];
+
+  // 1. Calculate top and height for each appointment
+  const apps = dayApps.map(app => {
+    const date = new Date(app.dateObj);
+    let h = date.getHours();
+    let m = date.getMinutes();
+    
+    // Clamp hours to calendar range: 09:00 to 21:00
+    if (h < 9) {
+      h = 9;
+      m = 0;
+    } else if (h >= 21) {
+      h = 20;
+      m = 59;
+    }
+    
+    // Total minutes since 09:00
+    const startMinutes = (h - 9) * 60 + m;
+    const duration = serviceDurations[app.serviceName] || 45;
+    
+    // Clamp endMinutes to calendar max (21:00 is 12 hours * 60 mins = 720 mins from 09:00)
+    const endMinutes = Math.min(720, startMinutes + duration);
+    const finalDuration = endMinutes - startMinutes;
+    
+    const top = startMinutes * 1.5; // 1 hour = 90px (h-20 = 5rem = 90px), 1 min = 1.5px
+    const height = Math.max(32, finalDuration * 1.5); // Min height of 32px
+    
+    const formattedTime = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")} (${duration} min)`;
+
+    return {
+      ...app,
+      top,
+      height,
+      endTop: top + height,
+      formattedTime,
+    };
+  });
+
+  // Sort appointments by top (start time)
+  apps.sort((a, b) => a.top - b.top);
+
+  // 2. Group into independent clusters
+  const clusters: any[][] = [];
+  let currentCluster: any[] = [];
+  let currentClusterEndTop = 0;
+
+  for (const app of apps) {
+    if (currentCluster.length === 0) {
+      currentCluster.push(app);
+      currentClusterEndTop = app.endTop;
+    } else if (app.top >= currentClusterEndTop) {
+      // No overlap with the active cluster, push the old one and start a new one
+      clusters.push(currentCluster);
+      currentCluster = [app];
+      currentClusterEndTop = app.endTop;
+    } else {
+      // Overlaps with the active cluster, add to it and expand the end boundary if needed
+      currentCluster.push(app);
+      currentClusterEndTop = Math.max(currentClusterEndTop, app.endTop);
+    }
+  }
+  if (currentCluster.length > 0) {
+    clusters.push(currentCluster);
+  }
+
+  // 3. For each cluster, distribute into columns and calculate positions
+  const positionedApps: any[] = [];
+
+  for (const cluster of clusters) {
+    const columns: any[][] = [];
+    
+    for (const app of cluster) {
+      let placed = false;
+      for (let i = 0; i < columns.length; i++) {
+        const lastApp = columns[i][columns[i].length - 1];
+        if (app.top >= lastApp.endTop) {
+          columns[i].push(app);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        columns.push([app]);
+      }
+    }
+
+    const numCols = columns.length;
+    for (let colIdx = 0; colIdx < numCols; colIdx++) {
+      const width = 100 / numCols;
+      const left = colIdx * width;
+      
+      for (const app of columns[colIdx]) {
+        positionedApps.push({
+          ...app,
+          width: width,
+          left: left,
+        });
+      }
+    }
+  }
+
+  return positionedApps;
+}
+
+const getWeekDates = (anchorDate: Date) => {
+  const currentDay = anchorDate.getDay(); // 0: Sun, 1: Mon, etc.
   const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
-  const monday = new Date(today);
-  monday.setDate(today.getDate() + distanceToMonday);
+  const monday = new Date(anchorDate);
+  monday.setDate(anchorDate.getDate() + distanceToMonday);
 
   const days = [];
   const dayNames = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"];
+  const today = new Date();
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(monday);
@@ -51,6 +167,7 @@ const getWeekDates = () => {
       dateString: date.toISOString().split("T")[0],
       current: date.toDateString() === today.toDateString(),
       closed: i === 6, // Sunday is closed
+      fullDate: date,
     });
   }
   return days;
@@ -71,6 +188,19 @@ export default function DashboardPage() {
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
   const [clients, setClients] = useState<any[]>([]);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [nowDate, setNowDate] = useState<Date | null>(null);
+  const [hoverGuide, setHoverGuide] = useState<{
+    dayIndex: number;
+    timeString: string;
+    top: number;
+  } | null>(null);
+
+  const [prefilledDate, setPrefilledDate] = useState<string>("");
+  const [prefilledTime, setPrefilledTime] = useState<string>("");
+
+  const [weekAnchorDate, setWeekAnchorDate] = useState<Date>(new Date());
+
   const colorClasses = [
     "bg-primary-container text-on-primary-container border-primary",
     "bg-secondary-container text-on-secondary-container border-secondary",
@@ -78,7 +208,7 @@ export default function DashboardPage() {
   ];
 
   const mapDbAppointments = (dbApps: any[]) => {
-    const weekDates = getWeekDates();
+    const weekDates = getWeekDates(weekAnchorDate);
     const startOfWeekStr = weekDates[0].dateString;
     const endOfWeekStr = weekDates[6].dateString;
 
@@ -91,11 +221,9 @@ export default function DashboardPage() {
         const dateObj = new Date(app.appointmentDate);
         const day = (dateObj.getDay() + 6) % 7; // Convert Sun=0, Mon=1... to Mon=0, Tue=1... Sun=6
 
-        let hoursVal = dateObj.getHours();
-        // Clamp to standard calendar time slots: 09:00 to 14:00
-        if (hoursVal < 9) hoursVal = 9;
-        if (hoursVal > 14) hoursVal = 14;
-        const timeSlot = `${hoursVal.toString().padStart(2, "0")}:00`;
+        const hoursVal = dateObj.getHours();
+        const minsVal = dateObj.getMinutes();
+        const timeSlot = `${hoursVal.toString().padStart(2, "0")}:${minsVal.toString().padStart(2, "0")}`;
 
         const service = app.client?.frequentService || "Corte Caballero";
         let hash = 0;
@@ -112,6 +240,7 @@ export default function DashboardPage() {
           timeSlot: timeSlot,
           duration: 1,
           colorClass: colorClass,
+          dateObj: dateObj,
         };
       });
   };
@@ -148,7 +277,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [businessId]);
+  }, [businessId, weekAnchorDate]);
 
   useEffect(() => {
     if (session?.user?.name) {
@@ -157,14 +286,46 @@ export default function DashboardPage() {
   }, [session]);
 
   const handlePrev = () => {
-    if (viewMode === "day") {
-      setSelectedDayIndex((prev) => (prev === 0 ? 6 : prev - 1));
+    if (viewMode === "week") {
+      setWeekAnchorDate((prev) => {
+        const newDate = new Date(prev);
+        newDate.setDate(prev.getDate() - 7);
+        return newDate;
+      });
+    } else {
+      setSelectedDayIndex((prev) => {
+        if (prev === 0) {
+          setWeekAnchorDate((anchor) => {
+            const newAnchor = new Date(anchor);
+            newAnchor.setDate(anchor.getDate() - 7);
+            return newAnchor;
+          });
+          return 6;
+        }
+        return prev - 1;
+      });
     }
   };
 
   const handleNext = () => {
-    if (viewMode === "day") {
-      setSelectedDayIndex((prev) => (prev === 6 ? 0 : prev + 1));
+    if (viewMode === "week") {
+      setWeekAnchorDate((prev) => {
+        const newDate = new Date(prev);
+        newDate.setDate(prev.getDate() + 7);
+        return newDate;
+      });
+    } else {
+      setSelectedDayIndex((prev) => {
+        if (prev === 6) {
+          setWeekAnchorDate((anchor) => {
+            const newAnchor = new Date(anchor);
+            newAnchor.setDate(anchor.getDate() + 7);
+            return newAnchor;
+          });
+          return 0;
+        }
+        return prev + 1;
+      });
     }
   };
 
@@ -174,13 +335,109 @@ export default function DashboardPage() {
     setSelectedDayIndex(todayDayIndex);
   }, []);
 
+  // Set up clock update interval for current time red line
+  useEffect(() => {
+    setNowDate(new Date());
+    const interval = setInterval(() => {
+      setNowDate(new Date());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Smooth scroll to current time or first appointment on mount
+  useEffect(() => {
+    if (isMounted && scrollContainerRef.current) {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMin = now.getMinutes();
+
+      // Filter appointments for the selected day
+      const todayApps = appointments.filter((app) => app.dayIndex === selectedDayIndex);
+      let targetScrollTop = 0;
+
+      if (todayApps.length > 0) {
+        // Find top position of the earliest appointment
+        const earliestTop = Math.min(...todayApps.map((app) => {
+          const date = new Date(app.dateObj || "");
+          const h = date.getHours();
+          const m = date.getMinutes();
+          return Math.max(0, (h - 9) * 60 + m) * 1.5;
+        }));
+        targetScrollTop = Math.max(0, earliestTop - 60); // Scroll to 60px above earliest
+      } else if (currentHour >= 9 && currentHour < 21) {
+        // Center the current time indicator line
+        const currentMinutesSinceStart = (currentHour - 9) * 60 + currentMin;
+        targetScrollTop = Math.max(0, currentMinutesSinceStart * 1.5 - 150);
+      } else {
+        // Default start position slightly scrolled (e.g. 30px)
+        targetScrollTop = 30;
+      }
+
+      scrollContainerRef.current.scrollTo({
+        top: targetScrollTop,
+        behavior: "smooth",
+      });
+    }
+  }, [isMounted, appointments, selectedDayIndex]);
+
+  const renderCurrentTimeLine = (colDayIndex: number) => {
+    if (!nowDate || !isMounted) return null;
+
+    const colDateStr = weekDays[colDayIndex]?.dateString;
+    const todayStr = nowDate.toISOString().split("T")[0];
+    if (colDateStr !== todayStr) return null;
+
+    const currentHour = nowDate.getHours();
+    const currentMin = nowDate.getMinutes();
+
+    if (currentHour < 9 || currentHour >= 21) return null;
+
+    const totalMinutes = (currentHour - 9) * 60 + currentMin;
+    const topPx = totalMinutes * 1.5;
+
+    return (
+      <div
+        style={{ top: `${topPx}px` }}
+        className="absolute left-0 right-0 z-30 pointer-events-none flex items-center"
+      >
+        <div className="w-2.5 h-2.5 rounded-full bg-primary absolute -left-1.5 shadow-[0_0_6px_rgba(0,101,101,0.6)]" />
+        <div className="w-full h-[2px] bg-primary/70" />
+      </div>
+    );
+  };
+
+  const handleGridClick = (dayIdx: number, topPx: number) => {
+    const totalMinutes = Math.round(topPx / 1.5);
+    const hour = 9 + Math.floor(totalMinutes / 60);
+    const minute = Math.round((totalMinutes % 60) / 5) * 5;
+    
+    let finalHour = hour;
+    let finalMin = minute;
+    if (finalMin === 60) {
+      finalHour += 1;
+      finalMin = 0;
+    }
+
+    const timeString = `${finalHour.toString().padStart(2, "0")}:${finalMin.toString().padStart(2, "0")}`;
+    const dateString = weekDays[dayIdx]?.dateString || new Date().toISOString().split("T")[0];
+
+    setPrefilledDate(dateString);
+    setPrefilledTime(timeString);
+    setIsAppointmentModalOpen(true);
+  };
+
   const handleGoToday = () => {
-    const todayDayIndex = (new Date().getDay() + 6) % 7;
+    const today = new Date();
+    setWeekAnchorDate(today);
+    const todayDayIndex = (today.getDay() + 6) % 7;
     setSelectedDayIndex(todayDayIndex);
   };
 
-  const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
-  const weekDays = getWeekDates();
+  const timeSlots = [
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
+    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+  ];
+  const weekDays = getWeekDates(weekAnchorDate);
 
   const handleSaveAppointment = (data: any) => {
     fetchDashboardData();
@@ -229,14 +486,15 @@ export default function DashboardPage() {
     "Abril",
     "Mayo",
     "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
+"Diciembre",
   ];
-  const currentMonthYear = `${monthNames[todayDate.getMonth()]} ${todayDate.getFullYear()}`;
+  const displayedDate = weekDays[3]?.fullDate || new Date();
+  const currentMonthYear = `${monthNames[displayedDate.getMonth()]} ${displayedDate.getFullYear()}`;
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const isViewingToday = viewMode === "week"
+    ? weekDays.some((day) => day.dateString === todayStr)
+    : weekDays[selectedDayIndex]?.dateString === todayStr;
 
   const gridColsClass =
     viewMode === "week"
@@ -244,6 +502,46 @@ export default function DashboardPage() {
       : "grid-cols-[80px_1fr]";
   const minWidthClass =
     viewMode === "week" ? "min-w-[800px]" : "min-w-0 w-full";
+
+  // Calculate active and next appointments for today to assign colors
+  const now = nowDate || new Date();
+  const nowMs = now.getTime();
+
+  // Find all appointments for the current real-world date
+  const todayApps = appointments.filter((app) => {
+    if (!app.dateObj) return false;
+    const dateStr = new Date(app.dateObj).toISOString().split("T")[0];
+    return dateStr === todayStr;
+  });
+
+  let activeAppId: string | null = null;
+  let nextAppId: string | null = null;
+
+  // Find if there is an appointment active right now
+  const activeApp = todayApps.find((app) => {
+    if (!app.dateObj) return false;
+    const startTime = new Date(app.dateObj).getTime();
+    const duration = serviceDurations[app.serviceName] || 45;
+    const endTime = startTime + duration * 60000;
+    return nowMs >= startTime && nowMs <= endTime;
+  });
+
+  if (activeApp) {
+    activeAppId = activeApp.id;
+  } else {
+    // If none are active, find the next upcoming one today
+    const upcomingApps = todayApps
+      .filter((app) => {
+        if (!app.dateObj) return false;
+        const startTime = new Date(app.dateObj).getTime();
+        return startTime > nowMs;
+      })
+      .sort((a, b) => new Date(a.dateObj || "").getTime() - new Date(b.dateObj || "").getTime());
+
+    if (upcomingApps.length > 0) {
+      nextAppId = upcomingApps[0].id;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
@@ -310,9 +608,16 @@ export default function DashboardPage() {
                   </button>
                   <button
                     onClick={handleGoToday}
-                    className="px-2 text-label-md font-label-md font-semibold cursor-pointer"
+                    disabled={isViewingToday}
+                    className={`px-2 text-label-md font-label-md font-semibold transition-all ${
+                      isViewingToday
+                        ? "text-on-surface-variant/40 cursor-default"
+                        : "text-primary hover:bg-primary-container/20 rounded cursor-pointer"
+                    }`}
                   >
-                    Hoy
+                    {isViewingToday
+                      ? (viewMode === "week" ? "Esta semana" : "Hoy")
+                      : (viewMode === "week" ? "Volver a esta semana" : "Volver a hoy")}
                   </button>
                   <button
                     onClick={handleNext}
@@ -356,7 +661,10 @@ export default function DashboardPage() {
             <div className="overflow-x-auto custom-scrollbar">
               <div className={minWidthClass}>
                 {/* Main Scroll Container containing both Header and Body */}
-                <div className="relative h-auto md:h-[560px] overflow-y-visible md:overflow-y-auto custom-scrollbar">
+                <div
+                  ref={scrollContainerRef}
+                  className="relative h-auto md:h-[560px] overflow-y-visible md:overflow-y-auto custom-scrollbar"
+                >
                   {/* Weekdays Header Row (Sticky at the top) */}
                   <div
                     className={`grid ${gridColsClass} bg-surface-container-low border-b border-outline-variant font-medium select-none sticky top-0 z-20`}
@@ -423,94 +731,180 @@ export default function DashboardPage() {
                         })()}
                   </div>
 
-                  {/* Calendar Body Rows */}
-                  {timeSlots.map((time) => {
-                    return (
-                      <div
-                        key={time}
-                        className={`grid ${gridColsClass} h-20 border-b border-outline-variant/60 relative`}
-                      >
-                        {/* Time labels column */}
-                        <div className="text-center py-3 text-label-md font-label-md text-on-surface-variant border-r border-outline-variant font-semibold select-none flex items-center justify-center bg-surface-container-low/35">
-                          {time}
-                        </div>
+                  {/* Calendar Grid Container (Relative to contain the absolute overlay) */}
+                  <div className="relative">
+                    {/* Calendar Body Rows */}
+                    {timeSlots.map((time) => {
+                      return (
+                        <div
+                          key={time}
+                          className={`grid ${gridColsClass} h-20 border-b border-outline-variant/60 relative`}
+                        >
+                          {/* Time labels column */}
+                          <div className="text-center py-3 text-label-md font-label-md text-on-surface-variant border-r border-outline-variant font-semibold select-none flex items-center justify-center bg-surface-container-low/35 h-20">
+                            {time}
+                          </div>
 
-                        {/* Day slots columns */}
-                        {viewMode === "week"
-                          ? Array.from({ length: 7 }).map((_, dayIndex) => {
-                              const cellAppointments = appointments.filter(
-                                (app) =>
-                                  app.dayIndex === dayIndex &&
-                                  app.timeSlot === time &&
-                                  (searchQuery === "" ||
-                                    app.clientName
-                                      .toLowerCase()
-                                      .includes(searchQuery.toLowerCase()) ||
-                                    app.serviceName
-                                      .toLowerCase()
-                                      .includes(searchQuery.toLowerCase())),
-                              );
+                          {/* Day slots columns (empty now, just borders with subdivision guides) */}
+                          {viewMode === "week"
+                            ? Array.from({ length: 7 }).map((_, dayIndex) => (
+                                <div
+                                  key={dayIndex}
+                                  className="border-r border-outline-variant/60 relative"
+                                >
+                                  {/* Sub-hour horizontal guides */}
+                                  <div className="absolute top-[22.5px] left-0 right-0 border-t border-dashed border-outline-variant/20 pointer-events-none" />
+                                  <div className="absolute top-[45px] left-0 right-0 border-t border-dashed border-outline-variant/35 pointer-events-none" />
+                                  <div className="absolute top-[67.5px] left-0 right-0 border-t border-dashed border-outline-variant/20 pointer-events-none" />
+                                </div>
+                              ))
+                            : (
+                                <div className="border-r border-outline-variant/60 relative">
+                                  {/* Sub-hour horizontal guides */}
+                                  <div className="absolute top-[22.5px] left-0 right-0 border-t border-dashed border-outline-variant/20 pointer-events-none" />
+                                  <div className="absolute top-[45px] left-0 right-0 border-t border-dashed border-outline-variant/35 pointer-events-none" />
+                                  <div className="absolute top-[67.5px] left-0 right-0 border-t border-dashed border-outline-variant/20 pointer-events-none" />
+                                </div>
+                              )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Appointments Overlay Container */}
+                    <div
+                      className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        // Calculate day index based on column width
+                        const colWidth = rect.width / (viewMode === "week" ? 7 : 1);
+                        const hoveredColIdx = Math.floor(x / colWidth);
+                        const actualDayIndex = viewMode === "week" ? hoveredColIdx : selectedDayIndex;
+
+                        // Calculate time
+                        const totalMinutes = Math.round(y / 1.5);
+                        const hour = 9 + Math.floor(totalMinutes / 60);
+                        const minute = Math.round((totalMinutes % 60) / 5) * 5;
+
+                        let finalHour = hour;
+                        let finalMin = minute;
+                        if (finalMin === 60) {
+                          finalHour += 1;
+                          finalMin = 0;
+                        }
+
+                        // Clamp bounds
+                        if (finalHour >= 9 && finalHour <= 21) {
+                          const timeStr = `${finalHour.toString().padStart(2, "0")}:${finalMin.toString().padStart(2, "0")}`;
+                          const roundedMinutes = (finalHour - 9) * 60 + finalMin;
+
+                          setHoverGuide({
+                            dayIndex: actualDayIndex,
+                            timeString: timeStr,
+                            top: roundedMinutes * 1.5,
+                          });
+                        } else {
+                          setHoverGuide(null);
+                        }
+                      }}
+                      onMouseLeave={() => setHoverGuide(null)}
+                      onClick={(e) => {
+                        if (hoverGuide) {
+                          handleGridClick(hoverGuide.dayIndex, hoverGuide.top);
+                        }
+                      }}
+                    >
+                      {Array.from({ length: viewMode === "week" ? 7 : 1 }).map((_, dayIndex) => {
+                        const actualDayIndex = viewMode === "week" ? dayIndex : selectedDayIndex;
+                        const dayAppointments = appointments.filter(
+                          (app) =>
+                            app.dayIndex === actualDayIndex &&
+                            (searchQuery === "" ||
+                              app.clientName
+                                .toLowerCase()
+                                .includes(searchQuery.toLowerCase()) ||
+                              app.serviceName
+                                .toLowerCase()
+                                .includes(searchQuery.toLowerCase())),
+                        );
+
+                        const positionedApps = calculateOverlaps(dayAppointments);
+                        const isColHovered = hoverGuide && hoverGuide.dayIndex === actualDayIndex;
+
+                        return (
+                          <div
+                            key={dayIndex}
+                            className="relative h-full border-r border-outline-variant/60 pointer-events-none"
+                          >
+                            {/* Hover Guide Line */}
+                            {isColHovered && hoverGuide && (
+                              <div
+                                style={{ top: `${hoverGuide.top}px` }}
+                                className="absolute left-0 right-0 z-25 border-t-2 border-primary/30 pointer-events-none flex items-center"
+                              >
+                                <span className="bg-primary text-on-primary text-[9px] font-bold px-1.5 py-0.5 rounded shadow absolute left-1 -translate-y-1/2">
+                                  {hoverGuide.timeString}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Current Time Line */}
+                            {renderCurrentTimeLine(actualDayIndex)}
+
+                            {positionedApps.map((app) => {
+                              const isActive = app.id === activeAppId;
+                              const isNext = app.id === nextAppId;
+
+                              // Muted style by default; active and next get the highlighted cyan/teal containers
+                              const cardClasses = isActive
+                                ? "bg-secondary-container text-on-secondary-container border-secondary shadow-[0_3px_10px_rgba(41,103,103,0.08)] z-15"
+                                : isNext
+                                  ? "bg-secondary-container/60 text-on-secondary-container/90 border-secondary/40 shadow-[0_2px_8px_rgba(41,103,103,0.05)] z-12"
+                                  : "bg-surface-container-low/85 text-on-surface-variant/80 border-outline-variant/40 shadow-[0_1px_3px_rgba(0,0,0,0.02)]";
+
+                              const isShort = app.height <= 45;
+                              const cardPadding = isShort ? "py-1 px-2" : "p-2";
+                              const cardRounded = isShort ? "rounded-md" : "rounded-lg";
+                              const cardGap = isShort ? "gap-0" : "gap-0.5";
+                              const serviceTextClass = isShort ? "text-[11.5px] font-bold leading-tight" : "text-label-md font-bold";
+                              const clientTextClass = isShort ? "text-[9.5px] opacity-75 font-medium leading-none" : "text-[10px] opacity-80 font-medium";
+                              const justifyClass = isShort ? "justify-center" : "justify-start";
 
                               return (
                                 <div
-                                  key={dayIndex}
-                                  className="border-r border-outline-variant/60 relative p-1 group hover:bg-surface-container-low/20 transition-all"
+                                  key={app.id}
+                                  style={{
+                                    position: "absolute",
+                                    top: `${app.top}px`,
+                                    height: `${app.height}px`,
+                                    width: `calc(${app.width}% - 8px)`,
+                                    left: `calc(${app.left}% + 4px)`,
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation(); // Prevent creating a new appointment
+                                  }}
+                                  className={`${cardRounded} ${cardPadding} border cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all flex flex-col ${justifyClass} ${cardGap} pointer-events-auto overflow-hidden ${cardClasses}`}
                                 >
-                                  {cellAppointments.map((app) => (
-                                    <div
-                                      key={app.id}
-                                      className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-2 border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
-                                    >
-                                      <div>
-                                        <p className="text-label-md font-bold truncate">
-                                          {app.serviceName}
-                                        </p>
-                                        <p className="text-[10px] opacity-80 font-medium">
-                                          {app.clientName}
-                                        </p>
-                                      </div>
+                                  <div className={`min-w-0 flex flex-col ${cardGap}`}>
+                                    <div className="flex items-center justify-between gap-1 flex-wrap">
+                                      <p className={`${serviceTextClass} truncate`}>
+                                        {app.serviceName}
+                                      </p>
                                     </div>
-                                  ))}
+                                    <p className={`${clientTextClass} truncate`}>
+                                      {app.clientName}
+                                    </p>
+                                  </div>
                                 </div>
                               );
-                            })
-                          : (() => {
-                              const cellAppointments = appointments.filter(
-                                (app) =>
-                                  app.dayIndex === selectedDayIndex &&
-                                  app.timeSlot === time &&
-                                  (searchQuery === "" ||
-                                    app.clientName
-                                      .toLowerCase()
-                                      .includes(searchQuery.toLowerCase()) ||
-                                    app.serviceName
-                                      .toLowerCase()
-                                      .includes(searchQuery.toLowerCase())),
-                              );
-
-                              return (
-                                <div className="border-r border-outline-variant/60 relative p-1 group hover:bg-surface-container-low/20 transition-all">
-                                  {cellAppointments.map((app) => (
-                                    <div
-                                      key={app.id}
-                                      className={`absolute inset-x-2 top-2 bottom-2 rounded-lg p-2 border-l-4 shadow-[0_2px_6px_rgba(0,0,0,0.03)] cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all z-10 flex flex-col justify-between ${app.colorClass}`}
-                                    >
-                                      <div>
-                                        <p className="text-label-md font-bold truncate">
-                                          {app.serviceName}
-                                        </p>
-                                        <p className="text-[10px] opacity-80 font-medium">
-                                          {app.clientName}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })()}
-                      </div>
-                    );
-                  })}
+                            })}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -534,6 +928,8 @@ export default function DashboardPage() {
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
         onSave={handleSaveAppointment}
+        initialDate={prefilledDate}
+        initialTime={prefilledTime}
       />
 
       {/* Client Addition Modal */}
