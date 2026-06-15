@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { 
-  Store, 
-  MapPin, 
-  Phone, 
-  Plus, 
-  X, 
-  Trash2, 
-  Mail, 
-  Lock, 
-  Sparkles
+import {
+  Store,
+  MapPin,
+  Phone,
+  Plus,
+  X,
+  Trash2,
+  Mail,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 
 import Sidebar from "@/components/Sidebar";
@@ -44,15 +44,15 @@ export default function SedesPage() {
 
   const fetchBusinesses = () => {
     fetch("/api/backend/admin/businesses")
-    .then((res) => res.json())
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setBusinesses(data);
-      }
-    })
-    .catch((e) => {
-      console.error("Error loading businesses:", e);
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setBusinesses(data);
+        }
+      })
+      .catch((e) => {
+        console.error("Error loading businesses:", e);
+      });
   };
 
   useEffect(() => {
@@ -67,33 +67,35 @@ export default function SedesPage() {
 
   const handleSaveBusiness = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     fetch("/api/backend/admin/businesses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(newBusiness)
+      body: JSON.stringify(newBusiness),
     })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to save business");
-      return res.json();
-    })
-    .then(() => {
-      fetchBusinesses();
-      setNewBusiness({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-        password: "",
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to save business");
+        return res.json();
+      })
+      .then(() => {
+        fetchBusinesses();
+        setNewBusiness({
+          name: "",
+          email: "",
+          phone: "",
+          address: "",
+          password: "",
+        });
+        setIsModalOpen(false);
+      })
+      .catch((err) => {
+        console.error("Error saving business:", err);
+        alert(
+          "Error al guardar el negocio. Asegúrate de que el email sea único.",
+        );
       });
-      setIsModalOpen(false);
-    })
-    .catch((err) => {
-      console.error("Error saving business:", err);
-      alert("Error al guardar el negocio. Asegúrate de que el email sea único.");
-    });
   };
 
   const handleDeleteBusiness = (id: string) => {
@@ -101,29 +103,31 @@ export default function SedesPage() {
       alert("No puedes eliminar tu propia cuenta de administrador.");
       return;
     }
-    const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este local? Se borrarán de forma permanente todas sus citas y clientes de la base de datos.");
+    const confirmDelete = window.confirm(
+      "¿Estás seguro de que deseas eliminar este local? Se borrarán de forma permanente todas sus citas y clientes de la base de datos.",
+    );
     if (!confirmDelete) return;
 
     fetch(`/api/backend/admin/businesses/${id}`, {
       method: "DELETE",
     })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to delete business");
-      return res.json();
-    })
-    .then(() => {
-      fetchBusinesses();
-    })
-    .catch((err) => {
-      console.error("Error deleting business:", err);
-    });
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete business");
+        return res.json();
+      })
+      .then(() => {
+        fetchBusinesses();
+      })
+      .catch((err) => {
+        console.error("Error deleting business:", err);
+      });
   };
 
   const filteredBusinesses = businesses.filter(
     (b) =>
       b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.address.toLowerCase().includes(searchQuery.toLowerCase())
+      b.address.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -134,8 +138,8 @@ export default function SedesPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
         {/* Top Header */}
-        <Header 
-          searchPlaceholder="Buscar salones..." 
+        <Header
+          searchPlaceholder="Buscar salones..."
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
         />
@@ -152,8 +156,8 @@ export default function SedesPage() {
                 Registra y administra las cuentas de salones en la plataforma.
               </p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-1 px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer self-start"
             >
@@ -166,9 +170,9 @@ export default function SedesPage() {
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBusinesses.length > 0 ? (
               filteredBusinesses.map((biz) => (
-                <div 
+                <div
                   key={biz.id}
-                  className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:border-primary-fixed-dim transition-colors group"
+                  className="bg-surface-container-lowest p-6 rounded-md border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:border-primary-fixed-dim transition-colors group"
                 >
                   <div>
                     {/* Header: Title and Badge */}
@@ -181,9 +185,7 @@ export default function SedesPage() {
                           {biz.name}
                         </h3>
                       </div>
-                      <Badge variant="secondary">
-                        {biz.role}
-                      </Badge>
+                      <Badge variant="secondary">{biz.role}</Badge>
                     </div>
 
                     {/* Details list */}
@@ -209,7 +211,7 @@ export default function SedesPage() {
 
                   {/* Actions buttons */}
                   <div className="flex justify-end items-center gap-4 mt-8 pt-6 border-t border-outline-variant/65">
-                    <button 
+                    <button
                       onClick={() => handleDeleteBusiness(biz.id)}
                       className="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full transition-colors cursor-pointer"
                       title="Eliminar salón permanentemente"
@@ -221,7 +223,8 @@ export default function SedesPage() {
               ))
             ) : (
               <div className="col-span-full py-8 text-center text-on-surface-variant text-body-lg">
-                No se encontraron locales de negocio registrados que coincidan con la búsqueda.
+                No se encontraron locales de negocio registrados que coincidan
+                con la búsqueda.
               </div>
             )}
           </section>
@@ -243,20 +246,20 @@ export default function SedesPage() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm transition-opacity"
             onClick={() => setIsModalOpen(false)}
           />
 
           {/* Modal Card */}
-          <div className="relative bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant max-w-md w-full z-10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-md w-full z-10 animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
               <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
                 <span>Añadir Nuevo Local</span>
               </h3>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1 rounded-full hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
               >
@@ -275,7 +278,12 @@ export default function SedesPage() {
                     required
                     placeholder="Ej. Glow Estética"
                     value={newBusiness.name}
-                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setNewBusiness((prev) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
                     className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
@@ -288,33 +296,52 @@ export default function SedesPage() {
                     required
                     placeholder="contacto@glow.com"
                     value={newBusiness.email}
-                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, email: e.target.value }))}
+                    onChange={(e) =>
+                      setNewBusiness((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
                     className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="bizPassword">Contraseña de acceso</FieldLabel>
+                  <FieldLabel htmlFor="bizPassword">
+                    Contraseña de acceso
+                  </FieldLabel>
                   <input
                     id="bizPassword"
                     type="password"
                     required
                     placeholder="Mínimo 6 caracteres"
                     value={newBusiness.password}
-                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, password: e.target.value }))}
+                    onChange={(e) =>
+                      setNewBusiness((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
                     className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="bizPhone">Teléfono de WhatsApp</FieldLabel>
+                  <FieldLabel htmlFor="bizPhone">
+                    Teléfono de WhatsApp
+                  </FieldLabel>
                   <input
                     id="bizPhone"
                     type="tel"
                     required
                     placeholder="34600000000 (sin símbolos)"
                     value={newBusiness.phone}
-                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) =>
+                      setNewBusiness((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
                     className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
@@ -326,7 +353,12 @@ export default function SedesPage() {
                     type="text"
                     placeholder="Calle de Serrano, 10, Madrid"
                     value={newBusiness.address}
-                    onChange={(e) => setNewBusiness((prev) => ({ ...prev, address: e.target.value }))}
+                    onChange={(e) =>
+                      setNewBusiness((prev) => ({
+                        ...prev,
+                        address: e.target.value,
+                      }))
+                    }
                     className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>

@@ -30,7 +30,10 @@ export default function Header({
       {/* Search Input / Mobile branding */}
       <div className="flex items-center gap-4 flex-1">
         {/* Mobile-only logo */}
-        <div className="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary truncate max-w-[130px] min-[375px]:max-w-[180px] min-[410px]:max-w-[220px]" title={session?.user?.name || "Volta"}>
+        <div
+          className="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary truncate max-w-[130px] min-[375px]:max-w-[180px] min-[410px]:max-w-[220px]"
+          title={session?.user?.name || "Volta"}
+        >
           {displayName}
         </div>
 
@@ -52,7 +55,7 @@ export default function Header({
       {/* Right side actions */}
       <div className="flex items-center gap-4">
         {/* Notification Bell */}
-        <button 
+        <button
           className="p-3 hover:bg-surface-variant rounded-full transition-colors cursor-pointer text-on-surface-variant hover:text-primary relative focus:outline-none"
           aria-label="Notificaciones"
         >
@@ -69,7 +72,7 @@ export default function Header({
 
         {/* Avatar Profile with Dropdown */}
         <div className="relative">
-          <button 
+          <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all shrink-0 focus:outline-none flex items-center justify-center"
           >
@@ -84,13 +87,13 @@ export default function Header({
           {isDropdownOpen && (
             <>
               {/* Backdrop overlay */}
-              <div 
-                className="fixed inset-0 z-30" 
+              <div
+                className="fixed inset-0 z-30"
                 onClick={() => setIsDropdownOpen(false)}
               />
-              
-              <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
-                <Link 
+
+              <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-md shadow-lg py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
+                <Link
                   href="/ajustes"
                   onClick={() => setIsDropdownOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-semibold text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
@@ -98,7 +101,7 @@ export default function Header({
                   <Settings className="w-5 h-5 text-on-surface-variant" />
                   <span>Ajustes</span>
                 </Link>
-                
+
                 <button
                   onClick={() => {
                     setIsDropdownOpen(false);

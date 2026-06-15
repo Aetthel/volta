@@ -48,14 +48,14 @@ export default function MetricCard({
 
   return (
     <div
-      className={`bg-surface-container-lowest p-4 sm:p-6 rounded-xl border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col gap-2 sm:gap-3 hover:border-primary-fixed-dim transition-colors ${className}`}
+      className={`bg-surface-container-lowest p-4 sm:p-6 rounded-md border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col gap-2 sm:gap-3 hover:border-primary-fixed-dim transition-colors ${className}`}
     >
       <div className="flex justify-between items-start">
         {/* Metric Icon Wrapper */}
         <div className="p-1 sm:p-1.5 bg-surface-container text-primary rounded-lg shrink-0">
           {icon}
         </div>
-        
+
         {/* Trend Indicator */}
         {change && (
           <div

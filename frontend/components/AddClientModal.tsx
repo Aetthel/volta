@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { X, Phone, Mail, Pencil, Sparkles } from "lucide-react";
-import { FieldGroup, Field, FieldLabel, InputGroup } from "@/components/ui/volta-ui";
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  InputGroup,
+} from "@/components/ui/volta-ui";
 
 interface ClientToEdit {
   id: string;
@@ -59,7 +64,9 @@ export default function AddClientModal({
   if (!isOpen) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -81,16 +88,18 @@ export default function AddClientModal({
       />
 
       {/* Modal Content Card */}
-      <div className="relative bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
-
+      <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
           <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-3">
-            {isEditMode
-              ? <Pencil className="w-5 h-5 text-primary" />
-              : <Sparkles className="w-5 h-5 text-primary" />
-            }
-            <span>{isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}</span>
+            {isEditMode ? (
+              <Pencil className="w-5 h-5 text-primary" />
+            ) : (
+              <Sparkles className="w-5 h-5 text-primary" />
+            )}
+            <span>
+              {isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}
+            </span>
           </h3>
           <button
             onClick={onClose}
@@ -101,7 +110,10 @@ export default function AddClientModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 md:p-8 flex flex-col gap-6">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 md:p-8 flex flex-col gap-6"
+        >
           {/* Section: Contact info */}
           <div>
             <div className="border-b border-outline-variant pb-1 mb-4">
@@ -197,7 +209,9 @@ export default function AddClientModal({
               </Field>
 
               <Field className="md:col-span-2">
-                <FieldLabel htmlFor="notes">Notas de estilo y alergias</FieldLabel>
+                <FieldLabel htmlFor="notes">
+                  Notas de estilo y alergias
+                </FieldLabel>
                 <textarea
                   id="notes"
                   rows={3}

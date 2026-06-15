@@ -52,7 +52,9 @@ export default function AddServiceModal({
   if (!isOpen) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -80,16 +82,18 @@ export default function AddServiceModal({
       />
 
       {/* Modal Content Card */}
-      <div className="relative bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
-
+      <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
           <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-3">
-            {isEditMode
-              ? <Pencil className="w-5 h-5 text-primary" />
-              : <Sparkles className="w-5 h-5 text-primary" />
-            }
-            <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
+            {isEditMode ? (
+              <Pencil className="w-5 h-5 text-primary" />
+            ) : (
+              <Sparkles className="w-5 h-5 text-primary" />
+            )}
+            <span>
+              {isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}
+            </span>
           </h3>
           <button
             onClick={onClose}
@@ -102,7 +106,6 @@ export default function AddServiceModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6">
           <FieldGroup className="gap-5">
-            
             {/* Service Name */}
             <Field>
               <FieldLabel htmlFor="name">Nombre del Servicio</FieldLabel>
@@ -115,7 +118,7 @@ export default function AddServiceModal({
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="ej. Corte Caballero, Tinte Completo..."
-                  className="block w-full pl-12 pr-4 py-3 bg-surface text-body-lg text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
+                  className="block w-full pl-12 pr-4 py-3 bg-surface text-body-lg text-on-surface border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
                 />
               </div>
             </Field>
@@ -130,7 +133,7 @@ export default function AddServiceModal({
                     id="duration"
                     value={formData.duration}
                     onChange={handleChange}
-                    className="block w-full pl-12 pr-4 py-3 bg-surface text-body-lg text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-sm appearance-none cursor-pointer"
+                    className="block w-full pl-12 pr-4 py-3 bg-surface text-body-lg text-on-surface border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all shadow-sm appearance-none cursor-pointer"
                   >
                     <option value="15">15 min</option>
                     <option value="30">30 min</option>
@@ -147,7 +150,9 @@ export default function AddServiceModal({
               <Field>
                 <FieldLabel htmlFor="price">Precio (€)</FieldLabel>
                 <div className="relative flex items-center">
-                  <span className="font-semibold text-on-surface-variant/70 absolute left-4 pointer-events-none">€</span>
+                  <span className="font-semibold text-on-surface-variant/70 absolute left-4 pointer-events-none">
+                    €
+                  </span>
                   <input
                     id="price"
                     type="number"
@@ -157,7 +162,7 @@ export default function AddServiceModal({
                     value={formData.price}
                     onChange={handleChange}
                     placeholder="ej. 35.00"
-                    className="block w-full pl-9 pr-4 py-3 bg-surface text-body-lg text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
+                    className="block w-full pl-9 pr-4 py-3 bg-surface text-body-lg text-on-surface border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
                   />
                 </div>
               </Field>
@@ -165,14 +170,16 @@ export default function AddServiceModal({
 
             {/* Description */}
             <Field>
-              <FieldLabel htmlFor="description">Descripción (opcional)</FieldLabel>
+              <FieldLabel htmlFor="description">
+                Descripción (opcional)
+              </FieldLabel>
               <textarea
                 id="description"
                 rows={3}
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Breve descripción del servicio o detalles específicos..."
-                className="block w-full px-4 py-3 bg-surface text-body-md text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm resize-none custom-scrollbar"
+                className="block w-full px-4 py-3 bg-surface text-body-md text-on-surface border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm resize-none custom-scrollbar"
               />
             </Field>
 
@@ -192,10 +199,8 @@ export default function AddServiceModal({
                 {isEditMode ? "Guardar Cambios" : "Añadir Servicio"}
               </button>
             </div>
-
           </FieldGroup>
         </form>
-
       </div>
     </div>
   );

@@ -1,20 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Users as UsersIcon, 
-  CalendarCheck, 
-  Gift, 
-  Search, 
-  Plus, 
-  Download, 
-  Trash2, 
+import {
+  Users as UsersIcon,
+  CalendarCheck,
+  Gift,
+  Search,
+  Plus,
+  Download,
+  Trash2,
   Edit3,
   ShieldAlert,
   ShieldCheck,
-  MessageCircle
+  MessageCircle,
+  MoreVertical,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { createPortal } from "react-dom";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
@@ -59,7 +61,10 @@ const formatPhoneForDisplay = (phone: string) => {
   const clean = phone.replace(/\s+/g, "");
   const digits = clean.replace(/\D/g, "");
 
-  if (digits.length === 9 && (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))) {
+  if (
+    digits.length === 9 &&
+    (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))
+  ) {
     return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
   }
 
@@ -111,33 +116,36 @@ export default function ClientesPage() {
   const [toastText, setToastText] = useState("");
   const [clients, setClients] = useState<ClientItem[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [activeDropdownClientId, setActiveDropdownClientId] = useState<string | null>(null);
+  const [dropdownCoords, setDropdownCoords] = useState<{ top: number; left: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const fetchData = () => {
     if (!businessId) return;
 
     // Fetch Clients
     fetch(`/api/backend/clients?businessId=${businessId}`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setClients(data);
-      }
-    })
-    .catch((e) => {
-      console.error("Error loading clients:", e);
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setClients(data);
+        }
+      })
+      .catch((e) => {
+        console.error("Error loading clients:", e);
+      });
 
     // Fetch Appointments
     fetch(`/api/backend/appointments?businessId=${businessId}`)
-    .then((res) => res.json())
-    .then((data) => {
-      if (Array.isArray(data)) {
-        setAppointments(data);
-      }
-    })
-    .catch((e) => {
-      console.error("Error loading appointments:", e);
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAppointments(data);
+        }
+      })
+      .catch((e) => {
+        console.error("Error loading appointments:", e);
+      });
   };
 
   useEffect(() => {
@@ -145,10 +153,47 @@ export default function ClientesPage() {
   }, [businessId]);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (session?.user?.name) {
       document.title = `Clientes - ${session.user.name} - Volta`;
     }
   }, [session]);
+
+  useEffect(() => {
+    const handleClose = () => {
+      setActiveDropdownClientId(null);
+      setDropdownCoords(null);
+    };
+    if (activeDropdownClientId) {
+      document.addEventListener("click", handleClose);
+      window.addEventListener("scroll", handleClose);
+      window.addEventListener("resize", handleClose);
+    }
+    return () => {
+      document.removeEventListener("click", handleClose);
+      window.removeEventListener("scroll", handleClose);
+      window.removeEventListener("resize", handleClose);
+    };
+  }, [activeDropdownClientId]);
+
+  const handleToggleDropdown = (e: React.MouseEvent, clientId: string) => {
+    e.stopPropagation();
+    if (activeDropdownClientId === clientId) {
+      setActiveDropdownClientId(null);
+      setDropdownCoords(null);
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const leftPos = rect.right + window.scrollX - 192; // 192px is the dropdown width (w-48)
+      setDropdownCoords({
+        top: rect.bottom + window.scrollY + 6,
+        left: Math.max(8, leftPos),
+      });
+      setActiveDropdownClientId(clientId);
+    }
+  };
 
   const handleSaveAppointment = (data: any) => {
     // Refresh client list since a new client might have been auto-registered
@@ -171,15 +216,15 @@ export default function ClientesPage() {
           frequentService: data.frequency,
         }),
       })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to update client");
-        return res.json();
-      })
-      .then(() => {
-        fetchData();
-        setEditingClient(null);
-      })
-      .catch((err) => console.error("Error updating client:", err));
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to update client");
+          return res.json();
+        })
+        .then(() => {
+          fetchData();
+          setEditingClient(null);
+        })
+        .catch((err) => console.error("Error updating client:", err));
       return;
     }
 
@@ -197,77 +242,82 @@ export default function ClientesPage() {
         businessId: businessId,
       }),
     })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to save client");
-      return res.json();
-    })
-    .then(() => {
-      fetchData();
-    })
-    .catch((err) => {
-      console.error("Error saving client:", err);
-      const newClient: ClientItem = {
-        id: String(Date.now()),
-        name: data.name,
-        surname: data.surname,
-        email: data.email,
-        phone: data.phone,
-        lastVisit: "Hoy",
-        frequentService: "Primera visita",
-        stylist: "Sin asignar",
-        avatarUrl: "",
-        lopdStatus: "Pendiente",
-      };
-      setClients((prev) => [newClient, ...prev]);
-    });
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to save client");
+        return res.json();
+      })
+      .then(() => {
+        fetchData();
+      })
+      .catch((err) => {
+        console.error("Error saving client:", err);
+        const newClient: ClientItem = {
+          id: String(Date.now()),
+          name: data.name,
+          surname: data.surname,
+          email: data.email,
+          phone: data.phone,
+          lastVisit: "Hoy",
+          frequentService: "Primera visita",
+          stylist: "Sin asignar",
+          avatarUrl: "",
+          lopdStatus: "Pendiente",
+        };
+        setClients((prev) => [newClient, ...prev]);
+      });
   };
 
   const handleDeleteClient = (id: string, name: string) => {
-    if (!window.confirm(`¿Eliminar a ${name}? Esta acción no se puede deshacer.`)) return;
+    if (
+      !window.confirm(`¿Eliminar a ${name}? Esta acción no se puede deshacer.`)
+    )
+      return;
     fetch(`/api/backend/clients/${id}`, {
       method: "DELETE",
     })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to delete client");
-      return res.json();
-    })
-    .then(() => {
-      fetchData();
-    })
-    .catch((err) => {
-      console.error("Error deleting client:", err);
-      setClients((prev) => prev.filter((c) => c.id !== id));
-    });
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to delete client");
+        return res.json();
+      })
+      .then(() => {
+        fetchData();
+      })
+      .catch((err) => {
+        console.error("Error deleting client:", err);
+        setClients((prev) => prev.filter((c) => c.id !== id));
+      });
   };
 
   const handleSendWhatsAppConsent = (client: ClientItem) => {
     fetch(`/api/backend/clients/${client.id}/resend-consent`, {
       method: "POST",
     })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to send LOPD consent");
-      return res.json();
-    })
-    .then(() => {
-      setToastPhone(client.phone);
-      setShowConsentToast(true);
-      setTimeout(() => {
-        setShowConsentToast(false);
-      }, 3000);
-    })
-    .catch((err) => {
-      console.error("Error resending consent:", err);
-      // fallback
-      setToastPhone(client.phone);
-      setShowConsentToast(true);
-      setTimeout(() => {
-        setShowConsentToast(false);
-      }, 3000);
-    });
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to send LOPD consent");
+        return res.json();
+      })
+      .then(() => {
+        setToastPhone(client.phone);
+        setShowConsentToast(true);
+        setTimeout(() => {
+          setShowConsentToast(false);
+        }, 3000);
+      })
+      .catch((err) => {
+        console.error("Error resending consent:", err);
+        // fallback
+        setToastPhone(client.phone);
+        setShowConsentToast(true);
+        setTimeout(() => {
+          setShowConsentToast(false);
+        }, 3000);
+      });
   };
 
   const handleSendCustomMessage = (client: ClientItem) => {
-    const msg = window.prompt(`Escribe el mensaje de WhatsApp para ${client.name} ${client.surname || ""}:`);
+    const msg = window.prompt(
+      `Escribe el mensaje de WhatsApp para ${client.name} ${client.surname || ""}:`,
+    );
     if (!msg) return;
 
     fetch(`/api/backend/clients/${client.id}/send-message`, {
@@ -275,24 +325,24 @@ export default function ClientesPage() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: msg })
+      body: JSON.stringify({ message: msg }),
     })
-    .then((res) => {
-      if (!res.ok) throw new Error("Failed to send message");
-      return res.json();
-    })
-    .then(() => {
-      setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
-      setShowGeneralToast(true);
-      setTimeout(() => setShowGeneralToast(false), 3000);
-    })
-    .catch((err) => {
-      console.error("Error sending custom message:", err);
-      // fallback simulation
-      setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
-      setShowGeneralToast(true);
-      setTimeout(() => setShowGeneralToast(false), 3000);
-    });
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to send message");
+        return res.json();
+      })
+      .then(() => {
+        setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
+      })
+      .catch((err) => {
+        console.error("Error sending custom message:", err);
+        // fallback simulation
+        setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
+      });
   };
 
   // Dynamic stats calculation
@@ -302,10 +352,15 @@ export default function ClientesPage() {
 
   const visitsThisMonthCount = appointments.filter((app) => {
     const appDate = new Date(app.appointmentDate);
-    return appDate.getMonth() === currentMonth && appDate.getFullYear() === currentYear;
+    return (
+      appDate.getMonth() === currentMonth &&
+      appDate.getFullYear() === currentYear
+    );
   }).length;
 
-  const pendingLopdCount = clients.filter((c) => c.lopdStatus === "Pendiente").length;
+  const pendingLopdCount = clients.filter(
+    (c) => c.lopdStatus === "Pendiente",
+  ).length;
 
   const filteredClients = clients.filter((c) => {
     const fullName = `${c.name} ${c.surname || ""}`.trim();
@@ -326,15 +381,14 @@ export default function ClientesPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
         {/* Header Search */}
-        <Header 
-          searchPlaceholder="Buscar clientes por nombre, email o teléfono..." 
+        <Header
+          searchPlaceholder="Buscar clientes por nombre, email o teléfono..."
           searchValue={searchQuery}
           onSearchChange={setSearchQuery}
         />
 
         {/* Content Canvas */}
         <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
-          
           {/* Header Action Section */}
           <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
@@ -345,13 +399,13 @@ export default function ClientesPage() {
                 Administra tu base de datos y fideliza a tus usuarios.
               </p>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-2">
               <button className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
                 <Download className="w-4 h-4" />
                 <span>Exportar</span>
               </button>
-              <button 
+              <button
                 onClick={() => setIsClientModalOpen(true)}
                 className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer"
               >
@@ -379,9 +433,9 @@ export default function ClientesPage() {
               icon={<CalendarCheck className="w-5 h-5" />}
               className="col-span-1"
             />
-            
+
             {/* Custom Banner Card (Bento Style) */}
-            <div className="col-span-2 bg-primary-container text-on-primary-container p-4 sm:p-6 rounded-xl shadow-sm relative overflow-hidden group flex flex-col justify-between min-h-[140px]">
+            <div className="col-span-2 bg-primary-container text-on-primary-container p-4 sm:p-6 rounded-md shadow-sm relative overflow-hidden group flex flex-col justify-between min-h-[140px]">
               <div className="relative z-10">
                 <h4 className="font-title-md text-title-md mb-1 font-semibold text-on-primary-container">
                   Control de Consentimiento LOPD
@@ -390,7 +444,7 @@ export default function ClientesPage() {
                   {`${pendingLopdCount} clientes tienen pendiente firmar el consentimiento LOPD.`}
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => setSearchQuery("Pendiente")}
                 className="bg-on-primary-container text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-1 rounded-full font-label-md text-label-md self-start transition-all cursor-pointer font-semibold shadow-sm"
               >
@@ -401,8 +455,7 @@ export default function ClientesPage() {
           </section>
 
           {/* Modern Table Container */}
-          <section className="bg-surface-container-lowest rounded-xl shadow-[0px_2px_8px_rgba(0,0,0,0.04)] border border-outline-variant overflow-hidden">
-            
+          <section className="bg-surface-container-lowest rounded-md shadow-[0px_2px_8px_rgba(0,0,0,0.04)] border border-outline-variant overflow-hidden">
             <div className="p-6 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h3 className="font-title-md text-title-md text-on-surface font-semibold">
                 Base de Datos de Clientes
@@ -437,22 +490,24 @@ export default function ClientesPage() {
                 <tbody className="divide-y divide-outline-variant">
                   {filteredClients.length > 0 ? (
                     filteredClients.map((client) => (
-                      <tr 
-                        key={client.id} 
+                      <tr
+                        key={client.id}
                         className="hover:bg-secondary-container/10 transition-colors group cursor-pointer"
                       >
                         {/* Name and avatar */}
                         <td className="px-6 py-4 flex items-center gap-4">
                           {client.avatarUrl ? (
                             <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container shrink-0">
-                              <img 
-                                src={client.avatarUrl} 
-                                alt={client.name} 
+                              <img
+                                src={client.avatarUrl}
+                                alt={client.name}
                                 className="w-full h-full object-cover"
                               />
                             </div>
                           ) : (
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-lg shrink-0 select-none ${getAvatarColor(client.name)}`}>
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-lg shrink-0 select-none ${getAvatarColor(client.name)}`}
+                            >
                               {getInitials(client.name, client.surname)}
                             </div>
                           )}
@@ -481,76 +536,124 @@ export default function ClientesPage() {
                         </td>
                         {/* Estado LOPD */}
                         <td className="px-6 py-4">
-                          <Badge 
-                            variant={client.lopdStatus === "Aceptado" ? "default" : "error"}
-                            className={client.lopdStatus === "Pendiente" ? "animate-pulse" : ""}
+                          <Badge
+                            variant={
+                              client.lopdStatus === "Aceptado"
+                                ? "default"
+                                : "error"
+                            }
+                            className={
+                              client.lopdStatus === "Pendiente"
+                                ? "animate-pulse"
+                                : ""
+                            }
                           >
-                            {client.lopdStatus === "Aceptado" ? "Aceptado" : "Pendiente"}
+                            {client.lopdStatus === "Aceptado"
+                              ? "Aceptado"
+                              : "Pendiente"}
                           </Badge>
                         </td>
                         {/* Actions */}
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            {client.lopdStatus === "Aceptado" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSendCustomMessage(client);
-                                }}
-                                title="Enviar WhatsApp"
-                                className="p-2 rounded-full text-outline hover:text-emerald-600 hover:bg-emerald-50 transition-colors cursor-pointer"
-                              >
-                                <MessageCircle className="w-4 h-4" />
-                              </button>
-                            )}
-                            {client.lopdStatus === "Pendiente" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleSendWhatsAppConsent(client);
-                                }}
-                                title="Enviar consentimiento LOPD"
-                                className="p-2 rounded-full text-outline hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
-                              >
-                                <ShieldCheck className="w-4 h-4" />
-                              </button>
-                            )}
+                          <div className="flex justify-start">
                             <button
-                              onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingClient(client);
-                                  setIsClientModalOpen(true);
-                              }}
-                              title="Editar cliente"
-                              className="p-2 rounded-full text-outline hover:text-primary hover:bg-surface-container transition-colors cursor-pointer"
+                              onClick={(e) => handleToggleDropdown(e, client.id)}
+                              className="p-2 rounded-full text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
+                              title="Acciones"
                             >
-                              <Edit3 className="w-4 h-4" />
+                              <MoreVertical className="w-5 h-5" />
                             </button>
-                            <button
-                              onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteClient(client.id, `${client.name} ${client.surname}`);
-                              }}
-                              title="Eliminar cliente"
-                              className="p-2 rounded-full text-outline hover:text-error hover:bg-error-container/20 transition-colors cursor-pointer"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+
+                            {mounted && activeDropdownClientId === client.id && dropdownCoords && createPortal(
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: `${dropdownCoords.top}px`,
+                                  left: `${dropdownCoords.left}px`,
+                                }}
+                                className="w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right"
+                              >
+                                {client.lopdStatus === "Aceptado" ? (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveDropdownClientId(null);
+                                      setDropdownCoords(null);
+                                      handleSendCustomMessage(client);
+                                    }}
+                                    className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <MessageCircle className="w-4 h-4 text-emerald-600" />
+                                    <span>Enviar WhatsApp</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveDropdownClientId(null);
+                                      setDropdownCoords(null);
+                                      handleSendWhatsAppConsent(client);
+                                    }}
+                                    className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <ShieldCheck className="w-4 h-4 text-amber-600" />
+                                    <span>Enviar LOPD</span>
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveDropdownClientId(null);
+                                    setDropdownCoords(null);
+                                    setEditingClient(client);
+                                    setIsClientModalOpen(true);
+                                  }}
+                                  className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Edit3 className="w-4 h-4 text-primary" />
+                                  <span>Editar cliente</span>
+                                </button>
+
+                                <div className="my-1 border-t border-outline-variant/65"></div>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveDropdownClientId(null);
+                                    setDropdownCoords(null);
+                                    handleDeleteClient(
+                                      client.id,
+                                      `${client.name} ${client.surname}`
+                                    );
+                                  }}
+                                  className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-error hover:bg-error-container/20 transition-colors flex items-center gap-2 cursor-pointer"
+                                  title="Eliminar cliente"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  <span>Eliminar cliente</span>
+                                </button>
+                              </div>,
+                              document.body
+                            )}
                           </div>
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-on-surface-variant text-body-lg">
-                        No se encontraron clientes que coincidan con la búsqueda.
+                      <td
+                        colSpan={6}
+                        className="px-6 py-8 text-center text-on-surface-variant text-body-lg"
+                      >
+                        No se encontraron clientes que coincidan con la
+                        búsqueda.
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-
           </section>
         </main>
 
@@ -569,7 +672,10 @@ export default function ClientesPage() {
       {/* Add / Edit Client Modal */}
       <AddClientModal
         isOpen={isClientModalOpen}
-        onClose={() => { setIsClientModalOpen(false); setEditingClient(null); }}
+        onClose={() => {
+          setIsClientModalOpen(false);
+          setEditingClient(null);
+        }}
         onSave={handleSaveClient}
         clientToEdit={editingClient}
       />
@@ -583,12 +689,15 @@ export default function ClientesPage() {
 
       {/* LOPD WhatsApp Consent Toast Overlay */}
       {showConsentToast && (
-        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
+        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-md shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
           <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-emerald-950 text-body-md">Consentimiento Reenviado</p>
+            <p className="font-semibold text-emerald-950 text-body-md">
+              Consentimiento Reenviado
+            </p>
             <p className="text-body-sm text-emerald-800">
-              Mensaje LOPD reenviado a <span className="font-semibold">{toastPhone}</span> por WhatsApp.
+              Mensaje LOPD reenviado a{" "}
+              <span className="font-semibold">{toastPhone}</span> por WhatsApp.
             </p>
           </div>
         </div>
@@ -596,13 +705,13 @@ export default function ClientesPage() {
 
       {/* General Toast Overlay */}
       {showGeneralToast && (
-        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-xl shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
+        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-md shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
           <MessageCircle className="w-6 h-6 text-emerald-600 shrink-0" />
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-emerald-950 text-body-md">Mensaje Enviado</p>
-            <p className="text-body-sm text-emerald-800">
-              {toastText}
+            <p className="font-semibold text-emerald-950 text-body-md">
+              Mensaje Enviado
             </p>
+            <p className="text-body-sm text-emerald-800">{toastText}</p>
           </div>
         </div>
       )}
