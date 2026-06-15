@@ -7,8 +7,8 @@ services:
       POSTGRES_USER: volta_user
       POSTGRES_PASSWORD: volta_password
       POSTGRES_DB: volta_db
-    # ports:
-    #   - "5432:5432"
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

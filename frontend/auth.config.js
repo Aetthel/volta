@@ -6,6 +6,10 @@ export const authConfig = {
   // ngrok, etc.) without needing to set NEXTAUTH_URL / AUTH_URL explicitly.
   trustHost: true,
   callbacks: {
+    authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      return isLoggedIn;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;

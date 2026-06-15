@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 
 // Use db service name for backend inside Docker container, fallback to localhost for host development
 const BACKEND_URL = process.env.BACKEND_INTERNAL_URL || "http://localhost:3001";
 
 async function proxyRequest(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+  const resolvedParams = await params;
+  const pathParts = resolvedParams.path;
+  const path = pathParts.join("/");
+
+  const isPublicRoute = pathParts[0] === "lopd" || pathParts[0] === "health";
+
+  let session: any = null;
+  if (!isPublicRoute) {
+    session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const isAdminRoute = pathParts[0] === "admin";
+    if (isAdminRoute && session.user?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
+    }
+  }
+
   // Validate API_KEY at request-time (not module-level) so Next.js build doesn't fail
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
@@ -11,8 +31,6 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: "Proxy misconfiguration: API_KEY not set." }, { status: 503 });
   }
 
-  const resolvedParams = await params;
-  const path = resolvedParams.path.join("/");
   const { searchParams } = new URL(request.url);
 
   const destinationUrl = `${BACKEND_URL}/api/${path}?${searchParams.toString()}`;

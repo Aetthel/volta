@@ -1,5 +1,6 @@
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env'), override: true });
+const runInDocker = require('fs').existsSync('/.dockerenv');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env'), override: !runInDocker });
 
 
 // Startup environment variables verification

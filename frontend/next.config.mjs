@@ -1,7 +1,9 @@
+import path from 'path';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   turbopack: {
-    root: "..",
+    root: path.resolve(process.cwd(), ".."),
   },
   serverExternalPackages: ["backend", "whatsapp-web.js"],
   // Allow external origins to connect to the Next.js dev server HMR WebSocket.
