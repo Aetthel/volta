@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS "User" (
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
+-- Create unique index on email immediately so ON CONFLICT can reference it
+CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
+
 -- 3. Data Migration: Migrate existing Business users to User accounts
 -- We use ON CONFLICT ("email") DO NOTHING to avoid duplicate key errors if run multiple times
 INSERT INTO "User" ("id", "name", "email", "password", "role", "businessId", "createdAt", "updatedAt")
@@ -60,8 +63,7 @@ ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "ownerName" TEXT;
 -- DropEnum safely
 DROP TYPE IF EXISTS "BusinessRole";
 
--- Create indexes conditionally
-CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
+-- Create index for businessId on User
 CREATE INDEX IF NOT EXISTS "User_businessId_idx" ON "User"("businessId");
 
 -- Add foreign key constraint conditionally using a PL/pgSQL block
