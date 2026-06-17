@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { Search, HelpCircle, Settings, LogOut, Bell } from "lucide-react";
+import { Search, HelpCircle, Settings, LogOut, Bell, User } from "lucide-react";
 
 interface HeaderProps {
   searchPlaceholder?: string;
@@ -11,6 +11,8 @@ interface HeaderProps {
   onSearchChange?: (value: string) => void;
   hasNotifications?: boolean;
 }
+
+const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
 
 export default function Header({
   searchPlaceholder = "Buscar...",
@@ -89,13 +91,19 @@ export default function Header({
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all shrink-0 focus:outline-none flex items-center justify-center"
+            className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all shrink-0 focus:outline-none flex items-center justify-center bg-surface-container"
           >
-            <img
-              src={workerPhoto || "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw"}
-              alt="Avatar del Estilista"
-              className="w-full h-full object-cover"
-            />
+            {workerPhoto && workerPhoto !== DEFAULT_AVATAR ? (
+              <img
+                src={workerPhoto}
+                alt="Avatar del Estilista"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
+                <User className="w-5 h-5" />
+              </div>
+            )}
           </button>
 
           {/* Dropdown Menu */}

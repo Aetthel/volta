@@ -40,7 +40,19 @@ import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddServiceModal from "@/components/AddServiceModal";
-import { FieldGroup, Field, FieldLabel, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, FloatingInput } from "@/components/ui/volta-ui";
+import {
+  FieldGroup,
+  Field,
+  FieldLabel,
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  FloatingInput,
+} from "@/components/ui/volta-ui";
 
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
 
@@ -103,7 +115,7 @@ export default function AjustesPage() {
   const [adminForm, setAdminForm] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
   });
   const [savingAdmin, setSavingAdmin] = useState(false);
 
@@ -121,13 +133,13 @@ export default function AjustesPage() {
         setAdminForm({
           name: session.user.name || "",
           email: session.user.email || "",
-          password: ""
+          password: "",
         });
       } else {
         setUserForm({
           name: session.user.name || "",
           email: session.user.email || "",
-          password: ""
+          password: "",
         });
       }
     }
@@ -138,8 +150,8 @@ export default function AjustesPage() {
   useEffect(() => {
     if (session?.user?.id) {
       fetch(`/api/backend/users`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (Array.isArray(data)) {
             const current = data.find((u: any) => u.id === session.user.id);
             if (current) {
@@ -147,7 +159,9 @@ export default function AjustesPage() {
             }
           }
         })
-        .catch(err => console.error("Error fetching user profile data:", err));
+        .catch((err) =>
+          console.error("Error fetching user profile data:", err),
+        );
     }
   }, [session]);
 
@@ -157,7 +171,7 @@ export default function AjustesPage() {
     return date.toLocaleDateString("es-ES", {
       day: "numeric",
       month: "long",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
@@ -168,7 +182,7 @@ export default function AjustesPage() {
 
     const payload: any = {
       name: adminForm.name,
-      email: adminForm.email
+      email: adminForm.email,
     };
     if (adminForm.password) {
       payload.password = adminForm.password;
@@ -177,9 +191,9 @@ export default function AjustesPage() {
     fetch(`/api/backend/users/${session.user.id}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     })
       .then(async (res) => {
         const data = await res.json();
@@ -189,12 +203,12 @@ export default function AjustesPage() {
       .then((updatedUser) => {
         update({
           name: updatedUser.name,
-          email: updatedUser.email
+          email: updatedUser.email,
         });
         setToastText("¡Ajustes de administrador guardados!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
-        setAdminForm(prev => ({ ...prev, password: "" }));
+        setAdminForm((prev) => ({ ...prev, password: "" }));
       })
       .catch((err) => {
         alert(err.message);
@@ -236,7 +250,10 @@ export default function AjustesPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfile((prev) => ({ ...prev, workerPhoto: reader.result as string }));
+        setProfile((prev) => ({
+          ...prev,
+          workerPhoto: reader.result as string,
+        }));
       };
       reader.readAsDataURL(file);
     }
@@ -261,10 +278,11 @@ export default function AjustesPage() {
     phone: "+34 912 345 678",
     address: "Calle de Velázquez, 45, Madrid",
     logoUrl: "/logo.png", // Business photo / logo
-    coverUrl: "",        // Business banner
-    description: "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
+    coverUrl: "", // Business banner
+    description:
+      "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
     ownerName: "Sofía Martín",
-    workerPhoto: DEFAULT_AVATAR,     // Worker / Stylist photo
+    workerPhoto: DEFAULT_AVATAR, // Worker / Stylist photo
   });
 
   const fetchProfile = () => {
@@ -273,7 +291,10 @@ export default function AjustesPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data && !data.error) {
-          const savedWorkerPhoto = typeof window !== "undefined" ? localStorage.getItem("stylist_worker_photo") || "" : "";
+          const savedWorkerPhoto =
+            typeof window !== "undefined"
+              ? localStorage.getItem("stylist_worker_photo") || ""
+              : "";
           setProfile((prev) => ({
             ...prev,
             name: data.name,
@@ -284,7 +305,7 @@ export default function AjustesPage() {
             coverUrl: data.coverUrl || prev.coverUrl,
             description: data.description || prev.description,
             ownerName: data.ownerName || prev.ownerName,
-            workerPhoto: savedWorkerPhoto || prev.workerPhoto || DEFAULT_AVATAR,
+            workerPhoto: savedWorkerPhoto || prev.workerPhoto,
           }));
         }
       })
@@ -374,7 +395,8 @@ export default function AjustesPage() {
   const [workerErrorMsg, setWorkerErrorMsg] = useState("");
 
   const fetchWorkers = () => {
-    if (!businessId || businessId === "mock-business-id" || role === "ADMIN") return;
+    if (!businessId || businessId === "mock-business-id" || role === "ADMIN")
+      return;
     fetch(`/api/backend/users?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -389,29 +411,34 @@ export default function AjustesPage() {
 
   const getWorkerSpecialty = (worker: any) => {
     const nameLower = worker.name.toLowerCase();
-    if (nameLower.includes("lucía") || nameLower.includes("lucia")) return "Estilista Senior";
+    if (nameLower.includes("lucía") || nameLower.includes("lucia"))
+      return "Estilista Senior";
     if (nameLower.includes("marcos")) return "Barbero";
-    if (nameLower.includes("sofía") || nameLower.includes("sofia")) return "Recepcionista";
+    if (nameLower.includes("sofía") || nameLower.includes("sofia"))
+      return "Recepcionista";
     if (nameLower.includes("dani")) return "Colorista";
     return worker.role === "JEFE" ? "Directora de Estilo" : "Estilista";
   };
 
   const getWorkerStatus = (worker: any) => {
     const nameLower = worker.name.toLowerCase();
-    if (nameLower.includes("sofía") || nameLower.includes("sofia")) return "INACTIVO";
+    if (nameLower.includes("sofía") || nameLower.includes("sofia"))
+      return "INACTIVO";
     return "ACTIVO";
   };
 
   const getWorkerAvatar = (worker: any) => {
     if (worker.id === session?.user?.id) {
-      return profile.workerPhoto || DEFAULT_AVATAR;
+      return profile.workerPhoto && profile.workerPhoto !== DEFAULT_AVATAR ? profile.workerPhoto : null;
     }
-    if (worker.name.toLowerCase().includes("lucía") || worker.name.toLowerCase().includes("lucia")) {
+    if (
+      worker.name.toLowerCase().includes("lucía") ||
+      worker.name.toLowerCase().includes("lucia")
+    ) {
       return "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
     }
     return null;
   };
-
 
   const handleSaveWorker = (e: React.FormEvent) => {
     e.preventDefault();
@@ -422,19 +449,23 @@ export default function AjustesPage() {
       return;
     }
     if (!editingWorker && !workerFormData.password) {
-      setWorkerErrorMsg("La contraseña es obligatoria para nuevos trabajadores.");
+      setWorkerErrorMsg(
+        "La contraseña es obligatoria para nuevos trabajadores.",
+      );
       return;
     }
 
     const isEdit = !!editingWorker;
-    const url = isEdit ? `/api/backend/users/${editingWorker.id}` : "/api/backend/users";
+    const url = isEdit
+      ? `/api/backend/users/${editingWorker.id}`
+      : "/api/backend/users";
     const method = isEdit ? "PUT" : "POST";
 
     const payload: any = {
       name: workerFormData.name,
       email: workerFormData.email,
       role: workerFormData.role,
-      businessId: businessId
+      businessId: businessId,
     };
     if (workerFormData.password) {
       payload.password = workerFormData.password;
@@ -443,17 +474,20 @@ export default function AjustesPage() {
     fetch(url, {
       method,
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     })
       .then(async (res) => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error al guardar trabajador.");
+        if (!res.ok)
+          throw new Error(data.error || "Error al guardar trabajador.");
         return data;
       })
       .then(() => {
-        setToastText(isEdit ? "¡Trabajador actualizado!" : "¡Trabajador creado!");
+        setToastText(
+          isEdit ? "¡Trabajador actualizado!" : "¡Trabajador creado!",
+        );
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
         setIsWorkerModalOpen(false);
@@ -469,11 +503,13 @@ export default function AjustesPage() {
       alert("No puedes eliminar tu propia cuenta activa.");
       return;
     }
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este trabajador?")) {
+    if (
+      !window.confirm("¿Estás seguro de que deseas eliminar este trabajador?")
+    ) {
       return;
     }
     fetch(`/api/backend/users/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
     })
       .then((res) => {
         if (!res.ok) throw new Error("Error al eliminar");
@@ -496,7 +532,7 @@ export default function AjustesPage() {
       name: "",
       email: "",
       password: "",
-      role: "EMPLEADO"
+      role: "EMPLEADO",
     });
     setWorkerErrorMsg("");
     setIsWorkerModalOpen(true);
@@ -508,7 +544,7 @@ export default function AjustesPage() {
       name: worker.name,
       email: worker.email,
       password: "",
-      role: worker.role
+      role: worker.role,
     });
     setWorkerErrorMsg("");
     setIsWorkerModalOpen(true);
@@ -809,7 +845,8 @@ export default function AjustesPage() {
     })
       .then(async (res) => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error al actualizar perfil.");
+        if (!res.ok)
+          throw new Error(data.error || "Error al actualizar perfil.");
         return data;
       })
       .then(async (updatedUser) => {
@@ -833,7 +870,10 @@ export default function AjustesPage() {
       })
       .catch((err) => {
         console.error("Error updating profile:", err);
-        setToastText(err.message || "Error al guardar el perfil. Por favor, inténtelo de nuevo.");
+        setToastText(
+          err.message ||
+            "Error al guardar el perfil. Por favor, inténtelo de nuevo.",
+        );
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
         setIsEditingProfile(false);
@@ -892,36 +932,54 @@ export default function AjustesPage() {
                   <CardContent className="flex flex-col gap-6">
                     <FieldGroup>
                       <Field>
-                        <FieldLabel htmlFor="adminName">Nombre Completo</FieldLabel>
+                        <FieldLabel htmlFor="adminName">
+                          Nombre Completo
+                        </FieldLabel>
                         <FloatingInput
                           id="adminName"
                           label="Nombre y Apellidos"
                           value={adminForm.name}
-                          onChange={(e) => setAdminForm({ ...adminForm, name: e.target.value })}
+                          onChange={(e) =>
+                            setAdminForm({ ...adminForm, name: e.target.value })
+                          }
                           icon={User}
                           required
                         />
                       </Field>
                       <Field>
-                        <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
+                        <FieldLabel htmlFor="adminEmail">
+                          Correo Electrónico
+                        </FieldLabel>
                         <FloatingInput
                           id="adminEmail"
                           label="correo@empresa.com"
                           type="email"
                           value={adminForm.email}
-                          onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
+                          onChange={(e) =>
+                            setAdminForm({
+                              ...adminForm,
+                              email: e.target.value,
+                            })
+                          }
                           icon={Mail}
                           required
                         />
                       </Field>
                       <Field>
-                        <FieldLabel htmlFor="adminPassword">Nueva Contraseña (dejar en blanco para mantener)</FieldLabel>
+                        <FieldLabel htmlFor="adminPassword">
+                          Nueva Contraseña (dejar en blanco para mantener)
+                        </FieldLabel>
                         <FloatingInput
                           id="adminPassword"
                           label="Mínimo 6 caracteres"
                           type="password"
                           value={adminForm.password}
-                          onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
+                          onChange={(e) =>
+                            setAdminForm({
+                              ...adminForm,
+                              password: e.target.value,
+                            })
+                          }
                           icon={Key}
                         />
                       </Field>
@@ -1029,20 +1087,75 @@ export default function AjustesPage() {
 
           {/* Tab Contents */}
           {activeTab === "perfil" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 animate-in fade-in duration-200">
               {/* Profile Card (Screenshot 1 style) */}
               <Card className="lg:col-span-12">
+                <CardHeader className="flex flex-row items-center justify-between pb-4">
+                  <CardTitle className="text-primary flex items-center gap-2">
+                    <User data-icon="user" />
+                    <span>Perfil de Usuario</span>
+                  </CardTitle>
+                  {!isEditingProfile ? (
+                    <button
+                      onClick={() => setIsEditingProfile(true)}
+                      className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
+                    >
+                      Editar perfil
+                    </button>
+                  ) : (
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingProfile(false);
+                          if (session?.user) {
+                            setUserForm({
+                              name: session.user.name || "",
+                              email: session.user.email || "",
+                              password: "",
+                            });
+                          }
+                        }}
+                        className="text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-semibold transition-all cursor-pointer hover:underline"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleSaveProfile}
+                        disabled={savingProfile}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm disabled:opacity-50"
+                      >
+                        {savingProfile ? (
+                          <Loader2 data-icon="loader" className="animate-spin" />
+                        ) : (
+                          <Save data-icon="save" />
+                        )}
+                        <span>Guardar</span>
+                      </button>
+                    </div>
+                  )}
+                </CardHeader>
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
                     <div className="flex items-center gap-6">
                       {/* Avatar */}
-                      <div className="relative w-24 h-24 shrink-0">
-                        <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-teal-500/30 bg-surface-container shadow-sm flex items-center justify-center">
-                          <img
-                            src={profile.workerPhoto || DEFAULT_AVATAR}
-                            alt="Foto de perfil del profesional"
-                            className="w-full h-full object-cover"
-                          />
+                      <div className="w-24 h-24 shrink-0 relative">
+                        <div
+                          onClick={triggerWorkerPhotoUpload}
+                          className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 bg-surface-container shadow-sm flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                          title="Cambiar foto de perfil"
+                        >
+                          {profile.workerPhoto && profile.workerPhoto !== DEFAULT_AVATAR ? (
+                            <img
+                              src={profile.workerPhoto}
+                              alt="Foto de perfil del profesional"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
+                              <User className="w-12 h-12" />
+                            </div>
+                          )}
                         </div>
                         <input
                           type="file"
@@ -1051,75 +1164,27 @@ export default function AjustesPage() {
                           accept="image/*"
                           className="hidden"
                         />
-                        <button
-                          type="button"
-                          onClick={triggerWorkerPhotoUpload}
-                          className="absolute -bottom-1 -left-1 w-8 h-8 bg-teal-800 hover:bg-teal-900 text-white rounded-full flex items-center justify-center border-2 border-surface shadow-md transition-all active:scale-90 cursor-pointer"
-                          title="Cambiar foto de perfil"
-                        >
-                          <Camera className="w-4 h-4" />
-                        </button>
                       </div>
-                      
+
                       {/* Name, Badge, ID */}
                       <div className="flex flex-col gap-1">
                         <h2 className="font-display text-2xl font-semibold text-on-surface">
                           {userForm.name || "Sin nombre"}
                         </h2>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="bg-teal-750 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                          <Badge
+                            variant="default"
+                            className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                          >
                             {role === "JEFE" ? "Administradora" : "Empleado"}
-                          </span>
+                          </Badge>
                           <span className="text-on-surface-variant/70 text-xs">
-                            • ID: #GS-{userProfileData?.id?.slice(-3).toUpperCase() || "001"}
+                            • ID: #GS-
+                            {userProfileData?.id?.slice(-3).toUpperCase() ||
+                              "001"}
                           </span>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex items-center gap-3">
-                      {isEditingProfile && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsEditingProfile(false);
-                            if (session?.user) {
-                              setUserForm({
-                                name: session.user.name || "",
-                                email: session.user.email || "",
-                                password: "",
-                              });
-                            }
-                          }}
-                          className="py-2 px-4 border border-outline rounded-lg font-label-md text-label-md hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
-                        >
-                          Cancelar
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (isEditingProfile) {
-                            handleSaveProfile();
-                          } else {
-                            setIsEditingProfile(true);
-                          }
-                        }}
-                        className="py-2 px-4 bg-teal-850 hover:bg-teal-905 text-white rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
-                      >
-                        {isEditingProfile ? (
-                          <>
-                            <Save className="w-4 h-4" />
-                            <span>Guardar Perfil</span>
-                          </>
-                        ) : (
-                          <>
-                            <Pencil className="w-4 h-4" />
-                            <span>Editar Perfil</span>
-                          </>
-                        )}
-                      </button>
                     </div>
                   </div>
 
@@ -1127,45 +1192,61 @@ export default function AjustesPage() {
 
                   {/* Info Columns */}
                   {isEditingProfile ? (
-                    <FieldGroup className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FieldGroup className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                       <Field>
-                        <FieldLabel htmlFor="user-name">Nombre Completo</FieldLabel>
+                        <FieldLabel htmlFor="user-name">
+                          Nombre Completo
+                        </FieldLabel>
                         <input
                           id="user-name"
                           type="text"
                           required
                           value={userForm.name}
-                          onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                          onChange={(e) =>
+                            setUserForm({ ...userForm, name: e.target.value })
+                          }
                           className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
                       </Field>
                       <Field>
-                        <FieldLabel htmlFor="user-email">Correo Electrónico</FieldLabel>
+                        <FieldLabel htmlFor="user-email">
+                          Correo Electrónico
+                        </FieldLabel>
                         <input
                           id="user-email"
                           type="email"
                           required
                           value={userForm.email}
-                          onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                          onChange={(e) =>
+                            setUserForm({ ...userForm, email: e.target.value })
+                          }
                           className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
                       </Field>
                       <Field>
                         <FieldLabel htmlFor="user-password">
-                          Nueva Contraseña <span className="text-on-surface-variant/50 font-normal">(opcional)</span>
+                          Nueva Contraseña{" "}
+                          <span className="text-on-surface-variant/50 font-normal">
+                            (opcional)
+                          </span>
                         </FieldLabel>
                         <input
                           id="user-password"
                           type="password"
                           placeholder="Mínimo 6 caracteres"
                           value={userForm.password}
-                          onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                          onChange={(e) =>
+                            setUserForm({
+                              ...userForm,
+                              password: e.target.value,
+                            })
+                          }
                           className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
                       </Field>
                     </FieldGroup>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                       <div>
                         <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider block mb-1">
                           Nombre Completo
@@ -1197,9 +1278,10 @@ export default function AjustesPage() {
 
               {/* Account Security Card */}
               <Card className="lg:col-span-12 mt-2">
-                <CardHeader>
-                  <CardTitle className="text-primary">
-                    Seguridad de la Cuenta
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-primary flex items-center gap-2">
+                    <ShieldCheck data-icon="shield-check" />
+                    <span>Seguridad de la Cuenta</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1207,7 +1289,10 @@ export default function AjustesPage() {
                     {/* Password card */}
                     <div className="border border-outline-variant rounded-md p-3 sm:p-4 flex items-center justify-between">
                       <div className="flex items-center gap-2 sm:gap-4">
-                        <Lock data-icon="lock" className="text-on-surface-variant shrink-0" />
+                        <Lock
+                          data-icon="lock"
+                          className="text-on-surface-variant shrink-0"
+                        />
                         <div>
                           <p className="font-body-lg text-body-lg font-semibold text-on-surface">
                             Contraseña
@@ -1225,7 +1310,10 @@ export default function AjustesPage() {
                     {/* 2FA card */}
                     <div className="border border-outline-variant rounded-md p-3 sm:p-4 flex items-center justify-between">
                       <div className="flex items-center gap-2 sm:gap-4">
-                        <ShieldCheck data-icon="shield-check" className="text-on-surface-variant shrink-0" />
+                        <ShieldCheck
+                          data-icon="shield-check"
+                          className="text-on-surface-variant shrink-0"
+                        />
                         <div>
                           <p className="font-body-lg text-body-lg font-semibold text-on-surface">
                             Verificación en dos pasos
@@ -1321,7 +1409,10 @@ export default function AjustesPage() {
                             </div>
                           ) : (
                             <div className="flex flex-col items-center justify-center h-[200px] text-center">
-                              <Loader2 data-icon="loader" className="animate-spin mb-3 text-primary" />
+                              <Loader2
+                                data-icon="loader"
+                                className="animate-spin mb-3 text-primary"
+                              />
                               <p className="font-body-md text-body-md text-on-surface-variant font-medium">
                                 Generando código QR...
                               </p>
@@ -1354,7 +1445,8 @@ export default function AjustesPage() {
                           <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[280px] mx-auto mb-4">
                             Vincula tu número de WhatsApp para poder enviar
                             confirmaciones inmediatas al agendar citas y
-                            recordatorios automáticos 24 horas antes del servicio.
+                            recordatorios automáticos 24 horas antes del
+                            servicio.
                           </p>
                         </div>
                       )}
@@ -1385,7 +1477,10 @@ export default function AjustesPage() {
                     >
                       {loadingQr ? (
                         <>
-                          <Loader2 data-icon="loader" className="animate-spin" />
+                          <Loader2
+                            data-icon="loader"
+                            className="animate-spin"
+                          />
                           <span>Iniciando...</span>
                         </>
                       ) : (
@@ -1431,7 +1526,10 @@ export default function AjustesPage() {
                           className="flex items-center gap-1 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm disabled:opacity-50"
                         >
                           {savingTemplates ? (
-                            <Loader2 data-icon="loader" className="animate-spin" />
+                            <Loader2
+                              data-icon="loader"
+                              className="animate-spin"
+                            />
                           ) : (
                             <Save data-icon="save" />
                           )}
@@ -1568,7 +1666,10 @@ export default function AjustesPage() {
               {/* Business Profile Card (Spans 8 cols) */}
               {isEditingBusiness ? (
                 <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
-                  <form onSubmit={handleSaveBusiness} className="h-full flex flex-col justify-between">
+                  <form
+                    onSubmit={handleSaveBusiness}
+                    className="h-full flex flex-col justify-between"
+                  >
                     <div>
                       <CardHeader className="flex flex-row items-center justify-between pb-4">
                         <CardTitle className="text-primary flex items-center gap-2">
@@ -1595,38 +1696,7 @@ export default function AjustesPage() {
                           </button>
                         </div>
                       </CardHeader>
-
                       <CardContent>
-                        {/* Cover Photo Banner */}
-                        <div className="relative w-full h-36 rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10 border border-outline-variant/60 mb-6 group">
-                          {profile.coverUrl ? (
-                            <img
-                              src={profile.coverUrl}
-                              alt="Portada del Negocio"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-on-surface-variant/30 font-medium text-body-sm select-none">
-                              Sin foto de portada. Haz clic para subir una.
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            ref={coverInputRef}
-                            onChange={handleCoverChange}
-                            accept="image/*"
-                            className="hidden"
-                          />
-                          <button
-                            type="button"
-                            onClick={triggerCoverUpload}
-                            className="absolute bottom-2 right-2 bg-surface/85 hover:bg-surface border border-outline-variant px-3 py-1 rounded-md text-label-sm font-semibold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
-                          >
-                            <Camera data-icon="camera" />
-                            <span>Cambiar portada</span>
-                          </button>
-                        </div>
-
                         {/* Business Photo Row */}
                         <div className="flex items-center gap-4 mb-6">
                           <div className="relative group shrink-0">
@@ -1649,13 +1719,19 @@ export default function AjustesPage() {
                               onClick={triggerBusinessLogoUpload}
                               className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer border border-primary/20"
                             >
-                              <Camera data-icon="camera" className="text-white" />
+                              <Camera
+                                data-icon="camera"
+                                className="text-white"
+                              />
                             </button>
                           </div>
                           <div className="flex flex-col gap-0.5">
-                            <span className="font-label-md text-label-md text-on-surface font-semibold">Foto del Negocio</span>
+                            <span className="font-label-md text-label-md text-on-surface font-semibold">
+                              Foto del Negocio
+                            </span>
                             <p className="text-[11px] text-on-surface-variant/85 leading-normal">
-                              Esta es la imagen de perfil de tu negocio o logotipo comercial.
+                              Esta es la imagen de perfil de tu negocio o
+                              logotipo comercial.
                             </p>
                           </div>
                         </div>
@@ -1735,7 +1811,7 @@ export default function AjustesPage() {
                             />
                           </Field>
                         </FieldGroup>
-                        
+
                         <Field className="mt-4">
                           <FieldLabel htmlFor="profile-description">
                             Descripción del Negocio
@@ -1775,21 +1851,6 @@ export default function AjustesPage() {
                     </CardHeader>
 
                     <CardContent>
-                      {/* Cover Photo Banner */}
-                      <div className="relative w-full h-36 rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10 border border-outline-variant/60 mb-6">
-                        {profile.coverUrl ? (
-                          <img
-                            src={profile.coverUrl}
-                            alt="Portada del Negocio"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant/30 font-medium text-body-sm select-none">
-                            Espacio sin foto de portada.
-                          </div>
-                        )}
-                      </div>
-
                       {/* Business Photo Row (View Only) */}
                       <div className="flex items-center gap-4 mb-6">
                         <div className="shrink-0">
@@ -1802,7 +1863,9 @@ export default function AjustesPage() {
                           </div>
                         </div>
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-label-md text-label-md text-on-surface font-semibold">Foto del Negocio</span>
+                          <span className="font-label-md text-label-md text-on-surface font-semibold">
+                            Foto del Negocio
+                          </span>
                           <p className="text-[11px] text-on-surface-variant/85 leading-normal">
                             Logotipo comercial o imagen principal de tu salón.
                           </p>
@@ -1848,7 +1911,8 @@ export default function AjustesPage() {
                             Descripción del Negocio
                           </span>
                           <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed whitespace-pre-wrap">
-                            {profile.description || "Sin descripción disponible."}
+                            {profile.description ||
+                              "Sin descripción disponible."}
                           </p>
                         </div>
                       </div>
@@ -1870,7 +1934,10 @@ export default function AjustesPage() {
                   <CardContent>
                     {loadingHours ? (
                       <div className="flex justify-center py-8">
-                        <Loader2 data-icon="loader" className="animate-spin text-primary" />
+                        <Loader2
+                          data-icon="loader"
+                          className="animate-spin text-primary"
+                        />
                       </div>
                     ) : !isEditingHours ? (
                       <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant font-semibold">
@@ -1973,7 +2040,10 @@ export default function AjustesPage() {
                             className="px-3 py-1.5 bg-primary text-on-primary rounded text-xs hover:bg-primary-container transition-all font-semibold cursor-pointer flex items-center gap-1"
                           >
                             {savingHours && (
-                              <Loader2 data-icon="loader" className="animate-spin" />
+                              <Loader2
+                                data-icon="loader"
+                                className="animate-spin"
+                              />
                             )}
                             <span>Guardar</span>
                           </button>
@@ -2011,7 +2081,10 @@ export default function AjustesPage() {
                   <CardContent>
                     {loadingServices ? (
                       <div className="flex justify-center py-12">
-                        <Loader2 data-icon="loader" className="animate-spin text-primary" />
+                        <Loader2
+                          data-icon="loader"
+                          className="animate-spin text-primary"
+                        />
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
@@ -2081,13 +2154,15 @@ export default function AjustesPage() {
               {showTrabajadoresTab && (
                 <Card className="col-span-12 mt-2">
                   <CardHeader className="flex flex-row items-center justify-between pb-4">
-                    <CardTitle className="text-teal-850 flex items-center gap-2">
-                      <Users className="w-5 h-5 text-teal-805" />
-                      <span className="text-teal-805">Gestión de Trabajadores</span>
+                    <CardTitle className="text-primary flex items-center gap-2">
+                      <Users className="w-5 h-5 text-primary" />
+                      <span className="text-primary">
+                        Gestión de Trabajadores
+                      </span>
                     </CardTitle>
                     <button
                       onClick={handleOpenCreateWorkerModal}
-                      className="py-2.5 px-4 bg-teal-850 hover:bg-teal-905 text-white rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
+                      className="py-2.5 px-4 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
                     >
                       <UserPlus data-icon="user-plus" />
                       <span>Añadir Empleado</span>
@@ -2133,10 +2208,14 @@ export default function AjustesPage() {
 
                             {/* Worker Info */}
                             <div className="flex flex-col min-w-0">
-                              <span className={`font-semibold text-body-lg truncate ${!isActive ? "text-on-surface-variant/50" : "text-on-surface"}`}>
+                              <span
+                                className={`font-semibold text-body-lg truncate ${!isActive ? "text-on-surface-variant/50" : "text-on-surface"}`}
+                              >
                                 {worker.name}
                               </span>
-                              <span className={`text-body-md truncate ${!isActive ? "text-on-surface-variant/40" : "text-on-surface-variant"}`}>
+                              <span
+                                className={`text-body-md truncate ${!isActive ? "text-on-surface-variant/40" : "text-on-surface-variant"}`}
+                              >
                                 {specialty}
                               </span>
                               <div className="flex items-center gap-1.5 mt-1">
@@ -2145,7 +2224,9 @@ export default function AjustesPage() {
                                     isActive ? "bg-emerald-500" : "bg-red-400"
                                   }`}
                                 />
-                                <span className={`text-[10px] font-semibold tracking-wider ${!isActive ? "text-on-surface-variant/40" : "text-on-surface-variant"}`}>
+                                <span
+                                  className={`text-[10px] font-semibold tracking-wider ${!isActive ? "text-on-surface-variant/40" : "text-on-surface-variant"}`}
+                                >
                                   {status}
                                 </span>
                               </div>
@@ -2155,7 +2236,9 @@ export default function AjustesPage() {
                             <div className="absolute right-3 top-3 flex items-center gap-1 opacity-0 group-hover/worker:opacity-100 transition-opacity bg-surface-container-low pl-2">
                               <button
                                 type="button"
-                                onClick={() => handleOpenEditWorkerModal(worker)}
+                                onClick={() =>
+                                  handleOpenEditWorkerModal(worker)
+                                }
                                 className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md active:scale-95 transition-all cursor-pointer"
                                 title="Editar trabajador"
                               >
@@ -2221,7 +2304,10 @@ export default function AjustesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveWorker} className="p-6 flex flex-col gap-6 overflow-y-auto">
+            <form
+              onSubmit={handleSaveWorker}
+              className="p-6 flex flex-col gap-6 overflow-y-auto"
+            >
               {workerErrorMsg && (
                 <div className="bg-error-container border border-error-container/45 text-on-error-container p-4 rounded-xl font-medium text-body-md">
                   {workerErrorMsg}
@@ -2235,20 +2321,32 @@ export default function AjustesPage() {
                     id="workerName"
                     label="Nombre y Apellidos"
                     value={workerFormData.name}
-                    onChange={(e) => setWorkerFormData({ ...workerFormData, name: e.target.value })}
+                    onChange={(e) =>
+                      setWorkerFormData({
+                        ...workerFormData,
+                        name: e.target.value,
+                      })
+                    }
                     icon={User}
                     required
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="workerEmail">Correo Electrónico</FieldLabel>
+                  <FieldLabel htmlFor="workerEmail">
+                    Correo Electrónico
+                  </FieldLabel>
                   <FloatingInput
                     id="workerEmail"
                     label="correo@empresa.com"
                     type="email"
                     value={workerFormData.email}
-                    onChange={(e) => setWorkerFormData({ ...workerFormData, email: e.target.value })}
+                    onChange={(e) =>
+                      setWorkerFormData({
+                        ...workerFormData,
+                        email: e.target.value,
+                      })
+                    }
                     icon={Mail}
                     required
                   />
@@ -2256,14 +2354,28 @@ export default function AjustesPage() {
 
                 <Field>
                   <FieldLabel htmlFor="workerPassword">
-                    Contraseña {editingWorker && <span className="text-on-surface-variant/50 font-normal">(dejar en blanco para mantener)</span>}
+                    Contraseña{" "}
+                    {editingWorker && (
+                      <span className="text-on-surface-variant/50 font-normal">
+                        (dejar en blanco para mantener)
+                      </span>
+                    )}
                   </FieldLabel>
                   <FloatingInput
                     id="workerPassword"
-                    label={editingWorker ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"}
+                    label={
+                      editingWorker
+                        ? "Nueva contraseña (opcional)"
+                        : "Mínimo 6 caracteres"
+                    }
                     type="password"
                     value={workerFormData.password}
-                    onChange={(e) => setWorkerFormData({ ...workerFormData, password: e.target.value })}
+                    onChange={(e) =>
+                      setWorkerFormData({
+                        ...workerFormData,
+                        password: e.target.value,
+                      })
+                    }
                     icon={Key}
                     required={!editingWorker}
                   />
@@ -2275,7 +2387,12 @@ export default function AjustesPage() {
                     <select
                       id="workerRole"
                       value={workerFormData.role}
-                      onChange={(e) => setWorkerFormData({ ...workerFormData, role: e.target.value as "JEFE" | "EMPLEADO" })}
+                      onChange={(e) =>
+                        setWorkerFormData({
+                          ...workerFormData,
+                          role: e.target.value as "JEFE" | "EMPLEADO",
+                        })
+                      }
                       className="w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-md p-3.5 focus:border-primary focus:border-2 focus:outline-none transition-all"
                     >
                       <option value="EMPLEADO">Empleado (Staff)</option>
