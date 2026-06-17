@@ -11,9 +11,7 @@ model Business {
   id              String          @id @default(uuid())
   name            String
   phone           String // Business phone for WhatsApp linkage
-  email           String          @unique
-  password        String // Hashed password
-  role            BusinessRole    @default(BUSINESS)
+  email           String? // Contact email
   address         String? // Commercial address
   logoUrl         String? // Profile photo URL
   coverUrl        String? // Business photo URL
@@ -27,11 +25,27 @@ model Business {
   clients         Client[]
   hours           BusinessHours[]
   services        Service[]
+  users           User[]
 }
 
-enum BusinessRole {
+enum UserRole {
   ADMIN
-  BUSINESS
+  JEFE
+  EMPLEADO
+}
+
+model User {
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  password   String // Hashed password
+  role       UserRole  @default(EMPLEADO)
+  businessId String?
+  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([businessId])
 }
 
 enum WhatsAppStatus {

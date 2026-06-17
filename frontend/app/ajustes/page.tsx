@@ -28,6 +28,11 @@ import {
   Pencil,
   X,
   User,
+  Key,
+  Users,
+  UserPlus,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 
 import Sidebar from "@/components/Sidebar";
@@ -35,7 +40,9 @@ import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddServiceModal from "@/components/AddServiceModal";
-import { FieldGroup, Field, FieldLabel, Badge, Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/volta-ui";
+import { FieldGroup, Field, FieldLabel, Badge, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, FloatingInput } from "@/components/ui/volta-ui";
+
+const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
 
 export default function AjustesPage() {
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
@@ -48,7 +55,7 @@ export default function AjustesPage() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
 
   // Custom tabs
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("perfil");
 
   const [services, setServices] = useState<any[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
@@ -89,7 +96,113 @@ export default function AjustesPage() {
   };
 
   const { data: session, update } = useSession();
-  const businessId = session?.user?.id || "mock-business-id";
+  const businessId = session?.user?.businessId || "mock-business-id";
+  const role = session?.user?.role || "EMPLEADO";
+
+  // Admin settings state and handlers
+  const [adminForm, setAdminForm] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
+  const [savingAdmin, setSavingAdmin] = useState(false);
+
+  // Logged-in worker settings state (Sobre ti)
+  const [userForm, setUserForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  useEffect(() => {
+    if (session?.user) {
+      if (role === "ADMIN") {
+        setAdminForm({
+          name: session.user.name || "",
+          email: session.user.email || "",
+          password: ""
+        });
+      } else {
+        setUserForm({
+          name: session.user.name || "",
+          email: session.user.email || "",
+          password: ""
+        });
+      }
+    }
+  }, [session, role]);
+
+  const [userProfileData, setUserProfileData] = useState<any>(null);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      fetch(`/api/backend/users`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const current = data.find((u: any) => u.id === session.user.id);
+            if (current) {
+              setUserProfileData(current);
+            }
+          }
+        })
+        .catch(err => console.error("Error fetching user profile data:", err));
+    }
+  }, [session]);
+
+  const formatProfileDate = (dateString: string) => {
+    if (!dateString) return "Fecha no disponible";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  };
+
+  const handleSaveAdminSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!session?.user?.id) return;
+    setSavingAdmin(true);
+
+    const payload: any = {
+      name: adminForm.name,
+      email: adminForm.email
+    };
+    if (adminForm.password) {
+      payload.password = adminForm.password;
+    }
+
+    fetch(`/api/backend/users/${session.user.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error al guardar cambios");
+        return data;
+      })
+      .then((updatedUser) => {
+        update({
+          name: updatedUser.name,
+          email: updatedUser.email
+        });
+        setToastText("¡Ajustes de administrador guardados!");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        setAdminForm(prev => ({ ...prev, password: "" }));
+      })
+      .catch((err) => {
+        alert(err.message);
+      })
+      .finally(() => {
+        setSavingAdmin(false);
+      });
+  };
 
   // Refs for file uploads
   const businessLogoInputRef = useRef<HTMLInputElement>(null);
@@ -151,7 +264,7 @@ export default function AjustesPage() {
     coverUrl: "",        // Business banner
     description: "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
     ownerName: "Sofía Martín",
-    workerPhoto: "",     // Worker / Stylist photo
+    workerPhoto: DEFAULT_AVATAR,     // Worker / Stylist photo
   });
 
   const fetchProfile = () => {
@@ -171,7 +284,7 @@ export default function AjustesPage() {
             coverUrl: data.coverUrl || prev.coverUrl,
             description: data.description || prev.description,
             ownerName: data.ownerName || prev.ownerName,
-            workerPhoto: savedWorkerPhoto || prev.workerPhoto,
+            workerPhoto: savedWorkerPhoto || prev.workerPhoto || DEFAULT_AVATAR,
           }));
         }
       })
@@ -246,6 +359,169 @@ export default function AjustesPage() {
 
     return () => clearInterval(interval);
   }, [pollingActive, businessId]);
+
+  // Workers state for the store manager (JEFE)
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [showTrabajadoresTab, setShowTrabajadoresTab] = useState(false);
+  const [isWorkerModalOpen, setIsWorkerModalOpen] = useState(false);
+  const [editingWorker, setEditingWorker] = useState<any | null>(null);
+  const [workerFormData, setWorkerFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "EMPLEADO" as "JEFE" | "EMPLEADO",
+  });
+  const [workerErrorMsg, setWorkerErrorMsg] = useState("");
+
+  const fetchWorkers = () => {
+    if (!businessId || businessId === "mock-business-id" || role === "ADMIN") return;
+    fetch(`/api/backend/users?businessId=${businessId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setWorkers(data);
+          // Show tab only if business has more than 1 worker (including the jefe)
+          setShowTrabajadoresTab(data.length > 1);
+        }
+      })
+      .catch((err) => console.error("Error loading workers:", err));
+  };
+
+  const getWorkerSpecialty = (worker: any) => {
+    const nameLower = worker.name.toLowerCase();
+    if (nameLower.includes("lucía") || nameLower.includes("lucia")) return "Estilista Senior";
+    if (nameLower.includes("marcos")) return "Barbero";
+    if (nameLower.includes("sofía") || nameLower.includes("sofia")) return "Recepcionista";
+    if (nameLower.includes("dani")) return "Colorista";
+    return worker.role === "JEFE" ? "Directora de Estilo" : "Estilista";
+  };
+
+  const getWorkerStatus = (worker: any) => {
+    const nameLower = worker.name.toLowerCase();
+    if (nameLower.includes("sofía") || nameLower.includes("sofia")) return "INACTIVO";
+    return "ACTIVO";
+  };
+
+  const getWorkerAvatar = (worker: any) => {
+    if (worker.id === session?.user?.id) {
+      return profile.workerPhoto || DEFAULT_AVATAR;
+    }
+    if (worker.name.toLowerCase().includes("lucía") || worker.name.toLowerCase().includes("lucia")) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
+    }
+    return null;
+  };
+
+
+  const handleSaveWorker = (e: React.FormEvent) => {
+    e.preventDefault();
+    setWorkerErrorMsg("");
+
+    if (!workerFormData.name || !workerFormData.email) {
+      setWorkerErrorMsg("El nombre y el correo son obligatorios.");
+      return;
+    }
+    if (!editingWorker && !workerFormData.password) {
+      setWorkerErrorMsg("La contraseña es obligatoria para nuevos trabajadores.");
+      return;
+    }
+
+    const isEdit = !!editingWorker;
+    const url = isEdit ? `/api/backend/users/${editingWorker.id}` : "/api/backend/users";
+    const method = isEdit ? "PUT" : "POST";
+
+    const payload: any = {
+      name: workerFormData.name,
+      email: workerFormData.email,
+      role: workerFormData.role,
+      businessId: businessId
+    };
+    if (workerFormData.password) {
+      payload.password = workerFormData.password;
+    }
+
+    fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error al guardar trabajador.");
+        return data;
+      })
+      .then(() => {
+        setToastText(isEdit ? "¡Trabajador actualizado!" : "¡Trabajador creado!");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        setIsWorkerModalOpen(false);
+        fetchWorkers();
+      })
+      .catch((err) => {
+        setWorkerErrorMsg(err.message);
+      });
+  };
+
+  const handleDeleteWorker = (id: string) => {
+    if (id === session?.user?.id) {
+      alert("No puedes eliminar tu propia cuenta activa.");
+      return;
+    }
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este trabajador?")) {
+      return;
+    }
+    fetch(`/api/backend/users/${id}`, {
+      method: "DELETE"
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error al eliminar");
+        return res.json();
+      })
+      .then(() => {
+        setToastText("¡Trabajador eliminado!");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        fetchWorkers();
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+  };
+
+  const handleOpenCreateWorkerModal = () => {
+    setEditingWorker(null);
+    setWorkerFormData({
+      name: "",
+      email: "",
+      password: "",
+      role: "EMPLEADO"
+    });
+    setWorkerErrorMsg("");
+    setIsWorkerModalOpen(true);
+  };
+
+  const handleOpenEditWorkerModal = (worker: any) => {
+    setEditingWorker(worker);
+    setWorkerFormData({
+      name: worker.name,
+      email: worker.email,
+      password: "",
+      role: worker.role
+    });
+    setWorkerErrorMsg("");
+    setIsWorkerModalOpen(true);
+  };
+
+  useEffect(() => {
+    fetchProfile();
+    fetchWhatsappStatus();
+    fetchTemplates();
+    fetchServices();
+    fetchHours();
+    fetchWorkers();
+  }, [businessId]);
 
   useEffect(() => {
     if (session?.user?.name) {
@@ -469,6 +745,7 @@ export default function AjustesPage() {
         address: profile.address,
         coverUrl: profile.coverUrl,
         logoUrl: profile.logoUrl, // Business photo / logo
+        description: profile.description,
       }),
     })
       .then((res) => {
@@ -506,6 +783,8 @@ export default function AjustesPage() {
 
   const handleSaveProfile = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (!session?.user?.id) return;
+    setSavingProfile(true);
 
     // Persist worker photo in localStorage
     if (typeof window !== "undefined" && profile.workerPhoto) {
@@ -513,36 +792,169 @@ export default function AjustesPage() {
       window.dispatchEvent(new Event("stylist_worker_photo_changed"));
     }
 
-    fetch(`/api/backend/business/${businessId}`, {
+    const payload: any = {
+      name: userForm.name,
+      email: userForm.email,
+    };
+    if (userForm.password) {
+      payload.password = userForm.password;
+    }
+
+    fetch(`/api/backend/users/${session.user.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        description: profile.description,
-        ownerName: profile.ownerName,
-      }),
+      body: JSON.stringify(payload),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to update professional profile");
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Error al actualizar perfil.");
+        return data;
       })
-      .then((data) => {
+      .then(async (updatedUser) => {
         setIsEditingProfile(false);
-        setToastText("¡Perfil profesional guardado!");
+        setToastText("¡Tu perfil personal ha sido guardado!");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
+
+        // Update NextAuth session state so header/sidebar updates automatically
+        if (update) {
+          await update({
+            ...session,
+            user: {
+              ...session?.user,
+              name: updatedUser.name,
+              email: updatedUser.email,
+            },
+          });
+        }
+        setUserForm((prev) => ({ ...prev, password: "" }));
       })
       .catch((err) => {
-        console.error("Error updating professional profile:", err);
-        setToastText(
-          "Error al guardar el perfil. Por favor, inténtelo de nuevo.",
-        );
+        console.error("Error updating profile:", err);
+        setToastText(err.message || "Error al guardar el perfil. Por favor, inténtelo de nuevo.");
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
         setIsEditingProfile(false);
+      })
+      .finally(() => {
+        setSavingProfile(false);
       });
   };
+
+  if (role === "ADMIN") {
+    return (
+      <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
+        {/* Sidebar navigation */}
+        <Sidebar onNewAppointmentClick={() => {}} />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+          {/* Top Header */}
+          <Header
+            searchPlaceholder="Buscar en ajustes..."
+            searchValue={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+
+          {/* Content Canvas */}
+          <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1 relative">
+            {/* Toast Notification Banner */}
+            {showToast && (
+              <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-secondary-container text-on-secondary-container border border-outline-variant px-6 py-4 rounded-md shadow-lg animate-in fade-in slide-in-from-top-4 duration-200">
+                <CheckCircle className="w-5 h-5 text-primary shrink-0" />
+                <span className="font-label-lg text-label-lg font-semibold">
+                  {toastText}
+                </span>
+              </div>
+            )}
+
+            {/* Page Title */}
+            <div className="mb-6">
+              <h1 className="font-display text-2xl sm:text-headline-lg text-on-surface font-semibold mb-1">
+                Ajustes de Administrador
+              </h1>
+              <p className="font-body-md text-on-surface-variant font-medium">
+                Gestiona tus credenciales de acceso y perfil de administrador.
+              </p>
+            </div>
+
+            <div className="max-w-xl">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-primary flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    <span>Tu Perfil de Administrador</span>
+                  </CardTitle>
+                </CardHeader>
+                <form onSubmit={handleSaveAdminSettings}>
+                  <CardContent className="flex flex-col gap-6">
+                    <FieldGroup>
+                      <Field>
+                        <FieldLabel htmlFor="adminName">Nombre Completo</FieldLabel>
+                        <FloatingInput
+                          id="adminName"
+                          label="Nombre y Apellidos"
+                          value={adminForm.name}
+                          onChange={(e) => setAdminForm({ ...adminForm, name: e.target.value })}
+                          icon={User}
+                          required
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
+                        <FloatingInput
+                          id="adminEmail"
+                          label="correo@empresa.com"
+                          type="email"
+                          value={adminForm.email}
+                          onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
+                          icon={Mail}
+                          required
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="adminPassword">Nueva Contraseña (dejar en blanco para mantener)</FieldLabel>
+                        <FloatingInput
+                          id="adminPassword"
+                          label="Mínimo 6 caracteres"
+                          type="password"
+                          value={adminForm.password}
+                          onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
+                          icon={Key}
+                        />
+                      </Field>
+                    </FieldGroup>
+                  </CardContent>
+                  <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end gap-3">
+                    <button
+                      type="submit"
+                      disabled={savingAdmin}
+                      className="py-2.5 px-5 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-medium text-body-md active:scale-95 transition-all shadow-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      {savingAdmin ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Guardando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          <span>Guardar Cambios</span>
+                        </>
+                      )}
+                    </button>
+                  </CardFooter>
+                </form>
+              </Card>
+            </div>
+          </main>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
@@ -581,17 +993,17 @@ export default function AjustesPage() {
             </p>
           </div>
 
-          {/* Tab Navigation (Task 2.1) */}
+          {/* Tab Navigation */}
           <div className="flex border-b border-outline-variant/65 mb-6 sm:mb-8 gap-4 sm:gap-6">
             <button
-              onClick={() => setActiveTab("general")}
+              onClick={() => setActiveTab("perfil")}
               className={`pb-3 font-label-lg text-label-lg font-semibold border-b-2 transition-all cursor-pointer ${
-                activeTab === "general"
+                activeTab === "perfil"
                   ? "border-primary text-primary"
                   : "border-transparent text-on-surface-variant hover:text-on-surface"
               }`}
             >
-              General
+              Perfil y Seguridad
             </button>
             <button
               onClick={() => setActiveTab("mensajeria")}
@@ -603,660 +1015,188 @@ export default function AjustesPage() {
             >
               Mensajes y WhatsApp
             </button>
+            <button
+              onClick={() => setActiveTab("gestion")}
+              className={`pb-3 font-label-lg text-label-lg font-semibold border-b-2 transition-all cursor-pointer ${
+                activeTab === "gestion"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-on-surface-variant hover:text-on-surface"
+              }`}
+            >
+              Gestión del Negocio
+            </button>
           </div>
 
           {/* Tab Contents */}
-          {activeTab === "general" ? (
-            /* Bento Grid Layout - General */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
-              {/* Business Profile Card (Spans 8 cols) */}
-              {isEditingBusiness ? (
-                <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
-                  <form onSubmit={handleSaveBusiness} className="h-full flex flex-col justify-between">
-                    <div>
-                      <CardHeader className="flex flex-row items-center justify-between pb-4">
-                        <CardTitle className="text-primary flex items-center gap-2">
-                          <Store data-icon="store" />
-                          <span>Información del Negocio</span>
-                        </CardTitle>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsEditingBusiness(false);
-                              fetchProfile();
-                            }}
-                            className="px-4 py-2 border border-outline rounded-lg font-label-md text-label-md hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
-                          >
-                            Cancelar
-                          </button>
-                          <button
-                            type="submit"
-                            className="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
-                          >
-                            <Save data-icon="save" />
-                            <span>Guardar</span>
-                          </button>
-                        </div>
-                      </CardHeader>
-
-                      <CardContent>
-                        {/* Cover Photo Banner */}
-                        <div className="relative w-full h-36 rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10 border border-outline-variant/60 mb-6 group">
-                          {profile.coverUrl ? (
-                            <img
-                              src={profile.coverUrl}
-                              alt="Portada del Negocio"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-on-surface-variant/30 font-medium text-body-sm select-none">
-                              Sin foto de portada. Haz clic para subir una.
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            ref={coverInputRef}
-                            onChange={handleCoverChange}
-                            accept="image/*"
-                            className="hidden"
-                          />
-                          <button
-                            type="button"
-                            onClick={triggerCoverUpload}
-                            className="absolute bottom-2 right-2 bg-surface/85 hover:bg-surface border border-outline-variant px-3 py-1 rounded-md text-label-sm font-semibold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
-                          >
-                            <Camera data-icon="camera" />
-                            <span>Cambiar portada</span>
-                          </button>
-                        </div>
-
-                        {/* Business Photo Row */}
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="relative group shrink-0">
-                            <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
-                              <img
-                                src={profile.logoUrl || "/logo.png"}
-                                alt="Foto del Negocio"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <input
-                              type="file"
-                              ref={businessLogoInputRef}
-                              onChange={handleBusinessLogoChange}
-                              accept="image/*"
-                              className="hidden"
-                            />
-                            <button
-                              type="button"
-                              onClick={triggerBusinessLogoUpload}
-                              className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer border border-primary/20"
-                            >
-                              <Camera data-icon="camera" className="text-white" />
-                            </button>
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="font-label-md text-label-md text-on-surface font-semibold">Foto del Negocio</span>
-                            <p className="text-[11px] text-on-surface-variant/85 leading-normal">
-                              Esta es la imagen de perfil de tu negocio o logotipo comercial.
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Form fields */}
-                        <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <Field>
-                            <FieldLabel htmlFor="profile-name">
-                              Nombre Comercial
-                            </FieldLabel>
-                            <input
-                              id="profile-name"
-                              type="text"
-                              required
-                              value={profile.name}
-                              onChange={(e) =>
-                                setProfile((prev) => ({
-                                  ...prev,
-                                  name: e.target.value,
-                                }))
-                              }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                            />
-                          </Field>
-                          <Field>
-                            <FieldLabel htmlFor="profile-email">
-                              Correo Electrónico
-                            </FieldLabel>
-                            <input
-                              id="profile-email"
-                              type="email"
-                              required
-                              value={profile.email}
-                              onChange={(e) =>
-                                setProfile((prev) => ({
-                                  ...prev,
-                                  email: e.target.value,
-                                }))
-                              }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                            />
-                          </Field>
-                          <Field>
-                            <FieldLabel htmlFor="profile-phone">
-                              Teléfono
-                            </FieldLabel>
-                            <input
-                              id="profile-phone"
-                              type="tel"
-                              required
-                              value={profile.phone}
-                              onChange={(e) =>
-                                setProfile((prev) => ({
-                                  ...prev,
-                                  phone: e.target.value,
-                                }))
-                              }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                            />
-                          </Field>
-                          <Field>
-                            <FieldLabel htmlFor="profile-address">
-                              Dirección
-                            </FieldLabel>
-                            <input
-                              id="profile-address"
-                              type="text"
-                              required
-                              value={profile.address}
-                              onChange={(e) =>
-                                setProfile((prev) => ({
-                                  ...prev,
-                                  address: e.target.value,
-                                }))
-                              }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                            />
-                          </Field>
-                        </FieldGroup>
-                      </CardContent>
-                    </div>
-                  </form>
-                </Card>
-              ) : (
-                <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
-                  <div>
-                    <CardHeader className="flex flex-row items-center justify-between pb-4">
-                      <CardTitle className="text-primary flex items-center gap-2">
-                        <Store data-icon="store" />
-                        <span>Información del Negocio</span>
-                      </CardTitle>
-                      <button
-                        type="button"
-                        onClick={() => setIsEditingBusiness(true)}
-                        className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
-                      >
-                        Editar negocio
-                      </button>
-                    </CardHeader>
-
-                    <CardContent>
-                      {/* Cover Photo Banner */}
-                      <div className="relative w-full h-36 rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10 border border-outline-variant/60 mb-6">
-                        {profile.coverUrl ? (
+          {activeTab === "perfil" ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
+              {/* Profile Card (Screenshot 1 style) */}
+              <Card className="lg:col-span-12">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+                    <div className="flex items-center gap-6">
+                      {/* Avatar */}
+                      <div className="relative w-24 h-24 shrink-0">
+                        <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-teal-500/30 bg-surface-container shadow-sm flex items-center justify-center">
                           <img
-                            src={profile.coverUrl}
-                            alt="Portada del Negocio"
+                            src={profile.workerPhoto || DEFAULT_AVATAR}
+                            alt="Foto de perfil del profesional"
                             className="w-full h-full object-cover"
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant/30 font-medium text-body-sm select-none">
-                            Espacio sin foto de portada.
-                          </div>
-                        )}
+                        </div>
+                        <input
+                          type="file"
+                          ref={workerPhotoInputRef}
+                          onChange={handleWorkerPhotoChange}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={triggerWorkerPhotoUpload}
+                          className="absolute -bottom-1 -left-1 w-8 h-8 bg-teal-800 hover:bg-teal-900 text-white rounded-full flex items-center justify-center border-2 border-surface shadow-md transition-all active:scale-90 cursor-pointer"
+                          title="Cambiar foto de perfil"
+                        >
+                          <Camera className="w-4 h-4" />
+                        </button>
                       </div>
-
-                      {/* Business Photo Row (View Only) */}
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="shrink-0">
-                          <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
-                            <img
-                              src={profile.logoUrl || "/logo.png"}
-                              alt="Foto del Negocio"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-label-md text-label-md text-on-surface font-semibold">Foto del Negocio</span>
-                          <p className="text-[11px] text-on-surface-variant/85 leading-normal">
-                            Logotipo comercial o imagen principal de tu salón.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Info grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                            Nombre Comercial
+                      
+                      {/* Name, Badge, ID */}
+                      <div className="flex flex-col gap-1">
+                        <h2 className="font-display text-2xl font-semibold text-on-surface">
+                          {userForm.name || "Sin nombre"}
+                        </h2>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="bg-teal-750 text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                            {role === "JEFE" ? "Administradora" : "Empleado"}
                           </span>
-                          <p className="font-body-lg text-body-lg font-medium text-on-surface">
-                            {profile.name}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                            Correo Electrónico
+                          <span className="text-on-surface-variant/70 text-xs">
+                            • ID: #GS-{userProfileData?.id?.slice(-3).toUpperCase() || "001"}
                           </span>
-                          <p className="font-body-lg text-body-lg font-medium text-on-surface">
-                            {profile.email}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                            Teléfono
-                          </span>
-                          <p className="font-body-lg text-body-lg font-medium text-on-surface">
-                            {profile.phone}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
-                            Dirección
-                          </span>
-                          <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed">
-                            {profile.address}
-                          </p>
                         </div>
                       </div>
-                    </CardContent>
-                  </div>
-                </Card>
-              )}
+                    </div>
 
-              {/* "Sobre ti" Card (Spans 4 cols) */}
-              <Card className="sm:col-span-1 lg:col-span-4 flex flex-col justify-between">
-                <div>
-                  <CardHeader className="flex flex-row items-center justify-between pb-4">
-                    <CardTitle className="text-primary flex items-center gap-2">
-                      <User data-icon="user" />
-                      <span>Sobre ti</span>
-                    </CardTitle>
-                    {isEditingProfile ? (
-                      <div className="flex gap-2">
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-3">
+                      {isEditingProfile && (
                         <button
                           type="button"
                           onClick={() => {
                             setIsEditingProfile(false);
-                            fetchProfile();
+                            if (session?.user) {
+                              setUserForm({
+                                name: session.user.name || "",
+                                email: session.user.email || "",
+                                password: "",
+                              });
+                            }
                           }}
-                          className="text-xs px-2.5 py-1 border border-outline rounded hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
+                          className="py-2 px-4 border border-outline rounded-lg font-label-md text-label-md hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
                         >
                           Cancelar
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSaveProfile()}
-                          className="text-xs px-2.5 py-1 bg-primary text-on-primary rounded hover:bg-primary-container transition-all cursor-pointer font-semibold shadow-sm"
-                        >
-                          Guardar
-                        </button>
-                      </div>
-                    ) : (
+                      )}
                       <button
                         type="button"
-                        onClick={() => setIsEditingProfile(true)}
-                        className="text-primary hover:text-primary-container font-label-md text-label-md font-semibold transition-all cursor-pointer hover:underline"
+                        onClick={() => {
+                          if (isEditingProfile) {
+                            handleSaveProfile();
+                          } else {
+                            setIsEditingProfile(true);
+                          }
+                        }}
+                        className="py-2 px-4 bg-teal-850 hover:bg-teal-905 text-white rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
                       >
-                        Editar perfil
+                        {isEditingProfile ? (
+                          <>
+                            <Save className="w-4 h-4" />
+                            <span>Guardar Perfil</span>
+                          </>
+                        ) : (
+                          <>
+                            <Pencil className="w-4 h-4" />
+                            <span>Editar Perfil</span>
+                          </>
+                        )}
                       </button>
-                    )}
-                  </CardHeader>
+                    </div>
+                  </div>
 
-                  <CardContent>
-                    {/* Profile Photo / Avatar Section */}
-                    {isEditingProfile ? (
-                      <div className="flex flex-col items-center gap-2 mb-4">
-                        <div className="relative group w-20 h-20 rounded-full overflow-hidden border border-outline-variant bg-surface-container shadow-sm shrink-0">
-                          {profile.workerPhoto ? (
-                            <img
-                              src={profile.workerPhoto}
-                              alt="Foto de perfil del profesional"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
-                              <User data-icon="user" />
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            ref={workerPhotoInputRef}
-                            onChange={handleWorkerPhotoChange}
-                            accept="image/*"
-                            className="hidden"
-                          />
-                          <button
-                            type="button"
-                            onClick={triggerWorkerPhotoUpload}
-                            className="absolute inset-0 bg-primary/45 flex items-center justify-center cursor-pointer border border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Camera data-icon="camera" className="text-white" />
-                          </button>
-                        </div>
-                        <span className="text-[10px] text-on-surface-variant/70 font-semibold">Cambiar foto de perfil</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2 mb-4">
-                        <div className="w-20 h-20 rounded-full overflow-hidden border border-outline-variant bg-surface-container shadow-sm flex items-center justify-center">
-                          {profile.workerPhoto ? (
-                            <img
-                              src={profile.workerPhoto}
-                              alt="Foto de perfil del profesional"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary">
-                              <User data-icon="user" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                  <hr className="border-outline-variant/60 my-6" />
 
-                    {/* Name field */}
-                    {isEditingProfile ? (
-                      <div className="flex flex-col gap-1 mb-4">
-                        <label className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">
-                          Nombre del Profesional
-                        </label>
+                  {/* Info Columns */}
+                  {isEditingProfile ? (
+                    <FieldGroup className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <Field>
+                        <FieldLabel htmlFor="user-name">Nombre Completo</FieldLabel>
                         <input
+                          id="user-name"
                           type="text"
-                          value={profile.ownerName || ""}
-                          onChange={(e) =>
-                            setProfile((prev) => ({
-                              ...prev,
-                              ownerName: e.target.value,
-                            }))
-                          }
-                          placeholder="Ej. Sofía Martín"
-                          className="w-full border border-outline-variant rounded-lg px-3 py-1.5 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                          required
+                          value={userForm.name}
+                          onChange={(e) => setUserForm({ ...userForm, name: e.target.value })}
+                          className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-0.5 items-center mb-4">
-                        <p className="font-title-md text-title-md font-semibold text-on-surface">
-                          {profile.ownerName || "Sin nombre configurado"}
-                        </p>
-                        <p className="text-[11px] text-on-surface-variant/80 font-medium bg-surface-variant/30 px-2 py-0.5 rounded-full">
-                          Profesional / Estilista
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Description Bio field */}
-                    {isEditingProfile ? (
-                      <div className="flex flex-col gap-1">
-                        <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider">
-                          Tu Biografía / Presentación
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="user-email">Correo Electrónico</FieldLabel>
+                        <input
+                          id="user-email"
+                          type="email"
+                          required
+                          value={userForm.email}
+                          onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+                          className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor="user-password">
+                          Nueva Contraseña <span className="text-on-surface-variant/50 font-normal">(opcional)</span>
+                        </FieldLabel>
+                        <input
+                          id="user-password"
+                          type="password"
+                          placeholder="Mínimo 6 caracteres"
+                          value={userForm.password}
+                          onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+                          className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                        />
+                      </Field>
+                    </FieldGroup>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div>
+                        <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider block mb-1">
+                          Nombre Completo
                         </span>
-                        <textarea
-                          value={profile.description || ""}
-                          onChange={(e) =>
-                            setProfile((prev) => ({
-                              ...prev,
-                              description: e.target.value,
-                            }))
-                          }
-                          placeholder="Describe tu perfil profesional, tu experiencia o especialidad..."
-                          className="w-full min-h-[90px] border border-outline-variant rounded-lg px-3 py-2 text-body-sm focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface resize-none animate-none"
-                        />
-                      </div>
-                    ) : (
-                      <div className="text-center pt-2 border-t border-outline-variant/35">
-                        <p className="font-body-md text-body-sm text-on-surface-variant leading-relaxed italic">
-                          "{profile.description || "Sin descripción disponible. Haz clic en 'Editar perfil' para añadir información sobre ti."}"
+                        <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                          {userForm.name || "Elena Martínez"}
                         </p>
                       </div>
-                    )}
-                  </CardContent>
-                </div>
-                {!isEditingProfile && (
-                  <CardFooter className="flex items-center justify-between w-full border-t border-outline-variant/40 pt-4">
-                    <span className="text-label-sm font-semibold text-primary bg-primary-container/20 px-2 py-0.5 rounded-full">
-                      Plan Profesional Activo
-                    </span>
-                    <span className="text-[11px] text-on-surface-variant/70 font-medium">
-                      Renueva en Oct 2024
-                    </span>
-                  </CardFooter>
-                )}
+                      <div>
+                        <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider block mb-1">
+                          Correo Electrónico
+                        </span>
+                        <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                          {userForm.email || "elena@glowstudio.com"}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="font-label-sm text-label-sm text-on-surface-variant font-semibold uppercase tracking-wider block mb-1">
+                          Fecha de Ingreso
+                        </span>
+                        <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                          {formatProfileDate(userProfileData?.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
               </Card>
 
-              {/* Operating Hours Card (Spans 4 cols) */}
-              <Card className="sm:col-span-1 lg:col-span-4 flex flex-col justify-between">
-                <div>
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-primary flex items-center gap-2">
-                      <Clock data-icon="clock" />
-                      <span>Horario de Apertura</span>
-                    </CardTitle>
-                  </CardHeader>
-
-                  <CardContent>
-                    {loadingHours ? (
-                      <div className="flex justify-center py-8">
-                        <Loader2 data-icon="loader" className="animate-spin text-primary" />
-                      </div>
-                    ) : !isEditingHours ? (
-                      <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant font-semibold">
-                        {hours.map((hourRow) => (
-                          <div
-                            key={hourRow.dayOfWeek}
-                            className="flex items-center justify-between py-1 border-b border-outline-variant/65"
-                          >
-                            <span>{dayNames[hourRow.dayOfWeek]}</span>
-                            <span
-                              className={`font-semibold ${hourRow.isClosed ? "text-error" : "text-primary"}`}
-                            >
-                              {hourRow.isClosed
-                                ? "Cerrado"
-                                : `${hourRow.openTime} - ${hourRow.closeTime}`}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <form
-                        onSubmit={handleSaveHours}
-                        className="flex flex-col gap-4"
-                      >
-                        {hours.map((hourRow, idx) => (
-                          <div
-                            key={hourRow.dayOfWeek}
-                            className="flex flex-col gap-2 pb-2 border-b border-outline-variant/40"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-body-md text-on-surface">
-                                {dayNames[hourRow.dayOfWeek]}
-                              </span>
-                              <label className="flex items-center gap-2 cursor-pointer text-xs text-on-surface-variant select-none">
-                                <input
-                                  type="checkbox"
-                                  checked={hourRow.isClosed}
-                                  onChange={(e) => {
-                                    const updatedHours = [...hours];
-                                    updatedHours[idx] = {
-                                      ...updatedHours[idx],
-                                      isClosed: e.target.checked,
-                                    };
-                                    setHours(updatedHours);
-                                  }}
-                                  className="rounded border-outline-variant text-primary focus:ring-primary"
-                                />
-                                Cerrado
-                              </label>
-                            </div>
-                            {!hourRow.isClosed && (
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="time"
-                                  value={hourRow.openTime}
-                                  onChange={(e) => {
-                                    const updatedHours = [...hours];
-                                    updatedHours[idx] = {
-                                      ...updatedHours[idx],
-                                      openTime: e.target.value,
-                                    };
-                                    setHours(updatedHours);
-                                  }}
-                                  className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
-                                />
-                                <span className="text-xs text-on-surface-variant">
-                                  a
-                                </span>
-                                <input
-                                  type="time"
-                                  value={hourRow.closeTime}
-                                  onChange={(e) => {
-                                    const updatedHours = [...hours];
-                                    updatedHours[idx] = {
-                                      ...updatedHours[idx],
-                                      closeTime: e.target.value,
-                                    };
-                                    setHours(updatedHours);
-                                  }}
-                                  className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-outline-variant/35">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsEditingHours(false);
-                              fetchHours();
-                            }}
-                            className="px-3 py-1.5 border border-outline rounded text-xs hover:bg-surface-variant/20 transition-all font-semibold cursor-pointer"
-                          >
-                            Cancelar
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={savingHours}
-                            className="px-3 py-1.5 bg-primary text-on-primary rounded text-xs hover:bg-primary-container transition-all font-semibold cursor-pointer flex items-center gap-1"
-                          >
-                            {savingHours && (
-                              <Loader2 data-icon="loader" className="animate-spin" />
-                            )}
-                            <span>Guardar</span>
-                          </button>
-                        </div>
-                      </form>
-                    )}
-                  </CardContent>
-                </div>
-
-                {!isEditingHours && !loadingHours && (
-                  <CardFooter className="pt-0">
-                    <button
-                      onClick={() => setIsEditingHours(true)}
-                      className="w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer"
-                    >
-                      Modificar Horarios
-                    </button>
-                  </CardFooter>
-                )}
-              </Card>
-
-              {/* Featured Services Card (Spans 8 cols) */}
-              <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
-                <div>
-                  <CardHeader className="flex flex-row items-center justify-between pb-4">
-                    <CardTitle className="text-primary flex items-center gap-2">
-                      <Scissors data-icon="scissors" />
-                      <span>Servicios Destacados</span>
-                    </CardTitle>
-                    <span className="text-body-sm text-on-surface-variant font-medium">
-                      {services.length} servicios registrados
-                    </span>
-                  </CardHeader>
-
-                  <CardContent>
-                    {loadingServices ? (
-                      <div className="flex justify-center py-12">
-                        <Loader2 data-icon="loader" className="animate-spin text-primary" />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                        {filteredServices.map((service, idx) => (
-                          <div
-                            key={idx}
-                            className="bg-surface-container-low flex items-center justify-between p-4 rounded-md group/service relative"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
-                                <Scissors data-icon="scissors" />
-                              </div>
-                              <div>
-                                <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                                  {service.name}
-                                </p>
-                                <p className="font-body-md text-body-md text-on-surface-variant">
-                                  {service.duration} min · {service.price}€
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Hover actions / Mobile visible actions */}
-                            <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/service:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2 bg-surface-container-low pl-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setServiceToEdit(service);
-                                  setIsAddServiceModalOpen(true);
-                                }}
-                                className="p-2 hover:bg-surface-variant rounded-lg text-primary transition-all cursor-pointer"
-                                title="Editar servicio"
-                              >
-                                <Pencil data-icon="pencil" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteService(service.id)}
-                                className="p-2 hover:bg-surface-variant rounded-lg text-error transition-all cursor-pointer"
-                                title="Eliminar servicio"
-                              >
-                                <X data-icon="x" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-
-                        {/* Add Service (Dashed border button) */}
-                        <div
-                          onClick={() => {
-                            setServiceToEdit(null);
-                            setIsAddServiceModalOpen(true);
-                          }}
-                          className="border border-dashed border-outline-variant hover:border-primary flex items-center justify-center gap-2 p-4 rounded-md cursor-pointer hover:bg-surface-variant/20 transition-all min-h-[80px]"
-                        >
-                          <Plus data-icon="plus" />
-                          <span className="font-label-lg text-label-lg font-semibold text-primary">
-                            Añadir Servicio
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </div>
-              </Card>
-
-              {/* Account Security Card (Spans 12 cols) */}
-              <Card className="sm:col-span-2 lg:col-span-12 mt-2">
+              {/* Account Security Card */}
+              <Card className="lg:col-span-12 mt-2">
                 <CardHeader>
                   <CardTitle className="text-primary">
                     Seguridad de la Cuenta
@@ -1303,8 +1243,8 @@ export default function AjustesPage() {
                 </CardContent>
               </Card>
             </div>
-          ) : (
-            /* Bento Grid Layout - Messaging & WhatsApp (Task 2.1) */
+          ) : activeTab === "mensajeria" ? (
+            /* Bento Grid Layout - Messaging & WhatsApp */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
               {/* WhatsApp Connection Card (Spans 5 cols) */}
               <Card className="sm:col-span-2 lg:col-span-5 flex flex-col justify-between min-h-0 sm:min-h-[420px]">
@@ -1622,6 +1562,623 @@ export default function AjustesPage() {
                 </div>
               </Card>
             </div>
+          ) : (
+            /* Bento Grid Layout - Gestión del Negocio */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
+              {/* Business Profile Card (Spans 8 cols) */}
+              {isEditingBusiness ? (
+                <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
+                  <form onSubmit={handleSaveBusiness} className="h-full flex flex-col justify-between">
+                    <div>
+                      <CardHeader className="flex flex-row items-center justify-between pb-4">
+                        <CardTitle className="text-primary flex items-center gap-2">
+                          <Store data-icon="store" />
+                          <span>Información del Negocio</span>
+                        </CardTitle>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEditingBusiness(false);
+                              fetchProfile();
+                            }}
+                            className="px-4 py-2 border border-outline rounded-lg font-label-md text-label-md hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="submit"
+                            className="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
+                          >
+                            <Save data-icon="save" />
+                            <span>Guardar</span>
+                          </button>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent>
+                        {/* Cover Photo Banner */}
+                        <div className="relative w-full h-36 rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10 border border-outline-variant/60 mb-6 group">
+                          {profile.coverUrl ? (
+                            <img
+                              src={profile.coverUrl}
+                              alt="Portada del Negocio"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-on-surface-variant/30 font-medium text-body-sm select-none">
+                              Sin foto de portada. Haz clic para subir una.
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            ref={coverInputRef}
+                            onChange={handleCoverChange}
+                            accept="image/*"
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={triggerCoverUpload}
+                            className="absolute bottom-2 right-2 bg-surface/85 hover:bg-surface border border-outline-variant px-3 py-1 rounded-md text-label-sm font-semibold flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+                          >
+                            <Camera data-icon="camera" />
+                            <span>Cambiar portada</span>
+                          </button>
+                        </div>
+
+                        {/* Business Photo Row */}
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="relative group shrink-0">
+                            <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
+                              <img
+                                src={profile.logoUrl || "/logo.png"}
+                                alt="Foto del Negocio"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <input
+                              type="file"
+                              ref={businessLogoInputRef}
+                              onChange={handleBusinessLogoChange}
+                              accept="image/*"
+                              className="hidden"
+                            />
+                            <button
+                              type="button"
+                              onClick={triggerBusinessLogoUpload}
+                              className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer border border-primary/20"
+                            >
+                              <Camera data-icon="camera" className="text-white" />
+                            </button>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-label-md text-label-md text-on-surface font-semibold">Foto del Negocio</span>
+                            <p className="text-[11px] text-on-surface-variant/85 leading-normal">
+                              Esta es la imagen de perfil de tu negocio o logotipo comercial.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Form fields */}
+                        <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <Field>
+                            <FieldLabel htmlFor="profile-name">
+                              Nombre Comercial
+                            </FieldLabel>
+                            <input
+                              id="profile-name"
+                              type="text"
+                              required
+                              value={profile.name}
+                              onChange={(e) =>
+                                setProfile((prev) => ({
+                                  ...prev,
+                                  name: e.target.value,
+                                }))
+                              }
+                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            />
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor="profile-email">
+                              Correo Electrónico
+                            </FieldLabel>
+                            <input
+                              id="profile-email"
+                              type="email"
+                              required
+                              value={profile.email}
+                              onChange={(e) =>
+                                setProfile((prev) => ({
+                                  ...prev,
+                                  email: e.target.value,
+                                }))
+                              }
+                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            />
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor="profile-phone">
+                              Teléfono
+                            </FieldLabel>
+                            <input
+                              id="profile-phone"
+                              type="tel"
+                              required
+                              value={profile.phone}
+                              onChange={(e) =>
+                                setProfile((prev) => ({
+                                  ...prev,
+                                  phone: e.target.value,
+                                }))
+                              }
+                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            />
+                          </Field>
+                          <Field>
+                            <FieldLabel htmlFor="profile-address">
+                              Dirección
+                            </FieldLabel>
+                            <input
+                              id="profile-address"
+                              type="text"
+                              required
+                              value={profile.address}
+                              onChange={(e) =>
+                                setProfile((prev) => ({
+                                  ...prev,
+                                  address: e.target.value,
+                                }))
+                              }
+                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                            />
+                          </Field>
+                        </FieldGroup>
+                        
+                        <Field className="mt-4">
+                          <FieldLabel htmlFor="profile-description">
+                            Descripción del Negocio
+                          </FieldLabel>
+                          <textarea
+                            id="profile-description"
+                            value={profile.description || ""}
+                            onChange={(e) =>
+                              setProfile((prev) => ({
+                                ...prev,
+                                description: e.target.value,
+                              }))
+                            }
+                            placeholder="Describe tu negocio, servicios o especialidad..."
+                            className="w-full min-h-[90px] border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface resize-none"
+                          />
+                        </Field>
+                      </CardContent>
+                    </div>
+                  </form>
+                </Card>
+              ) : (
+                <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
+                  <div>
+                    <CardHeader className="flex flex-row items-center justify-between pb-4">
+                      <CardTitle className="text-primary flex items-center gap-2">
+                        <Store data-icon="store" />
+                        <span>Información del Negocio</span>
+                      </CardTitle>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingBusiness(true)}
+                        className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
+                      >
+                        Editar negocio
+                      </button>
+                    </CardHeader>
+
+                    <CardContent>
+                      {/* Cover Photo Banner */}
+                      <div className="relative w-full h-36 rounded-lg overflow-hidden bg-gradient-to-r from-primary/10 to-secondary/10 border border-outline-variant/60 mb-6">
+                        {profile.coverUrl ? (
+                          <img
+                            src={profile.coverUrl}
+                            alt="Portada del Negocio"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-on-surface-variant/30 font-medium text-body-sm select-none">
+                            Espacio sin foto de portada.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Business Photo Row (View Only) */}
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="shrink-0">
+                          <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
+                            <img
+                              src={profile.logoUrl || "/logo.png"}
+                              alt="Foto del Negocio"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-label-md text-label-md text-on-surface font-semibold">Foto del Negocio</span>
+                          <p className="text-[11px] text-on-surface-variant/85 leading-normal">
+                            Logotipo comercial o imagen principal de tu salón.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Info grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                            Nombre Comercial
+                          </span>
+                          <p className="font-body-lg text-body-lg font-medium text-on-surface">
+                            {profile.name}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                            Correo Electrónico
+                          </span>
+                          <p className="font-body-lg text-body-lg font-medium text-on-surface">
+                            {profile.email}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                            Teléfono
+                          </span>
+                          <p className="font-body-lg text-body-lg font-medium text-on-surface">
+                            {profile.phone}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                            Dirección
+                          </span>
+                          <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed">
+                            {profile.address}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1 sm:col-span-2 border-t border-outline-variant/35 pt-4">
+                          <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">
+                            Descripción del Negocio
+                          </span>
+                          <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed whitespace-pre-wrap">
+                            {profile.description || "Sin descripción disponible."}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </div>
+                </Card>
+              )}
+
+              {/* Operating Hours Card (Spans 4 cols) */}
+              <Card className="sm:col-span-1 lg:col-span-4 flex flex-col justify-between">
+                <div>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-primary flex items-center gap-2">
+                      <Clock data-icon="clock" />
+                      <span>Horario de Apertura</span>
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent>
+                    {loadingHours ? (
+                      <div className="flex justify-center py-8">
+                        <Loader2 data-icon="loader" className="animate-spin text-primary" />
+                      </div>
+                    ) : !isEditingHours ? (
+                      <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant font-semibold">
+                        {hours.map((hourRow) => (
+                          <div
+                            key={hourRow.dayOfWeek}
+                            className="flex items-center justify-between py-1 border-b border-outline-variant/65"
+                          >
+                            <span>{dayNames[hourRow.dayOfWeek]}</span>
+                            <span
+                              className={`font-semibold ${hourRow.isClosed ? "text-error" : "text-primary"}`}
+                            >
+                              {hourRow.isClosed
+                                ? "Cerrado"
+                                : `${hourRow.openTime} - ${hourRow.closeTime}`}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <form
+                        onSubmit={handleSaveHours}
+                        className="flex flex-col gap-4"
+                      >
+                        {hours.map((hourRow, idx) => (
+                          <div
+                            key={hourRow.dayOfWeek}
+                            className="flex flex-col gap-2 pb-2 border-b border-outline-variant/40"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-body-md text-on-surface">
+                                {dayNames[hourRow.dayOfWeek]}
+                              </span>
+                              <label className="flex items-center gap-2 cursor-pointer text-xs text-on-surface-variant select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={hourRow.isClosed}
+                                  onChange={(e) => {
+                                    const updatedHours = [...hours];
+                                    updatedHours[idx] = {
+                                      ...updatedHours[idx],
+                                      isClosed: e.target.checked,
+                                    };
+                                    setHours(updatedHours);
+                                  }}
+                                  className="rounded border-outline-variant text-primary focus:ring-primary"
+                                />
+                                Cerrado
+                              </label>
+                            </div>
+                            {!hourRow.isClosed && (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="time"
+                                  value={hourRow.openTime}
+                                  onChange={(e) => {
+                                    const updatedHours = [...hours];
+                                    updatedHours[idx] = {
+                                      ...updatedHours[idx],
+                                      openTime: e.target.value,
+                                    };
+                                    setHours(updatedHours);
+                                  }}
+                                  className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
+                                />
+                                <span className="text-xs text-on-surface-variant">
+                                  a
+                                </span>
+                                <input
+                                  type="time"
+                                  value={hourRow.closeTime}
+                                  onChange={(e) => {
+                                    const updatedHours = [...hours];
+                                    updatedHours[idx] = {
+                                      ...updatedHours[idx],
+                                      closeTime: e.target.value,
+                                    };
+                                    setHours(updatedHours);
+                                  }}
+                                  className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-outline-variant/35">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsEditingHours(false);
+                              fetchHours();
+                            }}
+                            className="px-3 py-1.5 border border-outline rounded text-xs hover:bg-surface-variant/20 transition-all font-semibold cursor-pointer"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={savingHours}
+                            className="px-3 py-1.5 bg-primary text-on-primary rounded text-xs hover:bg-primary-container transition-all font-semibold cursor-pointer flex items-center gap-1"
+                          >
+                            {savingHours && (
+                              <Loader2 data-icon="loader" className="animate-spin" />
+                            )}
+                            <span>Guardar</span>
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </CardContent>
+                </div>
+
+                {!isEditingHours && !loadingHours && (
+                  <CardFooter className="pt-0">
+                    <button
+                      onClick={() => setIsEditingHours(true)}
+                      className="w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer"
+                    >
+                      Modificar Horarios
+                    </button>
+                  </CardFooter>
+                )}
+              </Card>
+
+              {/* Featured Services Card (Spans 12 cols - full width) */}
+              <Card className="col-span-12 flex flex-col justify-between mt-2">
+                <div>
+                  <CardHeader className="flex flex-row items-center justify-between pb-4">
+                    <CardTitle className="text-primary flex items-center gap-2">
+                      <Scissors data-icon="scissors" />
+                      <span>Servicios Destacados</span>
+                    </CardTitle>
+                    <span className="text-body-sm text-on-surface-variant font-medium">
+                      {services.length} servicios registrados
+                    </span>
+                  </CardHeader>
+
+                  <CardContent>
+                    {loadingServices ? (
+                      <div className="flex justify-center py-12">
+                        <Loader2 data-icon="loader" className="animate-spin text-primary" />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                        {filteredServices.map((service, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-surface-container-low flex items-center justify-between p-4 rounded-md group/service relative"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
+                                <Scissors data-icon="scissors" />
+                              </div>
+                              <div>
+                                <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                                  {service.name}
+                                </p>
+                                <p className="font-body-md text-body-md text-on-surface-variant">
+                                  {service.duration} min · {service.price}€
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Hover actions / Mobile visible actions */}
+                            <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/service:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2 bg-surface-container-low pl-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setServiceToEdit(service);
+                                  setIsAddServiceModalOpen(true);
+                                }}
+                                className="p-2 hover:bg-surface-variant rounded-lg text-primary transition-all cursor-pointer"
+                                title="Editar servicio"
+                              >
+                                <Pencil data-icon="pencil" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteService(service.id)}
+                                className="p-2 hover:bg-surface-variant rounded-lg text-error transition-all cursor-pointer"
+                                title="Eliminar servicio"
+                              >
+                                <X data-icon="x" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Add Service (Dashed border button) */}
+                        <div
+                          onClick={() => {
+                            setServiceToEdit(null);
+                            setIsAddServiceModalOpen(true);
+                          }}
+                          className="border border-dashed border-outline-variant hover:border-primary flex items-center justify-center gap-2 p-4 rounded-md cursor-pointer hover:bg-surface-variant/20 transition-all min-h-[80px]"
+                        >
+                          <Plus data-icon="plus" />
+                          <span className="font-label-lg text-label-lg font-semibold text-primary">
+                            Añadir Servicio
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </div>
+              </Card>
+              {/* Workers Management Card */}
+              {showTrabajadoresTab && (
+                <Card className="col-span-12 mt-2">
+                  <CardHeader className="flex flex-row items-center justify-between pb-4">
+                    <CardTitle className="text-teal-850 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-teal-805" />
+                      <span className="text-teal-805">Gestión de Trabajadores</span>
+                    </CardTitle>
+                    <button
+                      onClick={handleOpenCreateWorkerModal}
+                      className="py-2.5 px-4 bg-teal-850 hover:bg-teal-905 text-white rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
+                    >
+                      <UserPlus data-icon="user-plus" />
+                      <span>Añadir Empleado</span>
+                    </button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                      {workers.map((worker) => {
+                        const specialty = getWorkerSpecialty(worker);
+                        const status = getWorkerStatus(worker);
+                        const avatarUrl = getWorkerAvatar(worker);
+                        const isActive = status === "ACTIVO";
+
+                        return (
+                          <div
+                            key={worker.id}
+                            className={`bg-surface-container-low border border-outline-variant/60 rounded-xl p-4 flex items-center gap-4 relative group/worker transition-all hover:shadow-sm ${
+                              !isActive ? "opacity-65" : ""
+                            }`}
+                          >
+                            {/* Avatar / Placeholder */}
+                            <div className="shrink-0">
+                              {avatarUrl ? (
+                                <div className="w-14 h-14 rounded-full overflow-hidden border border-outline-variant/55 bg-surface-container">
+                                  <img
+                                    src={avatarUrl}
+                                    alt={`Foto de ${worker.name}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div
+                                  className={`w-14 h-14 rounded-full flex items-center justify-center border border-outline-variant/40 ${
+                                    isActive
+                                      ? "bg-[#b0c4de]/40 text-slate-600"
+                                      : "bg-slate-100 text-slate-350"
+                                  }`}
+                                >
+                                  <User className="w-6 h-6" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Worker Info */}
+                            <div className="flex flex-col min-w-0">
+                              <span className={`font-semibold text-body-lg truncate ${!isActive ? "text-on-surface-variant/50" : "text-on-surface"}`}>
+                                {worker.name}
+                              </span>
+                              <span className={`text-body-md truncate ${!isActive ? "text-on-surface-variant/40" : "text-on-surface-variant"}`}>
+                                {specialty}
+                              </span>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span
+                                  className={`w-2 h-2 rounded-full ${
+                                    isActive ? "bg-emerald-500" : "bg-red-400"
+                                  }`}
+                                />
+                                <span className={`text-[10px] font-semibold tracking-wider ${!isActive ? "text-on-surface-variant/40" : "text-on-surface-variant"}`}>
+                                  {status}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Hover actions / Mobile visible actions */}
+                            <div className="absolute right-3 top-3 flex items-center gap-1 opacity-0 group-hover/worker:opacity-100 transition-opacity bg-surface-container-low pl-2">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditWorkerModal(worker)}
+                                className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md active:scale-95 transition-all cursor-pointer"
+                                title="Editar trabajador"
+                              >
+                                <Edit2 data-icon="edit-2" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteWorker(worker.id)}
+                                disabled={worker.id === session?.user?.id}
+                                className="p-1.5 hover:bg-error-container/20 text-on-surface-variant hover:text-error rounded-md active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                                title="Eliminar trabajador"
+                              >
+                                <Trash2 data-icon="trash-2" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
         </main>
 
@@ -1646,6 +2203,107 @@ export default function AjustesPage() {
         onSave={handleSaveService}
         serviceToEdit={serviceToEdit}
       />
+
+      {/* Worker Add/Edit Modal */}
+      {isWorkerModalOpen && (
+        <div className="fixed inset-0 bg-black/55 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
+              <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                {editingWorker ? "Editar Trabajador" : "Nuevo Trabajador"}
+              </h2>
+              <button
+                onClick={() => setIsWorkerModalOpen(false)}
+                className="p-1.5 hover:bg-surface-variant text-on-surface-variant rounded-full active:scale-90 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveWorker} className="p-6 flex flex-col gap-6 overflow-y-auto">
+              {workerErrorMsg && (
+                <div className="bg-error-container border border-error-container/45 text-on-error-container p-4 rounded-xl font-medium text-body-md">
+                  {workerErrorMsg}
+                </div>
+              )}
+
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="workerName">Nombre Completo</FieldLabel>
+                  <FloatingInput
+                    id="workerName"
+                    label="Nombre y Apellidos"
+                    value={workerFormData.name}
+                    onChange={(e) => setWorkerFormData({ ...workerFormData, name: e.target.value })}
+                    icon={User}
+                    required
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="workerEmail">Correo Electrónico</FieldLabel>
+                  <FloatingInput
+                    id="workerEmail"
+                    label="correo@empresa.com"
+                    type="email"
+                    value={workerFormData.email}
+                    onChange={(e) => setWorkerFormData({ ...workerFormData, email: e.target.value })}
+                    icon={Mail}
+                    required
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="workerPassword">
+                    Contraseña {editingWorker && <span className="text-on-surface-variant/50 font-normal">(dejar en blanco para mantener)</span>}
+                  </FieldLabel>
+                  <FloatingInput
+                    id="workerPassword"
+                    label={editingWorker ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"}
+                    type="password"
+                    value={workerFormData.password}
+                    onChange={(e) => setWorkerFormData({ ...workerFormData, password: e.target.value })}
+                    icon={Key}
+                    required={!editingWorker}
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="workerRole">Rol de Usuario</FieldLabel>
+                  <div className="relative">
+                    <select
+                      id="workerRole"
+                      value={workerFormData.role}
+                      onChange={(e) => setWorkerFormData({ ...workerFormData, role: e.target.value as "JEFE" | "EMPLEADO" })}
+                      className="w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-md p-3.5 focus:border-primary focus:border-2 focus:outline-none transition-all"
+                    >
+                      <option value="EMPLEADO">Empleado (Staff)</option>
+                      <option value="JEFE">Jefe / Encargado</option>
+                    </select>
+                  </div>
+                </Field>
+              </FieldGroup>
+
+              <div className="flex items-center justify-end gap-3 mt-4 border-t border-outline-variant/50 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsWorkerModalOpen(false)}
+                  className="py-2.5 px-4 text-on-surface-variant hover:bg-surface-variant rounded-lg font-medium text-body-md active:scale-95 transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="py-2.5 px-5 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-medium text-body-md active:scale-95 transition-all shadow-sm cursor-pointer"
+                >
+                  {editingWorker ? "Guardar Cambios" : "Crear Trabajador"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

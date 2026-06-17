@@ -16,7 +16,6 @@ const createBusinessSchema = z.object({
 router.get('/businesses', authenticate, async (req, res) => {
   try {
     const businesses = await prisma.business.findMany({
-      where: { role: 'BUSINESS' },
       orderBy: { name: 'asc' }
     });
     res.json(businesses);
@@ -30,16 +29,30 @@ router.post('/businesses', authenticate, validateBody(createBusinessSchema), asy
   const { name, email, phone, address, password } = req.body;
   try {
     const hashedPass = await bcrypt.hash(password, 10);
-    const business = await prisma.business.create({
-      data: {
-        name,
-        email,
-        phone,
-        address: address || '',
-        password: hashedPass,
-        role: 'BUSINESS',
-      }
+    
+    const business = await prisma.$transaction(async (tx) => {
+      const biz = await tx.business.create({
+        data: {
+          name,
+          email,
+          phone,
+          address: address || '',
+        }
+      });
+      
+      await tx.user.create({
+        data: {
+          name: `${name} Encargado`,
+          email,
+          password: hashedPass,
+          role: 'JEFE',
+          businessId: biz.id
+        }
+      });
+      
+      return biz;
     });
+
     res.json(business);
   } catch (err) {
     console.error('[API] Error creating business account:', err);

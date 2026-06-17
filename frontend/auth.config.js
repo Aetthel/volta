@@ -14,6 +14,7 @@ export const authConfig = {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.businessId = user.businessId;
       }
       return token;
     },
@@ -21,6 +22,7 @@ export const authConfig = {
       if (token) {
         session.user.role = token.role;
         session.user.id = token.id;
+        session.user.businessId = token.businessId;
       }
       return session;
     },

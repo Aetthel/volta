@@ -43,7 +43,7 @@ export default function NewAppointmentModal({
   initialTime,
 }: NewAppointmentModalProps) {
   const { data: session } = useSession();
-  const businessId = session?.user?.id || "mock-business-id";
+  const businessId = session?.user?.businessId || "mock-business-id";
 
   const [formData, setFormData] = useState({
     clientName: "",

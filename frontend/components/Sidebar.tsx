@@ -20,19 +20,27 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
   
-  const role = session?.user?.role || "BUSINESS";
+  const role = session?.user?.role || "EMPLEADO";
 
-  const navigationItems = role === "ADMIN"
-    ? [
-        { name: "Control Global", href: "/admin", icon: BarChart3 },
-        { name: "Locales", href: "/sedes", icon: Store },
-        { name: "Ajustes", href: "/ajustes", icon: Settings },
-      ]
-    : [
-        { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
-        { name: "Clientes", href: "/clientes", icon: Users },
-        { name: "Ajustes", href: "/ajustes", icon: Settings },
-      ];
+  const navigationItems = [];
+  if (role === "ADMIN") {
+    navigationItems.push(
+      { name: "Control Global", href: "/admin", icon: BarChart3 },
+      { name: "Locales", href: "/sedes", icon: Store },
+      { name: "Ajustes", href: "/ajustes", icon: Settings },
+    );
+  } else if (role === "JEFE") {
+    navigationItems.push(
+      { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
+      { name: "Clientes", href: "/clientes", icon: Users },
+      { name: "Ajustes", href: "/ajustes", icon: Settings },
+    );
+  } else { // EMPLEADO
+    navigationItems.push(
+      { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
+      { name: "Clientes", href: "/clientes", icon: Users },
+    );
+  }
 
   return (
     <aside className="h-full w-[240px] hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-6 z-50">
@@ -42,7 +50,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           {session?.user?.name || "Volta"}
         </h1>
         <p className="text-label-md font-label-md text-on-surface-variant">
-          {role === "ADMIN" ? "Administrador" : "Salón de Belleza"}
+          {role === "ADMIN" ? "Administrador Global" : role === "JEFE" ? "Jefe de Tienda" : "Empleado"}
         </p>
       </div>
 
@@ -70,7 +78,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       </nav>
 
       {/* Action CTA Button at the bottom */}
-      {role === "BUSINESS" && onNewAppointmentClick && (
+      {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
         <div className="px-4 mt-auto">
           <button
             onClick={onNewAppointmentClick}

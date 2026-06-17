@@ -175,7 +175,7 @@ const getWeekDates = (anchorDate: Date) => {
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const businessId = session?.user?.id || "mock-business-id";
+  const businessId = session?.user?.businessId || "mock-business-id";
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);

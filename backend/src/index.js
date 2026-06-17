@@ -74,6 +74,7 @@ app.use('/api/lopd', publicLimiter, require('./routes/lopd'));
 app.use('/api/business', require('./routes/business'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/users', require('./routes/users'));
 
 const bcrypt = require('bcryptjs');
 
@@ -83,40 +84,64 @@ async function ensureMockBusinessesExist() {
     
     // Upsert Business account
     await prisma.business.upsert({
-      where: { email: 'contacto@glow.com' },
+      where: { id: 'mock-business-id' },
       update: {
         name: 'Glow (Ejemplo)',
-        address: 'Calle de Velázquez, 45, Madrid'
+        address: 'Calle de Velázquez, 45, Madrid',
+        email: 'contacto@glow.com'
       },
       create: {
         id: 'mock-business-id',
         name: 'Glow (Ejemplo)',
         phone: '34696352940',
         email: 'contacto@glow.com',
-        password: hashedPass,
-        role: 'BUSINESS',
         address: 'Calle de Velázquez, 45, Madrid',
         welcomeMessage: '¡Hola {{clientName}}! Hemos confirmado tu cita para el {{appointmentDate}} a las {{appointmentTime}} en {{businessName}}.',
         reminderMessage: 'Hola {{clientName}}, recordatorio de tu cita mañana en {{businessName}} a las {{appointmentTime}}.'
       }
     });
 
-    // Upsert Admin account
-    await prisma.business.upsert({
+    // Upsert Admin User
+    const hashedAdminPass = await bcrypt.hash('admin123', 10);
+    await prisma.user.upsert({
       where: { email: 'admin@test.com' },
       update: {},
       create: {
         id: 'mock-admin-id',
         name: 'Admin Global',
-        phone: '34696352940',
         email: 'admin@test.com',
-        password: hashedPass,
+        password: hashedAdminPass,
         role: 'ADMIN',
-        address: 'Local Principal Volta, Madrid'
       }
     });
 
-    console.log('[API] Mock businesses verified/created in database.');
+    // Upsert Jefe User
+    await prisma.user.upsert({
+      where: { email: 'jefe@test.com' },
+      update: {},
+      create: {
+        name: 'Jefe Glow',
+        email: 'jefe@test.com',
+        password: hashedPass,
+        role: 'JEFE',
+        businessId: 'mock-business-id',
+      }
+    });
+
+    // Upsert Empleado User
+    await prisma.user.upsert({
+      where: { email: 'empleado@test.com' },
+      update: {},
+      create: {
+        name: 'Empleado Glow',
+        email: 'empleado@test.com',
+        password: hashedPass,
+        role: 'EMPLEADO',
+        businessId: 'mock-business-id',
+      }
+    });
+
+    console.log('[API] Mock users and businesses verified/created in database.');
 
     // Seed example clients and appointments for demonstration if they don't exist yet
     const clientCount = await prisma.client.count({

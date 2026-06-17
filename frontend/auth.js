@@ -9,6 +9,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  secret: process.env.AUTH_SECRET || "fallback-secret-for-dev",
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -19,27 +20,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Database fallback
         try {
-          const business = await prisma.business.findUnique({
+          const user = await prisma.user.findUnique({
             where: { email: credentials.email },
           });
 
-          if (!business) return null;
+          if (!user) return null;
 
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
-            business.password
+            user.password
           );
 
           if (!isPasswordValid) return null;
 
           return {
-            id: business.id,
-            name: business.name,
-            email: business.email,
-            role: business.role,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            businessId: user.businessId,
           };
         } catch (error) {
-          console.error("Database connection omitted, running in mock mode.");
+          console.error("Database connection omitted, running in mock mode.", error);
           return null;
         }
       },

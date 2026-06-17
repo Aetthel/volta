@@ -125,8 +125,6 @@ exports.Prisma.BusinessScalarFieldEnum = {
   name: 'name',
   phone: 'phone',
   email: 'email',
-  password: 'password',
-  role: 'role',
   address: 'address',
   logoUrl: 'logoUrl',
   coverUrl: 'coverUrl',
@@ -136,6 +134,17 @@ exports.Prisma.BusinessScalarFieldEnum = {
   reminderMessage: 'reminderMessage',
   whatsappStatus: 'whatsappStatus',
   qrCode: 'qrCode'
+};
+
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  role: 'role',
+  businessId: 'businessId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.ClientScalarFieldEnum = {
@@ -200,15 +209,16 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-exports.BusinessRole = exports.$Enums.BusinessRole = {
-  ADMIN: 'ADMIN',
-  BUSINESS: 'BUSINESS'
-};
-
 exports.WhatsAppStatus = exports.$Enums.WhatsAppStatus = {
   CONNECTED: 'CONNECTED',
   DISCONNECTED: 'DISCONNECTED',
   WAITING_QR: 'WAITING_QR'
+};
+
+exports.UserRole = exports.$Enums.UserRole = {
+  ADMIN: 'ADMIN',
+  JEFE: 'JEFE',
+  EMPLEADO: 'EMPLEADO'
 };
 
 exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
@@ -219,6 +229,7 @@ exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
 
 exports.Prisma.ModelName = {
   Business: 'Business',
+  User: 'User',
   Client: 'Client',
   Appointment: 'Appointment',
   BusinessHours: 'BusinessHours',

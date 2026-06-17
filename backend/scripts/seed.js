@@ -5,15 +5,15 @@ async function main() {
   // Clear existing data to allow fresh seeds and avoid unique constraint failures
   await prisma.appointment.deleteMany();
   await prisma.client.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.business.deleteMany();
 
-  // 1. Create ADMIN User
+  // 1. Create ADMIN User (global, not tied to a business)
   const hashedAdminPassword = await bcrypt.hash('admin123', 10);
-  const admin = await prisma.business.create({
+  const admin = await prisma.user.create({
     data: {
       id: 'mock-admin-id',
       name: 'Volta Admin',
-      phone: '34600000000',
       email: 'admin@test.com',
       password: hashedAdminPassword,
       role: 'ADMIN',
@@ -21,19 +21,42 @@ async function main() {
   });
   console.log('Admin user created:', admin);
 
-  // 2. Create BUSINESS User (Test Salon)
-  const hashedBusinessPassword = await bcrypt.hash('123456', 10);
+  // 2. Create BUSINESS (Test Salon)
   const business = await prisma.business.create({
     data: {
       id: 'mock-business-id',
       name: 'Salón Glow de Prueba',
       phone: '34612345678',
       email: 'contacto@glow.com',
-      password: hashedBusinessPassword,
-      role: 'BUSINESS',
     },
   });
-  console.log('Business user created:', business);
+  console.log('Business created:', business);
+
+  // 2.1 Create JEFE (Store Manager)
+  const hashedJefePassword = await bcrypt.hash('123456', 10);
+  const jefe = await prisma.user.create({
+    data: {
+      name: 'Jefe Glow',
+      email: 'jefe@test.com',
+      password: hashedJefePassword,
+      role: 'JEFE',
+      businessId: 'mock-business-id',
+    },
+  });
+  console.log('Jefe user created:', jefe);
+
+  // 2.2 Create EMPLEADO (Store Employee)
+  const hashedEmpleadoPassword = await bcrypt.hash('123456', 10);
+  const empleado = await prisma.user.create({
+    data: {
+      name: 'Empleado Glow',
+      email: 'empleado@test.com',
+      password: hashedEmpleadoPassword,
+      role: 'EMPLEADO',
+      businessId: 'mock-business-id',
+    },
+  });
+  console.log('Empleado user created:', empleado);
 
   // 3. Create default Services
   await prisma.service.createMany({

@@ -15,19 +15,27 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
   
-  const role = session?.user?.role || "BUSINESS";
+  const role = session?.user?.role || "EMPLEADO";
 
-  const navItems = role === "ADMIN"
-    ? [
-        { name: "Inicio", href: "/admin", icon: BarChart3 },
-        { name: "Locales", href: "/sedes", icon: Store },
-        { name: "Ajustes", href: "/ajustes", icon: Settings },
-      ]
-    : [
-        { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
-        { name: "Clientes", href: "/clientes", icon: Users },
-        { name: "Ajustes", href: "/ajustes", icon: Settings },
-      ];
+  const navItems = [];
+  if (role === "ADMIN") {
+    navItems.push(
+      { name: "Inicio", href: "/admin", icon: BarChart3 },
+      { name: "Locales", href: "/sedes", icon: Store },
+      { name: "Ajustes", href: "/ajustes", icon: Settings },
+    );
+  } else if (role === "JEFE") {
+    navItems.push(
+      { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
+      { name: "Clientes", href: "/clientes", icon: Users },
+      { name: "Ajustes", href: "/ajustes", icon: Settings },
+    );
+  } else { // EMPLEADO
+    navItems.push(
+      { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
+      { name: "Clientes", href: "/clientes", icon: Users },
+    );
+  }
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-surface border-t border-outline-variant shadow-lg flex justify-around items-center h-16 pb-safe">
