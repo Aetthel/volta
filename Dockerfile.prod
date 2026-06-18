@@ -27,6 +27,6 @@ COPY . .
 RUN npm run --workspace=backend prisma:generate 2>/dev/null || npx prisma generate --schema=backend/prisma/schema.prisma
 
 # Build Next.js for production
-RUN npm run --workspace=frontend build
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" API_KEY="dummy" npm run --workspace=frontend build
 
 EXPOSE 3000 3001
