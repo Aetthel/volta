@@ -18,6 +18,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
+import { Button } from "@/components/ui/volta-ui";
 
 export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -149,9 +150,13 @@ export default function AdminPage() {
                 <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                   Evolución de Ingresos
                 </h3>
-                <button className="p-1 rounded-md hover:bg-surface-container transition-colors text-on-surface-variant cursor-pointer">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-1 rounded-md hover:bg-surface-container text-on-surface-variant w-8 h-8 shadow-none active:scale-95"
+                >
+                  <MoreVertical data-icon="more-vertical" />
+                </Button>
               </div>
 
               {/* Graphical representation */}

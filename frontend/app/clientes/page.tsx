@@ -24,7 +24,7 @@ import Header from "@/components/Header";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Badge } from "@/components/ui/volta-ui";
+import { Badge, Button, Card, CardHeader, CardTitle, Empty } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -455,206 +455,216 @@ export default function ClientesPage() {
           </section>
 
           {/* Modern Table Container */}
-          <section className="bg-surface-container-lowest rounded-md shadow-[0px_2px_8px_rgba(0,0,0,0.04)] border border-outline-variant overflow-hidden">
-            <div className="p-6 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <h3 className="font-title-md text-title-md text-on-surface font-semibold">
+          <Card>
+            <CardHeader className="flex-row items-center justify-between gap-4 border-b border-outline-variant/40 pb-4">
+              <CardTitle className="font-semibold text-title-md">
                 Base de Datos de Clientes
-              </h3>
-            </div>
+              </CardTitle>
+            </CardHeader>
 
-            {/* Responsive Table */}
-            <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-surface-container-low select-none">
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
-                      Cliente
-                    </th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
-                      Teléfono
-                    </th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
-                      Última Visita
-                    </th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
-                      Servicio Frecuente
-                    </th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
-                      Estado LOPD
-                    </th>
-                    <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant">
-                  {filteredClients.length > 0 ? (
-                    filteredClients.map((client) => (
-                      <tr
-                        key={client.id}
-                        className="hover:bg-secondary-container/10 transition-colors group cursor-pointer"
-                      >
-                        {/* Name and avatar */}
-                        <td className="px-6 py-4 flex items-center gap-4">
-                          {client.avatarUrl ? (
-                            <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container shrink-0">
-                              <img
-                                src={client.avatarUrl}
-                                alt={client.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-lg shrink-0 select-none ${getAvatarColor(client.name)}`}
-                            >
-                              {getInitials(client.name, client.surname)}
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                              {client.name} {client.surname}
-                            </p>
-                            <p className="text-sm text-on-surface-variant font-medium">
-                              {client.email}
-                            </p>
-                          </div>
-                        </td>
-                        {/* Phone */}
-                        <td className="px-6 py-4 text-body-lg text-on-surface font-medium">
-                          {formatPhoneForDisplay(client.phone)}
-                        </td>
-                        {/* Last Visit */}
-                        <td className="px-6 py-4 text-body-lg text-on-surface font-medium">
-                          {client.lastVisit}
-                        </td>
-                        {/* Frequent Service */}
-                        <td className="px-6 py-4">
-                          <Badge variant="secondary">
-                            {client.frequentService}
-                          </Badge>
-                        </td>
-                        {/* Estado LOPD */}
-                        <td className="px-6 py-4">
-                          <Badge
-                            variant={
-                              client.lopdStatus === "Aceptado"
-                                ? "default"
-                                : "error"
-                            }
-                            className={
-                              client.lopdStatus === "Pendiente"
-                                ? "animate-pulse"
-                                : ""
-                            }
-                          >
-                            {client.lopdStatus === "Aceptado"
-                              ? "Aceptado"
-                              : "Pendiente"}
-                          </Badge>
-                        </td>
-                        {/* Actions */}
-                        <td className="px-6 py-4">
-                          <div className="flex justify-start">
-                            <button
-                              onClick={(e) => handleToggleDropdown(e, client.id)}
-                              className="p-2 rounded-full text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
-                              title="Acciones"
-                            >
-                              <MoreVertical className="w-5 h-5" />
-                            </button>
-
-                            {mounted && activeDropdownClientId === client.id && dropdownCoords && createPortal(
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: `${dropdownCoords.top}px`,
-                                  left: `${dropdownCoords.left}px`,
-                                }}
-                                className="w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right"
-                              >
-                                {client.lopdStatus === "Aceptado" ? (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveDropdownClientId(null);
-                                      setDropdownCoords(null);
-                                      handleSendCustomMessage(client);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 cursor-pointer"
-                                  >
-                                    <MessageCircle className="w-4 h-4 text-emerald-600" />
-                                    <span>Enviar WhatsApp</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveDropdownClientId(null);
-                                      setDropdownCoords(null);
-                                      handleSendWhatsAppConsent(client);
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 cursor-pointer"
-                                  >
-                                    <ShieldCheck className="w-4 h-4 text-amber-600" />
-                                    <span>Enviar LOPD</span>
-                                  </button>
-                                )}
-
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveDropdownClientId(null);
-                                    setDropdownCoords(null);
-                                    setEditingClient(client);
-                                    setIsClientModalOpen(true);
-                                  }}
-                                  className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-2 cursor-pointer"
-                                >
-                                  <Edit3 className="w-4 h-4 text-primary" />
-                                  <span>Editar cliente</span>
-                                </button>
-
-                                <div className="my-1 border-t border-outline-variant/65"></div>
-
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setActiveDropdownClientId(null);
-                                    setDropdownCoords(null);
-                                    handleDeleteClient(
-                                      client.id,
-                                      `${client.name} ${client.surname}`
-                                    );
-                                  }}
-                                  className="w-full px-4 py-2.5 text-left font-label-md text-label-md font-semibold text-error hover:bg-error-container/20 transition-colors flex items-center gap-2 cursor-pointer"
-                                  title="Eliminar cliente"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  <span>Eliminar cliente</span>
-                                </button>
-                              </div>,
-                              document.body
-                            )}
-                          </div>
-                        </td>
+            <div>
+              {filteredClients.length > 0 ? (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-surface-container-low select-none">
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Cliente
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Teléfono
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Última Visita
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Servicio Frecuente
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Estado LOPD
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Acciones
+                        </th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="px-6 py-8 text-center text-on-surface-variant text-body-lg"
-                      >
-                        No se encontraron clientes que coincidan con la
-                        búsqueda.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant">
+                      {
+                        filteredClients.map((client) => (
+                          <tr
+                            key={client.id}
+                            className="hover:bg-secondary-container/10 transition-colors group cursor-pointer"
+                          >
+                            {/* Name and avatar */}
+                            <td className="px-6 py-4 flex items-center gap-4">
+                              {client.avatarUrl ? (
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant bg-surface-container shrink-0">
+                                  <img
+                                    src={client.avatarUrl}
+                                    alt={client.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <div
+                                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-lg shrink-0 select-none ${getAvatarColor(client.name)}`}
+                                >
+                                  {getInitials(client.name, client.surname)}
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                                  {client.name} {client.surname}
+                                </p>
+                                <p className="text-sm text-on-surface-variant font-medium">
+                                  {client.email}
+                                </p>
+                              </div>
+                            </td>
+                            {/* Phone */}
+                            <td className="px-6 py-4 text-body-lg text-on-surface font-medium">
+                              {formatPhoneForDisplay(client.phone)}
+                            </td>
+                            {/* Last Visit */}
+                            <td className="px-6 py-4 text-body-lg text-on-surface font-medium">
+                              {client.lastVisit}
+                            </td>
+                            {/* Frequent Service */}
+                            <td className="px-6 py-4">
+                              <Badge variant="secondary">
+                                {client.frequentService}
+                              </Badge>
+                            </td>
+                            {/* Estado LOPD */}
+                            <td className="px-6 py-4">
+                              <Badge
+                                variant={
+                                  client.lopdStatus === "Aceptado"
+                                    ? "default"
+                                    : "error"
+                                }
+                                className={
+                                  client.lopdStatus === "Pendiente"
+                                    ? "animate-pulse"
+                                    : ""
+                                }
+                              >
+                                {client.lopdStatus === "Aceptado"
+                                  ? "Aceptado"
+                                  : "Pendiente"}
+                              </Badge>
+                            </td>
+                            {/* Actions */}
+                            <td className="px-6 py-4">
+                              <div className="flex justify-start">
+                                <Button
+                                  variant="ghost"
+                                  onClick={(e) => handleToggleDropdown(e, client.id)}
+                                  className="p-2 rounded-full text-outline hover:text-on-surface hover:bg-surface-container active:scale-[0.98] w-9 h-9"
+                                  title="Acciones"
+                                >
+                                  <MoreVertical className="w-5 h-5" />
+                                </Button>
+
+                                {mounted && activeDropdownClientId === client.id && dropdownCoords && createPortal(
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: `${dropdownCoords.top}px`,
+                                      left: `${dropdownCoords.left}px`,
+                                    }}
+                                    className="w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right"
+                                  >
+                                    {client.lopdStatus === "Aceptado" ? (
+                                      <Button
+                                        variant="ghost"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveDropdownClientId(null);
+                                          setDropdownCoords(null);
+                                          handleSendCustomMessage(client);
+                                        }}
+                                        className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
+                                      >
+                                        <MessageCircle className="w-4 h-4 text-emerald-600" />
+                                        <span>Enviar WhatsApp</span>
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="ghost"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setActiveDropdownClientId(null);
+                                          setDropdownCoords(null);
+                                          handleSendWhatsAppConsent(client);
+                                        }}
+                                        className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
+                                      >
+                                        <ShieldCheck className="w-4 h-4 text-amber-600" />
+                                        <span>Enviar LOPD</span>
+                                      </Button>
+                                    )}
+
+                                    <Button
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDropdownClientId(null);
+                                        setDropdownCoords(null);
+                                        setEditingClient(client);
+                                        setIsClientModalOpen(true);
+                                      }}
+                                      className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
+                                    >
+                                      <Edit3 className="w-4 h-4 text-primary" />
+                                      <span>Editar cliente</span>
+                                    </Button>
+
+                                    <div className="my-1 border-t border-outline-variant/65"></div>
+
+                                    <Button
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDropdownClientId(null);
+                                        setDropdownCoords(null);
+                                        handleDeleteClient(
+                                          client.id,
+                                          `${client.name} ${client.surname}`
+                                        );
+                                      }}
+                                      className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-error hover:bg-error-container/20 justify-start shadow-none active:scale-100"
+                                      title="Eliminar cliente"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                      <span>Eliminar cliente</span>
+                                    </Button>
+                                  </div>,
+                                  document.body
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Empty
+                  title="No se encontraron clientes"
+                  description="Prueba a ajustar tu búsqueda o añade un nuevo cliente."
+                  icon={UsersIcon}
+                  action={
+                    <Button variant="primary" onClick={() => setIsClientModalOpen(true)}>
+                      Añadir Cliente
+                    </Button>
+                  }
+                  className="border-none bg-transparent py-12"
+                />
+              )}
             </div>
-          </section>
+          </Card>
         </main>
 
         {/* Mobile floating FAB action */}

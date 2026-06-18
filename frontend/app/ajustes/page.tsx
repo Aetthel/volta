@@ -35,6 +35,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
@@ -52,6 +53,8 @@ import {
   CardContent,
   CardFooter,
   FloatingInput,
+  Button,
+  Skeleton,
 } from "@/components/ui/volta-ui";
 
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
@@ -986,10 +989,12 @@ export default function AjustesPage() {
                     </FieldGroup>
                   </CardContent>
                   <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end gap-3">
-                    <button
+                    <Button
                       type="submit"
                       disabled={savingAdmin}
-                      className="py-2.5 px-5 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-medium text-body-md active:scale-95 transition-all shadow-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      variant="primary"
+                      size="lg"
+                      className="flex items-center gap-2 px-5 py-2.5 active:scale-95 font-medium"
                     >
                       {savingAdmin ? (
                         <>
@@ -1002,7 +1007,7 @@ export default function AjustesPage() {
                           <span>Guardar Cambios</span>
                         </>
                       )}
-                    </button>
+                    </Button>
                   </CardFooter>
                 </form>
               </Card>
@@ -1053,36 +1058,39 @@ export default function AjustesPage() {
 
           {/* Tab Navigation */}
           <div className="flex border-b border-outline-variant/65 mb-6 sm:mb-8 gap-4 sm:gap-6">
-            <button
+            <Button
+              variant="ghost"
               onClick={() => setActiveTab("perfil")}
-              className={`pb-3 font-label-lg text-label-lg font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
                 activeTab === "perfil"
                   ? "border-primary text-primary"
                   : "border-transparent text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Perfil y Seguridad
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => setActiveTab("mensajeria")}
-              className={`pb-3 font-label-lg text-label-lg font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
                 activeTab === "mensajeria"
                   ? "border-primary text-primary"
                   : "border-transparent text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Mensajes y WhatsApp
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => setActiveTab("gestion")}
-              className={`pb-3 font-label-lg text-label-lg font-semibold border-b-2 transition-all cursor-pointer ${
+              className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
                 activeTab === "gestion"
                   ? "border-primary text-primary"
                   : "border-transparent text-on-surface-variant hover:text-on-surface"
               }`}
             >
               Gestión del Negocio
-            </button>
+            </Button>
           </div>
 
           {/* Tab Contents */}
@@ -1096,15 +1104,17 @@ export default function AjustesPage() {
                     <span>Perfil de Usuario</span>
                   </CardTitle>
                   {!isEditingProfile ? (
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => setIsEditingProfile(true)}
-                      className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
+                      className="text-primary hover:text-primary-container font-label-lg text-label-lg transition-all hover:underline p-0 shadow-none active:scale-100 font-medium"
                     >
                       Editar perfil
-                    </button>
+                    </Button>
                   ) : (
                     <div className="flex gap-3">
-                      <button
+                      <Button
+                        variant="ghost"
                         type="button"
                         onClick={() => {
                           setIsEditingProfile(false);
@@ -1116,14 +1126,16 @@ export default function AjustesPage() {
                             });
                           }
                         }}
-                        className="text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-semibold transition-all cursor-pointer hover:underline"
+                        className="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all hover:underline px-0 shadow-none active:scale-100 font-medium"
                       >
                         Cancelar
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="md"
                         onClick={handleSaveProfile}
                         disabled={savingProfile}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2"
                       >
                         {savingProfile ? (
                           <Loader2 data-icon="loader" className="animate-spin" />
@@ -1131,7 +1143,7 @@ export default function AjustesPage() {
                           <Save data-icon="save" />
                         )}
                         <span>Guardar</span>
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </CardHeader>
@@ -1141,9 +1153,12 @@ export default function AjustesPage() {
                       {/* Avatar */}
                       <div className="w-24 h-24 shrink-0 relative">
                         <div
-                          onClick={triggerWorkerPhotoUpload}
-                          className="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 bg-surface-container shadow-sm flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
-                          title="Cambiar foto de perfil"
+                          onClick={isEditingProfile ? triggerWorkerPhotoUpload : undefined}
+                          className={cn(
+                            "w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 bg-surface-container shadow-sm flex items-center justify-center transition-all duration-200 relative group/avatar",
+                            isEditingProfile ? "cursor-pointer hover:opacity-90" : "cursor-default"
+                          )}
+                          title={isEditingProfile ? "Cambiar foto de perfil" : undefined}
                         >
                           {profile.workerPhoto && profile.workerPhoto !== DEFAULT_AVATAR ? (
                             <img
@@ -1154,6 +1169,11 @@ export default function AjustesPage() {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
                               <User className="w-12 h-12" />
+                            </div>
+                          )}
+                          {isEditingProfile && (
+                            <div className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                              <Camera className="w-6 h-6 text-white animate-in zoom-in-90 duration-150" />
                             </div>
                           )}
                         </div>
@@ -1302,9 +1322,12 @@ export default function AjustesPage() {
                           </p>
                         </div>
                       </div>
-                      <button className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold cursor-pointer hover:underline">
+                      <Button
+                        variant="ghost"
+                        className="text-primary hover:text-primary-container font-label-lg text-label-lg transition-all hover:underline p-0 shadow-none active:scale-100 font-medium"
+                      >
                         Cambiar
-                      </button>
+                      </Button>
                     </div>
 
                     {/* 2FA card */}
@@ -1323,9 +1346,12 @@ export default function AjustesPage() {
                           </p>
                         </div>
                       </div>
-                      <button className="text-error hover:text-error/80 font-label-lg text-label-lg font-semibold cursor-pointer hover:underline">
+                      <Button
+                        variant="ghost"
+                        className="text-error hover:text-error/80 font-label-lg text-label-lg transition-all hover:underline p-0 shadow-none active:scale-100 font-medium"
+                      >
                         Desactivar
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -1408,18 +1434,11 @@ export default function AjustesPage() {
                               </span>
                             </div>
                           ) : (
-                            <div className="flex flex-col items-center justify-center h-[200px] text-center">
-                              <Loader2
-                                data-icon="loader"
-                                className="animate-spin mb-3 text-primary"
-                              />
-                              <p className="font-body-md text-body-md text-on-surface-variant font-medium">
-                                Generando código QR...
-                              </p>
-                              <p className="text-[11px] text-on-surface-variant/80 mt-1 max-w-[200px]">
-                                Esto puede tomar hasta 15 segundos mientras se
-                                inicia la sesión.
-                              </p>
+                            <div className="flex flex-col items-center justify-center bg-white p-4 rounded-md border border-outline-variant shadow-sm w-[212px] h-[224px]">
+                              <Skeleton className="w-[180px] h-[180px] rounded" />
+                              <span className="text-[11px] font-medium text-on-surface-variant mt-2 text-center animate-pulse">
+                                Generando QR...
+                              </span>
                             </div>
                           )}
 
@@ -1456,24 +1475,30 @@ export default function AjustesPage() {
 
                 <CardFooter className="pt-0">
                   {whatsappStatus === "CONNECTED" ? (
-                    <button
+                    <Button
+                      variant="outline"
+                      size="lg"
                       onClick={handleDisconnectWhatsapp}
-                      className="w-full py-3 border border-error text-error font-label-lg text-label-lg font-semibold rounded-lg hover:bg-error-container/20 transition-all cursor-pointer text-center"
+                      className="w-full py-3 border-error text-error hover:bg-error-container/20 shadow-none font-medium"
                     >
                       Desconectar cuenta
-                    </button>
+                    </Button>
                   ) : whatsappStatus === "WAITING_QR" ? (
-                    <button
+                    <Button
+                      variant="outline"
+                      size="lg"
                       onClick={handleDisconnectWhatsapp}
-                      className="w-full py-3 border border-outline text-on-surface-variant font-label-lg text-label-lg font-semibold rounded-lg hover:bg-surface-container transition-all cursor-pointer text-center"
+                      className="w-full py-3 text-on-surface-variant hover:bg-surface-container shadow-none font-medium"
                     >
                       Cancelar vinculación
-                    </button>
+                    </Button>
                   ) : (
-                    <button
+                    <Button
+                      variant="primary"
+                      size="lg"
                       onClick={handleConnectWhatsapp}
                       disabled={loadingQr}
-                      className="w-full py-3 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container font-label-lg text-label-lg font-semibold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+                      className="w-full py-3 flex items-center justify-center gap-2 active:scale-[0.98] font-medium"
                     >
                       {loadingQr ? (
                         <>
@@ -1488,7 +1513,7 @@ export default function AjustesPage() {
                           <span>Vincular WhatsApp</span>
                         </>
                       )}
-                    </button>
+                    </Button>
                   )}
                 </CardFooter>
               </Card>
@@ -1503,27 +1528,31 @@ export default function AjustesPage() {
                     </CardTitle>
 
                     {!isEditingTemplates ? (
-                      <button
+                      <Button
+                        variant="ghost"
                         onClick={() => setIsEditingTemplates(true)}
-                        className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
+                        className="text-primary hover:text-primary-container font-label-lg text-label-lg transition-all hover:underline p-0 shadow-none active:scale-100 font-medium"
                       >
                         Editar plantillas
-                      </button>
+                      </Button>
                     ) : (
                       <div className="flex gap-3">
-                        <button
+                        <Button
+                          variant="ghost"
                           onClick={() => {
                             setIsEditingTemplates(false);
                             fetchTemplates();
                           }}
-                          className="text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-semibold transition-all cursor-pointer hover:underline"
+                          className="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all hover:underline px-0 shadow-none active:scale-100 font-medium"
                         >
                           Cancelar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="primary"
+                          size="md"
                           onClick={handleSaveTemplates}
                           disabled={savingTemplates}
-                          className="flex items-center gap-1 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm disabled:opacity-50"
+                          className="flex items-center gap-1 px-4 py-2 font-medium"
                         >
                           {savingTemplates ? (
                             <Loader2
@@ -1534,7 +1563,7 @@ export default function AjustesPage() {
                             <Save data-icon="save" />
                           )}
                           <span>Guardar</span>
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </CardHeader>
@@ -1677,23 +1706,27 @@ export default function AjustesPage() {
                           <span>Información del Negocio</span>
                         </CardTitle>
                         <div className="flex gap-2">
-                          <button
+                          <Button
                             type="button"
+                            variant="outline"
+                            size="md"
                             onClick={() => {
                               setIsEditingBusiness(false);
                               fetchProfile();
                             }}
-                            className="px-4 py-2 border border-outline rounded-lg font-label-md text-label-md hover:bg-surface-variant/20 transition-all cursor-pointer font-semibold text-on-surface"
+                            className="px-4 py-2 hover:bg-surface-variant/20 text-on-surface font-medium shadow-none"
                           >
                             Cancelar
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="submit"
-                            className="flex items-center gap-1.5 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container hover:text-on-primary-container transition-all cursor-pointer font-semibold shadow-sm"
+                            variant="primary"
+                            size="md"
+                            className="flex items-center gap-1.5 px-4 py-2 font-medium"
                           >
                             <Save data-icon="save" />
                             <span>Guardar</span>
-                          </button>
+                          </Button>
                         </div>
                       </CardHeader>
                       <CardContent>
@@ -1714,16 +1747,17 @@ export default function AjustesPage() {
                               accept="image/*"
                               className="hidden"
                             />
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
                               onClick={triggerBusinessLogoUpload}
-                              className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md cursor-pointer border border-primary/20"
+                              className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md border border-primary/20 w-full h-full p-0 shadow-none hover:bg-primary/50 text-white rounded-none"
                             >
                               <Camera
                                 data-icon="camera"
                                 className="text-white"
                               />
-                            </button>
+                            </Button>
                           </div>
                           <div className="flex flex-col gap-0.5">
                             <span className="font-label-md text-label-md text-on-surface font-semibold">
@@ -1841,13 +1875,14 @@ export default function AjustesPage() {
                         <Store data-icon="store" />
                         <span>Información del Negocio</span>
                       </CardTitle>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
                         onClick={() => setIsEditingBusiness(true)}
-                        className="text-primary hover:text-primary-container font-label-lg text-label-lg font-semibold transition-all cursor-pointer hover:underline"
+                        className="text-primary hover:text-primary-container font-label-lg text-label-lg transition-all hover:underline p-0 shadow-none active:scale-100 font-medium"
                       >
                         Editar negocio
-                      </button>
+                      </Button>
                     </CardHeader>
 
                     <CardContent>
@@ -1933,14 +1968,16 @@ export default function AjustesPage() {
 
                   <CardContent>
                     {loadingHours ? (
-                      <div className="flex justify-center py-8">
-                        <Loader2
-                          data-icon="loader"
-                          className="animate-spin text-primary"
-                        />
+                      <div className="flex flex-col gap-4 py-2">
+                        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                          <div key={i} className="flex items-center justify-between py-1 border-b border-outline-variant/30">
+                            <Skeleton className="h-5 w-24" />
+                            <Skeleton className="h-5 w-32" />
+                          </div>
+                        ))}
                       </div>
                     ) : !isEditingHours ? (
-                      <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant font-semibold">
+                      <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant">
                         {hours.map((hourRow) => (
                           <div
                             key={hourRow.dayOfWeek}
@@ -2024,20 +2061,24 @@ export default function AjustesPage() {
                           </div>
                         ))}
                         <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-outline-variant/35">
-                          <button
+                          <Button
+                            variant="outline"
+                            size="sm"
                             type="button"
                             onClick={() => {
                               setIsEditingHours(false);
                               fetchHours();
                             }}
-                            className="px-3 py-1.5 border border-outline rounded text-xs hover:bg-surface-variant/20 transition-all font-semibold cursor-pointer"
+                            className="px-3 py-1.5 font-medium shadow-none"
                           >
                             Cancelar
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
                             type="submit"
                             disabled={savingHours}
-                            className="px-3 py-1.5 bg-primary text-on-primary rounded text-xs hover:bg-primary-container transition-all font-semibold cursor-pointer flex items-center gap-1"
+                            className="px-3 py-1.5 font-medium flex items-center gap-1"
                           >
                             {savingHours && (
                               <Loader2
@@ -2046,7 +2087,7 @@ export default function AjustesPage() {
                               />
                             )}
                             <span>Guardar</span>
-                          </button>
+                          </Button>
                         </div>
                       </form>
                     )}
@@ -2055,12 +2096,14 @@ export default function AjustesPage() {
 
                 {!isEditingHours && !loadingHours && (
                   <CardFooter className="pt-0">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="md"
                       onClick={() => setIsEditingHours(true)}
-                      className="w-full border border-primary text-primary font-label-lg text-label-lg font-semibold py-2 rounded-lg hover:bg-secondary-container/30 transition-all cursor-pointer"
+                      className="w-full py-2 shadow-none font-medium"
                     >
                       Modificar Horarios
-                    </button>
+                    </Button>
                   </CardFooter>
                 )}
               </Card>
@@ -2080,11 +2123,21 @@ export default function AjustesPage() {
 
                   <CardContent>
                     {loadingServices ? (
-                      <div className="flex justify-center py-12">
-                        <Loader2
-                          data-icon="loader"
-                          className="animate-spin text-primary"
-                        />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="bg-surface-container-low flex items-center justify-between p-4 rounded-md animate-pulse"
+                          >
+                            <div className="flex items-center gap-4 w-full">
+                              <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+                              <div className="flex flex-col gap-2 w-full">
+                                <Skeleton className="h-5 w-2/3" />
+                                <Skeleton className="h-4 w-1/3" />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
@@ -2109,25 +2162,29 @@ export default function AjustesPage() {
 
                             {/* Hover actions / Mobile visible actions */}
                             <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/service:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2 bg-surface-container-low pl-2">
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 type="button"
                                 onClick={() => {
                                   setServiceToEdit(service);
                                   setIsAddServiceModalOpen(true);
                                 }}
-                                className="p-2 hover:bg-surface-variant rounded-lg text-primary transition-all cursor-pointer"
+                                className="p-2 hover:bg-surface-variant rounded-lg text-primary shadow-none active:scale-[0.98] w-9 h-9"
                                 title="Editar servicio"
                               >
                                 <Pencil data-icon="pencil" />
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 type="button"
                                 onClick={() => handleDeleteService(service.id)}
-                                className="p-2 hover:bg-surface-variant rounded-lg text-error transition-all cursor-pointer"
+                                className="p-2 hover:bg-surface-variant rounded-lg text-error shadow-none active:scale-[0.98] w-9 h-9"
                                 title="Eliminar servicio"
                               >
                                 <X data-icon="x" />
-                              </button>
+                              </Button>
                             </div>
                           </div>
                         ))}
@@ -2160,13 +2217,15 @@ export default function AjustesPage() {
                         Gestión de Trabajadores
                       </span>
                     </CardTitle>
-                    <button
+                    <Button
+                      variant="primary"
+                      size="md"
                       onClick={handleOpenCreateWorkerModal}
-                      className="py-2.5 px-4 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 active:scale-95 font-medium"
                     >
                       <UserPlus data-icon="user-plus" />
                       <span>Añadir Empleado</span>
-                    </button>
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
@@ -2234,25 +2293,29 @@ export default function AjustesPage() {
 
                             {/* Hover actions / Mobile visible actions */}
                             <div className="absolute right-3 top-3 flex items-center gap-1 opacity-0 group-hover/worker:opacity-100 transition-opacity bg-surface-container-low pl-2">
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 type="button"
                                 onClick={() =>
                                   handleOpenEditWorkerModal(worker)
                                 }
-                                className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md active:scale-95 transition-all cursor-pointer"
+                                className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md active:scale-95 shadow-none w-8 h-8"
                                 title="Editar trabajador"
                               >
                                 <Edit2 data-icon="edit-2" />
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 type="button"
                                 onClick={() => handleDeleteWorker(worker.id)}
                                 disabled={worker.id === session?.user?.id}
-                                className="p-1.5 hover:bg-error-container/20 text-on-surface-variant hover:text-error rounded-md active:scale-95 transition-all disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                                className="p-1.5 hover:bg-error-container/20 text-on-surface-variant hover:text-error rounded-md active:scale-95 disabled:opacity-40 shadow-none w-8 h-8"
                                 title="Eliminar trabajador"
                               >
                                 <Trash2 data-icon="trash-2" />
-                              </button>
+                              </Button>
                             </div>
                           </div>
                         );
@@ -2296,12 +2359,13 @@ export default function AjustesPage() {
                 <Users className="w-5 h-5 text-primary" />
                 {editingWorker ? "Editar Trabajador" : "Nuevo Trabajador"}
               </h2>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setIsWorkerModalOpen(false)}
-                className="p-1.5 hover:bg-surface-variant text-on-surface-variant rounded-full active:scale-90 transition-all cursor-pointer"
+                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 active:scale-90 shadow-none"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <form
@@ -2403,19 +2467,23 @@ export default function AjustesPage() {
               </FieldGroup>
 
               <div className="flex items-center justify-end gap-3 mt-4 border-t border-outline-variant/50 pt-4">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="md"
                   onClick={() => setIsWorkerModalOpen(false)}
-                  className="py-2.5 px-4 text-on-surface-variant hover:bg-surface-variant rounded-lg font-medium text-body-md active:scale-95 transition-all cursor-pointer"
+                  className="px-4 py-2.5 text-on-surface-variant active:scale-95 shadow-none font-medium"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="py-2.5 px-5 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-medium text-body-md active:scale-95 transition-all shadow-sm cursor-pointer"
+                  variant="primary"
+                  size="md"
+                  className="px-5 py-2.5 active:scale-95 font-medium"
                 >
                   {editingWorker ? "Guardar Cambios" : "Crear Trabajador"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

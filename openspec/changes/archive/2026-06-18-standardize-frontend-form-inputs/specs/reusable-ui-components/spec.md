@@ -1,14 +1,4 @@
-# reusable-ui-components Specification
-
-## Purpose
-TBD - created by archiving change migrate-stitch-design. Update Purpose after archive.
-## Requirements
-### Requirement: Componentes comunes de navegación y estadísticas
-El sistema SHALL estructurar componentes reutilizables como `Sidebar`, `BottomNav`, `Header` y `MetricCard` con un estilo uniforme y tipografías consistentes.
-
-#### Scenario: Resaltado dinámico del menú de navegación
-- **WHEN** el usuario navega a través de los enlaces de `Sidebar` en escritorio o `BottomNav` en móvil
-- **THEN** el componente correspondiente aplica el estilo activo resaltado en base a la ruta actual (`usePathname()`)
+## MODIFIED Requirements
 
 ### Requirement: Modales interactivos de creación
 El sistema SHALL proporcionar diálogos modales para la adición de clientes (`AddClientModal`), la creación de servicios (`AddServiceModal`) y la creación de citas (`NewAppointmentModal`) utilizando componentes centralizados de control de entrada como `FloatingInput` para garantizar la consistencia visual y de comportamiento.
@@ -16,4 +6,3 @@ El sistema SHALL proporcionar diálogos modales para la adición de clientes (`A
 #### Scenario: Apertura y envío en modales de creación con controles estandarizados
 - **WHEN** el usuario pulsa en "Nueva Cita", "Añadir Cliente" o "Añadir Servicio" y completa el formulario correspondiente
 - **THEN** todos los campos de entrada de texto utilizan `FloatingInput` con etiquetas flotantes y validaciones nativas de HTML5.
-

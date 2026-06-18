@@ -6,7 +6,10 @@ import {
   FieldGroup,
   Field,
   FieldLabel,
-  InputGroup,
+  FloatingInput,
+  Button,
+  Select,
+  Textarea,
 } from "@/components/ui/volta-ui";
 
 interface ClientToEdit {
@@ -101,12 +104,13 @@ export default function AddClientModal({
               {isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}
             </span>
           </h3>
-          <button
+          <Button
+            variant="ghost"
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface w-8 h-8 active:scale-95 shadow-none"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Form */}
@@ -123,64 +127,48 @@ export default function AddClientModal({
             </div>
             <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field>
-                <FieldLabel htmlFor="name">Nombre</FieldLabel>
-                <input
+                <FloatingInput
                   id="name"
+                  label="Nombre"
                   type="text"
                   required
-                  placeholder="Ej. Ana"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="surname">Apellidos</FieldLabel>
-                <input
+                <FloatingInput
                   id="surname"
+                  label="Apellidos"
                   type="text"
                   required
-                  placeholder="Ej. García López"
                   value={formData.surname}
                   onChange={handleChange}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="phone">Teléfono</FieldLabel>
-                <InputGroup>
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <input
-                    id="phone"
-                    type="tel"
-                    required
-                    placeholder="+34 600 000 000"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                  />
-                </InputGroup>
+                <FloatingInput
+                  id="phone"
+                  label="Teléfono"
+                  type="tel"
+                  required
+                  icon={Phone}
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
-                <InputGroup>
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <input
-                    id="email"
-                    type="email"
-                    placeholder="ana.garcia@email.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                  />
-                </InputGroup>
+                <FloatingInput
+                  id="email"
+                  label="Correo electrónico"
+                  type="email"
+                  icon={Mail}
+                  value={formData.email}
+                  onChange={handleChange}
+                />
               </Field>
             </FieldGroup>
           </div>
@@ -195,30 +183,28 @@ export default function AddClientModal({
             <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field>
                 <FieldLabel htmlFor="frequency">Frecuencia estimada</FieldLabel>
-                <select
+                <Select
                   id="frequency"
                   value={formData.frequency}
                   onChange={handleChange}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 >
                   <option value="Mensual">Mensual</option>
                   <option value="Cada 2 meses">Cada 2 meses</option>
                   <option value="Ocasional">Ocasional</option>
                   <option value="Primera visita">Primera visita</option>
-                </select>
+                </Select>
               </Field>
 
               <Field className="md:col-span-2">
                 <FieldLabel htmlFor="notes">
                   Notas de estilo y alergias
                 </FieldLabel>
-                <textarea
+                <Textarea
                   id="notes"
                   rows={3}
                   placeholder="Cabello fino, prefiere tintes orgánicos, alergia al níquel..."
                   value={formData.notes}
                   onChange={handleChange}
-                  className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface resize-none"
                 />
               </Field>
             </FieldGroup>
@@ -226,19 +212,21 @@ export default function AddClientModal({
 
           {/* Footer Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all cursor-pointer"
+              variant="outline"
+              size="lg"
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer"
+              variant="primary"
+              size="lg"
             >
               {isEditMode ? "Guardar cambios" : "Guardar Cliente"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -19,6 +19,7 @@ import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
+import { Button, Card } from "@/components/ui/volta-ui";
 
 // Interface for calendar appointment item
 interface AppointmentItem {
@@ -32,7 +33,7 @@ interface AppointmentItem {
   dateObj?: Date;
 }
 
-const serviceDurations: Record<string, number> = {
+const defaultServiceDurations: Record<string, number> = {
   "Corte Caballero": 30,
   "Corte Dama": 45,
   "Coloración Premium": 90,
@@ -41,7 +42,7 @@ const serviceDurations: Record<string, number> = {
   "Spa Facial": 45,
 };
 
-function calculateOverlaps(dayApps: any[]) {
+function calculateOverlaps(dayApps: any[], serviceDurations: Record<string, number>) {
   if (dayApps.length === 0) return [];
 
   // 1. Calculate top and height for each appointment
@@ -201,6 +202,8 @@ export default function DashboardPage() {
 
   const [weekAnchorDate, setWeekAnchorDate] = useState<Date>(new Date());
 
+  const [services, setServices] = useState<any[]>([]);
+
   const colorClasses = [
     "bg-primary-container text-on-primary-container border-primary",
     "bg-secondary-container text-on-secondary-container border-secondary",
@@ -225,7 +228,7 @@ export default function DashboardPage() {
         const minsVal = dateObj.getMinutes();
         const timeSlot = `${hoursVal.toString().padStart(2, "0")}:${minsVal.toString().padStart(2, "0")}`;
 
-        const service = app.client?.frequentService || "Corte Caballero";
+        const service = app.serviceName || app.client?.frequentService || "Servicio General";
         let hash = 0;
         for (let i = 0; i < service.length; i++) {
           hash = service.charCodeAt(i) + ((hash << 5) - hash);
@@ -272,6 +275,19 @@ export default function DashboardPage() {
       .catch((e) => {
         console.error("Error loading clients:", e);
         setClients([]);
+      });
+
+    // Fetch Services
+    fetch(`/api/backend/services?businessId=${businessId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setServices(data);
+        }
+      })
+      .catch((e) => {
+        console.error("Error loading services:", e);
+        setServices([]);
       });
   };
 
@@ -455,18 +471,30 @@ export default function DashboardPage() {
     return diffDays <= 30; // registered in the last 30 days
   }).length;
 
-  const servicePrices: Record<string, number> = {
+  const dynamicDurations: Record<string, number> = {
+    ...defaultServiceDurations,
+    ...services.reduce((acc, s) => {
+      acc[s.name] = s.duration;
+      return acc;
+    }, {} as Record<string, number>),
+  };
+
+  const dynamicPrices: Record<string, number> = {
     "Corte Caballero": 35,
     "Corte Dama": 45,
     "Coloración Premium": 85,
     "Tratamiento Keratina": 50,
     Manicura: 20,
     "Spa Facial": 40,
+    ...services.reduce((acc, s) => {
+      acc[s.name] = s.price;
+      return acc;
+    }, {} as Record<string, number>),
   };
 
   const estimatedIncome = appointments
     .filter((app) => app.dayIndex === selectedDayIndex)
-    .reduce((acc, app) => acc + (servicePrices[app.serviceName] || 35), 0);
+    .reduce((acc, app) => acc + (dynamicPrices[app.serviceName] || 35), 0);
 
   const occupiedSlots = new Set(
     appointments
@@ -521,7 +549,7 @@ export default function DashboardPage() {
   const activeApp = todayApps.find((app) => {
     if (!app.dateObj) return false;
     const startTime = new Date(app.dateObj).getTime();
-    const duration = serviceDurations[app.serviceName] || 45;
+    const duration = dynamicDurations[app.serviceName] || 45;
     const endTime = startTime + duration * 60000;
     return nowMs >= startTime && nowMs <= endTime;
   });
@@ -592,7 +620,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Calendar Container */}
-          <section className="bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col">
+          <Card className="flex flex-col">
             {/* Calendar Header Controls */}
             <div className="px-6 py-4 border-b border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-4">
@@ -600,61 +628,75 @@ export default function DashboardPage() {
                   {currentMonthYear}
                 </h3>
                 <div className="flex items-center bg-surface-container-low rounded-lg p-1 text-on-surface-variant border border-outline-variant/30">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handlePrev}
-                    className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer"
+                    className="p-1 rounded w-7 h-7 active:scale-[0.98]"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleGoToday}
                     disabled={isViewingToday}
-                    className={`px-2 text-label-md font-label-md font-semibold transition-all ${
+                    className={`px-2 text-label-md font-medium transition-all shadow-none active:scale-[0.98] ${
                       isViewingToday
-                        ? "text-on-surface-variant/40 cursor-default"
-                        : "text-primary hover:bg-primary-container/20 rounded cursor-pointer"
+                        ? "text-on-surface-variant/40 cursor-default hover:bg-transparent pointer-events-none"
+                        : "text-primary hover:bg-primary-container/20 rounded"
                     }`}
                   >
                     {isViewingToday
                       ? (viewMode === "week" ? "Esta semana" : "Hoy")
                       : (viewMode === "week" ? "Volver a esta semana" : "Volver a hoy")}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleNext}
-                    className="p-1 hover:bg-surface-variant rounded transition-colors cursor-pointer"
+                    className="p-1 rounded w-7 h-7 active:scale-[0.98]"
                   >
                     <ChevronRight className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* View Switches */}
               <div className="flex items-center gap-2">
                 <div className="flex rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low p-[2px]">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setViewMode("week")}
-                    className={`px-4 py-1 text-label-md font-label-md font-semibold rounded-md transition-all cursor-pointer ${
+                    className={`px-4 py-1 rounded-md transition-all font-medium shadow-none active:scale-100 ${
                       viewMode === "week"
-                        ? "bg-secondary-container text-on-secondary-container shadow-sm"
+                        ? "bg-secondary-container text-on-secondary-container shadow-sm hover:bg-secondary-container hover:text-on-secondary-container"
                         : "text-on-surface-variant hover:bg-surface-variant"
                     }`}
                   >
                     Semana
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setViewMode("day")}
-                    className={`px-4 py-1 text-label-md font-label-md font-semibold rounded-md transition-all cursor-pointer ${
+                    className={`px-4 py-1 rounded-md transition-all font-medium shadow-none active:scale-100 ${
                       viewMode === "day"
-                        ? "bg-secondary-container text-on-secondary-container shadow-sm"
+                        ? "bg-secondary-container text-on-secondary-container shadow-sm hover:bg-secondary-container hover:text-on-secondary-container"
                         : "text-on-surface-variant hover:bg-surface-variant"
                     }`}
                   >
                     Día
-                  </button>
+                  </Button>
                 </div>
-                <button className="p-2 border border-outline-variant rounded-lg hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer bg-surface-container-low">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="p-2 border-outline-variant rounded-lg hover:bg-surface-variant text-on-surface-variant hover:text-on-surface bg-surface-container-low w-9 h-9 active:scale-[0.98]"
+                >
                   <Filter className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
             {/* Calendar Calendar Content */}
@@ -830,7 +872,7 @@ export default function DashboardPage() {
                                 .includes(searchQuery.toLowerCase())),
                         );
 
-                        const positionedApps = calculateOverlaps(dayAppointments);
+                        const positionedApps = calculateOverlaps(dayAppointments, dynamicDurations);
                         const isColHovered = hoverGuide && hoverGuide.dayIndex === actualDayIndex;
 
                         return (
@@ -908,16 +950,17 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </Card>
         </main>
 
         {/* Mobile floating FAB action */}
-        <button
+        <Button
+          variant="primary"
           onClick={() => setIsAppointmentModalOpen(true)}
-          className="md:hidden fixed bottom-20 right-6 z-40 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container p-4 rounded-full shadow-lg active:scale-95 transition-all cursor-pointer"
+          className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg active:scale-95"
         >
           <Plus className="w-6 h-6" />
-        </button>
+        </Button>
 
         {/* Responsive Bottom Menu Bar */}
         <BottomNav />

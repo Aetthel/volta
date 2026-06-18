@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { Search, HelpCircle, Settings, LogOut, Bell, User } from "lucide-react";
+import { Button } from "@/components/ui/volta-ui";
 
 interface HeaderProps {
   searchPlaceholder?: string;
@@ -43,7 +44,7 @@ export default function Header({
     : "Volta";
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 w-full bg-surface sticky top-0 z-40 shrink-0">
+    <header className="flex justify-between items-center px-6 py-4 w-full bg-surface z-40 shrink-0">
       {/* Search Input / Mobile branding */}
       <div className="flex items-center gap-4 flex-1">
         {/* Mobile-only logo */}
@@ -72,26 +73,34 @@ export default function Header({
       {/* Right side actions */}
       <div className="flex items-center gap-4">
         {/* Notification Bell */}
-        <button
-          className="p-3 hover:bg-surface-variant rounded-full transition-colors cursor-pointer text-on-surface-variant hover:text-primary relative focus:outline-none"
+        {/* Notification Bell */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-3 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary relative shadow-none w-10 h-10"
           aria-label="Notificaciones"
         >
-          <Bell className="w-5 h-5" />
+          <Bell data-icon="bell" />
           {hasNotifications && (
             <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-surface"></span>
           )}
-        </button>
+        </Button>
 
         {/* Help Icon */}
-        <button className="p-3 hover:bg-surface-variant rounded-full transition-colors cursor-pointer text-on-surface-variant hover:text-primary">
-          <HelpCircle className="w-5 h-5" />
-        </button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-3 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary w-10 h-10 shadow-none"
+        >
+          <HelpCircle data-icon="help" />
+        </Button>
 
         {/* Avatar Profile with Dropdown */}
         <div className="relative">
-          <button
+          <Button
+            variant="ghost"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all shrink-0 focus:outline-none flex items-center justify-center bg-surface-container"
+            className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary p-0 bg-surface-container shadow-none active:scale-95"
           >
             {workerPhoto && workerPhoto !== DEFAULT_AVATAR ? (
               <img
@@ -101,10 +110,10 @@ export default function Header({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
-                <User className="w-5 h-5" />
+                <User data-icon="user" />
               </div>
             )}
-          </button>
+          </Button>
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (
@@ -119,22 +128,23 @@ export default function Header({
                 <Link
                   href="/ajustes"
                   onClick={() => setIsDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-semibold text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
+                  className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-medium text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
                 >
                   <Settings className="w-5 h-5 text-on-surface-variant" />
                   <span>Ajustes</span>
                 </Link>
 
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     setIsDropdownOpen(false);
                     signOut({ callbackUrl: "/login" });
                   }}
-                  className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-semibold text-error hover:bg-error-container/20 transition-colors cursor-pointer w-full text-left border-none"
+                  className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none active:scale-100 rounded-none"
                 >
-                  <LogOut className="w-5 h-5 text-error" />
+                  <LogOut data-icon="logout" className="text-error" />
                   <span>Cerrar Sesión</span>
-                </button>
+                </Button>
               </div>
             </>
           )}

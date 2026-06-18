@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { FieldGroup, Field, FieldLabel, Alert } from "@/components/ui/volta-ui";
+import { FieldGroup, Field, FieldLabel, Alert, Button } from "@/components/ui/volta-ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -162,20 +162,21 @@ export default function LoginPage() {
                     placeholder="••••••••••••••••••••"
                     className="block w-full pl-5 pr-12 py-4 bg-surface-container-lowest text-body-lg text-on-surface border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
                   />
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-4 flex items-center text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none cursor-pointer"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center text-on-surface-variant hover:text-on-surface transition-colors shadow-none p-0 w-8 h-8 rounded-full justify-center"
                     aria-label={
                       showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                     }
                   >
                     {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
+                      <EyeOff data-icon="eye-off" />
                     ) : (
-                      <Eye className="w-5 h-5" />
+                      <Eye data-icon="eye" />
                     )}
-                  </button>
+                  </Button>
                 </div>
               </Field>
 
@@ -208,13 +209,14 @@ export default function LoginPage() {
               </div>
 
               {/* Submit Button */}
-              <button
+              <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4.5 px-6 rounded-md bg-primary text-on-primary hover:bg-primary-container disabled:opacity-50 focus:outline-none transition-all active:scale-[0.99] font-title-md text-title-md font-semibold cursor-pointer shadow-sm text-center mt-2"
+                variant="primary"
+                className="w-full py-4 px-6 mt-2 font-medium active:scale-[0.99]"
               >
                 {isLoading ? "Iniciando sesión..." : "Iniciar sesión ahora"}
-              </button>
+              </Button>
             </FieldGroup>
           </form>
 
@@ -237,9 +239,11 @@ export default function LoginPage() {
 
           {/* Social Logins */}
           <div className="grid grid-cols-2 gap-4">
-            <button
+            <Button
               type="button"
-              className="flex justify-center items-center py-3.5 px-4 border border-outline-variant rounded-md hover:bg-surface-container font-label-lg text-label-lg text-on-surface font-semibold transition-all active:scale-[0.98] cursor-pointer gap-2.5 bg-surface-container-lowest"
+              variant="outline"
+              size="lg"
+              className="flex justify-center items-center py-3.5 px-4 border-outline-variant font-medium active:scale-[0.98] gap-2.5 bg-surface-container-lowest text-on-surface"
             >
               <svg
                 className="h-5 w-5 shrink-0"
@@ -265,10 +269,12 @@ export default function LoginPage() {
                 ></path>
               </svg>
               Google
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="flex justify-center items-center py-3.5 px-4 border border-outline-variant rounded-md hover:bg-surface-container font-label-lg text-label-lg text-on-surface font-semibold transition-all active:scale-[0.98] cursor-pointer gap-2.5 bg-surface-container-lowest"
+              variant="outline"
+              size="lg"
+              className="flex justify-center items-center py-3.5 px-4 border-outline-variant font-medium active:scale-[0.98] gap-2.5 bg-surface-container-lowest text-on-surface"
             >
               <svg
                 className="h-5 w-5 fill-current shrink-0"
@@ -278,7 +284,7 @@ export default function LoginPage() {
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.2.67-2.92 1.51-.64.73-1.2 1.87-1.05 2.98 1.1.09 2.22-.57 2.98-1.43z"></path>
               </svg>
               Apple
-            </button>
+            </Button>
           </div>
         </div>
       </div>

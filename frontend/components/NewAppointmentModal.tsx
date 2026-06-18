@@ -7,7 +7,9 @@ import {
   FieldGroup,
   Field,
   FieldLabel,
-  InputGroup,
+  FloatingInput,
+  Button,
+  Select,
 } from "@/components/ui/volta-ui";
 
 interface NewAppointmentModalProps {
@@ -34,6 +36,15 @@ const normalizePhone = (phone: string) => {
   }
   return digits;
 };
+
+const DEFAULT_SERVICES = [
+  { name: "Corte Caballero", price: 35 },
+  { name: "Corte Dama", price: 45 },
+  { name: "Coloración Premium", price: 85 },
+  { name: "Tratamiento Keratina", price: 50 },
+  { name: "Manicura", price: 20 },
+  { name: "Spa Facial", price: 40 }
+];
 
 export default function NewAppointmentModal({
   isOpen,
@@ -66,14 +77,16 @@ export default function NewAppointmentModal({
   }, [isOpen, initialDate, initialTime]);
 
   const [clientsList, setClientsList] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showConsentToast, setShowConsentToast] = useState(false);
   const [toastPhone, setToastPhone] = useState("");
 
-  // Load clients on modal open
+  // Load clients and services on modal open
   useEffect(() => {
     if (isOpen && businessId) {
+      // Fetch clients
       fetch(`/api/backend/clients?businessId=${businessId}`)
         .then((res) => res.json())
         .then((data) => {
@@ -84,6 +97,29 @@ export default function NewAppointmentModal({
         .catch((e) => {
           console.error("Error loading clients:", e);
           setClientsList([]);
+        });
+
+      // Fetch services
+      fetch(`/api/backend/services?businessId=${businessId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setServices(data);
+            setFormData((prev) => ({
+              ...prev,
+              service: data[0].name,
+            }));
+          } else {
+            setServices(DEFAULT_SERVICES);
+            setFormData((prev) => ({
+              ...prev,
+              service: DEFAULT_SERVICES[0].name,
+            }));
+          }
+        })
+        .catch((e) => {
+          console.error("Error loading services:", e);
+          setServices(DEFAULT_SERVICES);
         });
     }
   }, [isOpen, businessId]);
@@ -131,7 +167,7 @@ export default function NewAppointmentModal({
     setFormData({
       clientName: "",
       clientPhone: "",
-      service: "Corte Caballero",
+      service: services[0]?.name || "Corte Caballero",
       date: "",
       time: "10:00",
       stylist: "Volta",
@@ -207,14 +243,6 @@ export default function NewAppointmentModal({
       });
   };
 
-  const services = [
-    "Corte Caballero",
-    "Corte Dama",
-    "Coloración Premium",
-    "Tratamiento Keratina",
-    "Manicura",
-    "Spa Facial",
-  ];
 
   const [selectedHour, selectedMin] = (formData.time || "10:00").split(":");
 
@@ -246,12 +274,13 @@ export default function NewAppointmentModal({
             <Sparkles className="w-5 h-5 text-primary" />
             <span>Reservar Nueva Cita</span>
           </h3>
-          <button
+          <Button
+            variant="ghost"
             onClick={onClose}
-            className="p-1 rounded-full hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+            className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface w-8 h-8 active:scale-95 shadow-none"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Form */}
@@ -262,16 +291,13 @@ export default function NewAppointmentModal({
           {/* Client Details */}
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="clientName">Nombre del Cliente</FieldLabel>
-              <InputGroup>
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
-                  <User className="w-5 h-5" />
-                </div>
-                <input
+              <div className="relative w-full">
+                <FloatingInput
                   id="clientName"
+                  label="Nombre del Cliente"
                   type="text"
                   required
-                  placeholder="Ej. Juan Pérez"
+                  icon={User}
                   value={formData.clientName}
                   onChange={handleNameChange}
                   onFocus={() => {
@@ -282,7 +308,6 @@ export default function NewAppointmentModal({
                       setShowSuggestions(true);
                     }
                   }}
-                  className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                 />
 
                 {/* Autocomplete Suggestions list */}
@@ -294,63 +319,57 @@ export default function NewAppointmentModal({
                     />
                     <div className="absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar z-50 py-1">
                       {suggestions.map((client) => (
-                        <button
+                        <Button
                           key={client.id}
+                          variant="ghost"
                           type="button"
                           onClick={() => handleSelectSuggestion(client)}
-                          className="w-full px-4 py-2 hover:bg-surface-variant flex items-center justify-between text-left transition-colors cursor-pointer border-none"
+                          className="w-full px-4 py-2 hover:bg-surface-variant flex items-center justify-between text-left border-none rounded-none active:scale-100 shadow-none font-normal"
                         >
-                          <div className="flex flex-col">
-                            <span className="text-body-md font-semibold text-on-surface">
+                          <div className="flex flex-col text-left">
+                            <span className="text-body-md font-medium text-on-surface">
                               {client.name} {client.surname}
                             </span>
                             <span className="text-body-xs text-on-surface-variant">
                               {client.phone}
                             </span>
                           </div>
-                          <span className="text-body-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">
+                          <span className="text-body-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">
                             Registrado
                           </span>
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </>
                 )}
-              </InputGroup>
+              </div>
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="clientPhone">Teléfono</FieldLabel>
-              <InputGroup>
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <input
-                  id="clientPhone"
-                  type="tel"
-                  required
-                  placeholder="+34 600 000 000"
-                  value={formData.clientPhone}
-                  onChange={handleChange}
-                  className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                />
-              </InputGroup>
+              <FloatingInput
+                id="clientPhone"
+                label="Teléfono"
+                type="tel"
+                required
+                icon={Phone}
+                value={formData.clientPhone}
+                onChange={handleChange}
+              />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="service">Servicio</FieldLabel>
-              <select
+              <Select
                 id="service"
                 value={formData.service}
                 onChange={handleChange}
-                className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
               >
                 {services.map((svc) => (
-                  <option key={svc} value={svc}>
-                    {svc}
+                  <option key={svc.name} value={svc.name}>
+                    {svc.name} {svc.price !== undefined ? `(€${svc.price})` : ""}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
           </FieldGroup>
 
@@ -364,63 +383,57 @@ export default function NewAppointmentModal({
                 required
                 value={formData.date}
                 onChange={handleChange}
-                className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
+                className="w-full border border-outline rounded-md px-4 py-3 text-body-lg focus:border-primary focus:border-2 focus:outline-none transition-all bg-surface"
               />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="time">Hora</FieldLabel>
               <div className="grid grid-cols-2 gap-2 w-full">
-                <div className="relative flex items-center w-full">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant z-10">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <select
-                    id="hour"
-                    value={selectedHour || "10"}
-                    onChange={handleHourChange}
-                    className="w-full border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                  >
-                    {["09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"].map((h) => (
-                      <option key={h} value={h}>
-                        {h}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="relative flex items-center w-full">
-                  <select
-                    id="minute"
-                    value={selectedMin || "00"}
-                    onChange={handleMinChange}
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
-                  >
-                    {["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"].map((m) => (
-                      <option key={m} value={m}>
-                        {m}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  id="hour"
+                  value={selectedHour || "10"}
+                  onChange={handleHourChange}
+                  icon={Clock}
+                >
+                  {["09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"].map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  id="minute"
+                  value={selectedMin || "00"}
+                  onChange={handleMinChange}
+                >
+                  {["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"].map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </Field>
           </FieldGroup>
 
           {/* Footer Actions */}
           <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all cursor-pointer"
+              variant="outline"
+              size="lg"
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer"
+              variant="primary"
+              size="lg"
             >
               Reservar Cita
-            </button>
+            </Button>
           </div>
         </form>
       </div>

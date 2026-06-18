@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
-import { Alert } from "@/components/ui/volta-ui";
+import { Alert, Button } from "@/components/ui/volta-ui";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -42,21 +42,25 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row w-full gap-3 mt-2">
-          <button
+          <Button
             onClick={() => reset()}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer font-semibold"
+            variant="primary"
+            size="lg"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3"
           >
-            <RefreshCw className="size-4" />
+            <RefreshCw data-icon="refresh-cw" />
             <span>Reintentar</span>
-          </button>
+          </Button>
           
-          <button
+          <Button
             onClick={() => window.location.href = "/"}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all cursor-pointer font-semibold"
+            variant="outline"
+            size="lg"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 shadow-none"
           >
-            <Home className="size-4" />
+            <Home data-icon="home" />
             <span>Ir al Inicio</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

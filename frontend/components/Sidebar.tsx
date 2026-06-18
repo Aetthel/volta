@@ -11,6 +11,7 @@ import {
   BarChart3, 
   Plus 
 } from "lucide-react";
+import { Button } from "@/components/ui/volta-ui";
 
 interface SidebarProps {
   onNewAppointmentClick?: () => void;
@@ -80,13 +81,15 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       {/* Action CTA Button at the bottom */}
       {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
         <div className="px-4 mt-auto">
-          <button
+          <Button
             onClick={onNewAppointmentClick}
-            className="w-full py-4 px-6 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-label-lg text-label-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-all cursor-pointer shadow-sm"
+            variant="primary"
+            size="lg"
+            className="w-full py-4 px-6 shadow-sm"
           >
             <Plus className="w-5 h-5" />
             <span>Nueva Cita</span>
-          </button>
+          </Button>
         </div>
       )}
     </aside>

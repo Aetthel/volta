@@ -5,9 +5,7 @@ async function runFullTest() {
   console.log('--- Starting Full Lifecycle Test ---');
 
   // 1. Get our test business
-  const business = await prisma.business.findFirst({
-    where: { role: 'BUSINESS' }
-  });
+  const business = await prisma.business.findFirst();
   if (!business) {
     console.error('Error: No business found. Seed the database first.');
     return;

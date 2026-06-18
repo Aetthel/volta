@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/volta-ui";
 
 export default function LOPDConsentPage() {
   const params = useParams();
@@ -174,10 +175,13 @@ export default function LOPDConsentPage() {
               </p>
             </div>
 
-            <button
+            <Button
+              type="button"
+              variant="primary"
+              size="lg"
               onClick={handleAccept}
               disabled={submitting}
-              className="w-full py-4 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container rounded-lg font-label-lg text-label-lg font-semibold flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 disabled:scale-100 transition-all cursor-pointer shadow-sm"
+              className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
             >
               {submitting ? (
                 <>
@@ -187,7 +191,7 @@ export default function LOPDConsentPage() {
               ) : (
                 <span>Aceptar y permitir recordatorios</span>
               )}
-            </button>
+            </Button>
           </div>
         )}
       </div>

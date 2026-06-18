@@ -75,6 +75,24 @@ router.post('/', authenticate, validateId('businessId'), validateBody(appointmen
       console.log(`[API] Automatically registered new LOPD-pending client: ${firstName} ${surname || ""}`);
     }
 
+    // Look up service by name to store ID and Name
+    let serviceId = null;
+    let serviceName = req.body.service || null;
+
+    if (serviceName) {
+      const dbService = await prisma.service.findFirst({
+        where: {
+          businessId,
+          name: serviceName,
+          isActive: true
+        }
+      });
+      if (dbService) {
+        serviceId = dbService.id;
+        serviceName = dbService.name;
+      }
+    }
+
     const appointment = await prisma.appointment.create({
       data: {
         clientName,
@@ -82,6 +100,8 @@ router.post('/', authenticate, validateId('businessId'), validateBody(appointmen
         appointmentDate: new Date(appointmentDate),
         businessId,
         clientId: client.id,
+        serviceId,
+        serviceName,
         status: 'PENDING'
       }
     });

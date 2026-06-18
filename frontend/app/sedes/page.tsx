@@ -22,7 +22,7 @@ import {
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
-import { FieldGroup, Field, FieldLabel, Badge } from "@/components/ui/volta-ui";
+import { FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty } from "@/components/ui/volta-ui";
 
 interface BusinessItem {
   id: string;
@@ -324,22 +324,24 @@ export default function SedesPage() {
               </p>
             </div>
 
-            <button
+            <Button
+              variant="primary"
+              size="lg"
               onClick={handleOpenCreateModal}
-              className="flex items-center gap-1 px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer self-start"
+              className="flex items-center gap-1 px-6 py-2 self-start"
             >
-              <Plus className="w-4 h-4" />
+              <Plus data-icon="plus" />
               <span>Añadir Local</span>
-            </button>
+            </Button>
           </section>
 
           {/* Grid Layout of Businesses */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBusinesses.length > 0 ? (
               filteredBusinesses.map((biz) => (
-                <div
+                <Card
                   key={biz.id}
-                  className="bg-surface-container-lowest p-6 rounded-md border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between hover:border-primary-fixed-dim transition-colors group"
+                  className="p-6 flex flex-col justify-between hover:border-primary-fixed-dim transition-colors group"
                 >
                   <div>
                     {/* Header: Title and Badge */}
@@ -377,46 +379,60 @@ export default function SedesPage() {
                   </div>
 
                   <div className="flex justify-end items-center gap-2 mt-8 pt-6 border-t border-outline-variant/65">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleOpenWorkersModal(biz)}
-                      className="p-2 text-outline hover:text-primary hover:bg-primary/10 rounded-full transition-colors cursor-pointer"
+                      className="p-2 text-outline hover:text-primary hover:bg-primary/10 rounded-full shadow-none w-8 h-8"
                       title="Gestionar trabajadores"
                     >
-                      <Users className="w-4 h-4" />
-                    </button>
-                    <button
+                      <Users data-icon="users" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleOpenEditModal(biz)}
-                      className="p-2 text-outline hover:text-primary hover:bg-primary/10 rounded-full transition-colors cursor-pointer animate-none"
+                      className="p-2 text-outline hover:text-primary hover:bg-primary/10 rounded-full shadow-none w-8 h-8 animate-none"
                       title="Editar local"
                     >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
+                      <Pencil data-icon="pencil" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDeleteBusiness(biz.id)}
-                      className="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full transition-colors cursor-pointer"
+                      className="p-2 text-outline hover:text-error hover:bg-error-container/20 rounded-full shadow-none w-8 h-8"
                       title="Eliminar salón permanentemente"
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                      <Trash2 data-icon="trash" />
+                    </Button>
                   </div>
-                </div>
+                </Card>
               ))
             ) : (
-              <div className="col-span-full py-8 text-center text-on-surface-variant text-body-lg">
-                No se encontraron locales de negocio registrados que coincidan
-                con la búsqueda.
-              </div>
+              <Empty
+                title="No se encontraron locales"
+                description="Prueba a ajustar tu búsqueda o añade un nuevo local de negocio."
+                icon={Store}
+                action={
+                  <Button variant="primary" onClick={handleOpenCreateModal}>
+                    Añadir Local
+                  </Button>
+                }
+                className="col-span-full py-12"
+              />
             )}
           </section>
         </main>
 
         {/* Mobile floating FAB action */}
-        <button
+        <Button
+          variant="primary"
           onClick={handleOpenCreateModal}
-          className="md:hidden fixed bottom-20 right-6 z-40 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container p-4 rounded-full shadow-lg active:scale-95 transition-all cursor-pointer"
+          className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg active:scale-95"
         >
           <Plus className="w-6 h-6" />
-        </button>
+        </Button>
 
         {/* Mobile bottom nav */}
         <BottomNav />
@@ -432,19 +448,20 @@ export default function SedesPage() {
           />
 
           {/* Modal Card */}
-          <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-md w-full z-10 animate-in fade-in zoom-in-95 duration-200">
+          <Card className="relative max-w-md w-full z-10 animate-in fade-in zoom-in-95 duration-200 rounded-md shadow-xl">
             {/* Header */}
             <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
               <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
                 <span>{editingBusiness ? "Editar Local" : "Añadir Nuevo Local"}</span>
               </h3>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-full hover:bg-surface-variant text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+                className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface w-8 h-8 active:scale-95 shadow-none"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Form Body */}
@@ -550,53 +567,60 @@ export default function SedesPage() {
 
               {/* Footer Actions */}
               <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="md"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all cursor-pointer"
+                  className="px-6 py-2 text-primary shadow-none"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer font-semibold"
+                  variant="primary"
+                  size="md"
+                  className="px-6 py-2 font-medium"
                 >
                   {editingBusiness ? "Guardar Cambios" : "Crear Local"}
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       )}
       {/* Workers Management Modal */}
       {isWorkersModalOpen && selectedBusiness && (
         <div className="fixed inset-0 bg-black/55 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <Card className="w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
               <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
                 <span>Trabajadores - {selectedBusiness.name}</span>
               </h2>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setIsWorkersModalOpen(false)}
-                className="p-1.5 hover:bg-surface-variant text-on-surface-variant rounded-full cursor-pointer active:scale-90 transition-all"
+                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 active:scale-90 shadow-none"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-6">
+            <CardContent className="p-6 overflow-y-auto flex-1 flex flex-col gap-6">
               <div className="flex justify-between items-center">
                 <p className="font-body-md text-on-surface-variant">
                   Lista de personal que tiene acceso a esta sede.
                 </p>
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
                   onClick={handleOpenCreateWorkerModal}
-                  className="py-2 px-4 bg-primary hover:bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer font-semibold shadow-sm"
+                  className="flex items-center justify-center gap-2 px-4 py-2 active:scale-95 font-medium"
                 >
-                  <UserPlus className="w-4 h-4" />
+                  <UserPlus data-icon="user-plus" />
                   <span>Añadir Trabajador</span>
-                </button>
+                </Button>
               </div>
 
               <div className="border border-outline-variant rounded-xl overflow-hidden">
@@ -626,19 +650,23 @@ export default function SedesPage() {
                           </td>
                           <td className="p-3 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => handleOpenEditWorkerModal(worker)}
-                                className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md cursor-pointer transition-all"
+                                className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md cursor-pointer w-8 h-8 shadow-none"
                               >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <button
+                                <Pencil data-icon="pencil" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => handleDeleteWorker(worker.id)}
                                 disabled={worker.id === session?.user?.id}
-                                className="p-1.5 hover:bg-error-container/20 text-on-surface-variant hover:text-error rounded-md cursor-pointer transition-all disabled:opacity-40"
+                                className="p-1.5 hover:bg-error-container/20 text-on-surface-variant hover:text-error rounded-md cursor-pointer w-8 h-8 shadow-none disabled:opacity-40"
                               >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                                <Trash2 data-icon="trash" />
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -647,26 +675,27 @@ export default function SedesPage() {
                   </table>
                 )}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
       {/* Add/Edit Worker for Selected Business Modal */}
       {isAddWorkerModalOpen && selectedBusiness && (
         <div className="fixed inset-0 bg-black/55 backdrop-blur-[2px] z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <Card className="w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
               <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-primary" />
                 <span>{editingWorker ? "Editar Trabajador" : "Nuevo Trabajador"}</span>
               </h2>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setIsAddWorkerModalOpen(false)}
-                className="p-1.5 hover:bg-surface-variant text-on-surface-variant rounded-full cursor-pointer active:scale-90 transition-all"
+                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 active:scale-90 shadow-none"
               >
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleSaveWorker} className="p-6 flex flex-col gap-6 overflow-y-auto">
@@ -733,22 +762,26 @@ export default function SedesPage() {
               </FieldGroup>
 
               <div className="flex items-center justify-end gap-3 mt-4 border-t border-outline-variant/50 pt-4">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="md"
                   onClick={() => setIsAddWorkerModalOpen(false)}
-                  className="py-2 px-4 text-on-surface-variant hover:bg-surface-variant rounded-lg font-medium text-body-md active:scale-95 transition-all cursor-pointer"
+                  className="px-4 py-2 text-on-surface-variant active:scale-95 shadow-none font-medium"
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  className="py-2 px-5 bg-primary text-on-primary rounded-lg font-medium text-body-md active:scale-95 transition-all shadow-sm cursor-pointer"
+                  variant="primary"
+                  size="md"
+                  className="px-5 py-2 active:scale-95 font-medium"
                 >
                   {editingWorker ? "Guardar" : "Crear"}
-                </button>
+                </Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       )}
     </div>

@@ -345,3 +345,174 @@ export const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
   },
 );
 Separator.displayName = "Separator";
+
+// Button
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "primary", size = "md", ...props }, ref) => {
+    const variantClasses = {
+      primary:
+        "bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container shadow-sm",
+      secondary:
+        "bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80 shadow-sm",
+      outline:
+        "border border-outline text-primary hover:bg-surface-container shadow-sm",
+      ghost:
+        "text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors",
+    };
+
+    const sizeClasses = {
+      sm: "px-3 py-1.5 text-label-sm rounded-md",
+      md: "px-5 py-2 text-label-md rounded-lg",
+      lg: "px-6 py-2.5 text-label-lg rounded-lg",
+    };
+
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          "inline-flex items-center justify-center font-medium active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 gap-2",
+          variantClasses[variant],
+          sizeClasses[size],
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+
+
+// Select
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  icon?: React.ComponentType<any>;
+}
+
+export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
+  ({ className, icon: Icon, children, ...props }, ref) => {
+    return (
+      <div className="relative w-full group/select">
+        {/* Leading Icon */}
+        {Icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/select:text-primary pointer-events-none z-10">
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
+
+        <select
+          ref={ref}
+          className={cn(
+            "block w-full bg-surface text-body-lg text-on-surface border border-outline rounded-md focus:border-primary focus:border-2 focus:outline-none transition-all py-3 shadow-sm appearance-none cursor-pointer pr-10",
+            Icon ? "pl-12" : "pl-4",
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </select>
+
+        {/* Custom Chevron Indicator */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none transition-colors group-focus-within/select:text-primary z-10">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
+      </div>
+    );
+  }
+);
+Select.displayName = "Select";
+
+
+// Textarea
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        ref={ref}
+        className={cn(
+          "block w-full px-4 py-3 bg-surface text-body-lg text-on-surface border border-outline rounded-md focus:border-primary focus:border-2 focus:outline-none transition-all shadow-sm resize-none custom-scrollbar",
+          className,
+        )}
+        {...props}
+      />
+    );
+  }
+);
+Textarea.displayName = "Textarea";
+
+
+// Skeleton
+export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn("animate-pulse rounded bg-outline-variant/30", className)}
+        {...props}
+      />
+    );
+  }
+);
+Skeleton.displayName = "Skeleton";
+
+
+// Empty
+export interface EmptyProps extends React.HTMLAttributes<HTMLDivElement> {
+  title: string;
+  description: string;
+  icon?: React.ComponentType<any>;
+  action?: React.ReactNode;
+}
+
+export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(
+  ({ className, title, description, icon: Icon, action, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "flex flex-col items-center justify-center text-center p-8 border border-dashed border-outline-variant rounded-2xl bg-surface-container-lowest gap-4",
+          className,
+        )}
+        {...props}
+      >
+        {Icon && (
+          <div className="p-3 bg-surface-container text-on-surface-variant rounded-full">
+            <Icon className="w-8 h-8 text-on-surface-variant" />
+          </div>
+        )}
+        <div className="flex flex-col gap-1 max-w-sm">
+          <h3 className="font-title-md text-title-md text-on-surface font-semibold">
+            {title}
+          </h3>
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            {description}
+          </p>
+        </div>
+        {action && <div className="mt-2">{action}</div>}
+      </div>
+    );
+  }
+);
+Empty.displayName = "Empty";

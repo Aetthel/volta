@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/volta-ui";
 
 interface MetricCardProps {
   title: string;
@@ -47,8 +49,11 @@ export default function MetricCard({
   const TrendIcon = trendStyles.icon;
 
   return (
-    <div
-      className={`bg-surface-container-lowest p-4 sm:p-6 rounded-md border border-outline-variant shadow-[0px_2px_8px_rgba(0,0,0,0.04)] flex flex-col gap-2 sm:gap-3 hover:border-primary-fixed-dim transition-colors ${className}`}
+    <Card
+      className={cn(
+        "p-4 sm:p-6 flex flex-col gap-2 sm:gap-3 hover:border-primary-fixed-dim transition-colors",
+        className,
+      )}
     >
       <div className="flex justify-between items-start">
         {/* Metric Icon Wrapper */}
@@ -78,6 +83,6 @@ export default function MetricCard({
           {value}
         </h3>
       </div>
-    </div>
+    </Card>
   );
 }

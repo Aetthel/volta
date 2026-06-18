@@ -49,6 +49,31 @@ router.post('/businesses', authenticate, validateBody(createBusinessSchema), asy
           businessId: biz.id
         }
       });
+
+      // Seed default services for this business
+      await tx.service.createMany({
+        data: [
+          { businessId: biz.id, name: 'Corte Caballero', duration: 30, price: 35.0 },
+          { businessId: biz.id, name: 'Corte Dama', duration: 45, price: 45.0 },
+          { businessId: biz.id, name: 'Coloración Premium', duration: 90, price: 85.0 },
+          { businessId: biz.id, name: 'Tratamiento Keratina', duration: 60, price: 50.0 },
+          { businessId: biz.id, name: 'Manicura', duration: 30, price: 20.0 },
+          { businessId: biz.id, name: 'Spa Facial', duration: 45, price: 40.0 }
+        ]
+      });
+
+      // Seed default business hours
+      await tx.businessHours.createMany({
+        data: [
+          { businessId: biz.id, dayOfWeek: 1, openTime: '09:00', closeTime: '20:00', isClosed: false },
+          { businessId: biz.id, dayOfWeek: 2, openTime: '09:00', closeTime: '20:00', isClosed: false },
+          { businessId: biz.id, dayOfWeek: 3, openTime: '09:00', closeTime: '20:00', isClosed: false },
+          { businessId: biz.id, dayOfWeek: 4, openTime: '09:00', closeTime: '20:00', isClosed: false },
+          { businessId: biz.id, dayOfWeek: 5, openTime: '09:00', closeTime: '20:00', isClosed: false },
+          { businessId: biz.id, dayOfWeek: 6, openTime: '10:00', closeTime: '18:00', isClosed: false },
+          { businessId: biz.id, dayOfWeek: 0, openTime: '09:00', closeTime: '20:00', isClosed: true }
+        ]
+      });
       
       return biz;
     });
@@ -90,7 +115,6 @@ router.get('/dashboard', authenticate, async (req, res) => {
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
     const businesses = await prisma.business.findMany({
-      where: { role: 'BUSINESS' },
       include: {
         appointments: {
           include: { client: true }
