@@ -1,6 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const path = require('path');
 const prisma = require('./db');
+const config = require('./config');
 
 class WhatsAppManager {
   constructor() {
@@ -80,7 +81,7 @@ class WhatsAppManager {
           '--single-process',
           '--disable-gpu'
         ],
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+        executablePath: config.puppeteerExecutablePath,
       }
     });
 

@@ -1,6 +1,7 @@
-description = "Archive multiple completed changes at once"
+---
+description: Archive multiple completed changes at once
+---
 
-prompt = """
 Archive multiple completed changes in a single operation.
 
 This skill allows you to batch-archive changes, handling spec conflicts intelligently by checking the codebase to determine what's actually implemented.
@@ -236,4 +237,3 @@ No active changes found. Create a new change to get started.
 - Preserve .openspec.yaml when moving to archive
 - Archive directory target uses current date: YYYY-MM-DD-<name>
 - If archive target exists, fail that change but continue with others
-"""

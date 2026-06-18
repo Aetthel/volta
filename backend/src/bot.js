@@ -1,5 +1,6 @@
 const prisma = require('./db');
 const whatsappManager = require('./whatsapp');
+const config = require('./config');
 
 /**
  * Formats a message template by replacing placeholders with actual data
@@ -133,7 +134,7 @@ async function runSentinel() {
  * was ready, causing an 'evaluate' error that silently fell back to simulation.
  */
 async function sendConsentMessage(businessId, client) {
-  const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const FRONTEND_URL = config.frontendUrl;
   const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
 

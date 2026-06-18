@@ -1,0 +1,23 @@
+const path = require('path');
+const fs = require('fs');
+
+const runInDocker = fs.existsSync('/.dockerenv');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env'), override: !runInDocker });
+
+// Startup environment variables verification
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'API_KEY'];
+const missingVars = REQUIRED_ENV_VARS.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error(`\x1b[31m[FATAL] Missing required environment variables: ${missingVars.join(', ')}\x1b[0m`);
+  console.error('Please verify your .env configuration file.');
+  process.exit(1);
+}
+
+module.exports = {
+  databaseUrl: process.env.DATABASE_URL,
+  apiKey: process.env.API_KEY,
+  port: process.env.BACKEND_PORT || (process.env.PORT && process.env.PORT !== '3000' ? process.env.PORT : 3001),
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+};
