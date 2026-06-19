@@ -594,28 +594,28 @@ export default function DashboardPage() {
               value={String(appointmentsTodayCount)}
               change={`${appointmentsTodayCount > 0 ? "+" : ""}${appointmentsTodayCount * 10}%`}
               trend={appointmentsTodayCount > 0 ? "up" : "stable"}
-              icon={<CalendarIcon className="w-5 h-5" />}
+              icon={<CalendarIcon data-icon="calendar" />}
             />
             <MetricCard
               title="Nuevos Clientes"
               value={String(newClientsCount)}
               change={`${newClientsCount > 0 ? "+" : ""}${newClientsCount * 5}%`}
               trend={newClientsCount > 0 ? "up" : "stable"}
-              icon={<UserPlus className="w-5 h-5" />}
+              icon={<UserPlus data-icon="user-plus" />}
             />
             <MetricCard
               title="Ingresos Estimados"
               value={`€${estimatedIncome}`}
               change={estimatedIncome > 0 ? "+15%" : "Estable"}
               trend={estimatedIncome > 0 ? "up" : "stable"}
-              icon={<Euro className="w-5 h-5" />}
+              icon={<Euro data-icon="euro" />}
             />
             <MetricCard
               title="Ocupación"
               value={`${occupancyPercentage}%`}
               change={occupancyPercentage > 50 ? "Alta" : "Estable"}
               trend={occupancyPercentage > 50 ? "up" : "stable"}
-              icon={<Activity className="w-5 h-5" />}
+              icon={<Activity data-icon="activity" />}
             />
           </section>
 
@@ -634,7 +634,7 @@ export default function DashboardPage() {
                     onClick={handlePrev}
                     className="p-1 rounded w-7 h-7 active:scale-[0.98]"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft data-icon="chevron-left" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -657,7 +657,7 @@ export default function DashboardPage() {
                     onClick={handleNext}
                     className="p-1 rounded w-7 h-7 active:scale-[0.98]"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight data-icon="chevron-right" />
                   </Button>
                 </div>
               </div>
@@ -695,7 +695,7 @@ export default function DashboardPage() {
                   size="sm"
                   className="p-2 border-outline-variant rounded-lg hover:bg-surface-variant text-on-surface-variant hover:text-on-surface bg-surface-container-low w-9 h-9 active:scale-[0.98]"
                 >
-                  <Filter className="w-4 h-4" />
+                  <Filter data-icon="filter" />
                 </Button>
               </div>
             </div>
@@ -959,7 +959,7 @@ export default function DashboardPage() {
           onClick={() => setIsAppointmentModalOpen(true)}
           className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg active:scale-95"
         >
-          <Plus className="w-6 h-6" />
+          <Plus data-icon="plus" />
         </Button>
 
         {/* Responsive Bottom Menu Bar */}

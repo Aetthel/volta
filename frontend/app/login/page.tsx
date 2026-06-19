@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { FieldGroup, Field, FieldLabel, Alert, Button } from "@/components/ui/volta-ui";
+import { FieldGroup, Field, FieldLabel, Alert, Button, InputGroup } from "@/components/ui/volta-ui";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -130,7 +130,7 @@ export default function LoginPage() {
                 <FieldLabel className="font-label-sm text-label-sm text-on-surface-variant/80 tracking-wider uppercase mb-1.5">
                   Correo Electrónico o Usuario
                 </FieldLabel>
-                <div className="relative">
+                <InputGroup>
                   <input
                     id="email"
                     name="email"
@@ -141,7 +141,7 @@ export default function LoginPage() {
                     placeholder="refero.john.doe@gmail.com"
                     className="block w-full px-5 py-4 bg-surface-container-lowest text-body-lg text-on-surface border border-outline-variant rounded-md focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
                   />
-                </div>
+                </InputGroup>
               </Field>
 
               {/* Password Input */}
@@ -151,7 +151,7 @@ export default function LoginPage() {
                     Contraseña
                   </FieldLabel>
                 </div>
-                <div className="relative">
+                <InputGroup>
                   <input
                     id="password"
                     name="password"
@@ -177,7 +177,7 @@ export default function LoginPage() {
                       <Eye data-icon="eye" />
                     )}
                   </Button>
-                </div>
+                </InputGroup>
               </Field>
 
               {/* Keep me logged in */}

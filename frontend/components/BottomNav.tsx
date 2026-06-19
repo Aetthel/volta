@@ -56,7 +56,7 @@ export default function BottomNav() {
             {isActive && (
               <span className="absolute top-0 w-12 h-1 bg-primary rounded-b-full"></span>
             )}
-            <Icon className="w-5 h-5" />
+            <Icon data-icon="bottom-nav" />
             <span className="text-[10px] tracking-wider uppercase font-semibold">
               {item.name}
             </span>

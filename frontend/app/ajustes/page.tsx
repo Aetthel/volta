@@ -1196,7 +1196,11 @@ export default function AjustesPage() {
                             variant="default"
                             className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
                           >
-                            {role === "JEFE" ? "Administradora" : "Empleado"}
+                            {role === "ADMIN"
+                              ? "Administrador Global"
+                              : role === "JEFE"
+                              ? "Jefe de Tienda"
+                              : "Empleado"}
                           </Badge>
                           <span className="text-on-surface-variant/70 text-xs">
                             • ID: #GS-

@@ -26,6 +26,11 @@ const updateClientSchema = z.object({
 router.get('/', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.query;
 
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
+
   try {
     const clients = await prisma.client.findMany({
       where: { businessId },
@@ -40,6 +45,11 @@ router.get('/', authenticate, validateId('businessId'), async (req, res) => {
 
 router.post('/', authenticate, validateId('businessId'), validateBody(createClientSchema), async (req, res) => {
   const { name, surname, email, phone, businessId } = req.body;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
 
   try {
     const client = await prisma.client.create({
@@ -69,6 +79,16 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateClientSche
   const { name, surname, email, phone, lopdStatus, lastVisit, frequentService } = req.body;
 
   try {
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN') {
+      const client = await prisma.client.findUnique({
+        where: { id }
+      });
+      if (!client || client.businessId !== req.user.businessId) {
+        return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
+      }
+    }
+
     const client = await prisma.client.update({
       where: { id },
       data: {
@@ -92,6 +112,16 @@ router.delete('/:id', authenticate, validateId('id'), async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN') {
+      const client = await prisma.client.findUnique({
+        where: { id }
+      });
+      if (!client || client.businessId !== req.user.businessId) {
+        return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
+      }
+    }
+
     await prisma.appointment.updateMany({
       where: { clientId: id },
       data: { clientId: null }
@@ -117,6 +147,11 @@ router.post('/:id/resend-consent', authenticate, validateId('id'), async (req, r
 
     if (!client) {
       return res.status(404).json({ error: 'Client not found' });
+    }
+
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN' && client.businessId !== req.user.businessId) {
+      return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
     }
 
     sendConsentMessage(client.businessId, client).catch((err) => {
@@ -145,6 +180,11 @@ router.post('/:id/send-message', authenticate, validateId('id'), async (req, res
 
     if (!client) {
       return res.status(404).json({ error: 'Client not found' });
+    }
+
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN' && client.businessId !== req.user.businessId) {
+      return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
     }
 
     const whatsappManager = require('../whatsapp');

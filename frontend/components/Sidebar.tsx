@@ -71,7 +71,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
                   : "text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors"
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon data-icon="nav" />
               <span className="font-label-md text-label-md">{item.name}</span>
             </Link>
           );
@@ -87,7 +87,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
             size="lg"
             className="w-full py-4 px-6 shadow-sm"
           >
-            <Plus className="w-5 h-5" />
+            <Plus data-icon="plus" />
             <span>Nueva Cita</span>
           </Button>
         </div>

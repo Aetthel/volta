@@ -24,7 +24,7 @@ import Header from "@/components/Header";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Badge, Button, Card, CardHeader, CardTitle, Empty } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -367,7 +367,7 @@ export default function ClientesPage() {
     const query = searchQuery;
     return (
       normalizeString(fullName).includes(normalizeString(query)) ||
-      normalizeString(c.email).includes(normalizeString(query)) ||
+      normalizeString(c.email || "").includes(normalizeString(query)) ||
       normalizePhone(c.phone).includes(normalizePhone(query)) ||
       normalizeString(c.lopdStatus).includes(normalizeString(query))
     );
@@ -401,17 +401,21 @@ export default function ClientesPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-2">
-              <button className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg border border-outline text-primary font-label-lg text-label-lg hover:bg-secondary-container/30 transition-all cursor-pointer">
-                <Download className="w-4 h-4" />
-                <span>Exportar</span>
-              </button>
-              <button
-                onClick={() => setIsClientModalOpen(true)}
-                className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg shadow-sm hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all cursor-pointer"
+              <Button
+                variant="outline"
+                className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
               >
-                <Plus className="w-4 h-4" />
+                <Download data-icon="download" />
+                <span>Exportar</span>
+              </Button>
+              <Button
+                onClick={() => setIsClientModalOpen(true)}
+                variant="primary"
+                className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
+              >
+                <Plus data-icon="plus" />
                 <span>Añadir Cliente</span>
-              </button>
+              </Button>
             </div>
           </section>
 
@@ -444,12 +448,13 @@ export default function ClientesPage() {
                   {`${pendingLopdCount} clientes tienen pendiente firmar el consentimiento LOPD.`}
                 </p>
               </div>
-              <button
+              <Button
                 onClick={() => setSearchQuery("Pendiente")}
-                className="bg-on-primary-container text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-1 rounded-full font-label-md text-label-md self-start transition-all cursor-pointer font-semibold shadow-sm"
+                variant="ghost"
+                className="bg-on-primary-container text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-1 rounded-full font-label-md text-label-md self-start font-semibold shadow-sm"
               >
                 Revisar Pendientes
-              </button>
+              </Button>
               <ShieldAlert className="absolute -right-4 -bottom-4 w-[120px] h-[120px] text-on-primary-container opacity-10 group-hover:scale-110 transition-transform" />
             </div>
           </section>
@@ -560,10 +565,10 @@ export default function ClientesPage() {
                                 <Button
                                   variant="ghost"
                                   onClick={(e) => handleToggleDropdown(e, client.id)}
-                                  className="p-2 rounded-full text-outline hover:text-on-surface hover:bg-surface-container active:scale-[0.98] w-9 h-9"
+                                  className="p-2 rounded-full text-outline hover:text-on-surface hover:bg-surface-container w-9 h-9"
                                   title="Acciones"
                                 >
-                                  <MoreVertical className="w-5 h-5" />
+                                  <MoreVertical data-icon="more-vertical" />
                                 </Button>
 
                                 {mounted && activeDropdownClientId === client.id && dropdownCoords && createPortal(
@@ -586,7 +591,7 @@ export default function ClientesPage() {
                                         }}
                                         className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
                                       >
-                                        <MessageCircle className="w-4 h-4 text-emerald-600" />
+                                        <MessageCircle data-icon="message-circle" className="text-emerald-600" />
                                         <span>Enviar WhatsApp</span>
                                       </Button>
                                     ) : (
@@ -600,7 +605,7 @@ export default function ClientesPage() {
                                         }}
                                         className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
                                       >
-                                        <ShieldCheck className="w-4 h-4 text-amber-600" />
+                                        <ShieldCheck data-icon="shield-check" className="text-amber-600" />
                                         <span>Enviar LOPD</span>
                                       </Button>
                                     )}
@@ -616,7 +621,7 @@ export default function ClientesPage() {
                                       }}
                                       className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
                                     >
-                                      <Edit3 className="w-4 h-4 text-primary" />
+                                      <Edit3 data-icon="edit-3" className="text-primary" />
                                       <span>Editar cliente</span>
                                     </Button>
 
@@ -636,7 +641,7 @@ export default function ClientesPage() {
                                       className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-error hover:bg-error-container/20 justify-start shadow-none active:scale-100"
                                       title="Eliminar cliente"
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Trash2 data-icon="trash" />
                                       <span>Eliminar cliente</span>
                                     </Button>
                                   </div>,
@@ -667,13 +672,13 @@ export default function ClientesPage() {
           </Card>
         </main>
 
-        {/* Mobile floating FAB action */}
-        <button
+        <Button
           onClick={() => setIsClientModalOpen(true)}
-          className="md:hidden fixed bottom-20 right-6 z-40 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container p-4 rounded-full shadow-lg active:scale-95 transition-all cursor-pointer"
+          variant="primary"
+          className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg"
         >
-          <Plus className="w-6 h-6" />
-        </button>
+          <Plus data-icon="plus" />
+        </Button>
 
         {/* Mobile menu bar */}
         <BottomNav />
@@ -699,8 +704,11 @@ export default function ClientesPage() {
 
       {/* LOPD WhatsApp Consent Toast Overlay */}
       {showConsentToast && (
-        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-md shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
-          <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
+        <Alert
+          variant="success"
+          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
+        >
+          <ShieldCheck data-icon="shield-check" className="text-emerald-600 shrink-0" />
           <div className="flex flex-col gap-0.5">
             <p className="font-semibold text-emerald-950 text-body-md">
               Consentimiento Reenviado
@@ -710,20 +718,23 @@ export default function ClientesPage() {
               <span className="font-semibold">{toastPhone}</span> por WhatsApp.
             </p>
           </div>
-        </div>
+        </Alert>
       )}
 
       {/* General Toast Overlay */}
       {showGeneralToast && (
-        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-md shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
-          <MessageCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+        <Alert
+          variant="success"
+          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
+        >
+          <MessageCircle data-icon="message-circle" className="text-emerald-600 shrink-0" />
           <div className="flex flex-col gap-0.5">
             <p className="font-semibold text-emerald-950 text-body-md">
               Mensaje Enviado
             </p>
             <p className="text-body-sm text-emerald-800">{toastText}</p>
           </div>
-        </div>
+        </Alert>
       )}
     </div>
   );

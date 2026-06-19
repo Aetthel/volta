@@ -8,6 +8,12 @@ const authenticate = (req, res, next) => {
   if (!apiKey || apiKey !== API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
+  req.user = {
+    role: req.header('x-user-role') || null,
+    businessId: req.header('x-user-business-id') || null,
+  };
+
   next();
 };
 

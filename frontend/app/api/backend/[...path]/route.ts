@@ -40,12 +40,42 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
   headers.set("Content-Type", "application/json");
   headers.set("x-api-key", apiKey);
 
+  if (session?.user) {
+    if (session.user.role) {
+      headers.set("x-user-role", session.user.role);
+    }
+    if (session.user.businessId) {
+      headers.set("x-user-business-id", session.user.businessId);
+    }
+  }
+
   let body: any = undefined;
   if (method !== "GET" && method !== "HEAD") {
     try {
       body = await request.text();
     } catch (e) {
       // No body or error reading it
+    }
+  }
+
+  // Tenant Isolation validation for non-admin users
+  if (session && session.user?.role !== "ADMIN") {
+    // 1. Check URL query params
+    const queryBusinessId = searchParams.get("businessId");
+    if (queryBusinessId && queryBusinessId !== session.user.businessId) {
+      return NextResponse.json({ error: "Forbidden: Tenant isolation mismatch (query)" }, { status: 403 });
+    }
+
+    // 2. Check JSON request body
+    if (body && typeof body === "string") {
+      try {
+        const parsedBody = JSON.parse(body);
+        if (parsedBody?.businessId && parsedBody.businessId !== session.user.businessId) {
+          return NextResponse.json({ error: "Forbidden: Tenant isolation mismatch (body)" }, { status: 403 });
+        }
+      } catch (e) {
+        // Not JSON or parsing failed, ignore
+      }
     }
   }
 

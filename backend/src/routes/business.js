@@ -17,6 +17,12 @@ const updateBusinessSchema = z.object({
 
 router.get('/:id', authenticate, validateId('id'), async (req, res) => {
   const { id } = req.params;
+  
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+  }
+
   try {
     const business = await prisma.business.findUnique({
       where: { id },
@@ -45,6 +51,11 @@ router.get('/:id', authenticate, validateId('id'), async (req, res) => {
 router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSchema), async (req, res) => {
   const { id } = req.params;
   const { name, email, phone, address, logoUrl, coverUrl, description, ownerName } = req.body;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+  }
 
   try {
     const updated = await prisma.business.update({
@@ -97,6 +108,12 @@ const updateHoursSchema = z.array(z.object({
 
 router.get('/:id/hours', authenticate, validateId('id'), async (req, res) => {
   const { id } = req.params;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+  }
+
   try {
     const hours = await prisma.businessHours.findMany({
       where: { businessId: id },
@@ -116,6 +133,11 @@ router.put('/:id/hours', authenticate, validateId('id'), validateBody(updateHour
   const { id } = req.params;
   const hoursData = req.body;
 
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+  }
+
   try {
     const business = await prisma.business.findUnique({ where: { id } });
     if (!business) {
@@ -123,18 +145,28 @@ router.put('/:id/hours', authenticate, validateId('id'), validateBody(updateHour
     }
 
     await prisma.$transaction(async (tx) => {
-      await tx.businessHours.deleteMany({
-        where: { businessId: id }
-      });
-      await tx.businessHours.createMany({
-        data: hoursData.map(h => ({
-          businessId: id,
-          dayOfWeek: h.dayOfWeek,
-          openTime: h.openTime,
-          closeTime: h.closeTime,
-          isClosed: h.isClosed
-        }))
-      });
+      for (const h of hoursData) {
+        await tx.businessHours.upsert({
+          where: {
+            businessId_dayOfWeek: {
+              businessId: id,
+              dayOfWeek: h.dayOfWeek
+            }
+          },
+          update: {
+            openTime: h.openTime,
+            closeTime: h.closeTime,
+            isClosed: h.isClosed
+          },
+          create: {
+            businessId: id,
+            dayOfWeek: h.dayOfWeek,
+            openTime: h.openTime,
+            closeTime: h.closeTime,
+            isClosed: h.isClosed
+          }
+        });
+      }
     });
 
     const updatedHours = await prisma.businessHours.findMany({

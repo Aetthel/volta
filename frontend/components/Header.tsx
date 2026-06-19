@@ -58,7 +58,7 @@ export default function Header({
         {/* Desktop search bar */}
         {onSearchChange && (
           <div className="hidden md:flex items-center bg-surface-container rounded-full px-4 py-1 gap-3 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all max-w-md w-full">
-            <Search className="w-5 h-5 text-on-surface-variant shrink-0" />
+            <Search data-icon="search" className="text-on-surface-variant shrink-0" />
             <input
               type="text"
               value={searchValue}
@@ -130,7 +130,7 @@ export default function Header({
                   onClick={() => setIsDropdownOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-medium text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
                 >
-                  <Settings className="w-5 h-5 text-on-surface-variant" />
+                  <Settings data-icon="settings" className="text-on-surface-variant" />
                   <span>Ajustes</span>
                 </Link>
 

@@ -117,9 +117,13 @@ router.get('/dashboard', authenticate, async (req, res) => {
     const businesses = await prisma.business.findMany({
       include: {
         appointments: {
-          include: { client: true }
+          include: { 
+            client: true,
+            service: true
+          }
         },
         clients: true,
+        services: true
       }
     });
 
@@ -134,8 +138,34 @@ router.get('/dashboard', authenticate, async (req, res) => {
       let bizLastMonth = 0;
 
       const bizRevenue = b.appointments.reduce((acc, app) => {
-        const serviceName = app.client?.frequentService || "Corte Caballero";
-        const price = servicePrices[serviceName] || 35;
+        let price = null;
+        
+        // 1. Direct link relation
+        if (app.service && typeof app.service.price === 'number') {
+          price = app.service.price;
+        }
+        
+        // 2. Custom service matching serviceName in b.services
+        if (price === null && app.serviceName) {
+          const match = b.services.find(s => s.name === app.serviceName);
+          if (match && typeof match.price === 'number') {
+            price = match.price;
+          }
+        }
+        
+        // 3. Custom service matching frequentService in b.services
+        if (price === null && app.client && app.client.frequentService) {
+          const match = b.services.find(s => s.name === app.client.frequentService);
+          if (match && typeof match.price === 'number') {
+            price = match.price;
+          }
+        }
+        
+        // 4. Fallback to servicePrices or 35
+        if (price === null) {
+          const serviceName = app.serviceName || app.client?.frequentService || "Corte Caballero";
+          price = servicePrices[serviceName] || 35;
+        }
 
         const apptDate = new Date(app.appointmentDate);
         if (apptDate >= startOfThisMonth) bizThisMonth++;

@@ -29,6 +29,11 @@ router.get('/', authenticate, async (req, res) => {
     if (businessId && businessId !== 'null' && businessId !== 'undefined') {
       where.businessId = businessId;
     }
+
+    // Force non-admins to only query their own business
+    if (req.user.role !== 'ADMIN') {
+      where.businessId = req.user.businessId || 'no_business';
+    }
     
     const users = await prisma.user.findMany({
       where,
@@ -59,6 +64,16 @@ router.get('/', authenticate, async (req, res) => {
 router.post('/', authenticate, validateBody(createUserSchema), async (req, res) => {
   const { name, email, password, role, businessId } = req.body;
   try {
+    // Check tenant isolation
+    if (req.user.role !== 'ADMIN') {
+      if (businessId && businessId !== req.user.businessId) {
+        return res.status(403).json({ error: 'Forbidden: Access denied to other business ID' });
+      }
+      if (role === 'ADMIN') {
+        return res.status(403).json({ error: 'Forbidden: Cannot create ADMIN users' });
+      }
+    }
+
     // Check if email already exists
     const existing = await prisma.user.findUnique({
       where: { email }
@@ -74,7 +89,7 @@ router.post('/', authenticate, validateBody(createUserSchema), async (req, res) 
         email,
         password: hashedPassword,
         role,
-        businessId: businessId || null
+        businessId: (req.user.role !== 'ADMIN' ? req.user.businessId : businessId) || null
       }
     });
 
@@ -91,6 +106,20 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateUserSchema
   const { id } = req.params;
   const { name, email, password, role, businessId } = req.body;
   try {
+    // If not admin, check target user ownership and request params
+    if (req.user.role !== 'ADMIN') {
+      const targetUser = await prisma.user.findUnique({ where: { id } });
+      if (!targetUser || targetUser.businessId !== req.user.businessId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+      if (businessId && businessId !== req.user.businessId) {
+        return res.status(403).json({ error: 'Forbidden: Cannot transfer user to another business' });
+      }
+      if (role === 'ADMIN') {
+        return res.status(403).json({ error: 'Forbidden: Cannot promote user to ADMIN' });
+      }
+    }
+
     const data = {};
     if (name) data.name = name;
     if (email) {
@@ -128,6 +157,14 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateUserSchema
 router.delete('/:id', authenticate, validateId('id'), async (req, res) => {
   const { id } = req.params;
   try {
+    // If not admin, check target user ownership
+    if (req.user.role !== 'ADMIN') {
+      const targetUser = await prisma.user.findUnique({ where: { id } });
+      if (!targetUser || targetUser.businessId !== req.user.businessId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+    }
+
     await prisma.user.delete({
       where: { id }
     });

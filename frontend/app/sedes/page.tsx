@@ -22,7 +22,7 @@ import {
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
-import { FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty } from "@/components/ui/volta-ui";
+import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select } from "@/components/ui/volta-ui";
 
 interface BusinessItem {
   id: string;
@@ -348,7 +348,7 @@ export default function SedesPage() {
                     <div className="flex justify-between items-start gap-2 mb-4">
                       <div className="flex items-center gap-2">
                         <div className="p-1 bg-surface-container text-primary rounded-lg shrink-0">
-                          <Store className="w-5 h-5" />
+                          <Store data-icon="store" />
                         </div>
                         <h3 className="font-title-md text-title-md text-on-surface font-semibold">
                           {biz.name}
@@ -360,18 +360,18 @@ export default function SedesPage() {
                     {/* Details list */}
                     <div className="flex flex-col gap-2 text-body-md text-on-surface-variant font-medium mt-6">
                       <div className="flex items-start gap-2 leading-relaxed">
-                        <Mail className="w-4 h-4 text-outline shrink-0 mt-0.5" />
+                        <Mail data-icon="mail" className="text-outline shrink-0 mt-0.5" />
                         <span className="truncate">{biz.email}</span>
                       </div>
                       {biz.phone && (
                         <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-outline shrink-0" />
+                          <Phone data-icon="phone" className="text-outline shrink-0" />
                           <span>{biz.phone}</span>
                         </div>
                       )}
                       {biz.address && (
                         <div className="flex items-start gap-2 leading-relaxed">
-                          <MapPin className="w-4 h-4 text-outline shrink-0 mt-0.5" />
+                          <MapPin data-icon="map-pin" className="text-outline shrink-0 mt-0.5" />
                           <span>{biz.address}</span>
                         </div>
                       )}
@@ -429,9 +429,9 @@ export default function SedesPage() {
         <Button
           variant="primary"
           onClick={handleOpenCreateModal}
-          className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg active:scale-95"
+          className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg"
         >
-          <Plus className="w-6 h-6" />
+          <Plus data-icon="plus" />
         </Button>
 
         {/* Mobile bottom nav */}
@@ -452,7 +452,7 @@ export default function SedesPage() {
             {/* Header */}
             <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
               <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
+                <Sparkles data-icon="sparkles" className="text-primary" />
                 <span>{editingBusiness ? "Editar Local" : "Añadir Nuevo Local"}</span>
               </h3>
               <Button
@@ -460,7 +460,7 @@ export default function SedesPage() {
                 onClick={() => setIsModalOpen(false)}
                 className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface w-8 h-8 active:scale-95 shadow-none"
               >
-                <X className="w-5 h-5" />
+                <X data-icon="x" />
               </Button>
             </div>
 
@@ -468,9 +468,9 @@ export default function SedesPage() {
             <form onSubmit={handleSaveBusiness} className="p-6">
               <FieldGroup className="gap-4">
                 <Field>
-                  <FieldLabel htmlFor="bizName">Nombre Comercial</FieldLabel>
-                  <input
+                  <FloatingInput
                     id="bizName"
+                    label="Nombre Comercial"
                     type="text"
                     required
                     placeholder="Ej. Glow Estética"
@@ -481,16 +481,13 @@ export default function SedesPage() {
                         name: e.target.value,
                       }))
                     }
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="bizEmail">
-                    {editingBusiness ? "Email de contacto" : "Email de acceso"}
-                  </FieldLabel>
-                  <input
+                  <FloatingInput
                     id="bizEmail"
+                    label={editingBusiness ? "Email de contacto" : "Email de acceso"}
                     type="email"
                     required
                     placeholder="contacto@glow.com"
@@ -501,17 +498,14 @@ export default function SedesPage() {
                         email: e.target.value,
                       }))
                     }
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 {!editingBusiness && (
                   <Field>
-                    <FieldLabel htmlFor="bizPassword">
-                      Contraseña de acceso
-                    </FieldLabel>
-                    <input
+                    <FloatingInput
                       id="bizPassword"
+                      label="Contraseña de acceso"
                       type="password"
                       required
                       placeholder="Mínimo 6 caracteres"
@@ -522,17 +516,14 @@ export default function SedesPage() {
                           password: e.target.value,
                         }))
                       }
-                      className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                     />
                   </Field>
                 )}
 
                 <Field>
-                  <FieldLabel htmlFor="bizPhone">
-                    Teléfono de WhatsApp
-                  </FieldLabel>
-                  <input
+                  <FloatingInput
                     id="bizPhone"
+                    label="Teléfono de WhatsApp"
                     type="tel"
                     required
                     placeholder="34600000000 (sin símbolos)"
@@ -543,14 +534,13 @@ export default function SedesPage() {
                         phone: e.target.value,
                       }))
                     }
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="bizAddress">Dirección Física</FieldLabel>
-                  <input
+                  <FloatingInput
                     id="bizAddress"
+                    label="Dirección Física"
                     type="text"
                     placeholder="Calle de Serrano, 10, Madrid"
                     value={newBusiness.address}
@@ -560,7 +550,6 @@ export default function SedesPage() {
                         address: e.target.value,
                       }))
                     }
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
               </FieldGroup>
@@ -595,15 +584,15 @@ export default function SedesPage() {
           <Card className="w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
               <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
-                <Users className="w-5 h-5 text-primary" />
+                <Users data-icon="users" className="text-primary" />
                 <span>Trabajadores - {selectedBusiness.name}</span>
               </h2>
               <Button
                 variant="ghost"
                 onClick={() => setIsWorkersModalOpen(false)}
-                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 active:scale-90 shadow-none"
+                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 shadow-none"
               >
-                <X className="w-5 h-5" />
+                <X data-icon="x" />
               </Button>
             </div>
 
@@ -686,78 +675,72 @@ export default function SedesPage() {
           <Card className="w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
               <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-primary" />
+                <UserPlus data-icon="user-plus" className="text-primary" />
                 <span>{editingWorker ? "Editar Trabajador" : "Nuevo Trabajador"}</span>
               </h2>
               <Button
                 variant="ghost"
                 onClick={() => setIsAddWorkerModalOpen(false)}
-                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 active:scale-90 shadow-none"
+                className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 shadow-none"
               >
-                <X className="w-5 h-5" />
+                <X data-icon="x" />
               </Button>
             </div>
 
             <form onSubmit={handleSaveWorker} className="p-6 flex flex-col gap-6 overflow-y-auto">
               {workerErrorMsg && (
-                <div className="bg-error-container border border-error-container/45 text-on-error-container p-4 rounded-xl font-medium text-body-md">
+                <Alert variant="error">
                   {workerErrorMsg}
-                </div>
+                </Alert>
               )}
 
               <FieldGroup>
                 <Field>
-                  <FieldLabel htmlFor="workerName">Nombre Completo</FieldLabel>
-                  <input
+                  <FloatingInput
                     id="workerName"
+                    label="Nombre Completo"
                     type="text"
                     required
                     placeholder="Ej. Sofía Martín"
                     value={workerFormData.name}
                     onChange={(e) => setWorkerFormData({ ...workerFormData, name: e.target.value })}
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="workerEmail">Correo Electrónico</FieldLabel>
-                  <input
+                  <FloatingInput
                     id="workerEmail"
+                    label="Correo Electrónico"
                     type="email"
                     required
                     placeholder="correo@tienda.com"
                     value={workerFormData.email}
                     onChange={(e) => setWorkerFormData({ ...workerFormData, email: e.target.value })}
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="workerPassword">
-                    Contraseña {editingWorker && <span className="text-on-surface-variant/50 font-normal">(dejar vacío para mantener)</span>}
-                  </FieldLabel>
-                  <input
+                  <FloatingInput
                     id="workerPassword"
+                    label={editingWorker ? "Nueva contraseña (opcional)" : "Contraseña (mínimo 6 caracteres)"}
                     type="password"
                     placeholder={editingWorker ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"}
                     value={workerFormData.password}
                     onChange={(e) => setWorkerFormData({ ...workerFormData, password: e.target.value })}
                     required={!editingWorker}
-                    className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                   />
                 </Field>
 
                 <Field>
                   <FieldLabel htmlFor="workerRole">Rol de Usuario</FieldLabel>
-                  <select
+                  <Select
                     id="workerRole"
                     value={workerFormData.role}
                     onChange={(e) => setWorkerFormData({ ...workerFormData, role: e.target.value as "JEFE" | "EMPLEADO" })}
-                    className="w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-md p-3.5 focus:border-primary focus:border-2 focus:outline-none transition-all bg-surface"
                   >
                     <option value="EMPLEADO">Empleado (Staff)</option>
                     <option value="JEFE">Jefe / Encargado</option>
-                  </select>
+                  </Select>
                 </Field>
               </FieldGroup>
 
