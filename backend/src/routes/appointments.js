@@ -123,4 +123,96 @@ router.post('/', authenticate, validateId('businessId'), validateBody(appointmen
   }
 });
 
+const updateAppointmentSchema = z.object({
+  clientName: z.string().min(2).optional(),
+  clientPhone: z.string().regex(/^\+?[0-9\s-]{9,20}$/).optional(),
+  appointmentDate: z.string().optional(),
+  status: z.enum(['PENDING', 'SENT', 'ERROR']).optional(),
+  serviceName: z.string().optional().nullable(),
+});
+
+router.put('/:id', authenticate, validateId('id'), validateBody(updateAppointmentSchema), async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  try {
+    const existing = await prisma.appointment.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN' && existing.businessId !== req.user.businessId) {
+      return res.status(403).json({ error: 'Forbidden: Access denied to this appointment' });
+    }
+
+    const data = {};
+    if (updateData.clientName) data.clientName = updateData.clientName;
+    if (updateData.clientPhone) data.clientPhone = updateData.clientPhone;
+    if (updateData.appointmentDate) data.appointmentDate = new Date(updateData.appointmentDate);
+    if (updateData.status) data.status = updateData.status;
+    if (updateData.serviceName !== undefined) {
+      data.serviceName = updateData.serviceName;
+      // Also look up serviceId
+      if (updateData.serviceName) {
+        const dbService = await prisma.service.findFirst({
+          where: {
+            businessId: existing.businessId,
+            name: updateData.serviceName,
+            isActive: true
+          }
+        });
+        if (dbService) {
+          data.serviceId = dbService.id;
+        } else {
+          data.serviceId = null;
+        }
+      } else {
+        data.serviceId = null;
+      }
+    }
+
+    const updated = await prisma.appointment.update({
+      where: { id },
+      data
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('[API] Error updating appointment:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.delete('/:id', authenticate, validateId('id'), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const existing = await prisma.appointment.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Appointment not found' });
+    }
+
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN' && existing.businessId !== req.user.businessId) {
+      return res.status(403).json({ error: 'Forbidden: Access denied to this appointment' });
+    }
+
+    await prisma.appointment.delete({
+      where: { id }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[API] Error deleting appointment:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

@@ -10,6 +10,11 @@ import {
   ChevronRight,
   Filter,
   Plus,
+  Trash2,
+  Edit3,
+  Clock,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -19,7 +24,7 @@ import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
-import { Button, Card } from "@/components/ui/volta-ui";
+import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/volta-ui";
 
 // Interface for calendar appointment item
 interface AppointmentItem {
@@ -459,6 +464,39 @@ export default function DashboardPage() {
     fetchDashboardData();
   };
 
+  const handleDeleteAppointment = (id: string) => {
+    if (!window.confirm("¿Seguro que deseas eliminar esta cita? Esta acción no se puede deshacer.")) return;
+    fetch(`/api/backend/appointments/${id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error deleting appointment");
+        return res.json();
+      })
+      .then(() => {
+        fetchDashboardData();
+      })
+      .catch((err) => console.error("Error deleting appointment:", err));
+  };
+
+  const handleUpdateAppointmentStatus = (id: string, status: "PENDING" | "SENT" | "ERROR") => {
+    fetch(`/api/backend/appointments/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Error updating appointment status");
+        return res.json();
+      })
+      .then(() => {
+        fetchDashboardData();
+      })
+      .catch((err) => console.error("Error updating status:", err));
+  };
+
   // Dynamic stats calculation
   const appointmentsTodayCount = appointments.filter(
     (app) => app.dayIndex === selectedDayIndex,
@@ -812,140 +850,207 @@ export default function DashboardPage() {
                       );
                     })}
 
-                    {/* Appointments Overlay Container */}
-                    <div
-                      className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
-                      onMouseMove={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
+                    {/* Appointments Overlay Container wrapped in ContextMenu */}
+                    <ContextMenu>
+                      <ContextMenuTrigger
+                        as="div"
+                        className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
+                        onMouseMove={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const x = e.clientX - rect.left;
+                          const y = e.clientY - rect.top;
 
-                        // Calculate day index based on column width
-                        const colWidth = rect.width / (viewMode === "week" ? 7 : 1);
-                        const hoveredColIdx = Math.floor(x / colWidth);
-                        const actualDayIndex = viewMode === "week" ? hoveredColIdx : selectedDayIndex;
+                          // Calculate day index based on column width
+                          const colWidth = rect.width / (viewMode === "week" ? 7 : 1);
+                          const hoveredColIdx = Math.floor(x / colWidth);
+                          const actualDayIndex = viewMode === "week" ? hoveredColIdx : selectedDayIndex;
 
-                        // Calculate time
-                        const totalMinutes = Math.round(y / 1.5);
-                        const hour = 9 + Math.floor(totalMinutes / 60);
-                        const minute = Math.round((totalMinutes % 60) / 5) * 5;
+                          // Calculate time
+                          const totalMinutes = Math.round(y / 1.5);
+                          const hour = 9 + Math.floor(totalMinutes / 60);
+                          const minute = Math.round((totalMinutes % 60) / 5) * 5;
 
-                        let finalHour = hour;
-                        let finalMin = minute;
-                        if (finalMin === 60) {
-                          finalHour += 1;
-                          finalMin = 0;
-                        }
+                          let finalHour = hour;
+                          let finalMin = minute;
+                          if (finalMin === 60) {
+                            finalHour += 1;
+                            finalMin = 0;
+                          }
 
-                        // Clamp bounds
-                        if (finalHour >= 9 && finalHour <= 21) {
-                          const timeStr = `${finalHour.toString().padStart(2, "0")}:${finalMin.toString().padStart(2, "0")}`;
-                          const roundedMinutes = (finalHour - 9) * 60 + finalMin;
+                          // Clamp bounds
+                          if (finalHour >= 9 && finalHour <= 21) {
+                            const timeStr = `${finalHour.toString().padStart(2, "0")}:${finalMin.toString().padStart(2, "0")}`;
+                            const roundedMinutes = (finalHour - 9) * 60 + finalMin;
 
-                          setHoverGuide({
-                            dayIndex: actualDayIndex,
-                            timeString: timeStr,
-                            top: roundedMinutes * 1.5,
-                          });
-                        } else {
-                          setHoverGuide(null);
-                        }
-                      }}
-                      onMouseLeave={() => setHoverGuide(null)}
-                      onClick={(e) => {
-                        if (hoverGuide) {
-                          handleGridClick(hoverGuide.dayIndex, hoverGuide.top);
-                        }
-                      }}
-                    >
-                      {Array.from({ length: viewMode === "week" ? 7 : 1 }).map((_, dayIndex) => {
-                        const actualDayIndex = viewMode === "week" ? dayIndex : selectedDayIndex;
-                        const dayAppointments = appointments.filter(
-                          (app) =>
-                            app.dayIndex === actualDayIndex &&
-                            (searchQuery === "" ||
-                              app.clientName
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase()) ||
-                              app.serviceName
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase())),
-                        );
+                            setHoverGuide({
+                              dayIndex: actualDayIndex,
+                              timeString: timeStr,
+                              top: roundedMinutes * 1.5,
+                            });
+                          } else {
+                            setHoverGuide(null);
+                          }
+                        }}
+                        onMouseLeave={() => setHoverGuide(null)}
+                        onClick={(e) => {
+                          if (hoverGuide) {
+                            handleGridClick(hoverGuide.dayIndex, hoverGuide.top);
+                          }
+                        }}
+                      >
+                        {Array.from({ length: viewMode === "week" ? 7 : 1 }).map((_, dayIndex) => {
+                          const actualDayIndex = viewMode === "week" ? dayIndex : selectedDayIndex;
+                          const dayAppointments = appointments.filter(
+                            (app) =>
+                              app.dayIndex === actualDayIndex &&
+                              (searchQuery === "" ||
+                                app.clientName
+                                  .toLowerCase()
+                                  .includes(searchQuery.toLowerCase()) ||
+                                app.serviceName
+                                  .toLowerCase()
+                                  .includes(searchQuery.toLowerCase())),
+                          );
 
-                        const positionedApps = calculateOverlaps(dayAppointments, dynamicDurations);
-                        const isColHovered = hoverGuide && hoverGuide.dayIndex === actualDayIndex;
+                          const positionedApps = calculateOverlaps(dayAppointments, dynamicDurations);
+                          const isColHovered = hoverGuide && hoverGuide.dayIndex === actualDayIndex;
 
-                        return (
-                          <div
-                            key={dayIndex}
-                            className="relative h-full border-r border-outline-variant/60 pointer-events-none"
-                          >
-                            {/* Hover Guide Line */}
-                            {isColHovered && hoverGuide && (
-                              <div
-                                style={{ top: `${hoverGuide.top}px` }}
-                                className="absolute left-0 right-0 z-25 border-t-2 border-primary/30 pointer-events-none flex items-center"
-                              >
-                                <span className="bg-primary text-on-primary text-[9px] font-bold px-1.5 py-0.5 rounded shadow absolute left-1 -translate-y-1/2">
-                                  {hoverGuide.timeString}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Current Time Line */}
-                            {renderCurrentTimeLine(actualDayIndex)}
-
-                            {positionedApps.map((app) => {
-                              const isActive = app.id === activeAppId;
-                              const isNext = app.id === nextAppId;
-
-                              // Muted style by default; active and next get the highlighted cyan/teal containers
-                              const cardClasses = isActive
-                                ? "bg-secondary-container text-on-secondary-container border-secondary shadow-[0_3px_10px_rgba(41,103,103,0.08)] z-15"
-                                : isNext
-                                  ? "bg-secondary-container/60 text-on-secondary-container/90 border-secondary/40 shadow-[0_2px_8px_rgba(41,103,103,0.05)] z-12"
-                                  : "bg-surface-container-low/85 text-on-surface-variant/80 border-outline-variant/40 shadow-[0_1px_3px_rgba(0,0,0,0.02)]";
-
-                              const isShort = app.height <= 45;
-                              const cardPadding = isShort ? "py-1 px-2" : "p-2";
-                              const cardRounded = isShort ? "rounded-md" : "rounded-lg";
-                              const cardGap = isShort ? "gap-0" : "gap-0.5";
-                              const serviceTextClass = isShort ? "text-[11.5px] font-bold leading-tight" : "text-label-md font-bold";
-                              const clientTextClass = isShort ? "text-[9.5px] opacity-75 font-medium leading-none" : "text-[10px] opacity-80 font-medium";
-                              const justifyClass = isShort ? "justify-center" : "justify-start";
-
-                              return (
+                          return (
+                            <div
+                              key={dayIndex}
+                              className="relative h-full border-r border-outline-variant/60 pointer-events-none"
+                            >
+                              {/* Hover Guide Line */}
+                              {isColHovered && hoverGuide && (
                                 <div
-                                  key={app.id}
-                                  style={{
-                                    position: "absolute",
-                                    top: `${app.top}px`,
-                                    height: `${app.height}px`,
-                                    width: `calc(${app.width}% - 8px)`,
-                                    left: `calc(${app.left}% + 4px)`,
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation(); // Prevent creating a new appointment
-                                  }}
-                                  className={`${cardRounded} ${cardPadding} border cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all flex flex-col ${justifyClass} ${cardGap} pointer-events-auto overflow-hidden ${cardClasses}`}
+                                  style={{ top: `${hoverGuide.top}px` }}
+                                  className="absolute left-0 right-0 z-25 border-t-2 border-primary/30 pointer-events-none flex items-center"
                                 >
-                                  <div className={`min-w-0 flex flex-col ${cardGap}`}>
-                                    <div className="flex items-center justify-between gap-1 flex-wrap">
-                                      <p className={`${serviceTextClass} truncate`}>
-                                        {app.serviceName}
-                                      </p>
-                                    </div>
-                                    <p className={`${clientTextClass} truncate`}>
-                                      {app.clientName}
-                                    </p>
-                                  </div>
+                                  <span className="bg-primary text-on-primary text-[9px] font-bold px-1.5 py-0.5 rounded shadow absolute left-1 -translate-y-1/2">
+                                    {hoverGuide.timeString}
+                                  </span>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
-                    </div>
+                              )}
+
+                              {/* Current Time Line */}
+                              {renderCurrentTimeLine(actualDayIndex)}
+
+                              {positionedApps.map((app) => {
+                                const isActive = app.id === activeAppId;
+                                const isNext = app.id === nextAppId;
+
+                                // Muted style by default; active and next get the highlighted cyan/teal containers
+                                const cardClasses = isActive
+                                  ? "bg-secondary-container text-on-secondary-container border-secondary shadow-[0_3px_10px_rgba(41,103,103,0.08)] z-15"
+                                  : isNext
+                                    ? "bg-secondary-container/60 text-on-secondary-container/90 border-secondary/40 shadow-[0_2px_8px_rgba(41,103,103,0.05)] z-12"
+                                    : "bg-surface-container-low/85 text-on-surface-variant/80 border-outline-variant/40 shadow-[0_1px_3px_rgba(0,0,0,0.02)]";
+
+                                const isShort = app.height <= 45;
+                                const cardPadding = isShort ? "py-1 px-2" : "p-2";
+                                const cardRounded = isShort ? "rounded-md" : "rounded-lg";
+                                const cardGap = isShort ? "gap-0" : "gap-0.5";
+                                const serviceTextClass = isShort ? "text-[11.5px] font-bold leading-tight" : "text-label-md font-bold";
+                                const clientTextClass = isShort ? "text-[9.5px] opacity-75 font-medium leading-none" : "text-[10px] opacity-80 font-medium";
+                                const justifyClass = isShort ? "justify-center" : "justify-start";
+
+                                return (
+                                  <ContextMenu key={app.id}>
+                                    <ContextMenuTrigger
+                                      as="div"
+                                      style={{
+                                        position: "absolute",
+                                        top: `${app.top}px`,
+                                        height: `${app.height}px`,
+                                        width: `calc(${app.width}% - 8px)`,
+                                        left: `calc(${app.left}% + 4px)`,
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation(); // Prevent creating a new appointment
+                                      }}
+                                      className={`${cardRounded} ${cardPadding} border cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all flex flex-col ${justifyClass} ${cardGap} pointer-events-auto overflow-hidden ${cardClasses}`}
+                                    >
+                                      <div className={`min-w-0 flex flex-col ${cardGap}`}>
+                                        <div className="flex items-center justify-between gap-1 flex-wrap">
+                                          <p className={`${serviceTextClass} truncate`}>
+                                            {app.serviceName}
+                                          </p>
+                                        </div>
+                                        <p className={`${clientTextClass} truncate`}>
+                                          {app.clientName}
+                                        </p>
+                                      </div>
+                                    </ContextMenuTrigger>
+                                    <ContextMenuContent>
+                                      <ContextMenuItem
+                                        onClick={() => {
+                                          if (app.dateObj) {
+                                            const dateStr = app.dateObj.toISOString().split("T")[0];
+                                            const h = app.dateObj.getHours().toString().padStart(2, "0");
+                                            const m = app.dateObj.getMinutes().toString().padStart(2, "0");
+                                            setPrefilledDate(dateStr);
+                                            setPrefilledTime(`${h}:${m}`);
+                                            setIsAppointmentModalOpen(true);
+                                          }
+                                        }}
+                                      >
+                                        <Edit3 className="w-4 h-4 text-primary" />
+                                        <span>Editar/Ver cita</span>
+                                      </ContextMenuItem>
+
+                                      <ContextMenuSeparator />
+
+                                      <ContextMenuItem
+                                        onClick={() => handleUpdateAppointmentStatus(app.id, 'PENDING')}
+                                      >
+                                        <Clock className="w-4 h-4 text-amber-500" />
+                                        <span>Marcar Pendiente</span>
+                                      </ContextMenuItem>
+
+                                      <ContextMenuItem
+                                        onClick={() => handleUpdateAppointmentStatus(app.id, 'SENT')}
+                                      >
+                                        <Check className="w-4 h-4 text-emerald-600" />
+                                        <span>Marcar Enviada</span>
+                                      </ContextMenuItem>
+
+                                      <ContextMenuItem
+                                        onClick={() => handleUpdateAppointmentStatus(app.id, 'ERROR')}
+                                      >
+                                        <AlertCircle className="w-4 h-4 text-error" />
+                                        <span>Marcar con Error</span>
+                                      </ContextMenuItem>
+
+                                      <ContextMenuSeparator />
+
+                                      <ContextMenuItem
+                                        variant="error"
+                                        onClick={() => handleDeleteAppointment(app.id)}
+                                      >
+                                        <Trash2 className="w-4 h-4 text-error" />
+                                        <span>Eliminar cita</span>
+                                      </ContextMenuItem>
+                                    </ContextMenuContent>
+                                  </ContextMenu>
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuItem
+                          onClick={() => {
+                            if (hoverGuide) {
+                              handleGridClick(hoverGuide.dayIndex, hoverGuide.top);
+                            }
+                          }}
+                        >
+                          <Plus className="w-4 h-4 text-primary" />
+                          <span>Nueva cita {hoverGuide ? `a las ${hoverGuide.timeString}` : ""}</span>
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
                   </div>
                 </div>
               </div>

@@ -17,3 +17,10 @@ The system SHALL allow the `ADMIN` to view a list of all registered businesses a
 - **WHEN** the Admin accesses the Business Management page
 - **THEN** the system displays a list of all businesses including their name, email, and connection status
 
+### Requirement: Admin Dashboard Metrics
+The system SHALL calculate dashboard metrics dynamically using the actual services and prices recorded in the database. Calculated metrics MUST reflect the specific services and prices of the appointments rather than hardcoded static price maps or default client preferences.
+
+#### Scenario: Displaying admin metrics
+- **WHEN** the Admin views the dashboard stats
+- **THEN** the system calculates estimated income and average tickets based on actual appointment service names and dynamic database prices
+
