@@ -57,3 +57,21 @@ El sistema SHALL proporcionar un conjunto de componentes reutilizables de menú 
 - **WHEN** un usuario en un dispositivo táctil mantiene presionado un elemento envuelto en `ContextMenuTrigger` durante más de 500 ms (evento `touchstart`/`touchend` con temporizador)
 - **THEN** el sistema despliega el menú contextual (`ContextMenuContent`) en la posición táctil del usuario de forma análoga al comportamiento de escritorio.
 
+### Requirement: Agenda en Menús de Navegación
+El sistema de navegación principal (tanto `Sidebar` en escritorio como `BottomNav` en dispositivos móviles) SHALL incluir un elemento de enlace directo para la vista de la "Agenda" utilizando el icono de calendario y apuntando a la ruta `/agenda`.
+
+#### Scenario: Visualización del enlace de agenda en escritorio
+- **WHEN** un usuario con rol de JEFE o EMPLEADO inicia sesión y carga el panel lateral `Sidebar` en escritorio
+- **THEN** el sistema renderiza el enlace "Agenda" con el icono de calendario en el menú de navegación principal.
+
+#### Scenario: Visualización del enlace de agenda en móvil
+- **WHEN** un usuario con rol de JEFE o EMPLEADO carga la aplicación desde un dispositivo móvil
+- **THEN** la barra de navegación inferior `BottomNav` incluye un acceso directo llamado "Agenda" con el icono de calendario correspondiente.
+
+### Requirement: Rejilla Adaptable de Panel de Control
+El layout del panel principal (`/inicio`) SHALL estructurarse mediante una rejilla responsiva basada en 10 columnas en pantallas medianas y grandes, distribuyéndose en una proporción de 6 columnas (60%) para el listado de citas y 4 columnas (40%) para la columna lateral de utilidades, colapsando a 1 columna en móviles.
+
+#### Scenario: Visualización responsiva en tablets y ordenadores
+- **WHEN** la aplicación se carga en una pantalla de tamaño tablet (ancho >= 768px) o de escritorio
+- **THEN** el sistema renderiza la rejilla del panel de control alineada horizontalmente en proporción 6/4 (col-span-6 y col-span-4).
+

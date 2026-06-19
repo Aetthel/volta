@@ -36,6 +36,8 @@ router.get('/:id', authenticate, validateId('id'), async (req, res) => {
         coverUrl: true,
         description: true,
         ownerName: true,
+        whatsappStatus: true,
+        qrCode: true,
       }
     });
     if (!business) {

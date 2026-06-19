@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { 
   LayoutDashboard, 
+  Calendar,
   Users, 
   Store, 
   Settings,
@@ -27,12 +28,14 @@ export default function BottomNav() {
   } else if (role === "JEFE") {
     navItems.push(
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
+      { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
       { name: "Ajustes", href: "/ajustes", icon: Settings },
     );
   } else { // EMPLEADO
     navItems.push(
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
+      { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
     );
   }
