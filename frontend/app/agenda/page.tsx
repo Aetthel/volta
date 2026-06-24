@@ -136,14 +136,34 @@ function calculateOverlaps(dayApps: any[], serviceDurations: Record<string, numb
 
     const numCols = columns.length;
     for (let colIdx = 0; colIdx < numCols; colIdx++) {
-      const width = 100 / numCols;
-      const left = colIdx * width;
-      
       for (const app of columns[colIdx]) {
+        // Calculate how many columns to the right this app can expand into
+        let colspan = 1;
+        for (let c = colIdx + 1; c < numCols; c++) {
+          // Check if there is any collision with apps in column 'c' during this app's duration
+          const hasCollision = columns[c].some(otherApp => {
+            return !(app.endTop <= otherApp.top || app.top >= otherApp.endTop);
+          });
+          if (hasCollision) {
+            break;
+          }
+          colspan++;
+        }
+
+        // Calculate left position and width with a 30% overlap factor (numCols + 0.3)
+        let left = 0;
+        let width = 100;
+        if (numCols > 1) {
+          const step = 100 / (numCols + 0.3);
+          left = colIdx * step;
+          width = (colspan * step) + (step * 0.3);
+        }
+
         positionedApps.push({
           ...app,
           width: width,
           left: left,
+          colspan: colspan,
         });
       }
     }
@@ -906,20 +926,20 @@ export default function DashboardPage() {
                                 const isActive = app.id === activeAppId;
                                 const isNext = app.id === nextAppId;
 
-                                // Muted style by default; active and next get the highlighted cyan/teal containers
-                                const cardClasses = isActive
-                                  ? "bg-secondary-container text-on-secondary-container border-secondary shadow-[0_3px_10px_rgba(41,103,103,0.08)] z-15"
-                                  : isNext
-                                    ? "bg-secondary-container/60 text-on-secondary-container/90 border-secondary/40 shadow-[0_2px_8px_rgba(41,103,103,0.05)] z-12"
-                                    : "bg-surface-container-low/85 text-on-surface-variant/80 border-outline-variant/40 shadow-[0_1px_3px_rgba(0,0,0,0.02)]";
-
                                 const isShort = app.height <= 45;
-                                const cardPadding = isShort ? "py-1 px-2" : "p-2";
-                                const cardRounded = isShort ? "rounded-md" : "rounded-lg";
-                                const cardGap = isShort ? "gap-0" : "gap-0.5";
-                                const serviceTextClass = isShort ? "text-[11.5px] font-bold leading-tight" : "text-label-md font-bold";
-                                const clientTextClass = isShort ? "text-[9.5px] opacity-75 font-medium leading-none" : "text-[10px] opacity-80 font-medium";
+                                const cardPadding = isShort ? "py-[2px] px-2" : "py-2 px-3";
+                                const cardRounded = isShort ? "rounded-[4px]" : "rounded-[6px]";
                                 const justifyClass = isShort ? "justify-center" : "justify-start";
+                                
+                                const serviceTextClass = isShort ? "text-[11.5px] font-bold leading-none" : "text-label-lg font-semibold";
+                                const clientTextClass = isShort ? "text-[10px] font-medium leading-none" : "text-body-sm font-medium";
+
+                                // Clean solid card highlights (Google Calendar vibe)
+                                const activeClasses = isActive
+                                  ? "ring-2 ring-primary ring-offset-1 z-15 shadow-[0_3px_12px_rgba(55,126,127,0.2)]"
+                                  : isNext
+                                    ? "ring-1 ring-primary/60 ring-offset-1 z-12 shadow-[0_2px_8px_rgba(55,126,127,0.1)]"
+                                    : "shadow-[0_1px_3px_rgba(0,0,0,0.02)]";
 
                                 return (
                                   <ContextMenu key={app.id}>
@@ -935,18 +955,27 @@ export default function DashboardPage() {
                                       onClick={(e) => {
                                         e.stopPropagation(); // Prevent creating a new appointment
                                       }}
-                                      className={`${cardRounded} ${cardPadding} border cursor-pointer hover:scale-[1.01] hover:shadow-md transition-all flex flex-col ${justifyClass} ${cardGap} pointer-events-auto overflow-hidden ${cardClasses}`}
+                                      className={`${cardRounded} ${cardPadding} ${app.colorClass} ${activeClasses} cursor-pointer hover:scale-[1.03] hover:z-30 hover:shadow-lg transition-all duration-200 flex flex-col ${justifyClass} pointer-events-auto overflow-hidden`}
                                     >
-                                      <div className={`min-w-0 flex flex-col ${cardGap}`}>
-                                        <div className="flex items-center justify-between gap-1 flex-wrap">
+                                      {isShort ? (
+                                        <div className="flex items-center gap-1.5 min-w-0 select-none">
+                                          <span className={`${serviceTextClass} truncate shrink-0`}>
+                                            {app.serviceName}
+                                          </span>
+                                          <span className={`${clientTextClass} opacity-85 truncate`}>
+                                            - {app.clientName}
+                                          </span>
+                                        </div>
+                                      ) : (
+                                        <div className="min-w-0 flex flex-col gap-0.5">
                                           <p className={`${serviceTextClass} truncate`}>
                                             {app.serviceName}
                                           </p>
+                                          <p className={`${clientTextClass} opacity-85 truncate`}>
+                                            {app.clientName}
+                                          </p>
                                         </div>
-                                        <p className={`${clientTextClass} truncate`}>
-                                          {app.clientName}
-                                        </p>
-                                      </div>
+                                      )}
                                     </ContextMenuTrigger>
                                     <ContextMenuContent>
                                       <ContextMenuItem

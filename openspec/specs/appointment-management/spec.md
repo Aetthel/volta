@@ -65,7 +65,7 @@ El sistema SHALL proveer una página dedicada exclusivamente a la visualización
 
 #### Scenario: Visualización del calendario completo
 - **WHEN** el usuario accede a la ruta `/agenda`
-- **THEN** el sistema renderiza la rejilla horaria de citas (semanal o diaria) con soporte para clic derecho, menús contextuales y guías flotantes, aprovechando todo el ancho de la pantalla sin solapamiento de paneles informativos.
+- **THEN** el sistema renderiza la rejilla horaria de citas (semanal o diaria) con soporte para clic derecho, menús contextuales y guías flotantes, aprovechando todo el ancho de la pantalla sin solapamiento de paneles informativos, aplicando un posicionamiento dinámico de citas solapadas con solape visual tridimensional y expansión horizontal inteligente, tarjetas sólidas con colores correspondientes a la categoría del servicio y esquinas poco redondeadas.
 
 ### Requirement: Panel de Control de Citas de Hoy en Dashboard
 La página principal de inicio (`/inicio`) SHALL sustituir la cuadrícula completa del calendario por un listado ordenado cronológicamente de las citas correspondientes al día de hoy, optimizando la visibilidad diaria sin saturar la interfaz de forma adaptativa y fluida sin alturas fijas.
