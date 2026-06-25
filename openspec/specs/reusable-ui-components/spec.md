@@ -71,3 +71,32 @@ El layout del panel principal (`/inicio`) SHALL estructurarse mediante una rejil
 - **WHEN** la aplicación se carga en una pantalla de tamaño tablet (ancho >= 768px) o de escritorio
 - **THEN** el sistema renderiza la rejilla del panel de control alineada horizontalmente en proporción 6/4 (col-span-6 y col-span-4).
 
+### Requirement: Espaciado fluido en componentes reutilizables
+El sistema SHALL estructurar los componentes de interfaz reutilizables (`Card`, `Sidebar`, `BottomNav`, `Header`, etc.) de forma que sus márgenes, rellenos y espacios de separación internos consuman de manera dinámica la variable de espaciado fluido `--spacing-gutter` (`gutter`).
+
+#### Scenario: Relleno fluido en tarjetas
+- **WHEN** un contenedor o tarjeta utiliza padding de espaciado (ej. `p-gutter` o `p-margin-mobile md:p-gutter`)
+- **THEN** el espaciado efectivo se calcula dinámicamente según el viewport (`clamp(1rem, 0.75rem + 1.25vw, 1.5rem)`), adaptándose de forma continua a móviles, tablets y ordenadores.
+
+### Requirement: Componente PageHeader para cabeceras de página
+El sistema SHALL proporcionar un componente de cabecera de página reutilizable (`PageHeader`) en `volta-ui.tsx` que unifique visualmente el título de la página, la descripción de soporte y las llamadas a la acción en la parte superior derecha de las vistas principales de la aplicación.
+
+#### Scenario: Renderizar PageHeader completo en vista de clientes
+- **WHEN** la página de clientes se monta e instancia `PageHeader` con título "Gestión de Clientes", descripción y los botones "Exportar" y "Añadir Cliente"
+- **THEN** el sistema renderiza el título en el margen izquierdo con fuente `font-display` y tamaño `text-headline-lg` en peso semibold, y los botones alineados a la derecha de manera responsiva.
+
+### Requirement: Acceso a Ajustes en Navegación para Empleados
+El sistema SHALL incluir el enlace a "Ajustes" (apuntando a `/ajustes` con el icono de engranaje) en los componentes de navegación principal (`Sidebar` y `BottomNav`) para todos los roles de usuario (ADMIN, JEFE, EMPLEADO).
+
+#### Scenario: Visualización de Ajustes para Empleado
+- **WHEN** un usuario con el rol de EMPLEADO inicia sesión y se renderiza `Sidebar` o `BottomNav`
+- **THEN** el sistema muestra el enlace "Ajustes" junto con los de Inicio, Agenda y Clientes.
+
+### Requirement: Uniform Dashboard Card Headers
+El sistema SHALL garantizar que las tarjetas principales del dashboard (como Citas de Hoy, WhatsApp Bot y Servicios Solicitados) compartan una estructura de encabezado uniforme, mostrando un icono de Lucide alineado con el título de la tarjeta utilizando una separación flex gap consistente, y evitando elementos auxiliares como recuentos totales o subtítulos de fecha a menos que se configure explícitamente.
+
+#### Scenario: Encabezado estándar para Citas de Hoy
+- **WHEN** se renderiza la página principal del dashboard
+- **THEN** el encabezado de la tarjeta "Citas de Hoy" MUST mostrar el CalendarIcon junto al título "Citas de Hoy" dentro del contenedor de cabecera flex, sin subtítulo de fecha ni badge de total de citas
+
+

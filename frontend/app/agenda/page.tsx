@@ -643,7 +643,7 @@ export default function DashboardPage() {
         />
 
         {/* Inner Content Canvas */}
-        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1 overflow-hidden flex flex-col min-h-0">
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 overflow-hidden flex flex-col min-h-0">
           {/* Calendar Container */}
           <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Calendar Header Controls */}

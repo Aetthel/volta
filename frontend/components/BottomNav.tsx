@@ -37,6 +37,7 @@ export default function BottomNav() {
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
       { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
+      { name: "Ajustes", href: "/ajustes", icon: Settings },
     );
   }
 

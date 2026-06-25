@@ -22,7 +22,7 @@ import {
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
-import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select } from "@/components/ui/volta-ui";
+import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select, PageHeader } from "@/components/ui/volta-ui";
 
 interface BusinessItem {
   id: string;
@@ -312,31 +312,25 @@ export default function SedesPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
-          {/* Header Action Section */}
-          <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-            <div>
-              <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
-                Gestión de Locales
-              </h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
-                Registra y administra las cuentas de salones en la plataforma.
-              </p>
-            </div>
-
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleOpenCreateModal}
-              className="flex items-center gap-1 px-6 py-2 self-start"
-            >
-              <Plus data-icon="plus" />
-              <span>Añadir Local</span>
-            </Button>
-          </section>
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+          <PageHeader
+            title="Gestión de Locales"
+            description="Registra y administra las cuentas de salones en la plataforma."
+            actions={
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleOpenCreateModal}
+                className="flex items-center gap-1 px-6 py-2 self-start"
+              >
+                <Plus data-icon="plus" />
+                <span>Añadir Local</span>
+              </Button>
+            }
+          />
 
           {/* Grid Layout of Businesses */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
             {filteredBusinesses.length > 0 ? (
               filteredBusinesses.map((biz) => (
                 <Card

@@ -26,7 +26,7 @@ import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, Separator, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, Separator, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 
 interface AppointmentItem {
@@ -240,19 +240,11 @@ export default function DashboardPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
-          {/* Header Action Section */}
-          <section className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant/60 shadow-[0_4px_20px_rgba(0,0,0,0.01)] mb-gutter">
-            <div>
-              <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1.5 flex items-center gap-2">
-                <span>{greeting}</span>
-                {session?.user?.name && (
-                  <span className="text-primary font-medium">
-                    {session.user.name.split(" ")[0]}
-                  </span>
-                )}
-              </h1>
-              <p className="font-body-md text-body-md text-on-surface-variant/90 font-medium">
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+          <PageHeader
+            title={greeting + (session?.user?.name ? ` ${session.user.name.split(" ")[0]}` : "")}
+            description={
+              <>
                 Hoy tienes <strong className="text-on-surface">{todayApps.length}</strong> citas programadas.
                 {todayApps.length > 0 && (
                   <>
@@ -263,9 +255,9 @@ export default function DashboardPage() {
                     </strong> con error.
                   </>
                 )}
-              </p>
-            </div>
-          </section>
+              </>
+            }
+          />
 
           {/* Quick Metrics Bento Grid */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
@@ -309,22 +301,11 @@ export default function DashboardPage() {
             {/* Today's Appointments List Widget */}
             <div className="md:col-span-6 flex flex-col gap-gutter">
               <Card>
-                <CardHeader className="flex-row items-center justify-between gap-4 border-b border-outline-variant/40 pb-4">
-                  <div>
-                    <CardTitle className="font-semibold text-title-md">
-                      Citas de Hoy
-                    </CardTitle>
-                    <p className="text-body-sm text-on-surface-variant font-medium mt-0.5">
-                      {new Date().toLocaleDateString("es-ES", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                      })}
-                    </p>
-                  </div>
-                  <Badge variant="secondary">
-                    {`${todayApps.length} citas en total`}
-                  </Badge>
+                <CardHeader className="pb-3 border-b border-outline-variant/30">
+                  <CardTitle className="text-title-md font-semibold flex items-center gap-2">
+                    <CalendarIcon className="w-5 h-5 text-primary" />
+                    <span>Citas de Hoy</span>
+                  </CardTitle>
                 </CardHeader>
 
                 <div className="p-6 flex flex-col gap-4">
@@ -490,7 +471,11 @@ export default function DashboardPage() {
 
                       {whatsappStatus === "WAITING_QR" && qrCode && (
                         <div className="flex flex-col items-center gap-2 p-4 bg-surface-container-low rounded-xl border border-outline-variant/50">
-                          <img src={qrCode} alt="WhatsApp Pairing QR" className="w-40 h-40 object-contain" />
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`}
+                            alt="WhatsApp Pairing QR"
+                            className="w-40 h-40 object-contain"
+                          />
                           <span className="text-xs text-on-surface-variant font-medium">
                             Escanea este código desde WhatsApp
                           </span>

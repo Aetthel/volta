@@ -770,3 +770,43 @@ export const ContextMenuSeparator = React.forwardRef<
   />
 ));
 ContextMenuSeparator.displayName = "ContextMenuSeparator";
+
+// PageHeader
+export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  title: string;
+  description?: string | React.ReactNode;
+  actions?: React.ReactNode;
+}
+
+export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
+  ({ className, title, description, actions, ...props }, ref) => {
+    return (
+      <section
+        ref={ref}
+        className={cn(
+          "flex flex-col md:flex-row md:items-end justify-between gap-gutter mb-gutter",
+          className
+        )}
+        {...props}
+      >
+        <div>
+          <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
+            {title}
+          </h1>
+          {description && (
+            <div className="font-body-lg text-body-lg text-on-surface-variant font-medium">
+              {description}
+            </div>
+          )}
+        </div>
+        {actions && (
+          <div className="flex items-center gap-2 shrink-0">
+            {actions}
+          </div>
+        )}
+      </section>
+    );
+  }
+);
+PageHeader.displayName = "PageHeader";
+

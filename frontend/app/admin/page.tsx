@@ -18,7 +18,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
-import { Button } from "@/components/ui/volta-ui";
+import { Button, PageHeader } from "@/components/ui/volta-ui";
 
 export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,32 +86,25 @@ export default function AdminPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
-          {/* Dashboard Header & Range Selector */}
-          <section className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
-            <div>
-              <h1 className="font-display text-headline-lg text-on-surface font-semibold tracking-tight mb-1">
-                Panel de Control Global
-              </h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
-                Resumen de rendimiento y métricas operativas.
-              </p>
-            </div>
-
-            {/* Range dropdown */}
-            <div className="relative group cursor-pointer">
-              <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container transition-colors shadow-sm select-none">
-                <Calendar className="w-5 h-5 text-on-surface-variant" />
-                <span className="font-label-lg text-on-surface font-semibold">
-                  {selectedRange}
-                </span>
-                <ChevronDown className="w-5 h-5 text-on-surface-variant" />
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+          <PageHeader
+            title="Panel de Control Global"
+            description="Resumen de rendimiento y métricas operativas."
+            actions={
+              <div className="relative group cursor-pointer">
+                <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container transition-colors shadow-sm select-none">
+                  <Calendar className="w-5 h-5 text-on-surface-variant" />
+                  <span className="font-label-lg text-on-surface font-semibold">
+                    {selectedRange}
+                  </span>
+                  <ChevronDown className="w-5 h-5 text-on-surface-variant" />
+                </div>
               </div>
-            </div>
-          </section>
+            }
+          />
 
           {/* Grid KPIs */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
             <MetricCard
               title="Ingresos Totales"
               value={kpis.totalRevenue}
@@ -143,7 +136,7 @@ export default function AdminPage() {
           </section>
 
           {/* Bento Chart and Rankings Grid */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
             {/* Custom Chart Panel (Spans 8 cols) */}
             <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between overflow-hidden">
               <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">

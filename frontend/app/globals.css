@@ -64,7 +64,7 @@
   --font-sans: "Inter", system-ui, sans-serif;
 
   /* Custom Spacing scale for Volta UI & Stitch Designs */
-  --spacing-gutter: 1.5rem; /* 24px */
+  --spacing-gutter: clamp(1rem, 0.75rem + 1.25vw, 1.5rem);
   --spacing-margin-mobile: 1rem; /* 16px */
 
   --width-container-max: 1440px;

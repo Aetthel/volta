@@ -55,6 +55,7 @@ import {
   FloatingInput,
   Button,
   Skeleton,
+  PageHeader,
 } from "@/components/ui/volta-ui";
 
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
@@ -902,7 +903,7 @@ export default function AjustesPage() {
           />
 
           {/* Content Canvas */}
-          <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1 relative">
+          <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
             {/* Toast Notification Banner */}
             {showToast && (
               <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-secondary-container text-on-secondary-container border border-outline-variant px-6 py-4 rounded-md shadow-lg animate-in fade-in slide-in-from-top-4 duration-200">
@@ -913,15 +914,10 @@ export default function AjustesPage() {
               </div>
             )}
 
-            {/* Page Title */}
-            <div className="mb-6">
-              <h1 className="font-display text-2xl sm:text-headline-lg text-on-surface font-semibold mb-1">
-                Ajustes de Administrador
-              </h1>
-              <p className="font-body-md text-on-surface-variant font-medium">
-                Gestiona tus credenciales de acceso y perfil de administrador.
-              </p>
-            </div>
+            <PageHeader
+              title="Ajustes de Administrador"
+              description="Gestiona tus credenciales de acceso y perfil de administrador."
+            />
 
             <div className="max-w-xl">
               <Card>
@@ -1034,7 +1030,7 @@ export default function AjustesPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1 relative">
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           {/* Toast Notification Banner */}
           {showToast && (
             <div className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-secondary-container text-on-secondary-container border border-outline-variant px-6 py-4 rounded-md shadow-lg animate-in fade-in slide-in-from-top-4 duration-200">
@@ -1045,19 +1041,13 @@ export default function AjustesPage() {
             </div>
           )}
 
-          {/* Page Title */}
-          <div className="mb-4 sm:mb-6">
-            <h1 className="font-display text-2xl sm:text-headline-lg text-on-surface font-semibold mb-1">
-              Configuración
-            </h1>
-            <p className="font-body-md text-body-sm sm:text-body-md text-on-surface-variant font-medium">
-              Gestiona tu identidad de marca, horarios, servicios y mensajería
-              automatizada.
-            </p>
-          </div>
+          <PageHeader
+            title="Configuración"
+            description="Gestiona tu identidad de marca, horarios, servicios y mensajería automatizada."
+          />
 
           {/* Tab Navigation */}
-          <div className="flex border-b border-outline-variant/65 mb-6 sm:mb-8 gap-4 sm:gap-6">
+          <div className="flex border-b border-outline-variant/65 mb-gutter gap-gutter">
             <Button
               variant="ghost"
               onClick={() => setActiveTab("perfil")}
@@ -1069,33 +1059,37 @@ export default function AjustesPage() {
             >
               Perfil y Seguridad
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("mensajeria")}
-              className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
-                activeTab === "mensajeria"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              Mensajes y WhatsApp
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setActiveTab("gestion")}
-              className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
-                activeTab === "gestion"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-on-surface-variant hover:text-on-surface"
-              }`}
-            >
-              Gestión del Negocio
-            </Button>
+            {role !== "EMPLEADO" && (
+              <>
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveTab("mensajeria")}
+                  className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
+                    activeTab === "mensajeria"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-on-surface-variant hover:text-on-surface"
+                  }`}
+                >
+                  Mensajes y WhatsApp
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveTab("gestion")}
+                  className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
+                    activeTab === "gestion"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-on-surface-variant hover:text-on-surface"
+                  }`}
+                >
+                  Gestión del Negocio
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Tab Contents */}
-          {activeTab === "perfil" ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 animate-in fade-in duration-200">
+          {(activeTab === "perfil" || role === "EMPLEADO") ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter mt-gutter animate-in fade-in duration-200">
               {/* Profile Card (Screenshot 1 style) */}
               <Card className="lg:col-span-12">
                 <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -1301,7 +1295,7 @@ export default function AjustesPage() {
               </Card>
 
               {/* Account Security Card */}
-              <Card className="lg:col-span-12 mt-2">
+              <Card className="lg:col-span-12">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-primary flex items-center gap-2">
                     <ShieldCheck data-icon="shield-check" />
@@ -1363,7 +1357,7 @@ export default function AjustesPage() {
             </div>
           ) : activeTab === "mensajeria" ? (
             /* Bento Grid Layout - Messaging & WhatsApp */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter animate-in fade-in duration-200">
               {/* WhatsApp Connection Card (Spans 5 cols) */}
               <Card className="sm:col-span-2 lg:col-span-5 flex flex-col justify-between min-h-0 sm:min-h-[420px]">
                 <div>
@@ -1695,7 +1689,7 @@ export default function AjustesPage() {
             </div>
           ) : (
             /* Bento Grid Layout - Gestión del Negocio */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 animate-in fade-in duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter animate-in fade-in duration-200">
               {/* Business Profile Card (Spans 8 cols) */}
               {isEditingBusiness ? (
                 <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
@@ -2113,7 +2107,7 @@ export default function AjustesPage() {
               </Card>
 
               {/* Featured Services Card (Spans 12 cols - full width) */}
-              <Card className="col-span-12 flex flex-col justify-between mt-2">
+              <Card className="col-span-12 flex flex-col justify-between">
                 <div>
                   <CardHeader className="flex flex-row items-center justify-between pb-4">
                     <CardTitle className="text-primary flex items-center gap-2">
@@ -2213,7 +2207,7 @@ export default function AjustesPage() {
               </Card>
               {/* Workers Management Card */}
               {showTrabajadoresTab && (
-                <Card className="col-span-12 mt-2">
+                <Card className="col-span-12">
                   <CardHeader className="flex flex-row items-center justify-between pb-4">
                     <CardTitle className="text-primary flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary" />

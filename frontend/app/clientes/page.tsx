@@ -25,7 +25,7 @@ import Header from "@/components/Header";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -389,39 +389,33 @@ export default function ClientesPage() {
         />
 
         {/* Content Canvas */}
-        <main className="p-margin-mobile md:p-gutter max-w-container-max w-full mx-auto flex-1">
-          {/* Header Action Section */}
-          <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-            <div>
-              <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
-                Gestión de Clientes
-              </h1>
-              <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
-                Administra tu base de datos y fideliza a tus usuarios.
-              </p>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="outline"
-                className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
-              >
-                <Download data-icon="download" />
-                <span>Exportar</span>
-              </Button>
-              <Button
-                onClick={() => setIsClientModalOpen(true)}
-                variant="primary"
-                className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
-              >
-                <Plus data-icon="plus" />
-                <span>Añadir Cliente</span>
-              </Button>
-            </div>
-          </section>
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
+          <PageHeader
+            title="Gestión de Clientes"
+            description="Administra tu base de datos y fideliza a tus usuarios."
+            actions={
+              <>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
+                >
+                  <Download data-icon="download" />
+                  <span>Exportar</span>
+                </Button>
+                <Button
+                  onClick={() => setIsClientModalOpen(true)}
+                  variant="primary"
+                  className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
+                >
+                  <Plus data-icon="plus" />
+                  <span>Añadir Cliente</span>
+                </Button>
+              </>
+            }
+          />
 
           {/* Stats Bento Grid */}
-          <section className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-gutter mb-gutter">
             <MetricCard
               title="Clientes Totales"
               value={clients.length}
