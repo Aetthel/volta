@@ -40,11 +40,7 @@ El sistema SHALL proporcionar un componente de botón reutilizable (`Button`) co
 
 #### Scenario: Visualización del botón primario
 - **WHEN** un botón utiliza la variante `primary`
-- **THEN** se muestra con fondo de color primario (`bg-primary`), texto de contraste (`text-on-primary`) y tipografía de peso medio (`font-medium`) sin utilizar negrita.
-
-#### Scenario: Visualización de botones de acción en modales
-- **WHEN** los modales interactivos muestran botones para confirmar o cancelar acciones
-- **THEN** estos botones utilizan el componente centralizado `Button` con variantes estandarizadas y tipografía de peso medio.
+- **THEN** se muestra con fondo de color primario (`bg-primary`), texto de contraste (`text-on-primary`) de color blanco por defecto sin conflictos de fusión de clases, y tipografía de peso medio (`font-medium`) sin utilizar negrita.
 
 ### Requirement: Componente de Menú Contextual Estilo Figma
 El sistema SHALL proporcionar un conjunto de componentes reutilizables de menú contextual (`ContextMenu`, `ContextMenuTrigger`, `ContextMenuContent`, `ContextMenuItem`, `ContextMenuSeparator`) en `volta-ui.tsx` para gestionar menús de clic derecho (desktop) y de pulsación prolongada (móviles/táctiles). Este componente debe seguir los estándares visuales de Volta UI con tipografía en peso medio/semibold, bordes redondeados y micro-animaciones de entrada de escala/opacidad.
