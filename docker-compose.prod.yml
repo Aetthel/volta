@@ -11,7 +11,6 @@ services:
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
     command: npm run --workspace=backend start
-    # Connect to the host's existing PostgreSQL via extra_hosts
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -33,16 +32,9 @@ services:
     command: npm run --workspace=frontend start
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: volta-cloudflared
-    restart: always
-    depends_on:
-      - frontend
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    command: tunnel --no-autoupdate run
+    networks:
+      - default # Red interna para hablar con el backend
+      - cloudfare-tunnel_default # Red externa para hablar con Cloudflare
 
   watchtower:
     image: containrrr/watchtower:latest
@@ -57,3 +49,7 @@ services:
 
 volumes:
   wwebjs-auth:
+
+networks:
+  cloudfare-tunnel_default:
+    external: true
