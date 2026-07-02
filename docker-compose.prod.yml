@@ -27,14 +27,12 @@ services:
       - NODE_ENV=production
       - AUTH_TRUST_HOST=true
       - PORT=3000
-    ports:
-      - "127.0.0.1:3000:3000"
     command: npm run --workspace=frontend start
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      - default # Red interna para hablar con el backend
-      - cloudfare-tunnel_default # Red externa para hablar con Cloudflare
+      - default
+      - cloudfare-tunnel_default
 
   watchtower:
     image: containrrr/watchtower:latest
