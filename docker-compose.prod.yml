@@ -33,9 +33,6 @@ services:
       - "${PORT_HOST:-3001}:${PORT:-3000}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - default
-      - cloudfare-tunnel_default
 
   watchtower:
     image: containrrr/watchtower:latest
@@ -50,7 +47,3 @@ services:
 
 volumes:
   wwebjs-auth:
-
-networks:
-  cloudfare-tunnel_default:
-    external: true
