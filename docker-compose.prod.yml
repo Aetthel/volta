@@ -34,16 +34,5 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: volta-watchtower
-    restart: always
-    environment:
-      - DOCKER_API_VERSION=1.40
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ~/.docker/config.json:/config.json
-    command: --cleanup --interval 300 volta-frontend volta-backend
-
 volumes:
   wwebjs-auth:
