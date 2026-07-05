@@ -1,6 +1,7 @@
 services:
   backend:
     image: ghcr.io/kore29/volta:latest
+    pull_policy: always
     container_name: volta-backend
     restart: always
     volumes:
@@ -12,6 +13,7 @@ services:
 
   frontend:
     image: ghcr.io/kore29/volta:latest
+    pull_policy: always
     container_name: volta-frontend
     restart: always
     depends_on:
