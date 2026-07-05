@@ -2,7 +2,9 @@ const path = require('path');
 const fs = require('fs');
 
 const runInDocker = fs.existsSync('/.dockerenv');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env'), override: !runInDocker });
+if (!process.env.DATABASE_URL || !process.env.API_KEY) {
+  require('dotenv').config({ path: path.resolve(__dirname, '../../.env'), override: !runInDocker });
+}
 
 // Startup environment variables verification
 const REQUIRED_ENV_VARS = ['DATABASE_URL', 'API_KEY'];
