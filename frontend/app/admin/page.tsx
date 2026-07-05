@@ -84,27 +84,15 @@ export default function AdminPage() {
             title="Panel de Control Global"
             description="Resumen de rendimiento y métricas operativas."
             actions={
-              <>
-                <div className="flex items-center bg-surface-container rounded-full px-4 py-1.5 gap-3 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-full max-w-[280px]">
-                  <Search data-icon="search" className="text-on-surface-variant shrink-0 w-4 h-4" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar..."
-                    className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
-                  />
+              <div className="relative group cursor-pointer">
+                <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container transition-colors shadow-sm select-none">
+                  <Calendar className="w-5 h-5 text-on-surface-variant" />
+                  <span className="font-label-lg text-on-surface font-semibold">
+                    {selectedRange}
+                  </span>
+                  <ChevronDown className="w-5 h-5 text-on-surface-variant" />
                 </div>
-                <div className="relative group cursor-pointer">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container transition-colors shadow-sm select-none">
-                    <Calendar className="w-5 h-5 text-on-surface-variant" />
-                    <span className="font-label-lg text-on-surface font-semibold">
-                      {selectedRange}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-on-surface-variant" />
-                  </div>
-                </div>
-              </>
+              </div>
             }
           />
 

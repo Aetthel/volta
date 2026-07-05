@@ -683,17 +683,6 @@ export default function DashboardPage() {
 
               {/* View Switches */}
               <div className="flex flex-wrap items-center gap-2">
-                {/* Search Bar */}
-                <div className="flex items-center bg-surface-container rounded-full px-3 py-1 gap-2 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-48">
-                  <Search data-icon="search" className="text-on-surface-variant shrink-0 w-3.5 h-3.5" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar..."
-                    className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
-                  />
-                </div>
 
                 <div className="flex rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low p-[2px]">
                   <Button

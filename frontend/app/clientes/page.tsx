@@ -387,16 +387,6 @@ export default function ClientesPage() {
             description="Administra tu base de datos y fideliza a tus usuarios."
             actions={
               <>
-                <div className="flex items-center bg-surface-container rounded-full px-4 py-1.5 gap-3 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-full max-w-[280px]">
-                  <Search data-icon="search" className="text-on-surface-variant shrink-0 w-4 h-4" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar clientes..."
-                    className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
-                  />
-                </div>
                 <Button
                   variant="outline"
                   className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
