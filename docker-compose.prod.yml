@@ -5,7 +5,7 @@ services:
     container_name: volta-backend
     restart: always
     env_file:
-      - /opt/docker/volta/.env
+      - .env
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
     command: npm run --workspace=backend start
@@ -20,7 +20,7 @@ services:
     depends_on:
       - backend
     env_file:
-      - /opt/docker/volta/.env
+      - .env
     command: npm run --workspace=frontend start
     ports:
       - "${PORT_HOST:-3001}:${PORT:-3000}"
