@@ -1,4 +1,4 @@
-name: Build, Push & Deploy Volta
+name: Build & Push Volta Image
 
 on:
   push:
@@ -52,7 +52,3 @@ jobs:
           # Cache layers between builds for faster subsequent builds
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Trigger Portainer Webhook for Deployment
-        run: |
-          curl -k -X POST "${{ secrets.PORTAINER_WEBHOOK_URL }}"
