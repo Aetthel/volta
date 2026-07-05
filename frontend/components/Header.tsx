@@ -44,112 +44,84 @@ export default function Header({
     : "Volta";
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 w-full bg-surface z-40 shrink-0">
-      {/* Search Input / Mobile branding */}
-      <div className="flex items-center gap-4 flex-1">
-        {/* Mobile-only logo */}
-        <div
-          className="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary truncate max-w-[130px] min-[375px]:max-w-[180px] min-[410px]:max-w-[220px]"
-          title={session?.user?.name || "Volta"}
-        >
-          {displayName}
-        </div>
+    <div className="flex items-center gap-3 shrink-0">
+      {/* Notification Bell */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="p-2.5 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary relative shadow-none w-9 h-9 flex items-center justify-center"
+        aria-label="Notificaciones"
+      >
+        <Bell data-icon="bell" className="w-[18px] h-[18px]" />
+        {hasNotifications && (
+          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-surface"></span>
+        )}
+      </Button>
 
-        {/* Desktop search bar */}
-        {onSearchChange && (
-          <div className="hidden md:flex items-center bg-surface-container rounded-full px-4 py-1 gap-3 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all max-w-md w-full">
-            <Search data-icon="search" className="text-on-surface-variant shrink-0" />
-            <input
-              type="text"
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="bg-transparent border-none focus:ring-0 text-body-md font-body-md w-full placeholder-on-surface-variant outline-none"
+      {/* Help Icon */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="p-2.5 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary w-9 h-9 shadow-none flex items-center justify-center"
+        aria-label="Ayuda"
+      >
+        <HelpCircle data-icon="help" className="w-[18px] h-[18px]" />
+      </Button>
+
+      {/* Avatar Profile with Dropdown */}
+      <div className="relative">
+        <Button
+          variant="ghost"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="relative w-9 h-9 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary p-0 bg-surface-container shadow-none active:scale-95 flex items-center justify-center"
+        >
+          {workerPhoto && workerPhoto !== DEFAULT_AVATAR ? (
+            <img
+              src={workerPhoto}
+              alt="Avatar del Estilista"
+              className="w-full h-full object-cover"
             />
-          </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
+              <User data-icon="user" className="w-[18px] h-[18px]" />
+            </div>
+          )}
+        </Button>
+
+        {/* Dropdown Menu */}
+        {isDropdownOpen && (
+          <>
+            {/* Backdrop overlay */}
+            <div
+              className="fixed inset-0 z-30"
+              onClick={() => setIsDropdownOpen(false)}
+            />
+
+            <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-md shadow-lg py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
+              <Link
+                href="/ajustes"
+                onClick={() => setIsDropdownOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
+              >
+                <Settings data-icon="settings" className="text-on-surface-variant w-4 h-4" />
+                <span>Ajustes</span>
+              </Link>
+
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  signOut({ callbackUrl: "/login" });
+                }}
+                className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none active:scale-100 rounded-none h-auto"
+              >
+                <LogOut data-icon="logout" className="text-error w-4 h-4" />
+                <span>Cerrar Sesión</span>
+              </Button>
+            </div>
+          </>
         )}
       </div>
-
-      {/* Right side actions */}
-      <div className="flex items-center gap-4">
-        {/* Notification Bell */}
-        {/* Notification Bell */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="p-3 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary relative shadow-none w-10 h-10"
-          aria-label="Notificaciones"
-        >
-          <Bell data-icon="bell" />
-          {hasNotifications && (
-            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-surface"></span>
-          )}
-        </Button>
-
-        {/* Help Icon */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="p-3 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary w-10 h-10 shadow-none"
-        >
-          <HelpCircle data-icon="help" />
-        </Button>
-
-        {/* Avatar Profile with Dropdown */}
-        <div className="relative">
-          <Button
-            variant="ghost"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="relative w-10 h-10 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary p-0 bg-surface-container shadow-none active:scale-95"
-          >
-            {workerPhoto && workerPhoto !== DEFAULT_AVATAR ? (
-              <img
-                src={workerPhoto}
-                alt="Avatar del Estilista"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
-                <User data-icon="user" />
-              </div>
-            )}
-          </Button>
-
-          {/* Dropdown Menu */}
-          {isDropdownOpen && (
-            <>
-              {/* Backdrop overlay */}
-              <div
-                className="fixed inset-0 z-30"
-                onClick={() => setIsDropdownOpen(false)}
-              />
-
-              <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-md shadow-lg py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
-                <Link
-                  href="/ajustes"
-                  onClick={() => setIsDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-medium text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
-                >
-                  <Settings data-icon="settings" className="text-on-surface-variant" />
-                  <span>Ajustes</span>
-                </Link>
-
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setIsDropdownOpen(false);
-                    signOut({ callbackUrl: "/login" });
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 text-label-lg font-label-lg font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none active:scale-100 rounded-none"
-                >
-                  <LogOut data-icon="logout" className="text-error" />
-                  <span>Cerrar Sesión</span>
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
+    </div>
   );
 }

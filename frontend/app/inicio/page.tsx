@@ -17,12 +17,12 @@ import {
   Award,
   Trash2,
   MoreVertical,
+  Search,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import Header from "@/components/Header";
 import MetricCard from "@/components/MetricCard";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
@@ -232,13 +232,6 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
-        {/* Header Bar */}
-        <Header
-          searchPlaceholder="Buscar citas por cliente o servicio..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader
@@ -256,6 +249,18 @@ export default function DashboardPage() {
                   </>
                 )}
               </>
+            }
+            actions={
+              <div className="flex items-center bg-surface-container rounded-full px-4 py-1.5 gap-3 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-full max-w-[280px]">
+                <Search data-icon="search" className="text-on-surface-variant shrink-0 w-4 h-4" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar citas..."
+                  className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
+                />
+              </div>
             }
           />
 

@@ -33,12 +33,12 @@ import {
   UserPlus,
   Edit2,
   Trash2,
+  Search,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddServiceModal from "@/components/AddServiceModal";
 import {
@@ -895,13 +895,6 @@ export default function AjustesPage() {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
-          {/* Top Header */}
-          <Header
-            searchPlaceholder="Buscar en ajustes..."
-            searchValue={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-
           {/* Content Canvas */}
           <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
             {/* Toast Notification Banner */}
@@ -1022,13 +1015,6 @@ export default function AjustesPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
-        {/* Top Header */}
-        <Header
-          searchPlaceholder="Buscar ajustes..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           {/* Toast Notification Banner */}
@@ -2109,14 +2095,26 @@ export default function AjustesPage() {
               {/* Featured Services Card (Spans 12 cols - full width) */}
               <Card className="col-span-12 flex flex-col justify-between">
                 <div>
-                  <CardHeader className="flex flex-row items-center justify-between pb-4">
+                  <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
                     <CardTitle className="text-primary flex items-center gap-2">
                       <Scissors data-icon="scissors" />
                       <span>Servicios Destacados</span>
                     </CardTitle>
-                    <span className="text-body-sm text-on-surface-variant font-medium">
-                      {services.length} servicios registrados
-                    </span>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <div className="flex items-center bg-surface-container rounded-full px-3 py-1 gap-2 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-full sm:w-48">
+                        <Search data-icon="search" className="text-on-surface-variant shrink-0 w-3.5 h-3.5" />
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Buscar..."
+                          className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
+                        />
+                      </div>
+                      <span className="text-body-sm text-on-surface-variant font-medium shrink-0">
+                        {services.length} servicios registrados
+                      </span>
+                    </div>
                   </CardHeader>
 
                   <CardContent>

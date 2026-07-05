@@ -17,11 +17,11 @@ import {
   UserPlus,
   Key,
   Loader2,
+  Search,
 } from "lucide-react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import Header from "@/components/Header";
 import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select, PageHeader } from "@/components/ui/volta-ui";
 
 interface BusinessItem {
@@ -304,28 +304,33 @@ export default function SedesPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
-        {/* Top Header */}
-        <Header
-          searchPlaceholder="Buscar salones..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader
             title="Gestión de Locales"
             description="Registra y administra las cuentas de salones en la plataforma."
             actions={
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleOpenCreateModal}
-                className="flex items-center gap-1 px-6 py-2 self-start"
-              >
-                <Plus data-icon="plus" />
-                <span>Añadir Local</span>
-              </Button>
+              <>
+                <div className="flex items-center bg-surface-container rounded-full px-4 py-1.5 gap-3 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-full max-w-[280px]">
+                  <Search data-icon="search" className="text-on-surface-variant shrink-0 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar locales..."
+                    className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
+                  />
+                </div>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={handleOpenCreateModal}
+                  className="flex items-center gap-1 px-6 py-2 self-start"
+                >
+                  <Plus data-icon="plus" />
+                  <span>Añadir Local</span>
+                </Button>
+              </>
             }
           />
 

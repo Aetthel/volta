@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import Header from "../Header";
 
 // FieldGroup
 export interface FieldGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -784,26 +785,39 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
       <section
         ref={ref}
         className={cn(
-          "flex flex-col md:flex-row md:items-end justify-between gap-gutter mb-gutter",
+          "flex flex-col md:flex-row md:items-center justify-between gap-gutter mb-gutter w-full",
           className
         )}
         {...props}
       >
-        <div>
-          <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
-            {title}
-          </h1>
+        <div className="flex-1 min-w-0 w-full">
+          <div className="flex items-center gap-3 w-full">
+            <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1 truncate">
+              {title}
+            </h1>
+            <div className="md:hidden ml-auto shrink-0">
+              <Header />
+            </div>
+          </div>
           {description && (
             <div className="font-body-lg text-body-lg text-on-surface-variant font-medium">
               {description}
             </div>
           )}
         </div>
-        {actions && (
-          <div className="flex items-center gap-2 shrink-0">
-            {actions}
+        
+        <div className="flex items-center gap-4 shrink-0 mt-2 md:mt-0 justify-between md:justify-end w-full md:w-auto">
+          {actions ? (
+            <div className="flex items-center gap-2">
+              {actions}
+            </div>
+          ) : (
+            <div />
+          )}
+          <div className="hidden md:block">
+            <Header />
           </div>
-        )}
+        </div>
       </section>
     );
   }

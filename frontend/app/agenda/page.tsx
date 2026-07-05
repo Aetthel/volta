@@ -15,6 +15,7 @@ import {
   Clock,
   Check,
   AlertCircle,
+  Search,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -635,13 +636,6 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden md:ml-[240px]">
-        {/* Header Bar */}
-        <Header
-          searchPlaceholder="Buscar citas o clientes..."
-          searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-
         {/* Inner Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 overflow-hidden flex flex-col min-h-0">
           {/* Calendar Container */}
@@ -688,7 +682,19 @@ export default function DashboardPage() {
               </div>
 
               {/* View Switches */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Search Bar */}
+                <div className="flex items-center bg-surface-container rounded-full px-3 py-1 gap-2 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-48">
+                  <Search data-icon="search" className="text-on-surface-variant shrink-0 w-3.5 h-3.5" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar..."
+                    className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
+                  />
+                </div>
+
                 <div className="flex rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low p-[2px]">
                   <Button
                     variant="ghost"
@@ -722,6 +728,11 @@ export default function DashboardPage() {
                 >
                   <Filter data-icon="filter" />
                 </Button>
+
+                {/* Compact System Actions */}
+                <div className="pl-2 border-l border-outline-variant">
+                  <Header />
+                </div>
               </div>
             </div>
             {/* Calendar Calendar Content */}
