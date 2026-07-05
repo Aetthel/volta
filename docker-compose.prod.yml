@@ -4,9 +4,10 @@ services:
     pull_policy: always
     container_name: volta-backend
     restart: always
+    env_file:
+      - /opt/docker/volta/.env
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
-      - /opt/docker/volta/.env:/app/.env:ro
     command: npm run --workspace=backend start
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -18,14 +19,8 @@ services:
     restart: always
     depends_on:
       - backend
-    environment:
-      - BACKEND_INTERNAL_URL=http://backend:3001
-      - NODE_ENV=production
-      - AUTH_TRUST_HOST=true
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
-    volumes:
-      - /opt/docker/volta/.env:/app/.env:ro
+    env_file:
+      - /opt/docker/volta/.env
     command: npm run --workspace=frontend start
     ports:
       - "${PORT_HOST:-3001}:${PORT:-3000}"
