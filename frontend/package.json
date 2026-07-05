@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "dotenvx run -f ../.env -- next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "dotenvx run -f ../.env -- next start",
     "lint": "next lint"
   },
   "dependencies": {
