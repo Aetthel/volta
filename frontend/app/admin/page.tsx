@@ -18,7 +18,7 @@ import {
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import MetricCard from "@/components/MetricCard";
-import { Button, PageHeader } from "@/components/ui/volta-ui";
+import { Button, PageHeader, Skeleton } from "@/components/ui/volta-ui";
 
 export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,8 +32,10 @@ export default function AdminPage() {
     growth: "+0%",
   });
   const [rankings, setRankings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAdminData = () => {
+    setIsLoading(true);
     fetch("/api/backend/admin/dashboard")
       .then((res) => res.json())
       .then((data) => {
@@ -51,6 +53,9 @@ export default function AdminPage() {
       })
       .catch((e) => {
         console.error("Error loading admin stats:", e);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -97,156 +102,213 @@ export default function AdminPage() {
           />
 
           {/* Grid KPIs */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
-            <MetricCard
-              title="Ingresos Totales"
-              value={kpis.totalRevenue}
-              change="+12% vs mes anterior"
-              trend="up"
-              icon={<TrendingUp className="w-5 h-5" />}
-            />
-            <MetricCard
-              title="Clientes Totales"
-              value={kpis.totalClients}
-              change="+8% vs mes anterior"
-              trend="up"
-              icon={<Group className="w-5 h-5" />}
-            />
-            <MetricCard
-              title="Ticket Promedio"
-              value={kpis.averageTicket}
-              change="+5% vs mes anterior"
-              trend="up"
-              icon={<CreditCard className="w-5 h-5" />}
-            />
-            <MetricCard
-              title="Crecimiento Mensual"
-              value={kpis.growth}
-              change="Objetivo: +10% superado"
-              trend="stable"
-              icon={<Rocket className="w-5 h-5" />}
-            />
-          </section>
+          {isLoading ? (
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-surface-container-lowest p-5 rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[116px] animate-pulse">
+                  <div className="flex justify-between items-center w-full">
+                    <Skeleton className="w-24 h-4" />
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                  </div>
+                  <Skeleton className="w-16 h-8 mt-2" />
+                  <Skeleton className="w-28 h-3.5 mt-1" />
+                </div>
+              ))}
+            </section>
+          ) : (
+            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
+              <MetricCard
+                title="Ingresos Totales"
+                value={kpis.totalRevenue}
+                change="+12% vs mes anterior"
+                trend="up"
+                icon={<TrendingUp className="w-5 h-5" />}
+              />
+              <MetricCard
+                title="Clientes Totales"
+                value={kpis.totalClients}
+                change="+8% vs mes anterior"
+                trend="up"
+                icon={<Group className="w-5 h-5" />}
+              />
+              <MetricCard
+                title="Ticket Promedio"
+                value={kpis.averageTicket}
+                change="+5% vs mes anterior"
+                trend="up"
+                icon={<CreditCard className="w-5 h-5" />}
+              />
+              <MetricCard
+                title="Crecimiento Mensual"
+                value={kpis.growth}
+                change="Objetivo: +10% superado"
+                trend="stable"
+                icon={<Rocket className="w-5 h-5" />}
+              />
+            </section>
+          )}
 
           {/* Bento Chart and Rankings Grid */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-            {/* Custom Chart Panel (Spans 8 cols) */}
-            <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between overflow-hidden">
-              <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-                <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
-                  Evolución de Ingresos
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="p-1 rounded-md hover:bg-surface-container text-on-surface-variant w-8 h-8 shadow-none active:scale-95"
-                >
-                  <MoreVertical data-icon="more-vertical" />
-                </Button>
-              </div>
-
-              {/* Graphical representation */}
-              <div className="flex-1 p-6 relative flex items-end gap-4 select-none bg-surface-container-lowest">
-                {/* CSS Bars Container */}
-                <div className="w-full flex justify-between items-end h-[240px] pt-8 z-10 px-4">
-                  {chartData.map((data, idx) => {
-                    const isLast = idx === chartData.length - 1;
-                    const isHovered = activeBar === data.month;
-
-                    return (
-                      <div
-                        key={idx}
-                        onMouseEnter={() => setActiveBar(data.month)}
-                        onMouseLeave={() => setActiveBar(null)}
-                        className={`w-12 rounded-t-sm transition-all duration-300 relative group cursor-pointer ${data.pct} ${
-                          isLast
-                            ? "bg-primary/80 hover:bg-primary"
-                            : "bg-surface-container-high hover:bg-secondary-container"
-                        }`}
-                      >
-                        {/* Custom Tooltip */}
-                        <div
-                          className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-md px-2 py-[2px] rounded text-[11px] whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
-                            isHovered
-                              ? "opacity-100 translate-y-0"
-                              : "opacity-0 translate-y-2"
-                          }`}
-                        >
-                          {data.month}: {data.label}
-                        </div>
-
-                        {/* Month Label below bar */}
-                        <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-md font-label-md text-on-surface-variant">
-                          {data.month}
-                        </span>
-                      </div>
-                    );
-                  })}
+          {isLoading ? (
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+              {/* Chart Panel Skeleton */}
+              <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between overflow-hidden">
+                <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low animate-pulse">
+                  <Skeleton className="w-44 h-6" />
+                  <Skeleton className="w-8 h-8 rounded-md" />
                 </div>
-
-                {/* Dashed Grid Helper Lines */}
-                <div className="absolute inset-x-6 top-6 bottom-8 border-t border-b border-dashed border-outline-variant/30 flex flex-col justify-between pointer-events-none">
-                  <div className="border-t border-dashed border-outline-variant/20 w-full"></div>
-                  <div className="border-t border-dashed border-outline-variant/20 w-full"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Rankings Panel (Spans 4 cols) */}
-            <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] overflow-hidden">
-              <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-                <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
-                  Ranking de Locales
-                </h3>
-                <span className="font-label-md text-primary bg-secondary-container/50 rounded-full px-2 py-[2px] font-bold">
-                  Top 3
-                </span>
-              </div>
-
-              {/* List */}
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <ul className="flex flex-col divide-y divide-outline-variant/65">
-                  {filteredRankings.map((branch, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-center justify-between p-6 hover:bg-surface-container-low transition-colors cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-title-md text-title-md font-bold text-outline group-hover:text-primary transition-colors">
-                          #{branch.rank}
-                        </span>
-                        <div>
-                          <p className="font-body-md text-body-md font-semibold text-on-surface">
-                            {branch.name}
-                          </p>
-                          <p className="text-[12px] text-on-surface-variant font-medium flex items-center gap-1">
-                            <Store className="w-3.5 h-3.5" />
-                            <span>Local activo</span>
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="font-body-lg text-body-lg font-bold text-primary">
-                          {branch.revenue}
-                        </p>
-                        <span
-                          className={`text-label-md font-bold inline-flex items-center gap-1 ${
-                            branch.change.startsWith("+")
-                              ? "text-tertiary"
-                              : "text-error"
-                          }`}
-                        >
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                          <span>{branch.change}</span>
-                        </span>
-                      </div>
-                    </li>
+                <div className="flex-1 p-6 flex items-end gap-6 h-[240px] px-8 pb-10 select-none animate-pulse">
+                  {[...Array(6)].map((_, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center gap-2">
+                      <Skeleton className="w-full rounded-t-sm" style={{ height: `${50 + (idx % 3) * 60}px` }} />
+                      <Skeleton className="w-8 h-4" />
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
-            </div>
-          </section>
+
+              {/* Rankings Panel Skeleton */}
+              <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] overflow-hidden">
+                <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low animate-pulse">
+                  <Skeleton className="w-40 h-6" />
+                  <Skeleton className="w-8 h-8 rounded-md" />
+                </div>
+                <div className="p-6 flex flex-col gap-4 overflow-y-auto animate-pulse">
+                  {[...Array(4)].map((_, idx) => (
+                    <div key={idx} className="flex items-center justify-between border-b border-outline-variant/35 pb-3">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-6 h-6 rounded-full" />
+                        <div className="flex flex-col gap-1">
+                          <Skeleton className="w-24 h-4" />
+                          <Skeleton className="w-16 h-3" />
+                        </div>
+                      </div>
+                      <Skeleton className="w-12 h-5 rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+              {/* Custom Chart Panel (Spans 8 cols) */}
+              <div className="col-span-1 lg:col-span-8 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] justify-between overflow-hidden">
+                <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                  <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
+                    Evolución de Ingresos
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="p-1 rounded-md hover:bg-surface-container text-on-surface-variant w-8 h-8 shadow-none active:scale-95"
+                  >
+                    <MoreVertical data-icon="more-vertical" />
+                  </Button>
+                </div>
+
+                {/* Graphical representation */}
+                <div className="flex-1 p-6 relative flex items-end gap-4 select-none bg-surface-container-lowest">
+                  {/* CSS Bars Container */}
+                  <div className="w-full flex justify-between items-end h-[240px] pt-8 z-10 px-4">
+                    {chartData.map((data, idx) => {
+                      const isLast = idx === chartData.length - 1;
+                      const isHovered = activeBar === data.month;
+
+                      return (
+                        <div
+                          key={idx}
+                          onMouseEnter={() => setActiveBar(data.month)}
+                          onMouseLeave={() => setActiveBar(null)}
+                          className={`w-12 rounded-t-sm transition-all duration-300 relative group cursor-pointer ${data.pct} ${
+                            isLast
+                              ? "bg-primary/80 hover:bg-primary"
+                              : "bg-surface-container-high hover:bg-secondary-container"
+                          }`}
+                        >
+                          {/* Custom Tooltip */}
+                          <div
+                            className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-md px-2 py-[2px] rounded text-[11px] whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
+                              isHovered
+                                ? "opacity-100 translate-y-0"
+                                : "opacity-0 translate-y-2"
+                            }`}
+                          >
+                            {data.month}: {data.label}
+                          </div>
+
+                          {/* Month Label below bar */}
+                          <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-label-md font-label-md text-on-surface-variant">
+                            {data.month}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Dashed Grid Helper Lines */}
+                  <div className="absolute inset-x-6 top-6 bottom-8 border-t border-b border-dashed border-outline-variant/30 flex flex-col justify-between pointer-events-none">
+                    <div className="border-t border-dashed border-outline-variant/20 w-full"></div>
+                    <div className="border-t border-dashed border-outline-variant/20 w-full"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rankings Panel (Spans 4 cols) */}
+              <div className="col-span-1 lg:col-span-4 bg-surface-container-lowest rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col h-[400px] overflow-hidden">
+                <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                  <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
+                    Ranking de Locales
+                  </h3>
+                  <span className="font-label-md text-primary bg-secondary-container/50 rounded-full px-2 py-[2px] font-bold">
+                    Top 3
+                  </span>
+                </div>
+
+                {/* List */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  <ul className="flex flex-col divide-y divide-outline-variant/65">
+                    {filteredRankings.map((branch, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-center justify-between p-6 hover:bg-surface-container-low transition-colors cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-title-md text-title-md font-bold text-outline group-hover:text-primary transition-colors">
+                            #{branch.rank}
+                          </span>
+                          <div>
+                            <p className="font-body-md text-body-md font-semibold text-on-surface">
+                              {branch.name}
+                            </p>
+                            <p className="text-[12px] text-on-surface-variant font-medium flex items-center gap-1">
+                              <Store className="w-3.5 h-3.5" />
+                              <span>Local activo</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="font-body-lg text-body-lg font-bold text-primary">
+                            {branch.revenue}
+                          </p>
+                          <span
+                            className={`text-label-md font-bold inline-flex items-center gap-1 ${
+                              branch.change.startsWith("+")
+                                ? "text-tertiary"
+                                : "text-error"
+                            }`}
+                          >
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                            <span>{branch.change}</span>
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          )}
         </main>
 
         {/* Mobile menu bar */}

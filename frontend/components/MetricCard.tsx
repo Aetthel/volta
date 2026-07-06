@@ -93,7 +93,7 @@ export default function MetricCard({
         {progress !== undefined && (
           <div className="w-full bg-surface-container rounded-full h-1.5 overflow-hidden mt-3 sm:mt-4">
             <div
-              className="bg-[#005d63] h-full rounded-full transition-all duration-500"
+              className="bg-primary h-full rounded-full transition-all duration-500"
               style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
             />
           </div>

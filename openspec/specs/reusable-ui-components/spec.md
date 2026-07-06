@@ -11,11 +11,11 @@ El sistema SHALL estructurar componentes reutilizables como `Sidebar`, `BottomNa
 - **THEN** el componente correspondiente aplica el estilo activo resaltado en base a la ruta actual (`usePathname()`)
 
 ### Requirement: Modales interactivos de creación
-El sistema SHALL proporcionar diálogos modales para la adición de clientes (`AddClientModal`), la creación de servicios (`AddServiceModal`) y la creación de citas (`NewAppointmentModal`) utilizando componentes centralizados de control de entrada como `FloatingInput`, `Select` y `Textarea` para garantizar la consistencia visual y de comportamiento.
+El sistema SHALL proporcionar diálogos modales para la adición de clientes (`AddClientModal`), la creación de servicios (`AddServiceModal`) y la creación de citas (`NewAppointmentModal`) utilizando componentes centralizados de control de entrada como `FloatingInput`, `Select` y `Textarea` para garantizar la consistencia visual y de comportamiento. Todos los campos de entrada de datos (`FloatingInput`, `Select` y `Textarea`) SHALL implementar un radio de esquina de 4px (`rounded-sm`) para diferenciarse de los contenedores generales.
 
 #### Scenario: Apertura y envío en modales de creación con controles estandarizados
 - **WHEN** el usuario pulsa en "Nueva Cita", "Añadir Cliente" o "Añadir Servicio" y completa el formulario correspondiente
-- **THEN** todos los campos de entrada de datos utilizan componentes unificados (`FloatingInput` para campos de texto simples con iconos, `Select` para menús desplegables y `Textarea` para áreas multilínea) con validaciones y estilos homogéneos.
+- **THEN** todos los campos de entrada de datos utilizan componentes unificados (`FloatingInput` para campos de texto simples con iconos, `Select` para menús desplegables y `Textarea` para áreas multilínea) con validaciones y estilos homogéneos, incluyendo bordes redondeados con radio de 4px (`rounded-sm`).
 
 ### Requirement: Componentes comunes de estado vacío y carga
 El sistema SHALL proporcionar componentes comunes para representar estados vacíos (`EmptyState`) y placeholders de carga animados (`Skeleton`) para garantizar que todas las páginas utilicen el mismo patrón visual al cargar datos o al mostrar vistas vacías.
@@ -33,7 +33,7 @@ El sistema SHALL estructurar los paneles de control y secciones informativas de 
 
 #### Scenario: Estructuración con Card
 - **WHEN** se despliega una sección de datos complejos (ej. tabla de clientes, calendario semanal o tarjetas de sedes)
-- **THEN** el sistema renderiza el componente `Card` unificado con bordes `rounded-2xl` y sombreado uniforme.
+- **THEN** el sistema renderiza el componente `Card` unificado con bordes `rounded-default` (0.5rem / 8px) y sombreado uniforme.
 
 ### Requirement: Componente de botón estandarizado
 El sistema SHALL proporcionar un componente de botón reutilizable (`Button`) con variantes de estilo consistentes y tipografía que evite el uso de letras negritas (`font-bold` o `font-semibold`), utilizando en su lugar un peso medio (`font-medium`).
@@ -98,5 +98,4 @@ El sistema SHALL garantizar que las tarjetas principales del dashboard (como Cit
 #### Scenario: Encabezado estándar para Citas de Hoy
 - **WHEN** se renderiza la página principal del dashboard
 - **THEN** el encabezado de la tarjeta "Citas de Hoy" MUST mostrar el CalendarIcon junto al título "Citas de Hoy" dentro del contenedor de cabecera flex, sin subtítulo de fecha ni badge de total de citas
-
 

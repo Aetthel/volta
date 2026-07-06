@@ -21,7 +21,7 @@ export default function BottomNav() {
   const navItems = [];
   if (role === "ADMIN") {
     navItems.push(
-      { name: "Inicio", href: "/admin", icon: BarChart3 },
+      { name: "Control Global", href: "/admin", icon: BarChart3 },
       { name: "Locales", href: "/sedes", icon: Store },
       { name: "Ajustes", href: "/ajustes", icon: Settings },
     );

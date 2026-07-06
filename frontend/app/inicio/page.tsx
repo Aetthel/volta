@@ -32,7 +32,7 @@ import { WeeklyPerformanceChart } from "@/components/WeeklyPerformanceChart";
 import { FeaturedServicesList } from "@/components/FeaturedServicesList";
 import { UpcomingAppointmentsList } from "@/components/UpcomingAppointmentsList";
 import AddClientModal from "@/components/AddClientModal";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, Separator, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, Separator, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 
 interface AppointmentItem {
@@ -68,6 +68,7 @@ export default function DashboardPage() {
   const [services, setServices] = useState<any[]>([]);
   const [whatsappStatus, setWhatsappStatus] = useState("DISCONNECTED");
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [greeting, setGreeting] = useState("¡Hola!");
 
   useEffect(() => {
@@ -79,9 +80,9 @@ export default function DashboardPage() {
 
   const fetchData = () => {
     if (!businessId) return;
+    setIsLoading(true);
 
-    // Fetch Appointments
-    fetch(`/api/backend/appointments?businessId=${businessId}`)
+    const p1 = fetch(`/api/backend/appointments?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -90,8 +91,7 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("Error loading appointments:", e));
 
-    // Fetch Clients
-    fetch(`/api/backend/clients?businessId=${businessId}`)
+    const p2 = fetch(`/api/backend/clients?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -100,8 +100,7 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("Error loading clients:", e));
 
-    // Fetch Services
-    fetch(`/api/backend/services?businessId=${businessId}`)
+    const p3 = fetch(`/api/backend/services?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -110,8 +109,7 @@ export default function DashboardPage() {
       })
       .catch((e) => console.error("Error loading services:", e));
 
-    // Fetch WhatsApp & Business Status
-    fetch(`/api/backend/business/${businessId}`)
+    const p4 = fetch(`/api/backend/business/${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data) {
@@ -120,6 +118,10 @@ export default function DashboardPage() {
         }
       })
       .catch((e) => console.error("Error loading business status:", e));
+
+    Promise.all([p1, p2, p3, p4]).finally(() => {
+      setIsLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -374,7 +376,7 @@ export default function DashboardPage() {
                 {todayApps.length > 0 && (
                   <>
                     {" "}
-                    <strong className="text-emerald-700">{todayApps.filter(a => a.status === "SENT").length}</strong> notificadas y{" "}
+                    <strong className="text-primary">{todayApps.filter(a => a.status === "SENT").length}</strong> notificadas y{" "}
                     <strong className={todayApps.filter(a => a.status === "ERROR").length > 0 ? "text-error" : "text-on-surface-variant"}>
                       {todayApps.filter(a => a.status === "ERROR").length}
                     </strong> con error.
@@ -385,92 +387,160 @@ export default function DashboardPage() {
           />
 
           {/* Metrics Bento Grid */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-            <MetricCard
-              title="Citas Hoy"
-              value={String(todayApps.length)}
-              change={`${todayApps.length > 0 ? "+" : ""}${todayApps.length * 10}%`}
-              trend={todayApps.length > 0 ? "up" : "down"}
-              icon={<CalendarIcon className="w-5 h-5 text-[#005d63]" />}
-              iconClassName="bg-[#b2f1e8]/30"
-            />
-            <MetricCard
-              title="Nuevos Clientes"
-              value={String(newClientsCount)}
-              change={`${newClientsCount > 0 ? "+" : ""}${newClientsCount * 5}%`}
-              trend={newClientsCount > 0 ? "up" : "down"}
-              icon={<UserPlus className="w-5 h-5 text-[#005d63]" />}
-              iconClassName="bg-[#b2f1e8]/30"
-            />
-            <MetricCard
-              title="Ingresos Est."
-              value={`€${estimatedIncome}`}
-              change={estimatedIncome > 0 ? "+12%" : "Estable"}
-              trend={estimatedIncome > 0 ? "up" : "down"}
-              icon={<Euro className="w-5 h-5 text-[#005d63]" />}
-              iconClassName="bg-[#b2f1e8]/30"
-            />
-            <MetricCard
-              title="Ocupación"
-              value={
-                <div className="flex items-baseline gap-1.5 mt-0.5 sm:mt-1">
-                  <span className="text-2xl sm:text-3xl font-bold text-slate-800">
-                    {occupancyPercentage}%
-                  </span>
-                  <span className="text-body-sm font-medium text-slate-400">
-                    de capacidad
-                  </span>
-                </div>
-              }
-              icon={<Activity className="w-5 h-5 text-[#005d63]" />}
-              iconClassName="bg-[#b2f1e8]/30"
-              progress={occupancyPercentage}
-            />
-          </section>
+          {isLoading ? (
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="p-5 h-[116px] flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                  <div className="flex justify-between items-center w-full">
+                    <Skeleton className="w-24 h-4" />
+                    <Skeleton className="w-8 h-8 rounded-full" />
+                  </div>
+                  <Skeleton className="w-16 h-8 mt-2" />
+                  <Skeleton className="w-20 h-3.5 mt-1" />
+                </Card>
+              ))}
+            </section>
+          ) : (
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+              <MetricCard
+                title="Citas Hoy"
+                value={String(todayApps.length)}
+                change={`${todayApps.length > 0 ? "+" : ""}${todayApps.length * 10}%`}
+                trend={todayApps.length > 0 ? "up" : "down"}
+                icon={<CalendarIcon className="w-5 h-5 text-primary" />}
+                iconClassName="bg-secondary-container/30"
+              />
+              <MetricCard
+                title="Nuevos Clientes"
+                value={String(newClientsCount)}
+                change={`${newClientsCount > 0 ? "+" : ""}${newClientsCount * 5}%`}
+                trend={newClientsCount > 0 ? "up" : "down"}
+                icon={<UserPlus className="w-5 h-5 text-primary" />}
+                iconClassName="bg-secondary-container/30"
+              />
+              <MetricCard
+                title="Ingresos Est."
+                value={`€${estimatedIncome}`}
+                change={estimatedIncome > 0 ? "+12%" : "Estable"}
+                trend={estimatedIncome > 0 ? "up" : "down"}
+                icon={<Euro className="w-5 h-5 text-primary" />}
+                iconClassName="bg-secondary-container/30"
+              />
+              <MetricCard
+                title="Ocupación"
+                value={
+                  <div className="flex items-baseline gap-1.5 mt-0.5 sm:mt-1">
+                    <span className="text-2xl sm:text-3xl font-bold text-on-surface">
+                      {occupancyPercentage}%
+                    </span>
+                    <span className="text-body-sm font-medium text-on-surface-variant">
+                      de capacidad
+                    </span>
+                  </div>
+                }
+                icon={<Activity className="w-5 h-5 text-primary" />}
+                iconClassName="bg-secondary-container/30"
+                progress={occupancyPercentage}
+              />
+            </section>
+          )}
 
           {/* Middle Row (Weekly Performance + Featured Services) */}
-          <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter">
-            {/* Weekly Performance Bar Chart */}
-            <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-              <div>
+          {isLoading ? (
+            <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter">
+              <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col h-[340px] justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="font-medium text-xl text-slate-800">
-                    Rendimiento Semanal
-                  </h3>
-                  <div className="flex items-center text-body-sm font-semibold text-slate-500 border border-slate-100 rounded-lg px-3 py-1.5 bg-slate-50/50 cursor-pointer hover:bg-slate-100 transition-colors">
-                    <span>Esta Semana</span>
-                    <ChevronDown className="w-4 h-4 ml-1.5 text-slate-400" />
-                  </div>
+                  <Skeleton className="w-40 h-6" />
+                  <Skeleton className="w-24 h-8" />
                 </div>
+                <div className="flex-1 flex items-end gap-4 h-[200px] px-2 pb-4">
+                  {[...Array(7)].map((_, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <Skeleton className="w-full rounded-t-sm" style={{ height: `${30 + (i % 3) * 40}px` }} />
+                      <Skeleton className="w-8 h-4" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+              <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <Skeleton className="w-44 h-6 mb-6" />
+                <div className="flex flex-col gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex flex-col gap-1.5">
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="w-28 h-4" />
+                        <Skeleton className="w-12 h-4" />
+                      </div>
+                      <Skeleton className="w-full h-2 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </section>
+          ) : (
+            <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter">
+              {/* Weekly Performance Bar Chart */}
+              <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-medium text-xl text-on-surface">
+                      Rendimiento Semanal
+                    </h3>
+                    <div className="flex items-center text-body-sm font-semibold text-on-surface-variant border border-outline-variant rounded-lg px-3 py-1.5 bg-surface-container-low/50 cursor-pointer hover:bg-surface-container-high transition-colors">
+                      <span>Esta Semana</span>
+                      <ChevronDown className="w-4 h-4 ml-1.5 text-on-surface-variant" />
+                    </div>
+                  </div>
 
-                <WeeklyPerformanceChart
-                  data={weeklyData}
-                  maxCount={maxWeeklyCount}
-                />
-              </div>
-            </Card>
+                  <WeeklyPerformanceChart
+                    data={weeklyData}
+                    maxCount={maxWeeklyCount}
+                  />
+                </div>
+              </Card>
 
-            {/* Featured Services */}
-            <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-              <h3 className="font-medium text-xl text-slate-800 mb-6">
-                Servicios Destacados
-              </h3>
-              <FeaturedServicesList services={displayServiceShares} />
-            </Card>
-          </section>
+              {/* Featured Services */}
+              <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <h3 className="font-medium text-xl text-on-surface mb-6">
+                  Servicios Destacados
+                </h3>
+                <FeaturedServicesList services={displayServiceShares} />
+              </Card>
+            </section>
+          )}
 
           {/* Upcoming Appointments section */}
           <section>
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-xl text-slate-800">
+              <h3 className="font-medium text-xl text-on-surface">
                 Próximas Citas
               </h3>
-              <Link href="/agenda" className="text-body-sm font-bold text-[#005d63] hover:text-[#00474b] hover:underline transition-colors">
+              <Link href="/agenda" className="text-body-sm font-bold text-primary hover:text-primary/80 hover:underline transition-colors">
                 Ver todas
               </Link>
             </div>
 
-            <UpcomingAppointmentsList appointments={displayUpcomingApps} />
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i} className="p-4 flex items-center justify-between border-l-[6px] border-l-outline-variant bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] h-[84px]">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+                      <div className="flex flex-col gap-1.5">
+                        <Skeleton className="w-24 h-4" />
+                        <Skeleton className="w-32 h-3" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <Skeleton className="w-12 h-5 rounded-md" />
+                      <Skeleton className="w-14 h-3" />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <UpcomingAppointmentsList appointments={displayUpcomingApps} />
+            )}
           </section>
         </main>
 
@@ -478,7 +548,7 @@ export default function DashboardPage() {
         <Button
           onClick={() => setIsAppointmentModalOpen(true)}
           variant="ghost"
-          className="md:hidden fixed bottom-20 right-6 z-40 p-4 bg-[#005d63] text-white rounded-full shadow-lg border-none"
+          className="md:hidden fixed bottom-20 right-6 z-40 p-4 bg-primary text-white rounded-full shadow-lg border-none"
         >
           <Plus className="w-6 h-6" />
         </Button>

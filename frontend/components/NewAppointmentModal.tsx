@@ -10,6 +10,7 @@ import {
   FloatingInput,
   Button,
   Select,
+  Alert,
 } from "@/components/ui/volta-ui";
 
 interface NewAppointmentModalProps {
@@ -440,24 +441,27 @@ export default function NewAppointmentModal({
 
       {/* LOPD WhatsApp Consent Toast Overlay */}
       {showConsentToast && (
-        <div className="fixed top-6 right-6 z-[60] flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-950 px-6 py-4 rounded-md shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm">
+        <Alert
+          variant="info"
+          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
+        >
           <svg
-            className="w-6 h-6 text-[#25D366] shrink-0"
+            className="w-6 h-6 text-secondary shrink-0"
             viewBox="0 0 16 16"
             fill="currentColor"
           >
             <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232" />
           </svg>
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-emerald-950 text-body-md">
+            <p className="font-semibold text-on-secondary-container text-body-md">
               Cita Reservada
             </p>
-            <p className="text-body-sm text-emerald-800">
+            <p className="text-body-sm text-on-secondary-container/80">
               Enlace de consentimiento LOPD enviado a{" "}
               <span className="font-semibold">{toastPhone}</span> por WhatsApp.
             </p>
           </div>
-        </div>
+        </Alert>
       )}
     </div>
   );

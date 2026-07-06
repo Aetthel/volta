@@ -23,17 +23,17 @@ export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
         const Icon = s.icon || icons[idx % icons.length];
         return (
           <div key={s.name} className="flex flex-col gap-2">
-            <div className="flex justify-between items-center text-body-sm font-semibold text-slate-700">
+            <div className="flex justify-between items-center text-body-sm font-semibold text-on-surface-variant">
               <div className="flex items-center gap-2">
-                <Icon className="w-4 h-4 text-[#005d63]" />
+                <Icon className="w-4 h-4 text-primary" />
                 <span>{s.name}</span>
               </div>
-              <span className="text-slate-400 font-medium">{s.pct}%</span>
+              <span className="text-on-surface-variant/70 font-medium">{s.pct}%</span>
             </div>
             {/* Progress Bar */}
-            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
               <div
-                className="bg-[#005d63] h-full rounded-full transition-all duration-500"
+                className="bg-primary h-full rounded-full transition-all duration-500"
                 style={{ width: `${s.pct}%` }}
               />
             </div>

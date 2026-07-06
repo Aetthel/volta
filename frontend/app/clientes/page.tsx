@@ -24,7 +24,7 @@ import BottomNav from "@/components/BottomNav";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -118,13 +118,15 @@ export default function ClientesPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [activeDropdownClientId, setActiveDropdownClientId] = useState<string | null>(null);
   const [dropdownCoords, setDropdownCoords] = useState<{ top: number; left: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   const fetchData = () => {
     if (!businessId) return;
+    setIsLoading(true);
 
     // Fetch Clients
-    fetch(`/api/backend/clients?businessId=${businessId}`)
+    const p1 = fetch(`/api/backend/clients?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -136,7 +138,7 @@ export default function ClientesPage() {
       });
 
     // Fetch Appointments
-    fetch(`/api/backend/appointments?businessId=${businessId}`)
+    const p2 = fetch(`/api/backend/appointments?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -146,6 +148,10 @@ export default function ClientesPage() {
       .catch((e) => {
         console.error("Error loading appointments:", e);
       });
+
+    Promise.all([p1, p2]).finally(() => {
+      setIsLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -455,7 +461,62 @@ export default function ClientesPage() {
             </CardHeader>
 
             <div>
-              {filteredClients.length > 0 ? (
+              {isLoading ? (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-surface-container-low select-none">
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Cliente
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Teléfono
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Última Visita
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Servicio Frecuente
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Estado LOPD
+                        </th>
+                        <th className="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant">
+                      {[...Array(5)].map((_, i) => (
+                        <tr key={i} className="animate-pulse">
+                          <td className="px-6 py-4 flex items-center gap-4">
+                            <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                            <div className="flex flex-col gap-1.5">
+                              <Skeleton className="w-24 h-4" />
+                              <Skeleton className="w-36 h-3" />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Skeleton className="w-24 h-4" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <Skeleton className="w-20 h-4" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <Skeleton className="w-32 h-4" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <Skeleton className="w-16 h-6 rounded-full" />
+                          </td>
+                          <td className="px-6 py-4">
+                            <Skeleton className="w-8 h-8 rounded-full" />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : filteredClients.length > 0 ? (
                 <div className="overflow-x-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -579,7 +640,7 @@ export default function ClientesPage() {
                                           }}
                                           className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
                                         >
-                                          <MessageCircle data-icon="message-circle" className="text-emerald-600" />
+                                          <MessageCircle data-icon="message-circle" className="text-primary" />
                                           <span>Enviar WhatsApp</span>
                                         </Button>
                                       ) : (
@@ -593,7 +654,7 @@ export default function ClientesPage() {
                                           }}
                                           className="w-full px-4 py-2.5 text-left font-label-md text-label-md text-on-surface hover:bg-surface-container justify-start shadow-none active:scale-100"
                                         >
-                                          <ShieldCheck data-icon="shield-check" className="text-amber-600" />
+                                          <ShieldCheck data-icon="shield-check" className="text-error" />
                                           <span>Enviar LOPD</span>
                                         </Button>
                                       )}
@@ -643,14 +704,14 @@ export default function ClientesPage() {
                                 <ContextMenuItem
                                   onClick={() => handleSendCustomMessage(client)}
                                 >
-                                  <MessageCircle className="w-4 h-4 text-emerald-600" />
+                                  <MessageCircle className="w-4 h-4 text-primary" />
                                   <span>Enviar WhatsApp</span>
                                 </ContextMenuItem>
                               ) : (
                                 <ContextMenuItem
                                   onClick={() => handleSendWhatsAppConsent(client)}
                                 >
-                                  <ShieldCheck className="w-4 h-4 text-amber-600" />
+                                  <ShieldCheck className="w-4 h-4 text-error" />
                                   <span>Enviar LOPD</span>
                                 </ContextMenuItem>
                               )}
@@ -759,15 +820,15 @@ export default function ClientesPage() {
       {/* LOPD WhatsApp Consent Toast Overlay */}
       {showConsentToast && (
         <Alert
-          variant="success"
+          variant="info"
           className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
         >
-          <ShieldCheck data-icon="shield-check" className="text-emerald-600 shrink-0" />
+          <ShieldCheck data-icon="shield-check" className="text-secondary shrink-0" />
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-emerald-950 text-body-md">
+            <p className="font-semibold text-on-secondary-container text-body-md">
               Consentimiento Reenviado
             </p>
-            <p className="text-body-sm text-emerald-800">
+            <p className="text-body-sm text-on-secondary-container/80">
               Mensaje LOPD reenviado a{" "}
               <span className="font-semibold">{toastPhone}</span> por WhatsApp.
             </p>
@@ -778,15 +839,15 @@ export default function ClientesPage() {
       {/* General Toast Overlay */}
       {showGeneralToast && (
         <Alert
-          variant="success"
+          variant="info"
           className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
         >
-          <MessageCircle data-icon="message-circle" className="text-emerald-600 shrink-0" />
+          <MessageCircle data-icon="message-circle" className="text-secondary shrink-0" />
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-emerald-950 text-body-md">
+            <p className="font-semibold text-on-secondary-container text-body-md">
               Mensaje Enviado
             </p>
-            <p className="text-body-sm text-emerald-800">{toastText}</p>
+            <p className="text-body-sm text-on-secondary-container/80">{toastText}</p>
           </div>
         </Alert>
       )}

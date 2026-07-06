@@ -21,9 +21,9 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
   return (
     <div className="flex flex-col mt-8">
       {/* Bounded Grid Area */}
-      <div className="relative h-48 border border-slate-200 rounded-lg overflow-hidden bg-white shadow-inner-sm">
+      <div className="relative h-48 border border-outline-variant rounded-lg overflow-hidden bg-white shadow-inner-sm">
         {/* Background Grid Pattern of Squares */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none opacity-85" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-outline-variant)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-outline-variant)_1px,transparent_1px)] bg-[size:18px_18px] pointer-events-none opacity-85" />
 
         {/* Bars Container */}
         <div className="absolute inset-0 flex items-end justify-between px-6 sm:px-12 pb-0 pt-8">
@@ -35,8 +35,8 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
                   className={cn(
                     "w-full rounded-t-[3px] transition-all duration-500 cursor-pointer shadow-sm",
                     d.isCurrent
-                      ? "bg-[#005d63] hover:bg-[#00474b]"
-                      : "bg-[#b2f1e8]/50 hover:bg-[#92ebd9]"
+                      ? "bg-primary hover:bg-primary/80"
+                      : "bg-secondary-container/50 hover:bg-secondary-container/85"
                   )}
                   style={{ height: `${Math.max(8, pct)}%` }}
                   title={`${d.name}: ${d.count} citas`}
@@ -54,7 +54,7 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
             key={d.name}
             className={cn(
               "w-8 sm:w-12 text-center text-body-sm font-semibold transition-colors",
-              d.isCurrent ? "text-[#005d63] font-bold" : "text-slate-400"
+              d.isCurrent ? "text-primary font-bold" : "text-on-surface-variant/50"
             )}
           >
             {d.name}

@@ -1,8 +1,5 @@
-# stitch-design-migration Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change migrate-stitch-design. Update Purpose after archive.
-## Requirements
 ### Requirement: Estandarizar diseño de pantallas
 El sistema SHALL implementar las vistas de Iniciar Sesión, Dashboard/Calendario, Clientes, Sedes, Ajustes y Admin Global Stats en Next.js utilizando Tailwind CSS puro y siguiendo las pautas de diseño "Clinical Elegance". Todos los espaciados, márgenes y gaps de contenedores principales de layouts en estas vistas SHALL utilizar la variable `--spacing-gutter` (`gutter`) para garantizar consistencia visual y reescalado fluido en todas las resoluciones. Todos los colores de texto, fondos y bordes en estas vistas SHALL adecuarse estrictamente a los tokens de color del tema definidos en `DESIGN.md` (como `primary`, `secondary`, `error`, `surface`, etc.), prohibiéndose el uso de clases de color hardcodeadas.
 
@@ -25,15 +22,3 @@ El sistema SHALL implementar las vistas de Iniciar Sesión, Dashboard/Calendario
 #### Scenario: Armonización de colores primarios y containers
 - **WHEN** la aplicación carga las hojas de estilo globales y lee las propiedades personalizadas en `globals.css`
 - **THEN** los colores primarios corporativos de Teal se sincronizan exactamente con las especificaciones de `DESIGN.md`, utilizando `#006565` para el color primario de marca (`primary`) y `#008080` para el contenedor primario (`primary-container`).
-
-### Requirement: Integración de PageHeader en layouts de vistas
-El sistema SHALL unificar la estructura de cabecera de página en las vistas principales (`/clientes`, `/sedes`, `/ajustes`, `/admin`, `/inicio`) utilizando el componente `PageHeader` para garantizar consistencia visual en la tipografía y alineación.
-
-#### Scenario: Cabecera limpia sin tarjeta en el inicio
-- **WHEN** el usuario carga la vista `/inicio`
-- **THEN** el sistema renderiza el saludo personalizado mediante `PageHeader` directamente en el flujo del canvas sin contenedores de tarjetas, bordes ni fondos adicionales.
-
-#### Scenario: Ocultar cabecera de página en agenda
-- **WHEN** el usuario carga la vista de la agenda en `/agenda`
-- **THEN** el sistema no renderiza ninguna cabecera de página (`PageHeader`), de modo que el contenedor del calendario semanal (`Card`) inicia directamente en la parte superior del canvas de contenido.
-

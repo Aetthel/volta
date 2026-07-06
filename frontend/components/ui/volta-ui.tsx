@@ -126,7 +126,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          "bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden",
+          "bg-surface-container-lowest border border-outline-variant rounded-default shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden",
           className,
         )}
         {...props}
@@ -216,8 +216,8 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       error:
         "bg-error-container border border-error-container/60 text-on-error-container",
       info: "bg-secondary-container border border-secondary-container/60 text-on-secondary-container",
-      success: "bg-emerald-50 border border-emerald-200 text-emerald-800",
-      warning: "bg-amber-50 border border-amber-200 text-amber-800",
+      success: "bg-secondary-container border border-secondary-container/60 text-on-secondary-container",
+      warning: "bg-surface-container border border-outline-variant text-on-surface-variant",
     };
 
     return (
@@ -292,7 +292,7 @@ export const FloatingInput = React.forwardRef<
         type={type}
         placeholder=" "
         className={cn(
-          "peer block w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-md focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 pr-4",
+          "peer block w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 pr-4",
           Icon ? "pl-12" : "pl-4",
           endAction ? "pr-12" : "pr-4",
           className,
@@ -410,7 +410,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            "block w-full bg-surface text-body-lg text-on-surface border border-outline rounded-md focus:border-primary focus:border-2 focus:outline-none transition-all py-3 shadow-sm appearance-none cursor-pointer pr-10",
+            "block w-full bg-surface text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3 shadow-sm appearance-none cursor-pointer pr-10",
             Icon ? "pl-12" : "pl-4",
             className,
           )}
@@ -452,7 +452,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       <textarea
         ref={ref}
         className={cn(
-          "block w-full px-4 py-3 bg-surface text-body-lg text-on-surface border border-outline rounded-md focus:border-primary focus:border-2 focus:outline-none transition-all shadow-sm resize-none custom-scrollbar",
+          "block w-full px-4 py-3 bg-surface text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all shadow-sm resize-none custom-scrollbar",
           className,
         )}
         {...props}

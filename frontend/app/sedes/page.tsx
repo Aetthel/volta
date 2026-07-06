@@ -22,7 +22,7 @@ import {
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select, PageHeader } from "@/components/ui/volta-ui";
+import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select, PageHeader, Skeleton } from "@/components/ui/volta-ui";
 
 interface BusinessItem {
   id: string;
@@ -47,6 +47,7 @@ export default function SedesPage() {
   });
 
   const [businesses, setBusinesses] = useState<BusinessItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // States and CRUD for managing workers of a specific business
   const [selectedBusiness, setSelectedBusiness] = useState<BusinessItem | null>(null);
@@ -174,6 +175,7 @@ export default function SedesPage() {
   };
 
   const fetchBusinesses = () => {
+    setIsLoading(true);
     fetch("/api/backend/admin/businesses")
       .then((res) => res.json())
       .then((data) => {
@@ -183,6 +185,9 @@ export default function SedesPage() {
       })
       .catch((e) => {
         console.error("Error loading businesses:", e);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -324,7 +329,30 @@ export default function SedesPage() {
 
           {/* Grid Layout of Businesses */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-            {filteredBusinesses.length > 0 ? (
+            {isLoading ? (
+              [...Array(3)].map((_, i) => (
+                <Card key={i} className="p-6 flex flex-col justify-between h-[280px]">
+                  <div>
+                    <div className="flex justify-between items-start gap-2 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+                        <Skeleton className="w-32 h-5" />
+                      </div>
+                      <Skeleton className="w-16 h-5 rounded" />
+                    </div>
+                    <div className="flex flex-col gap-2 mt-6">
+                      <Skeleton className="w-48 h-4" />
+                      <Skeleton className="w-36 h-4" />
+                      <Skeleton className="w-56 h-4" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-6">
+                    <Skeleton className="w-24 h-9 rounded-lg" />
+                    <Skeleton className="w-24 h-9 rounded-lg" />
+                  </div>
+                </Card>
+              ))
+            ) : filteredBusinesses.length > 0 ? (
               filteredBusinesses.map((biz) => (
                 <Card
                   key={biz.id}

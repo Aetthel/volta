@@ -24,7 +24,7 @@ import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
-import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from "@/components/ui/volta-ui";
+import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton } from "@/components/ui/volta-ui";
 
 // Interface for calendar appointment item
 interface AppointmentItem {
@@ -199,20 +199,22 @@ const getWeekDates = (anchorDate: Date) => {
   return days;
 };
 
-export default function DashboardPage() {
+export default function AgendaPage() {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "mock-business-id";
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"week" | "day">("week");
+  const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
 
+  const [viewMode, setViewMode] = useState<"week" | "day">("week");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
   const [clients, setClients] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [nowDate, setNowDate] = useState<Date | null>(null);
@@ -275,9 +277,10 @@ export default function DashboardPage() {
 
   const fetchDashboardData = () => {
     if (!businessId) return;
+    setIsLoading(true);
 
     // Fetch Appointments
-    fetch(`/api/backend/appointments?businessId=${businessId}`)
+    const p1 = fetch(`/api/backend/appointments?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -290,7 +293,7 @@ export default function DashboardPage() {
       });
 
     // Fetch Clients
-    fetch(`/api/backend/clients?businessId=${businessId}`)
+    const p2 = fetch(`/api/backend/clients?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -303,7 +306,7 @@ export default function DashboardPage() {
       });
 
     // Fetch Services
-    fetch(`/api/backend/services?businessId=${businessId}`)
+    const p3 = fetch(`/api/backend/services?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -314,6 +317,10 @@ export default function DashboardPage() {
         console.error("Error loading services:", e);
         setServices([]);
       });
+
+    Promise.all([p1, p2, p3]).finally(() => {
+      setIsLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -636,8 +643,11 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden md:ml-[240px]">
-        {/* Inner Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 overflow-hidden flex flex-col min-h-0">
+          <PageHeader
+            title="Agenda"
+            description="Planifica y gestiona las citas de los clientes y horarios del salón."
+          />
           {/* Calendar Container */}
           <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Calendar Header Controls */}
@@ -725,7 +735,15 @@ export default function DashboardPage() {
               </div>
             </div>
             {/* Calendar Calendar Content */}
-            <div className="overflow-x-auto custom-scrollbar flex-1 flex flex-col min-h-0">
+            <div className="overflow-x-auto custom-scrollbar flex-1 flex flex-col min-h-0 relative">
+              {isLoading && (
+                <div className="absolute inset-0 bg-surface/70 backdrop-blur-[1px] z-30 flex items-center justify-center select-none pointer-events-auto">
+                  <div className="flex flex-col items-center gap-2.5">
+                    <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-body-sm font-semibold text-primary animate-pulse">Cargando agenda...</span>
+                  </div>
+                </div>
+              )}
               <div className={`${minWidthClass} flex-1 flex flex-col min-h-0`}>
                 {/* Main Scroll Container containing both Header and Body */}
                 <div
@@ -999,14 +1017,14 @@ export default function DashboardPage() {
                                       <ContextMenuItem
                                         onClick={() => handleUpdateAppointmentStatus(app.id, 'PENDING')}
                                       >
-                                        <Clock className="w-4 h-4 text-amber-500" />
+                                        <Clock className="w-4 h-4 text-error" />
                                         <span>Marcar Pendiente</span>
                                       </ContextMenuItem>
 
                                       <ContextMenuItem
                                         onClick={() => handleUpdateAppointmentStatus(app.id, 'SENT')}
                                       >
-                                        <Check className="w-4 h-4 text-emerald-600" />
+                                        <Check className="w-4 h-4 text-primary" />
                                         <span>Marcar Enviada</span>
                                       </ContextMenuItem>
 

@@ -1147,7 +1147,7 @@ export default function AjustesPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
+                            <div className="w-full h-full flex items-center justify-center bg-secondary-container/50 text-on-secondary-container">
                               <User className="w-12 h-12" />
                             </div>
                           )}
@@ -1361,8 +1361,8 @@ export default function AjustesPage() {
                         {whatsappStatus === "CONNECTED" ? (
                           <>
                             <div className="relative flex h-3 w-3 shrink-0">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/70 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
                             </div>
                             <div>
                               <p className="font-body-lg text-body-lg font-semibold text-on-surface">
@@ -1376,8 +1376,8 @@ export default function AjustesPage() {
                         ) : whatsappStatus === "WAITING_QR" ? (
                           <>
                             <div className="relative flex h-3 w-3 shrink-0">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error-container/70 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
                             </div>
                             <div>
                               <p className="font-body-lg text-body-lg font-semibold text-on-surface">
@@ -2252,8 +2252,8 @@ export default function AjustesPage() {
                                 <div
                                   className={`w-14 h-14 rounded-full flex items-center justify-center border border-outline-variant/40 ${
                                     isActive
-                                      ? "bg-[#b0c4de]/40 text-slate-600"
-                                      : "bg-slate-100 text-slate-350"
+                                      ? "bg-secondary-container text-on-secondary-container"
+                                      : "bg-surface-container-low text-on-surface-variant/40"
                                   }`}
                                 >
                                   <User className="w-6 h-6" />
@@ -2276,7 +2276,7 @@ export default function AjustesPage() {
                               <div className="flex items-center gap-1.5 mt-1">
                                 <span
                                   className={`w-2 h-2 rounded-full ${
-                                    isActive ? "bg-emerald-500" : "bg-red-400"
+                                    isActive ? "bg-primary" : "bg-error"
                                   }`}
                                 />
                                 <span
