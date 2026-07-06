@@ -36,6 +36,8 @@ interface AppointmentItem {
   duration: number; // in slots (1 slot = 1 hour)
   colorClass: string;
   dateObj?: Date;
+  stylistName?: string;
+  workerId?: string;
 }
 
 const defaultServiceDurations: Record<string, number> = {
@@ -230,6 +232,8 @@ export default function AgendaPage() {
   const [weekAnchorDate, setWeekAnchorDate] = useState<Date>(new Date());
 
   const [services, setServices] = useState<any[]>([]);
+  const [workers, setWorkers] = useState<any[]>([]);
+  const [selectedWorkerId, setSelectedWorkerId] = useState<string>("all");
 
   const colorClasses = [
     "bg-primary-container text-on-primary-container border-primary",
@@ -237,7 +241,7 @@ export default function AgendaPage() {
     "bg-tertiary-container text-on-tertiary-container border-tertiary",
   ];
 
-  const mapDbAppointments = (dbApps: any[]) => {
+  const mapDbAppointments = (dbApps: any[], currentWorkers: any[] = []) => {
     const weekDates = getWeekDates(weekAnchorDate);
     const startOfWeekStr = weekDates[0].dateString;
     const endOfWeekStr = weekDates[6].dateString;
@@ -262,6 +266,23 @@ export default function AgendaPage() {
         }
         const colorClass = colorClasses[Math.abs(hash) % colorClasses.length];
 
+        // Stylist assignment (falls back to static names for Luxe Salon)
+        let stylistName = "Todos";
+        let workerId = "all";
+        if (currentWorkers.length > 0) {
+          const w = currentWorkers[Math.abs(hash) % currentWorkers.length];
+          stylistName = w.name;
+          workerId = w.id;
+        } else {
+          const staticStylists = [
+            { name: "Ana García", id: "1" },
+            { name: "Marta Ruiz", id: "2" },
+          ];
+          const st = staticStylists[Math.abs(hash) % staticStylists.length];
+          stylistName = st.name;
+          workerId = st.id;
+        }
+
         return {
           id: app.id,
           clientName: app.clientName,
@@ -271,6 +292,8 @@ export default function AgendaPage() {
           duration: 1,
           colorClass: colorClass,
           dateObj: dateObj,
+          stylistName,
+          workerId,
         };
       });
   };
@@ -279,48 +302,32 @@ export default function AgendaPage() {
     if (!businessId) return;
     setIsLoading(true);
 
-    // Fetch Appointments
-    const p1 = fetch(`/api/backend/appointments?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAppointments(mapDbAppointments(data));
+    Promise.all([
+      fetch(`/api/backend/users?businessId=${businessId}`).then(res => res.json()).catch(() => []),
+      fetch(`/api/backend/appointments?businessId=${businessId}`).then(res => res.json()).catch(() => []),
+      fetch(`/api/backend/clients?businessId=${businessId}`).then(res => res.json()).catch(() => []),
+      fetch(`/api/backend/services?businessId=${businessId}`).then(res => res.json()).catch(() => []),
+    ])
+      .then(([usersData, appsData, clientsData, servicesData]) => {
+        const activeWorkers = Array.isArray(usersData) ? usersData : [];
+        setWorkers(activeWorkers);
+
+        if (Array.isArray(appsData)) {
+          setAppointments(mapDbAppointments(appsData, activeWorkers));
+        }
+        if (Array.isArray(clientsData)) {
+          setClients(clientsData);
+        }
+        if (Array.isArray(servicesData) && servicesData.length > 0) {
+          setServices(servicesData);
         }
       })
       .catch((e) => {
-        console.error("Error loading appointments:", e);
-        setAppointments([]);
-      });
-
-    // Fetch Clients
-    const p2 = fetch(`/api/backend/clients?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setClients(data);
-        }
+        console.error("Error fetching dashboard data:", e);
       })
-      .catch((e) => {
-        console.error("Error loading clients:", e);
-        setClients([]);
+      .finally(() => {
+        setIsLoading(false);
       });
-
-    // Fetch Services
-    const p3 = fetch(`/api/backend/services?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setServices(data);
-        }
-      })
-      .catch((e) => {
-        console.error("Error loading services:", e);
-        setServices([]);
-      });
-
-    Promise.all([p1, p2, p3]).finally(() => {
-      setIsLoading(false);
-    });
   };
 
   useEffect(() => {
@@ -428,15 +435,18 @@ export default function AgendaPage() {
     }
   }, [isMounted, appointments, selectedDayIndex]);
 
-  const renderCurrentTimeLine = (colDayIndex: number) => {
+  const renderGlobalTimeLine = () => {
     if (!nowDate || !isMounted) return null;
 
-    const colDateStr = weekDays[colDayIndex]?.dateString;
-    const todayStr = nowDate.toISOString().split("T")[0];
-    if (colDateStr !== todayStr) return null;
+    // Check if current day of week is visible on screen
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+    const isTodayVisible = weekDays.some(day => day.dateString === todayStr);
 
-    const currentHour = nowDate.getHours();
-    const currentMin = nowDate.getMinutes();
+    if (!isTodayVisible) return null;
+
+    const currentHour = today.getHours();
+    const currentMin = today.getMinutes();
 
     if (currentHour < 9 || currentHour >= 21) return null;
 
@@ -448,8 +458,10 @@ export default function AgendaPage() {
         style={{ top: `${topPx}px` }}
         className="absolute left-0 right-0 z-30 pointer-events-none flex items-center"
       >
-        <div className="w-2.5 h-2.5 rounded-full bg-primary absolute -left-1.5 shadow-[0_0_6px_rgba(0,101,101,0.6)]" />
-        <div className="w-full h-[2px] bg-primary/70" />
+        {/* Red circle dot right at the left axis of the columns */}
+        <div className="w-2.5 h-2.5 rounded-full bg-red-600 absolute -left-[5px] shadow-[0_0_6px_rgba(220,38,38,0.6)]" />
+        {/* Red line */}
+        <div className="w-full h-[1.5px] bg-red-600/80" />
       </div>
     );
   };
@@ -643,65 +655,76 @@ export default function AgendaPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden md:ml-[240px]">
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 overflow-hidden flex flex-col min-h-0">
-          <PageHeader
-            title="Agenda"
-            description="Planifica y gestiona las citas de los clientes y horarios del salón."
-          />
-          {/* Calendar Container */}
-          <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Calendar Header Controls */}
-            <div className="px-6 py-4 border-b border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-4">
-                <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
-                  {currentMonthYear}
-                </h3>
-                <div className="flex items-center bg-surface-container-low rounded-lg p-1 text-on-surface-variant border border-outline-variant/30">
+        <main className="flex-1 overflow-hidden flex flex-col min-h-0 w-full h-full bg-surface">
+            {/* Calendar Header Controls — Luxe Salon style */}
+            <div className="px-6 py-3 border-b border-outline-variant flex items-center justify-between gap-3 bg-surface">
+              {/* Left: Month + week navigation */}
+              <div className="flex items-center gap-3">
+                <span className="text-on-surface-variant text-label-lg font-medium whitespace-nowrap">{currentMonthYear}</span>
+
+                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handlePrev}
-                    className="p-1 rounded w-7 h-7 active:scale-[0.98]"
+                    className="p-1.5 rounded-lg w-8 h-8 text-on-surface-variant hover:bg-surface-variant active:scale-[0.97]"
                   >
-                    <ChevronLeft data-icon="chevron-left" />
+                    <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleGoToday}
-                    disabled={isViewingToday}
-                    className={`px-2 text-label-md font-medium transition-all shadow-none active:scale-[0.98] ${
-                      isViewingToday
-                        ? "text-on-surface-variant/40 cursor-default hover:bg-transparent pointer-events-none"
-                        : "text-primary hover:bg-primary-container/20 rounded"
-                    }`}
-                  >
-                    {isViewingToday
-                      ? (viewMode === "week" ? "Esta semana" : "Hoy")
-                      : (viewMode === "week" ? "Volver a esta semana" : "Volver a hoy")}
-                  </Button>
+
+                  {/* Week range pill */}
+                  <span className="px-3 py-1 rounded-full border border-outline-variant text-label-md font-medium text-on-surface bg-surface-container-low whitespace-nowrap select-none">
+                    {viewMode === "week"
+                      ? `${weekDays[0]?.name} ${weekDays[0]?.num} — ${weekDays[6]?.name} ${weekDays[6]?.num}`
+                      : `${weekDays[selectedDayIndex]?.name} ${weekDays[selectedDayIndex]?.num}`}
+                  </span>
+
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleNext}
-                    className="p-1 rounded w-7 h-7 active:scale-[0.98]"
+                    className="p-1.5 rounded-lg w-8 h-8 text-on-surface-variant hover:bg-surface-variant active:scale-[0.97]"
                   >
-                    <ChevronRight data-icon="chevron-right" />
+                    <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
+
+                {/* Hoy outline button */}
+                {!isViewingToday && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGoToday}
+                    className="px-3 py-1 h-8 rounded-full border-primary text-primary text-label-md font-medium hover:bg-primary-container/20 active:scale-[0.97]"
+                  >
+                    Hoy
+                  </Button>
+                )}
               </div>
 
-              {/* View Switches */}
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Right: Stylist dropdown + view switcher + actions */}
+              <div className="flex items-center gap-2">
+                {/* Stylist selector */}
+                <select
+                  value={selectedWorkerId}
+                  onChange={(e) => setSelectedWorkerId(e.target.value)}
+                  className="h-8 px-3 pr-7 rounded-lg border border-outline-variant bg-surface-container-low text-label-md text-on-surface font-medium focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                >
+                  <option value="all">Todos los Estilistas</option>
+                  {workers.map((w) => (
+                    <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
 
+                {/* Week / Day toggle */}
                 <div className="flex rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low p-[2px]">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setViewMode("week")}
-                    className={`px-4 py-1 rounded-md transition-all font-medium shadow-none active:scale-100 ${
+                    className={`px-3 py-1 h-7 rounded-md text-label-sm font-medium transition-all shadow-none active:scale-100 ${
                       viewMode === "week"
-                        ? "bg-secondary-container text-on-secondary-container shadow-sm hover:bg-secondary-container hover:text-on-secondary-container"
+                        ? "bg-secondary-container text-on-secondary-container shadow-sm"
                         : "text-on-surface-variant hover:bg-surface-variant"
                     }`}
                   >
@@ -711,25 +734,18 @@ export default function AgendaPage() {
                     variant="ghost"
                     size="sm"
                     onClick={() => setViewMode("day")}
-                    className={`px-4 py-1 rounded-md transition-all font-medium shadow-none active:scale-100 ${
+                    className={`px-3 py-1 h-7 rounded-md text-label-sm font-medium transition-all shadow-none active:scale-100 ${
                       viewMode === "day"
-                        ? "bg-secondary-container text-on-secondary-container shadow-sm hover:bg-secondary-container hover:text-on-secondary-container"
+                        ? "bg-secondary-container text-on-secondary-container shadow-sm"
                         : "text-on-surface-variant hover:bg-surface-variant"
                     }`}
                   >
                     Día
                   </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="p-2 border-outline-variant rounded-lg hover:bg-surface-variant text-on-surface-variant hover:text-on-surface bg-surface-container-low w-9 h-9 active:scale-[0.98]"
-                >
-                  <Filter data-icon="filter" />
-                </Button>
 
-                {/* Compact System Actions */}
-                <div className="pl-2 border-l border-outline-variant">
+                {/* Compact System Actions — hidden on mobile to prevent duplication */}
+                <div className="pl-2 border-l border-outline-variant hidden md:flex">
                   <Header />
                 </div>
               </div>
@@ -767,24 +783,31 @@ export default function AgendaPage() {
                                 setSelectedDayIndex(idx);
                                 setViewMode("day");
                               }}
-                              className={`p-4 text-center border-r border-outline-variant cursor-pointer hover:bg-surface-variant/40 transition-colors ${
+                              className={`py-3 px-2 text-center border-r border-outline-variant cursor-pointer hover:bg-surface-variant/40 transition-colors relative ${
                                 isToday
-                                  ? "bg-primary-container/10 text-primary"
+                                  ? "bg-surface"
                                   : day.closed
                                     ? "bg-error-container/10"
-                                    : "text-on-surface-variant bg-surface-container-low"
+                                    : "bg-surface-container-low"
                               }`}
                             >
-                              <p
-                                className={`text-label-md font-label-md ${isToday ? "font-bold" : ""} ${day.closed && !isToday ? "text-error/70" : ""}`}
-                              >
+                              <p className={`text-label-sm font-semibold uppercase tracking-wide mb-1 ${
+                                isToday ? "text-primary" : day.closed ? "text-error/70" : "text-on-surface-variant"
+                              }`}>
                                 {day.name}
                               </p>
-                              <p
-                                className={`text-title-md font-title-md ${isToday ? "font-bold text-lg" : ""} ${day.closed && !isToday ? "text-error font-medium" : ""}`}
-                              >
+                              {/* Day number — circle for today */}
+                              <div className={`w-8 h-8 flex items-center justify-center mx-auto rounded-full text-body-md font-bold transition-all ${
+                                isToday
+                                  ? "bg-primary text-on-primary"
+                                  : day.closed
+                                    ? "text-error"
+                                    : "text-on-surface"
+                              }`}>
                                 {day.num}
-                              </p>
+                              </div>
+                              {/* Teal bottom accent for today */}
+                              {isToday && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
                             </div>
                           );
                         })
@@ -792,25 +815,20 @@ export default function AgendaPage() {
                           const day = weekDays[selectedDayIndex];
                           const isToday = isMounted && day.current;
                           return (
-                            <div
-                              className={`p-4 text-center border-r border-outline-variant ${
-                                isToday
-                                  ? "bg-primary-container/10 text-primary"
-                                  : day.closed
-                                    ? "bg-error-container/10"
-                                    : "text-on-surface-variant bg-surface-container-low"
-                              }`}
-                            >
-                              <p
-                                className={`text-label-md font-label-md ${isToday ? "font-bold" : ""} ${day.closed && !isToday ? "text-error/70" : ""}`}
-                              >
+                            <div className={`py-3 px-2 text-center border-r border-outline-variant relative ${
+                              isToday ? "bg-surface" : day.closed ? "bg-error-container/10" : "bg-surface-container-low"
+                            }`}>
+                              <p className={`text-label-sm font-semibold uppercase tracking-wide mb-1 ${
+                                isToday ? "text-primary" : day.closed ? "text-error/70" : "text-on-surface-variant"
+                              }`}>
                                 {day.name}
                               </p>
-                              <p
-                                className={`text-title-md font-title-md ${isToday ? "font-bold text-lg" : ""} ${day.closed && !isToday ? "text-error font-medium" : ""}`}
-                              >
+                              <div className={`w-8 h-8 flex items-center justify-center mx-auto rounded-full text-body-md font-bold ${
+                                isToday ? "bg-primary text-on-primary" : day.closed ? "text-error" : "text-on-surface"
+                              }`}>
                                 {day.num}
-                              </p>
+                              </div>
+                              {isToday && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary" />}
                             </div>
                           );
                         })()}
@@ -859,7 +877,7 @@ export default function AgendaPage() {
                     <ContextMenu>
                       <ContextMenuTrigger
                         as="div"
-                        className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
+                        className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"} relative`}
                         onMouseMove={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const x = e.clientX - rect.left;
@@ -903,11 +921,16 @@ export default function AgendaPage() {
                           }
                         }}
                       >
+                        {/* Global current-time red line spanning all columns */}
+                        <div className={`absolute inset-y-0 left-0 right-0 pointer-events-none z-30 col-span-full`} style={{ gridColumn: '1 / -1' }}>
+                          {renderGlobalTimeLine()}
+                        </div>
                         {Array.from({ length: viewMode === "week" ? 7 : 1 }).map((_, dayIndex) => {
                           const actualDayIndex = viewMode === "week" ? dayIndex : selectedDayIndex;
                           const dayAppointments = appointments.filter(
                             (app) =>
                               app.dayIndex === actualDayIndex &&
+                              (selectedWorkerId === "all" || app.workerId === selectedWorkerId) &&
                               (searchQuery === "" ||
                                 app.clientName
                                   .toLowerCase()
@@ -936,9 +959,6 @@ export default function AgendaPage() {
                                   </span>
                                 </div>
                               )}
-
-                              {/* Current Time Line */}
-                              {renderCurrentTimeLine(actualDayIndex)}
 
                               {positionedApps.map((app) => {
                                 const isActive = app.id === activeAppId;
@@ -1069,7 +1089,6 @@ export default function AgendaPage() {
                 </div>
               </div>
             </div>
-          </Card>
         </main>
 
         {/* Mobile floating FAB action */}

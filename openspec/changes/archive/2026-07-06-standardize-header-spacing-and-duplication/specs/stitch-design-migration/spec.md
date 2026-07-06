@@ -1,14 +1,11 @@
-# stitch-design-migration Specification
+## MODIFIED Requirements
 
-## Purpose
-TBD - created by archiving change migrate-stitch-design. Update Purpose after archive.
-## Requirements
 ### Requirement: Estandarizar diseño de pantallas
 El sistema SHALL implementar las vistas de Iniciar Sesión, Dashboard/Calendario, Clientes, Sedes, Ajustes y Admin Global Stats en Next.js utilizando Tailwind CSS puro y siguiendo las pautas de diseño "Clinical Elegance". Todos los espaciados, márgenes y gaps de contenedores principales de layouts en estas vistas SHALL utilizar la variable `--spacing-gutter` (`gutter`) para garantizar consistencia visual y reescalado fluido en todas las resoluciones. Todos los colores de texto, fondos y bordes en estas vistas SHALL adecuarse estrictamente a los tokens de color del tema definidos en `DESIGN.md` (como `primary`, `secondary`, `error`, `surface`, etc.), prohibiéndose el uso de clases de color hardcodeadas.
 
 #### Scenario: Visualización responsiva de páginas
 - **WHEN** el usuario accede a cualquier ruta principal (ej. `/dashboard`, `/clientes`, `/sedes`, `/ajustes`, `/admin`) en pantalla de escritorio o móvil
-- **THEN** la aplicación se renderiza de forma responsiva adaptándose al tamaño de la pantalla, con un tamaño de fuente base de 18px, pesos tipográficos ligeros/medianos, y un espaciado externo e interno controlado dinámicamente por la variable `--spacing-gutter`.
+- **THEN** la aplicación se renderiza de forma responsiva adaptándose al tamaño de la pantalla, con un tamaño de fuente base of 18px, pesos tipográficos ligeros/medianos, y un espaciado externo e interno controlado dinámicamente por la variable `--spacing-gutter`.
 
 #### Scenario: Flujo de redirección desde Inicio de Sesión
 - **WHEN** el usuario introduce credenciales en la ruta `/login` y envía el formulario
@@ -29,19 +26,3 @@ El sistema SHALL implementar las vistas de Iniciar Sesión, Dashboard/Calendario
 #### Scenario: Consistencia de espaciados de cabecera y visualización móvil
 - **WHEN** el usuario carga la vista de Inicio, Agenda o cualquier otra vista con PageHeader
 - **THEN** el espacio vertical entre el PageHeader y los elementos de contenido inferiores es homogéneo (exactamente 1x gutter), y en la vista de Agenda no se duplica el componente Header (campana de notificaciones y avatar del usuario) en teléfonos móviles.
-
-#### Scenario: Calendario a Pantalla Completa y Filtro por Estilistas
-- **WHEN** el usuario navega a la sección de Agenda
-- **THEN** la vista de la agenda ocupa el 100% del ancho y alto útil del lienzo principal, eliminando la cabecera "Agenda" y los márgenes de contenedor de tarjeta, integrando un selector de rango de semana de estilo Luxe Salon y un selector desplegable "Todos los Estilistas" para filtrar las citas en tiempo real.
-
-### Requirement: Integración de PageHeader en layouts de vistas
-El sistema SHALL unificar la estructura de cabecera de página en las vistas principales (`/clientes`, `/sedes`, `/ajustes`, `/admin`, `/inicio`) utilizando el componente `PageHeader` para garantizar consistencia visual en la tipografía y alineación.
-
-#### Scenario: Cabecera limpia sin tarjeta en el inicio
-- **WHEN** el usuario carga la vista `/inicio`
-- **THEN** el sistema renderiza el saludo personalizado mediante `PageHeader` directamente en el flujo del canvas sin contenedores de tarjetas, bordes ni fondos adicionales.
-
-#### Scenario: Ocultar cabecera de página en agenda
-- **WHEN** el usuario carga la vista de la agenda en `/agenda`
-- **THEN** el sistema no renderiza ninguna cabecera de página (`PageHeader`), de modo que el contenedor del calendario semanal (`Card`) inicia directamente en la parte superior del canvas de contenido.
-

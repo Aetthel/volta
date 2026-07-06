@@ -366,8 +366,7 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
-        {/* Content Canvas */}
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col gap-gutter">
+        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col">
           <PageHeader
             title={greeting + (session?.user?.name ? ` ${session.user.name.split(" ")[0]}` : "")}
             description={
@@ -388,7 +387,7 @@ export default function DashboardPage() {
 
           {/* Metrics Bento Grid */}
           {isLoading ? (
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
               {[...Array(4)].map((_, i) => (
                 <Card key={i} className="p-5 h-[116px] flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                   <div className="flex justify-between items-center w-full">
@@ -401,7 +400,7 @@ export default function DashboardPage() {
               ))}
             </section>
           ) : (
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
               <MetricCard
                 title="Citas Hoy"
                 value={String(todayApps.length)}
@@ -447,7 +446,7 @@ export default function DashboardPage() {
 
           {/* Middle Row (Weekly Performance + Featured Services) */}
           {isLoading ? (
-            <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter">
+            <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter mb-gutter">
               <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col h-[340px] justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                 <div className="flex justify-between items-center mb-6">
                   <Skeleton className="w-40 h-6" />
@@ -478,7 +477,7 @@ export default function DashboardPage() {
               </Card>
             </section>
           ) : (
-            <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter">
+            <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter mb-gutter">
               {/* Weekly Performance Bar Chart */}
               <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                 <div>
