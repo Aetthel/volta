@@ -353,6 +353,7 @@ export default function RootPage() {
               <p className="text-body-lg text-on-surface-variant max-w-2xl mx-auto">
                 Escala tu negocio con la transparencia de Volta. Precios claros, sin sorpresas ocultas.
               </p>
+
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
@@ -364,10 +365,10 @@ export default function RootPage() {
                     Básico
                   </p>
                   <h4 className="text-display font-bold text-on-surface mb-2">
-                    0€<span className="text-title-lg font-normal text-on-surface-variant">/mes</span>
+                    18€<span className="text-title-lg font-normal text-on-surface-variant">/mes</span>
                   </h4>
                   <p className="text-body-md text-on-surface-variant italic">
-                    Para autónomos que empiezan.
+                    Para empezar sin complicaciones.
                   </p>
                 </div>
                 
@@ -376,19 +377,19 @@ export default function RootPage() {
                   <ul className="space-y-4">
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
                       <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      Agenda básica (1 calendario)
+                      1 trabajador
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
                       <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      Hasta 50 Citas/mes
+                      1 calendario
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
                       <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      Fichas de cliente estándar
+                      Hasta 40 citas/mes
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
                       <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      Soporte por Email (48h)
+                      Soporte por email
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-on-surface-variant/50 line-through">
                       <Check className="w-4.5 h-4.5 text-outline shrink-0 opacity-30" />
@@ -397,11 +398,14 @@ export default function RootPage() {
                   </ul>
                 </div>
                 
-                <Link href="/login" className="mt-8">
-                  <Button variant="outline" size="lg" className="w-full">
-                    Seleccionar Básico
-                  </Button>
-                </Link>
+                <div className="mt-8 space-y-3">
+                  <Link href="/login">
+                    <Button variant="outline" size="lg" className="w-full">
+                      Probar 14 días gratis
+                    </Button>
+                  </Link>
+                  <p className="text-body-sm text-on-surface-variant text-center mt-2">Sin compromiso</p>
+                </div>
               </Card>
 
               {/* Pro Plan */}
@@ -415,16 +419,20 @@ export default function RootPage() {
                     Pro
                   </p>
                   <h4 className="text-[2.75rem] font-bold text-white mb-2 leading-none">
-                    29€<span className="text-title-lg font-normal text-on-primary/80">/mes</span>
+                    25€<span className="text-title-lg font-normal text-on-primary/80">/mes</span>
                   </h4>
                   <p className="text-body-md text-on-primary/95">
-                    Para salones individuales de élite.
+                    Para salones que quieren crecer.
                   </p>
                 </div>
 
                 <div className="flex-grow">
                   <p className="text-title-md font-bold mb-4 text-white">Todo lo Básico, más:</p>
                   <ul className="space-y-4">
+                    <li className="flex items-center gap-3 text-body-md text-white">
+                      <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
+                      Trabajadores ilimitados
+                    </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
                       Citas y calendarios ilimitados
@@ -435,35 +443,34 @@ export default function RootPage() {
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Marketing Automatizado
+                      Gestión completa de clientes
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Inventario en tiempo real
+                      Analítica de negocio
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Analítica Financiera
-                    </li>
-                    <li className="flex items-center gap-3 text-body-md text-white">
-                      <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Soporte Prioritario Chat
+                      Soporte prioritario por chat
                     </li>
                   </ul>
                 </div>
 
-                <Link href="/login" className="mt-8">
-                  <Button variant="secondary" size="lg" className="w-full bg-white text-primary hover:bg-surface-container-lowest">
-                    Empezar Prueba Pro
-                  </Button>
-                </Link>
+                <div className="mt-8 space-y-3">
+                  <Link href="/login">
+                    <Button variant="secondary" size="lg" className="w-full bg-white text-primary hover:bg-surface-container-lowest">
+                      Probar 14 días gratis
+                    </Button>
+                  </Link>
+                  <p className="text-body-sm text-on-primary/70 text-center mt-2">Sin compromiso</p>
+                </div>
               </Card>
 
-              {/* Enterprise Plan */}
+              {/* A medida Plan */}
               <Card className="p-8 flex flex-col hover:shadow-md transition-shadow">
                 <div className="mb-8">
                   <p className="text-label-lg font-bold text-on-surface-variant uppercase tracking-wider mb-2">
-                    Enterprise
+                    A Medida
                   </p>
                   <h4 className="text-display font-bold text-on-surface mb-2">
                     A medida
@@ -499,17 +506,21 @@ export default function RootPage() {
                   </ul>
                 </div>
 
-                <Link href="/login" className="mt-8">
-                  <Button variant="outline" size="lg" className="w-full bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high">
-                    Contactar Ventas
-                  </Button>
-                </Link>
+                <div className="mt-8 space-y-3">
+                  <Link href="/login">
+                    <Button variant="outline" size="lg" className="w-full bg-surface-container border-outline-variant text-on-surface hover:bg-surface-container-high">
+                      Contactar Ventas
+                    </Button>
+                  </Link>
+                  <p className="text-body-sm text-on-surface-variant text-center mt-2">Sin compromiso</p>
+                </div>
               </Card>
 
             </div>
 
           </div>
         </section>
+
 
         {/* Testimonials Section */}
         <section id="testimonials" className="py-24 bg-primary/5">

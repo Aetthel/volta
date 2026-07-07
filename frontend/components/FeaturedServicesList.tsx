@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Scissors } from "lucide-react";
+import { Briefcase } from "lucide-react";
 
 export interface ServiceShare {
   name: string;
@@ -19,7 +19,7 @@ export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
   return (
     <div className="flex flex-col gap-6 justify-center flex-1">
       {services.map((s, idx) => {
-        const icons = [Scissors, Scissors, Scissors, Scissors];
+        const icons = [Briefcase, Briefcase, Briefcase, Briefcase];
         const Icon = s.icon || icons[idx % icons.length];
         return (
           <div key={s.name} className="flex flex-col gap-2">

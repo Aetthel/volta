@@ -5,11 +5,10 @@ import { X, Phone, Mail, Pencil, Sparkles } from "lucide-react";
 import {
   FieldGroup,
   Field,
-  FieldLabel,
   FloatingInput,
   Button,
-  Select,
-  Textarea,
+  FloatingSelect,
+  FloatingTextarea,
 } from "@/components/ui/volta-ui";
 
 interface ClientToEdit {
@@ -182,9 +181,9 @@ export default function AddClientModal({
             </div>
             <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field>
-                <FieldLabel htmlFor="frequency">Frecuencia estimada</FieldLabel>
-                <Select
+                <FloatingSelect
                   id="frequency"
+                  label="Frecuencia estimada"
                   value={formData.frequency}
                   onChange={handleChange}
                 >
@@ -192,17 +191,14 @@ export default function AddClientModal({
                   <option value="Cada 2 meses">Cada 2 meses</option>
                   <option value="Ocasional">Ocasional</option>
                   <option value="Primera visita">Primera visita</option>
-                </Select>
+                </FloatingSelect>
               </Field>
 
               <Field className="md:col-span-2">
-                <FieldLabel htmlFor="notes">
-                  Notas de estilo y alergias
-                </FieldLabel>
-                <Textarea
+                <FloatingTextarea
                   id="notes"
+                  label="Notas de estilo y alergias"
                   rows={3}
-                  placeholder="Cabello fino, prefiere tintes orgánicos, alergia al níquel..."
                   value={formData.notes}
                   onChange={handleChange}
                 />

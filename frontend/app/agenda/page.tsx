@@ -744,10 +744,6 @@ export default function AgendaPage() {
                   </Button>
                 </div>
 
-                {/* Compact System Actions — hidden on mobile to prevent duplication */}
-                <div className="pl-2 border-l border-outline-variant hidden md:flex">
-                  <Header />
-                </div>
               </div>
             </div>
             {/* Calendar Calendar Content */}
@@ -835,16 +831,16 @@ export default function AgendaPage() {
                   </div>
 
                   {/* Calendar Grid Container (Relative to contain the absolute overlay) */}
-                  <div className="relative">
+                  <div className="relative" style={{ minHeight: `${timeSlots.length * 90}px` }}>
                     {/* Calendar Body Rows */}
                     {timeSlots.map((time) => {
                       return (
                         <div
                           key={time}
-                          className={`grid ${gridColsClass} h-20 border-b border-outline-variant/60 relative`}
+                          className={`grid ${gridColsClass} h-[90px] border-b border-outline-variant/60 relative`}
                         >
                           {/* Time labels column */}
-                          <div className="text-center py-3 text-label-md font-label-md text-on-surface-variant border-r border-outline-variant font-semibold select-none flex items-center justify-center bg-surface-container-low/35 h-20">
+                          <div className="text-center pt-1 text-label-md font-label-md text-on-surface-variant border-r border-outline-variant font-semibold select-none flex items-start justify-center bg-surface-container-low/35 h-[90px]">
                             {time}
                           </div>
 
@@ -873,11 +869,9 @@ export default function AgendaPage() {
                       );
                     })}
 
-                    {/* Appointments Overlay Container wrapped in ContextMenu */}
-                    <ContextMenu>
-                      <ContextMenuTrigger
-                        as="div"
-                        className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"} relative`}
+                    {/* Appointments Overlay Container */}
+                    <div
+                        className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
                         onMouseMove={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const x = e.clientX - rect.left;
@@ -946,7 +940,7 @@ export default function AgendaPage() {
                           return (
                             <div
                               key={dayIndex}
-                              className="relative h-full border-r border-outline-variant/60 pointer-events-none"
+                              className="relative h-full border-r border-outline-variant/60 pointer-events-auto"
                             >
                               {/* Hover Guide Line */}
                               {isColHovered && hoverGuide && (
@@ -1071,20 +1065,7 @@ export default function AgendaPage() {
                             </div>
                           );
                         })}
-                      </ContextMenuTrigger>
-                      <ContextMenuContent>
-                        <ContextMenuItem
-                          onClick={() => {
-                            if (hoverGuide) {
-                              handleGridClick(hoverGuide.dayIndex, hoverGuide.top);
-                            }
-                          }}
-                        >
-                          <Plus className="w-4 h-4 text-primary" />
-                          <span>Nueva cita {hoverGuide ? `a las ${hoverGuide.timeString}` : ""}</span>
-                        </ContextMenuItem>
-                      </ContextMenuContent>
-                    </ContextMenu>
+                    </div>
                   </div>
                 </div>
               </div>

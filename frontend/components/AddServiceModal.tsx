@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Sparkles, Pencil, Scissors, Clock, DollarSign } from "lucide-react";
+import { X, Sparkles, Pencil, Briefcase, Clock, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FieldGroup, Field, FieldLabel, FloatingInput, Button, Select, Textarea } from "@/components/ui/volta-ui";
+import { FieldGroup, Field, FloatingInput, Button, FloatingSelect, FloatingTextarea } from "@/components/ui/volta-ui";
 
 const EuroIcon = ({ className }: { className?: string }) => (
   <span className={cn("font-semibold text-on-surface-variant/70 text-body-lg", className)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -121,7 +121,7 @@ export default function AddServiceModal({
                 label="Nombre del Servicio"
                 type="text"
                 required
-                icon={Scissors}
+                icon={Briefcase}
                 value={formData.name}
                 onChange={handleChange}
               />
@@ -130,21 +130,16 @@ export default function AddServiceModal({
             <div className="grid grid-cols-2 gap-4">
               {/* Duration (minutes) */}
               <Field>
-                <FieldLabel htmlFor="duration">Duración (minutos)</FieldLabel>
-                <Select
+                <FloatingInput
                   id="duration"
+                  label="Duración (minutos)"
+                  type="number"
+                  min="1"
+                  required
+                  icon={Clock}
                   value={formData.duration}
                   onChange={handleChange}
-                  icon={Clock}
-                >
-                  <option value="15">15 min</option>
-                  <option value="30">30 min</option>
-                  <option value="45">45 min</option>
-                  <option value="60">1 hora (60 min)</option>
-                  <option value="90">1.5 horas (90 min)</option>
-                  <option value="120">2 horas (120 min)</option>
-                  <option value="180">3 horas (180 min)</option>
-                </Select>
+                />
               </Field>
 
               {/* Price (Euros) */}
@@ -165,15 +160,12 @@ export default function AddServiceModal({
 
             {/* Description */}
             <Field>
-              <FieldLabel htmlFor="description">
-                Descripción (opcional)
-              </FieldLabel>
-              <Textarea
+              <FloatingTextarea
                 id="description"
+                label="Descripción (opcional)"
                 rows={3}
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Breve descripción del servicio o detalles específicos..."
               />
             </Field>
 

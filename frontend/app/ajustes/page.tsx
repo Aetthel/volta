@@ -12,7 +12,7 @@ import {
   Mail,
   CheckCircle,
   Save,
-  Scissors,
+  Briefcase,
   Palette,
   Sparkles,
   ShieldCheck,
@@ -53,6 +53,8 @@ import {
   CardContent,
   CardFooter,
   FloatingInput,
+  FloatingSelect,
+  FloatingTextarea,
   Button,
   Skeleton,
   PageHeader,
@@ -1198,46 +1200,34 @@ export default function AjustesPage() {
                   {isEditingProfile ? (
                     <FieldGroup className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                       <Field>
-                        <FieldLabel htmlFor="user-name">
-                          Nombre Completo
-                        </FieldLabel>
-                        <input
+                        <FloatingInput
                           id="user-name"
+                          label="Nombre Completo"
                           type="text"
                           required
                           value={userForm.name}
                           onChange={(e) =>
                             setUserForm({ ...userForm, name: e.target.value })
                           }
-                          className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
                       </Field>
                       <Field>
-                        <FieldLabel htmlFor="user-email">
-                          Correo Electrónico
-                        </FieldLabel>
-                        <input
+                        <FloatingInput
                           id="user-email"
+                          label="Correo Electrónico"
                           type="email"
                           required
                           value={userForm.email}
                           onChange={(e) =>
                             setUserForm({ ...userForm, email: e.target.value })
                           }
-                          className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
                       </Field>
                       <Field>
-                        <FieldLabel htmlFor="user-password">
-                          Nueva Contraseña{" "}
-                          <span className="text-on-surface-variant/50 font-normal">
-                            (opcional)
-                          </span>
-                        </FieldLabel>
-                        <input
+                        <FloatingInput
                           id="user-password"
+                          label="Nueva Contraseña (opcional)"
                           type="password"
-                          placeholder="Mínimo 6 caracteres"
                           value={userForm.password}
                           onChange={(e) =>
                             setUserForm({
@@ -1245,7 +1235,6 @@ export default function AjustesPage() {
                               password: e.target.value,
                             })
                           }
-                          className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                         />
                       </Field>
                     </FieldGroup>
@@ -1678,7 +1667,7 @@ export default function AjustesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter animate-in fade-in duration-200">
               {/* Business Profile Card (Spans 8 cols) */}
               {isEditingBusiness ? (
-                <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
+                <Card className="col-span-1 sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
                   <form
                     onSubmit={handleSaveBusiness}
                     className="h-full flex flex-col justify-between"
@@ -1757,11 +1746,9 @@ export default function AjustesPage() {
                         {/* Form fields */}
                         <FieldGroup className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <Field>
-                            <FieldLabel htmlFor="profile-name">
-                              Nombre Comercial
-                            </FieldLabel>
-                            <input
+                            <FloatingInput
                               id="profile-name"
+                              label="Nombre Comercial"
                               type="text"
                               required
                               value={profile.name}
@@ -1771,15 +1758,12 @@ export default function AjustesPage() {
                                   name: e.target.value,
                                 }))
                               }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
                           </Field>
                           <Field>
-                            <FieldLabel htmlFor="profile-email">
-                              Correo Electrónico
-                            </FieldLabel>
-                            <input
+                            <FloatingInput
                               id="profile-email"
+                              label="Correo Electrónico"
                               type="email"
                               required
                               value={profile.email}
@@ -1789,15 +1773,12 @@ export default function AjustesPage() {
                                   email: e.target.value,
                                 }))
                               }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
                           </Field>
                           <Field>
-                            <FieldLabel htmlFor="profile-phone">
-                              Teléfono
-                            </FieldLabel>
-                            <input
+                            <FloatingInput
                               id="profile-phone"
+                              label="Teléfono"
                               type="tel"
                               required
                               value={profile.phone}
@@ -1807,15 +1788,12 @@ export default function AjustesPage() {
                                   phone: e.target.value,
                                 }))
                               }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
                           </Field>
                           <Field>
-                            <FieldLabel htmlFor="profile-address">
-                              Dirección
-                            </FieldLabel>
-                            <input
+                            <FloatingInput
                               id="profile-address"
+                              label="Dirección"
                               type="text"
                               required
                               value={profile.address}
@@ -1825,17 +1803,14 @@ export default function AjustesPage() {
                                   address: e.target.value,
                                 }))
                               }
-                              className="w-full border border-outline-variant rounded-lg px-4 py-2 text-body-lg focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface"
                             />
                           </Field>
                         </FieldGroup>
 
                         <Field className="mt-4">
-                          <FieldLabel htmlFor="profile-description">
-                            Descripción del Negocio
-                          </FieldLabel>
-                          <textarea
+                          <FloatingTextarea
                             id="profile-description"
+                            label="Descripción del Negocio"
                             value={profile.description || ""}
                             onChange={(e) =>
                               setProfile((prev) => ({
@@ -1843,8 +1818,7 @@ export default function AjustesPage() {
                                 description: e.target.value,
                               }))
                             }
-                            placeholder="Describe tu negocio, servicios o especialidad..."
-                            className="w-full min-h-[90px] border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface resize-none"
+                            rows={3}
                           />
                         </Field>
                       </CardContent>
@@ -1852,7 +1826,7 @@ export default function AjustesPage() {
                   </form>
                 </Card>
               ) : (
-                <Card className="sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
+                <Card className="col-span-1 sm:col-span-2 lg:col-span-8 flex flex-col justify-between">
                   <div>
                     <CardHeader className="flex flex-row items-center justify-between pb-4">
                       <CardTitle className="text-primary flex items-center gap-2">
@@ -1941,7 +1915,7 @@ export default function AjustesPage() {
               )}
 
               {/* Operating Hours Card (Spans 4 cols) */}
-              <Card className="sm:col-span-1 lg:col-span-4 flex flex-col justify-between">
+              <Card className="col-span-1 sm:col-span-1 lg:col-span-4 flex flex-col justify-between">
                 <div>
                   <CardHeader className="pb-4">
                     <CardTitle className="text-primary flex items-center gap-2">
@@ -2010,36 +1984,42 @@ export default function AjustesPage() {
                               </label>
                             </div>
                             {!hourRow.isClosed && (
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="time"
-                                  value={hourRow.openTime}
-                                  onChange={(e) => {
-                                    const updatedHours = [...hours];
-                                    updatedHours[idx] = {
-                                      ...updatedHours[idx],
-                                      openTime: e.target.value,
-                                    };
-                                    setHours(updatedHours);
-                                  }}
-                                  className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
-                                />
-                                <span className="text-xs text-on-surface-variant">
+                              <div className="flex items-center gap-2 w-full mt-2">
+                                <div className="flex-1 min-w-0">
+                                  <FloatingInput
+                                    type="time"
+                                    id={`open-${idx}`}
+                                    label="Apertura"
+                                    value={hourRow.openTime}
+                                    onChange={(e) => {
+                                      const updatedHours = [...hours];
+                                      updatedHours[idx] = {
+                                        ...updatedHours[idx],
+                                        openTime: e.target.value,
+                                      };
+                                      setHours(updatedHours);
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-xs text-on-surface-variant font-medium shrink-0">
                                   a
                                 </span>
-                                <input
-                                  type="time"
-                                  value={hourRow.closeTime}
-                                  onChange={(e) => {
-                                    const updatedHours = [...hours];
-                                    updatedHours[idx] = {
-                                      ...updatedHours[idx],
-                                      closeTime: e.target.value,
-                                    };
-                                    setHours(updatedHours);
-                                  }}
-                                  className="border border-outline-variant rounded px-2 py-1 text-xs bg-surface focus:outline-none focus:border-primary w-full"
-                                />
+                                <div className="flex-1 min-w-0">
+                                  <FloatingInput
+                                    type="time"
+                                    id={`close-${idx}`}
+                                    label="Cierre"
+                                    value={hourRow.closeTime}
+                                    onChange={(e) => {
+                                      const updatedHours = [...hours];
+                                      updatedHours[idx] = {
+                                        ...updatedHours[idx],
+                                        closeTime: e.target.value,
+                                      };
+                                      setHours(updatedHours);
+                                    }}
+                                  />
+                                </div>
                               </div>
                             )}
                           </div>
@@ -2093,28 +2073,13 @@ export default function AjustesPage() {
               </Card>
 
               {/* Featured Services Card (Spans 12 cols - full width) */}
-              <Card className="col-span-12 flex flex-col justify-between">
+              <Card className="col-span-1 sm:col-span-2 lg:col-span-12 flex flex-col justify-between">
                 <div>
-                  <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+                  <CardHeader className="flex flex-row items-center justify-between pb-4">
                     <CardTitle className="text-primary flex items-center gap-2">
-                      <Scissors data-icon="scissors" />
+                      <Briefcase data-icon="briefcase" />
                       <span>Servicios Destacados</span>
                     </CardTitle>
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                      <div className="flex items-center bg-surface-container rounded-full px-3 py-1 gap-2 border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all w-full sm:w-48">
-                        <Search data-icon="search" className="text-on-surface-variant shrink-0 w-3.5 h-3.5" />
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Buscar..."
-                          className="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm w-full placeholder-on-surface-variant outline-none"
-                        />
-                      </div>
-                      <span className="text-body-sm text-on-surface-variant font-medium shrink-0">
-                        {services.length} servicios registrados
-                      </span>
-                    </div>
                   </CardHeader>
 
                   <CardContent>
@@ -2144,7 +2109,7 @@ export default function AjustesPage() {
                           >
                             <div className="flex items-center gap-4">
                               <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
-                                <Scissors data-icon="scissors" />
+                                <Briefcase data-icon="briefcase" />
                               </div>
                               <div>
                                 <p className="font-body-lg text-body-lg font-semibold text-on-surface">
@@ -2205,7 +2170,7 @@ export default function AjustesPage() {
               </Card>
               {/* Workers Management Card */}
               {showTrabajadoresTab && (
-                <Card className="col-span-12">
+                <Card className="col-span-1 sm:col-span-2 lg:col-span-12">
                   <CardHeader className="flex flex-row items-center justify-between pb-4">
                     <CardTitle className="text-primary flex items-center gap-2">
                       <Users className="w-5 h-5 text-primary" />
@@ -2288,7 +2253,7 @@ export default function AjustesPage() {
                             </div>
 
                             {/* Hover actions / Mobile visible actions */}
-                            <div className="absolute right-3 top-3 flex items-center gap-1 opacity-0 group-hover/worker:opacity-100 transition-opacity bg-surface-container-low pl-2">
+                            <div className="absolute right-3 top-3 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/worker:opacity-100 transition-opacity bg-surface-container-low pl-2">
                               <Button
                                 variant="ghost"
                                 size="sm"

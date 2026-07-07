@@ -280,7 +280,7 @@ export const FloatingInput = React.forwardRef<
     <div className="relative w-full group/input">
       {/* Leading Icon */}
       {Icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none z-10">
           <Icon className="w-5 h-5" />
         </div>
       )}
@@ -304,12 +304,11 @@ export const FloatingInput = React.forwardRef<
       <label
         htmlFor={id}
         className={cn(
-          "absolute top-1/2 -translate-y-1/2 z-10 origin-left scale-100 bg-surface-container-lowest px-1.5 text-body-lg text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
-          "peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary",
-          "peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
-          Icon
-            ? "left-12 peer-focus:left-3 peer-[:not(:placeholder-shown)]:left-3"
-            : "left-4",
+          "absolute z-10 origin-left bg-surface-container-lowest px-1.5 text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
+          (type === "date" || type === "time")
+            ? "top-0 scale-[0.82] text-primary"
+            : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
+          Icon ? "left-12" : "left-4",
         )}
       >
         {label}
@@ -325,6 +324,100 @@ export const FloatingInput = React.forwardRef<
   );
 });
 FloatingInput.displayName = "FloatingInput";
+
+// FloatingSelect
+export interface FloatingSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  icon?: React.ComponentType<any>;
+}
+
+export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelectProps>(
+  ({ className, label, icon: Icon, children, id, ...props }, ref) => {
+    return (
+      <div className="relative w-full group/select">
+        {/* Leading Icon */}
+        {Icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none z-10">
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
+
+        <select
+          ref={ref}
+          id={id}
+          className={cn(
+            "peer block w-full bg-transparent bg-none text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 pr-10 appearance-none cursor-pointer",
+            Icon ? "pl-12" : "pl-4",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </select>
+
+        {/* Custom Chevron Indicator */}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none z-10">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        {/* Floating Label */}
+        <label
+          htmlFor={id}
+          className={cn(
+            "absolute z-10 origin-left bg-surface-container-lowest px-1.5 text-on-surface-variant transition-all duration-200 pointer-events-none select-none top-0 scale-[0.82] text-primary",
+            Icon ? "left-12" : "left-4"
+          )}
+        >
+          {label}
+        </label>
+      </div>
+    );
+  }
+);
+FloatingSelect.displayName = "FloatingSelect";
+
+// FloatingTextarea
+export interface FloatingTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string;
+}
+
+export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTextareaProps>(
+  ({ className, label, id, ...props }, ref) => {
+    return (
+      <div className="relative w-full group/textarea">
+        <textarea
+          ref={ref}
+          id={id}
+          placeholder=" "
+          className={cn(
+            "peer block w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 px-4 resize-none",
+            className
+          )}
+          {...props}
+        />
+        <label
+          htmlFor={id}
+          className={cn(
+            "absolute z-10 origin-left bg-surface-container-lowest px-1.5 text-on-surface-variant transition-all duration-200 pointer-events-none select-none top-6 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
+            "left-4"
+          )}
+        >
+          {label}
+        </label>
+      </div>
+    );
+  }
+);
+FloatingTextarea.displayName = "FloatingTextarea";
+
 
 // Separator
 export interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -369,9 +462,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizeClasses = {
-      sm: "px-3 py-1.5 text-[0.7rem] rounded-md",
-      md: "px-5 py-2 text-[0.75rem] rounded-lg",
-      lg: "px-6 py-2.5 text-[0.875rem] rounded-lg",
+      sm: "px-3 py-1.5 text-[0.7rem] rounded",
+      md: "px-5 py-2 text-[0.75rem] rounded-md",
+      lg: "px-6 py-2.5 text-[0.875rem] rounded-md",
     };
 
     return (
@@ -410,7 +503,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            "block w-full bg-surface text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3 shadow-sm appearance-none cursor-pointer pr-10",
+            "block w-full bg-surface bg-none text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3 shadow-sm appearance-none cursor-pointer pr-10",
             Icon ? "pl-12" : "pl-4",
             className,
           )}
@@ -520,6 +613,22 @@ export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(
 Empty.displayName = "Empty";
 
 
+// Global ContextMenu manager — ensures only one menu is open at a time
+let _activeContextMenuClose: (() => void) | null = null;
+
+function registerContextMenu(closeFn: () => void) {
+  if (_activeContextMenuClose && _activeContextMenuClose !== closeFn) {
+    _activeContextMenuClose(); // close the previously open menu
+  }
+  _activeContextMenuClose = closeFn;
+}
+
+function unregisterContextMenu(closeFn: () => void) {
+  if (_activeContextMenuClose === closeFn) {
+    _activeContextMenuClose = null;
+  }
+}
+
 // ContextMenu Context
 interface ContextMenuContextType {
   isOpen: boolean;
@@ -539,14 +648,15 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [coords, setCoords] = React.useState({ x: 0, y: 0 });
 
-  const openMenu = React.useCallback((e: React.MouseEvent | TouchEvent | React.TouchEvent, clientX: number, clientY: number) => {
-    setCoords({ x: clientX, y: clientY });
-    setIsOpen(true);
-  }, []);
-
   const closeMenu = React.useCallback(() => {
     setIsOpen(false);
   }, []);
+
+  const openMenu = React.useCallback((e: React.MouseEvent | TouchEvent | React.TouchEvent, clientX: number, clientY: number) => {
+    registerContextMenu(closeMenu); // close any other open menu first
+    setCoords({ x: clientX, y: clientY });
+    setIsOpen(true);
+  }, [closeMenu]);
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -558,6 +668,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
       document.removeEventListener("click", handleClose);
       window.removeEventListener("scroll", handleClose);
       window.removeEventListener("resize", handleClose);
+      unregisterContextMenu(closeMenu);
     };
   }, [isOpen, closeMenu]);
 

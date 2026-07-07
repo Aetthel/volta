@@ -6,10 +6,9 @@ import { useSession } from "next-auth/react";
 import {
   FieldGroup,
   Field,
-  FieldLabel,
   FloatingInput,
   Button,
-  Select,
+  FloatingSelect,
   Alert,
 } from "@/components/ui/volta-ui";
 
@@ -359,9 +358,9 @@ export default function NewAppointmentModal({
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="service">Servicio</FieldLabel>
-              <Select
+              <FloatingSelect
                 id="service"
+                label="Servicio"
                 value={formData.service}
                 onChange={handleChange}
               >
@@ -370,29 +369,28 @@ export default function NewAppointmentModal({
                     {svc.name} {svc.price !== undefined ? `(€${svc.price})` : ""}
                   </option>
                 ))}
-              </Select>
+              </FloatingSelect>
             </Field>
           </FieldGroup>
 
           {/* Date and Time selection */}
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field>
-              <FieldLabel htmlFor="date">Fecha</FieldLabel>
-              <input
+              <FloatingInput
                 id="date"
+                label="Fecha"
                 type="date"
                 required
                 value={formData.date}
                 onChange={handleChange}
-                className="w-full border border-outline rounded-md px-4 py-3 text-body-lg focus:border-primary focus:border-2 focus:outline-none transition-all bg-surface"
               />
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="time">Hora</FieldLabel>
               <div className="grid grid-cols-2 gap-2 w-full">
-                <Select
+                <FloatingSelect
                   id="hour"
+                  label="Hora"
                   value={selectedHour || "10"}
                   onChange={handleHourChange}
                   icon={Clock}
@@ -402,9 +400,10 @@ export default function NewAppointmentModal({
                       {h}
                     </option>
                   ))}
-                </Select>
-                <Select
+                </FloatingSelect>
+                <FloatingSelect
                   id="minute"
+                  label="Minuto"
                   value={selectedMin || "00"}
                   onChange={handleMinChange}
                 >
@@ -413,7 +412,7 @@ export default function NewAppointmentModal({
                       {m}
                     </option>
                   ))}
-                </Select>
+                </FloatingSelect>
               </div>
             </Field>
           </FieldGroup>

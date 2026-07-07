@@ -20,7 +20,7 @@ import {
   Trash2,
   MoreVertical,
   Search,
-  Scissors,
+  Briefcase,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -309,7 +309,7 @@ export default function DashboardPage() {
     return list.slice(0, 4).map((s) => ({
       name: s.name,
       pct: s.pct,
-      icon: Scissors,
+      icon: Briefcase,
     }));
   })();
 
