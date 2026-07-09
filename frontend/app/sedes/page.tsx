@@ -34,7 +34,7 @@ interface BusinessItem {
 }
 
 export default function SedesPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBusiness, setEditingBusiness] = useState<BusinessItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -192,8 +192,10 @@ export default function SedesPage() {
   };
 
   useEffect(() => {
-    fetchBusinesses();
-  }, []);
+    if (status === "authenticated" && session?.user?.role === "ADMIN") {
+      fetchBusinesses();
+    }
+  }, [session, status]);
 
   useEffect(() => {
     if (session?.user?.name) {
@@ -301,6 +303,24 @@ export default function SedesPage() {
       b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.address.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  if (status !== "loading" && session?.user?.role !== "ADMIN") {
+    return (
+      <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
+        <Sidebar onNewAppointmentClick={() => {}} />
+        <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+          <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col justify-center items-center">
+            <div className="max-w-md w-full">
+              <Alert variant="error" className="mb-4">
+                <span className="font-bold">Acceso Denegado:</span> Se requieren permisos de Administrador Global para ver esta sección.
+              </Alert>
+            </div>
+          </main>
+          <BottomNav />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">

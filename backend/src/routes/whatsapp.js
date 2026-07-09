@@ -14,6 +14,11 @@ const templateSchema = z.object({
 router.post('/init', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.body;
 
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
+
   try {
     await whatsappManager.initClient(businessId);
     res.json({ success: true, message: 'WhatsApp initialization started' });
@@ -25,6 +30,11 @@ router.post('/init', authenticate, validateId('businessId'), async (req, res) =>
 
 router.get('/status', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.query;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
 
   try {
     const business = await prisma.business.findUnique({
@@ -52,6 +62,11 @@ router.get('/status', authenticate, validateId('businessId'), async (req, res) =
 router.post('/disconnect', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.body;
 
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
+
   try {
     const client = whatsappManager.getClient(businessId);
     if (client) {
@@ -73,6 +88,11 @@ router.post('/disconnect', authenticate, validateId('businessId'), async (req, r
 
 router.get('/templates', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.query;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
 
   try {
     const business = await prisma.business.findUnique({
@@ -99,6 +119,11 @@ router.get('/templates', authenticate, validateId('businessId'), async (req, res
 
 router.post('/templates', authenticate, validateId('businessId'), validateBody(templateSchema), async (req, res) => {
   const { businessId, welcomeMessage, reminderMessage } = req.body;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
 
   try {
     const updated = await prisma.business.update({

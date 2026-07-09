@@ -47,6 +47,7 @@ async function sendWelcomeMessage(appointmentId) {
 
     console.log(`[Bot] Sending welcome to ${appt.clientPhone}...`);
     await whatsappManager.initClient(appt.businessId); // Ensure client is init
+    await whatsappManager.waitForReady(appt.businessId, 45000);
     await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
 
   } catch (err) {
@@ -103,6 +104,7 @@ async function runSentinel() {
         });
 
         await whatsappManager.initClient(appt.businessId);
+        await whatsappManager.waitForReady(appt.businessId, 45000);
         await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
 
         await prisma.appointment.update({

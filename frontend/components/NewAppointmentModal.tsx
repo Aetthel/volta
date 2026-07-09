@@ -203,7 +203,7 @@ export default function NewAppointmentModal({
         // Call parent onSave with the response data (which is a real DB appointment)
         onSave({
           ...savedApp,
-          service: formData.service, // pass original service since DB doesn't store it but frontend needs it to render
+          service: formData.service, // pass original service name for frontend layout state updates
         });
 
         // Check if client exists to show toast if it's new

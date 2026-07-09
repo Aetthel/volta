@@ -17,6 +17,11 @@ const appointmentSchema = z.object({
 router.get('/', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.query;
 
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
+
   try {
     const appointments = await prisma.appointment.findMany({
       where: { businessId },
@@ -32,6 +37,11 @@ router.get('/', authenticate, validateId('businessId'), async (req, res) => {
 
 router.post('/', authenticate, validateId('businessId'), validateBody(appointmentSchema), async (req, res) => {
   const { clientName, clientPhone, appointmentDate, businessId } = req.body;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
 
   try {
     const business = await prisma.business.findUnique({

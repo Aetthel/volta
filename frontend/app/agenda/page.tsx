@@ -591,7 +591,12 @@ export default function AgendaPage() {
     "Abril",
     "Mayo",
     "Junio",
-"Diciembre",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
   const displayedDate = weekDays[3]?.fullDate || new Date();
   const currentMonthYear = `${monthNames[displayedDate.getMonth()]} ${displayedDate.getFullYear()}`;

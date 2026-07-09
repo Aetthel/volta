@@ -24,6 +24,11 @@ const updateServiceSchema = z.object({
 router.get('/', authenticate, validateId('businessId'), async (req, res) => {
   const { businessId } = req.query;
 
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
+
   try {
     const services = await prisma.service.findMany({
       where: { 
@@ -42,6 +47,11 @@ router.get('/', authenticate, validateId('businessId'), async (req, res) => {
 // POST create a new service
 router.post('/', authenticate, validateId('businessId'), validateBody(createServiceSchema), async (req, res) => {
   const { businessId, name, description, duration, price } = req.body;
+
+  // Verify tenant isolation
+  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+  }
 
   try {
     const business = await prisma.business.findUnique({ where: { id: businessId } });
@@ -77,6 +87,11 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateServiceSch
       return res.status(404).json({ error: 'Service not found' });
     }
 
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN' && service.businessId !== req.user.businessId) {
+      return res.status(403).json({ error: 'Forbidden: Access denied to this service' });
+    }
+
     const updated = await prisma.service.update({
       where: { id },
       data: {
@@ -103,6 +118,11 @@ router.delete('/:id', authenticate, validateId('id'), async (req, res) => {
     const service = await prisma.service.findUnique({ where: { id } });
     if (!service) {
       return res.status(404).json({ error: 'Service not found' });
+    }
+
+    // Verify tenant isolation
+    if (req.user.role !== 'ADMIN' && service.businessId !== req.user.businessId) {
+      return res.status(403).json({ error: 'Forbidden: Access denied to this service' });
     }
 
     await prisma.service.update({

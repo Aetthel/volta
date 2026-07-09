@@ -14,13 +14,15 @@ import {
   Store,
   Search,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import MetricCard from "@/components/MetricCard";
-import { Button, PageHeader, Skeleton } from "@/components/ui/volta-ui";
+import { Button, PageHeader, Skeleton, Alert } from "@/components/ui/volta-ui";
 
 export default function AdminPage() {
+  const { data: session, status } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRange, setSelectedRange] = useState("Últimos 30 días");
   const [activeBar, setActiveBar] = useState<string | null>(null);
@@ -60,8 +62,10 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    fetchAdminData();
-  }, []);
+    if (status === "authenticated" && session?.user?.role === "ADMIN") {
+      fetchAdminData();
+    }
+  }, [session, status]);
 
   const chartData = [
     { month: "Ene", val: 28000, label: "€28.0k", pct: "h-[30%]" },
@@ -75,6 +79,24 @@ export default function AdminPage() {
   const filteredRankings = rankings.filter((branch) =>
     branch.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  if (status !== "loading" && session?.user?.role !== "ADMIN") {
+    return (
+      <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
+        <Sidebar onNewAppointmentClick={() => {}} />
+        <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+          <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col justify-center items-center">
+            <div className="max-w-md w-full">
+              <Alert variant="error" className="mb-4">
+                <span className="font-bold">Acceso Denegado:</span> Se requieren permisos de Administrador Global para ver esta sección.
+              </Alert>
+            </div>
+          </main>
+          <BottomNav />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
