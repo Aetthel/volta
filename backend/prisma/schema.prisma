@@ -21,6 +21,9 @@ model Business {
   reminderMessage String?         // Custom reminder message template
   whatsappStatus  WhatsAppStatus  @default(DISCONNECTED)
   qrCode          String?         // Current QR code for pairing
+  themeColor      String          @default("CLINICAL_ELEGANCE")
+  fontSizeLevel   String          @default("MEDIUM")
+  borderRadiusLevel String        @default("MEDIUM")
   appointments    Appointment[]
   clients         Client[]
   hours           BusinessHours[]

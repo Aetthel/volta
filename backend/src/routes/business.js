@@ -12,7 +12,10 @@ const updateBusinessSchema = z.object({
   logoUrl: z.string().optional().nullable(),
   coverUrl: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  ownerName: z.string().optional().nullable()
+  ownerName: z.string().optional().nullable(),
+  themeColor: z.string().optional(),
+  fontSizeLevel: z.string().optional(),
+  borderRadiusLevel: z.string().optional()
 });
 
 router.get('/:id', authenticate, validateId('id'), async (req, res) => {
@@ -38,6 +41,9 @@ router.get('/:id', authenticate, validateId('id'), async (req, res) => {
         ownerName: true,
         whatsappStatus: true,
         qrCode: true,
+        themeColor: true,
+        fontSizeLevel: true,
+        borderRadiusLevel: true,
       }
     });
     if (!business) {
@@ -52,7 +58,7 @@ router.get('/:id', authenticate, validateId('id'), async (req, res) => {
 
 router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSchema), async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address, logoUrl, coverUrl, description, ownerName } = req.body;
+  const { name, email, phone, address, logoUrl, coverUrl, description, ownerName, themeColor, fontSizeLevel, borderRadiusLevel } = req.body;
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
@@ -70,7 +76,10 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSc
         logoUrl,
         coverUrl,
         description,
-        ownerName
+        ownerName,
+        themeColor,
+        fontSizeLevel,
+        borderRadiusLevel
       },
       select: {
         id: true,
@@ -82,6 +91,9 @@ router.put('/:id', authenticate, validateId('id'), validateBody(updateBusinessSc
         coverUrl: true,
         description: true,
         ownerName: true,
+        themeColor: true,
+        fontSizeLevel: true,
+        borderRadiusLevel: true,
       }
     });
     res.json(updated);

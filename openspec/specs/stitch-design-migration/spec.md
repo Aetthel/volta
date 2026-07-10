@@ -41,7 +41,7 @@ El sistema SHALL unificar la estructura de cabecera de página en las vistas pri
 - **WHEN** el usuario carga la vista `/inicio`
 - **THEN** el sistema renderiza el saludo personalizado mediante `PageHeader` directamente en el flujo del canvas sin contenedores de tarjetas, bordes ni fondos adicionales.
 
-#### Scenario: Ocultar cabecera de página en agenda
+#### Scenario: Cabecera de página en agenda
 - **WHEN** el usuario carga la vista de la agenda en `/agenda`
-- **THEN** el sistema no renderiza ninguna cabecera de página (`PageHeader`), de modo que el contenedor del calendario semanal (`Card`) inicia directamente en la parte superior del canvas de contenido.
+- **THEN** el sistema renderiza el componente `PageHeader` de manera compacta, alineando la cabecera con los controles de navegación del calendario.
 

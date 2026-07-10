@@ -22,6 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
+            include: { business: true }
           });
 
           if (!user) return null;
@@ -39,6 +40,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email,
             role: user.role,
             businessId: user.businessId,
+            themeColor: user.business?.themeColor || "TEAL",
+            fontSizeLevel: user.business?.fontSizeLevel || "MEDIUM",
+            borderRadiusLevel: user.business?.borderRadiusLevel || "MEDIUM",
           };
         } catch (error) {
           console.error("Database connection omitted, running in mock mode.", error);

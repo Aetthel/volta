@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import FaceIcon from "@/components/FaceIcon";
 import {
   Calendar,
   BarChart3,
@@ -53,9 +54,7 @@ export default function RootPage() {
         <div className="flex justify-between items-center px-6 md:px-16 lg:px-24 xl:px-32 max-w-container-max mx-auto">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-display text-headline-lg font-bold text-primary tracking-tight">
-              Volta
-            </span>
+            <FaceIcon className="w-11 h-11 text-primary" />
           </Link>
 
           {/* Navigation Links */}

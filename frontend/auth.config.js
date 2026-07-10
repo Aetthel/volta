@@ -10,11 +10,25 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user;
       return isLoggedIn;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      console.log("[NextAuth JWT] Before:", { trigger, tokenTheme: token.themeColor, sessionUserTheme: session?.user?.themeColor });
       if (user) {
         token.role = user.role;
         token.id = user.id;
         token.businessId = user.businessId;
+        token.themeColor = user.themeColor || "TEAL";
+        token.fontSizeLevel = user.fontSizeLevel || "MEDIUM";
+        token.borderRadiusLevel = user.borderRadiusLevel || "MEDIUM";
+      }
+      if (trigger === "update" && session) {
+        const themeColor = session.themeColor || session.user?.themeColor;
+        const fontSizeLevel = session.fontSizeLevel || session.user?.fontSizeLevel;
+        const borderRadiusLevel = session.borderRadiusLevel || session.user?.borderRadiusLevel;
+
+        if (themeColor) token.themeColor = themeColor;
+        if (fontSizeLevel) token.fontSizeLevel = fontSizeLevel;
+        if (borderRadiusLevel) token.borderRadiusLevel = borderRadiusLevel;
+        console.log("[NextAuth JWT] Updated token:", { themeColor, fontSizeLevel, borderRadiusLevel });
       }
       return token;
     },
@@ -23,7 +37,11 @@ export const authConfig = {
         session.user.role = token.role;
         session.user.id = token.id;
         session.user.businessId = token.businessId;
+        session.user.themeColor = token.themeColor || "TEAL";
+        session.user.fontSizeLevel = token.fontSizeLevel || "MEDIUM";
+        session.user.borderRadiusLevel = token.borderRadiusLevel || "MEDIUM";
       }
+      console.log("[NextAuth Session] Output:", { userTheme: session.user.themeColor });
       return session;
     },
   },

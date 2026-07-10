@@ -32,4 +32,10 @@ The login interface SHALL render as a flat, single-column centered layout direct
 - **WHEN** the login page is loaded on any viewport (mobile, tablet, or desktop)
 - **THEN** the login form elements are vertically and horizontally centered on the viewport in a flat, borderless structure
 
+### Requirement: Client-side Page Authorization for Administrative Routes
+The dashboard application must check user roles before rendering administrative pages to prevent unauthorized access.
+
+#### Scenario: Non-admin user tries to access /admin or /sedes
+- **WHEN** a logged-in user with role EMPLEADO or JEFE navigates to `/admin` or `/sedes`
+- **THEN** the page displays a custom "Acceso Denegado" message instead of empty dashboards or infinite loading indicators.
 

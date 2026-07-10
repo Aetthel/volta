@@ -1517,6 +1517,9 @@ export namespace Prisma {
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus | null
     qrCode: string | null
+    themeColor: string | null
+    fontSizeLevel: string | null
+    borderRadiusLevel: string | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -1533,6 +1536,9 @@ export namespace Prisma {
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus | null
     qrCode: string | null
+    themeColor: string | null
+    fontSizeLevel: string | null
+    borderRadiusLevel: string | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -1549,6 +1555,9 @@ export namespace Prisma {
     reminderMessage: number
     whatsappStatus: number
     qrCode: number
+    themeColor: number
+    fontSizeLevel: number
+    borderRadiusLevel: number
     _all: number
   }
 
@@ -1567,6 +1576,9 @@ export namespace Prisma {
     reminderMessage?: true
     whatsappStatus?: true
     qrCode?: true
+    themeColor?: true
+    fontSizeLevel?: true
+    borderRadiusLevel?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -1583,6 +1595,9 @@ export namespace Prisma {
     reminderMessage?: true
     whatsappStatus?: true
     qrCode?: true
+    themeColor?: true
+    fontSizeLevel?: true
+    borderRadiusLevel?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -1599,6 +1614,9 @@ export namespace Prisma {
     reminderMessage?: true
     whatsappStatus?: true
     qrCode?: true
+    themeColor?: true
+    fontSizeLevel?: true
+    borderRadiusLevel?: true
     _all?: true
   }
 
@@ -1688,6 +1706,9 @@ export namespace Prisma {
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus
     qrCode: string | null
+    themeColor: string
+    fontSizeLevel: string
+    borderRadiusLevel: string
     _count: BusinessCountAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
@@ -1721,6 +1742,9 @@ export namespace Prisma {
     reminderMessage?: boolean
     whatsappStatus?: boolean
     qrCode?: boolean
+    themeColor?: boolean
+    fontSizeLevel?: boolean
+    borderRadiusLevel?: boolean
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
     hours?: boolean | Business$hoursArgs<ExtArgs>
@@ -1743,6 +1767,9 @@ export namespace Prisma {
     reminderMessage?: boolean
     whatsappStatus?: boolean
     qrCode?: boolean
+    themeColor?: boolean
+    fontSizeLevel?: boolean
+    borderRadiusLevel?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1759,6 +1786,9 @@ export namespace Prisma {
     reminderMessage?: boolean
     whatsappStatus?: boolean
     qrCode?: boolean
+    themeColor?: boolean
+    fontSizeLevel?: boolean
+    borderRadiusLevel?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -1775,9 +1805,12 @@ export namespace Prisma {
     reminderMessage?: boolean
     whatsappStatus?: boolean
     qrCode?: boolean
+    themeColor?: boolean
+    fontSizeLevel?: boolean
+    borderRadiusLevel?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -1812,6 +1845,9 @@ export namespace Prisma {
       reminderMessage: string | null
       whatsappStatus: $Enums.WhatsAppStatus
       qrCode: string | null
+      themeColor: string
+      fontSizeLevel: string
+      borderRadiusLevel: string
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -2253,6 +2289,9 @@ export namespace Prisma {
     readonly reminderMessage: FieldRef<"Business", 'String'>
     readonly whatsappStatus: FieldRef<"Business", 'WhatsAppStatus'>
     readonly qrCode: FieldRef<"Business", 'String'>
+    readonly themeColor: FieldRef<"Business", 'String'>
+    readonly fontSizeLevel: FieldRef<"Business", 'String'>
+    readonly borderRadiusLevel: FieldRef<"Business", 'String'>
   }
     
 
@@ -8578,7 +8617,10 @@ export namespace Prisma {
     welcomeMessage: 'welcomeMessage',
     reminderMessage: 'reminderMessage',
     whatsappStatus: 'whatsappStatus',
-    qrCode: 'qrCode'
+    qrCode: 'qrCode',
+    themeColor: 'themeColor',
+    fontSizeLevel: 'fontSizeLevel',
+    borderRadiusLevel: 'borderRadiusLevel'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -8812,6 +8854,9 @@ export namespace Prisma {
     reminderMessage?: StringNullableFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusFilter<"Business"> | $Enums.WhatsAppStatus
     qrCode?: StringNullableFilter<"Business"> | string | null
+    themeColor?: StringFilter<"Business"> | string
+    fontSizeLevel?: StringFilter<"Business"> | string
+    borderRadiusLevel?: StringFilter<"Business"> | string
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -8833,6 +8878,9 @@ export namespace Prisma {
     reminderMessage?: SortOrderInput | SortOrder
     whatsappStatus?: SortOrder
     qrCode?: SortOrderInput | SortOrder
+    themeColor?: SortOrder
+    fontSizeLevel?: SortOrder
+    borderRadiusLevel?: SortOrder
     appointments?: AppointmentOrderByRelationAggregateInput
     clients?: ClientOrderByRelationAggregateInput
     hours?: BusinessHoursOrderByRelationAggregateInput
@@ -8857,6 +8905,9 @@ export namespace Prisma {
     reminderMessage?: StringNullableFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusFilter<"Business"> | $Enums.WhatsAppStatus
     qrCode?: StringNullableFilter<"Business"> | string | null
+    themeColor?: StringFilter<"Business"> | string
+    fontSizeLevel?: StringFilter<"Business"> | string
+    borderRadiusLevel?: StringFilter<"Business"> | string
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -8878,6 +8929,9 @@ export namespace Prisma {
     reminderMessage?: SortOrderInput | SortOrder
     whatsappStatus?: SortOrder
     qrCode?: SortOrderInput | SortOrder
+    themeColor?: SortOrder
+    fontSizeLevel?: SortOrder
+    borderRadiusLevel?: SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
@@ -8900,6 +8954,9 @@ export namespace Prisma {
     reminderMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusWithAggregatesFilter<"Business"> | $Enums.WhatsAppStatus
     qrCode?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    themeColor?: StringWithAggregatesFilter<"Business"> | string
+    fontSizeLevel?: StringWithAggregatesFilter<"Business"> | string
+    borderRadiusLevel?: StringWithAggregatesFilter<"Business"> | string
   }
 
   export type UserWhereInput = {
@@ -9303,6 +9360,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -9324,6 +9384,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -9345,6 +9408,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -9366,6 +9432,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -9387,6 +9456,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -9403,6 +9475,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -9419,6 +9494,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
   }
 
   export type UserCreateInput = {
@@ -9941,6 +10019,9 @@ export namespace Prisma {
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
     qrCode?: SortOrder
+    themeColor?: SortOrder
+    fontSizeLevel?: SortOrder
+    borderRadiusLevel?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -9957,6 +10038,9 @@ export namespace Prisma {
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
     qrCode?: SortOrder
+    themeColor?: SortOrder
+    fontSizeLevel?: SortOrder
+    borderRadiusLevel?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -9973,6 +10057,9 @@ export namespace Prisma {
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
     qrCode?: SortOrder
+    themeColor?: SortOrder
+    fontSizeLevel?: SortOrder
+    borderRadiusLevel?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -11355,6 +11442,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -11375,6 +11465,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -11411,6 +11504,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -11431,6 +11527,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11451,6 +11550,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -11471,6 +11573,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -11539,6 +11644,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -11559,6 +11667,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11595,6 +11706,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -11615,6 +11729,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -11715,6 +11832,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -11735,6 +11855,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11831,6 +11954,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -11851,6 +11977,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -11887,6 +12016,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -11907,6 +12039,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11927,6 +12062,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -11947,6 +12085,9 @@ export namespace Prisma {
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
     qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -12015,6 +12156,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -12035,6 +12179,9 @@ export namespace Prisma {
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
     qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput

@@ -10,6 +10,10 @@ El sistema SHALL estructurar componentes reutilizables como `Sidebar`, `BottomNa
 - **WHEN** el usuario navega a través de los enlaces de `Sidebar` en escritorio o `BottomNav` en móvil
 - **THEN** el componente correspondiente aplica el estilo activo resaltado en base a la ruta actual (`usePathname()`)
 
+#### Scenario: Nombres unificados en menús de navegación
+- **WHEN** el administrador global accede a la plataforma
+- **THEN** tanto el componente `Sidebar` como `BottomNav` muestran la pestaña del panel de administración con el nombre "Control Global" de forma unificada.
+
 ### Requirement: Modales interactivos de creación
 El sistema SHALL proporcionar diálogos modales para la adición de clientes (`AddClientModal`), la creación de servicios (`AddServiceModal`) y la creación de citas (`NewAppointmentModal`) utilizando componentes centralizados de control de entrada como `FloatingInput`, `Select` y `Textarea` para garantizar la consistencia visual y de comportamiento. Todos los campos de entrada de datos (`FloatingInput`, `Select` y `Textarea`) SHALL implementar un radio de esquina de 4px (`rounded-sm`) para diferenciarse de los contenedores generales.
 
@@ -27,6 +31,10 @@ El sistema SHALL proporcionar componentes comunes para representar estados vací
 #### Scenario: Visualización de EmptyState sin datos
 - **WHEN** una lista de registros, tabla de clientes o buscador no encuentra información para mostrar
 - **THEN** el sistema visualiza el componente `EmptyState` que contiene un icono descriptivo de Lucide, un mensaje explicativo y una llamada a la acción opcional.
+
+#### Scenario: Skeletons de página en cargas asíncronas
+- **WHEN** el usuario accede a las páginas de `/inicio`, `/agenda`, `/clientes`, `/sedes` o `/admin` y el sistema inicia las peticiones asíncronas de datos
+- **THEN** el sistema renderiza marcadores de posición `Skeleton` correspondientes a la estructura de la página, ocultando las alertas de vacío y el contenido definitivo hasta completar el fetch.
 
 ### Requirement: Contenedores de tarjetas estandarizados
 El sistema SHALL estructurar los paneles de control y secciones informativas de la aplicación mediante la composición unificada de `Card` (`CardHeader`, `CardTitle`, `CardDescription`, `CardContent` y `CardFooter`) de `volta-ui.tsx` para evitar la replicación manual de estilos de contenedor.

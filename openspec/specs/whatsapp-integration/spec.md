@@ -33,3 +33,10 @@ The system SHALL persist WhatsApp sessions to disk using `LocalAuth` to avoid re
 #### Scenario: Re-initializing an existing session
 - **WHEN** the bot restarts and a session already exists for a business ID
 - **THEN** the bot MUST automatically reconnect without requiring a new QR code
+
+### Requirement: Ensure WhatsApp client is ready before sending notifications
+The backend bot routines must await the full initialization of the Puppeteer WhatsApp client before triggering message sends, avoiding evaluate/simulation errors on startup.
+
+#### Scenario: Sending welcome messages or sentinel reminders
+- **WHEN** a welcome message or sentinel reminder is triggered
+- **THEN** the bot calls `waitForReady()` to ensure the WhatsApp client is connected and active before calling `sendMessage()`.

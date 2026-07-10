@@ -8,24 +8,27 @@ datasource db {
 }
 
 model Business {
-  id              String          @id @default(uuid())
-  name            String
-  phone           String // Business phone for WhatsApp linkage
-  email           String? // Contact email
-  address         String? // Commercial address
-  logoUrl         String? // Profile photo URL
-  coverUrl        String? // Business photo URL
-  description     String? // About you description
-  ownerName       String? // Owner / Professional name
-  welcomeMessage  String? // Custom welcome message template
-  reminderMessage String? // Custom reminder message template
-  whatsappStatus  WhatsAppStatus  @default(DISCONNECTED)
-  qrCode          String? // Current QR code for pairing
-  appointments    Appointment[]
-  clients         Client[]
-  hours           BusinessHours[]
-  services        Service[]
-  users           User[]
+  id                String          @id @default(uuid())
+  name              String
+  phone             String // Business phone for WhatsApp linkage
+  email             String? // Contact email
+  address           String? // Commercial address
+  logoUrl           String? // Profile photo URL
+  coverUrl          String? // Business photo URL
+  description       String? // About you description
+  ownerName         String? // Owner / Professional name
+  welcomeMessage    String? // Custom welcome message template
+  reminderMessage   String? // Custom reminder message template
+  whatsappStatus    WhatsAppStatus  @default(DISCONNECTED)
+  qrCode            String? // Current QR code for pairing
+  themeColor        String          @default("TEAL")
+  fontSizeLevel     String          @default("MEDIUM")
+  borderRadiusLevel String          @default("MEDIUM")
+  appointments      Appointment[]
+  clients           Client[]
+  hours             BusinessHours[]
+  services          Service[]
+  users             User[]
 }
 
 enum UserRole {

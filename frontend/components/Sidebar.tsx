@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import FaceIcon from "@/components/FaceIcon";
 import { useSession } from "next-auth/react";
 import { 
   LayoutDashboard, 
@@ -50,13 +51,18 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   return (
     <aside className="h-full w-[240px] hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-6 z-50">
       {/* Brand logo & styling */}
-      <div className="px-4 mb-8">
-        <h1 className="font-title-lg text-title-lg font-bold text-primary tracking-tight truncate" title={session?.user?.name || "Volta"}>
-          {session?.user?.name || "Volta"}
-        </h1>
-        <p className="text-label-md font-label-md text-on-surface-variant">
-          {role === "ADMIN" ? "Administrador Global" : role === "JEFE" ? "Jefe de Tienda" : "Empleado"}
-        </p>
+      <div className="flex items-center gap-3 px-4 mb-8">
+        <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-xl">
+          <FaceIcon className="w-8 h-8" />
+        </div>
+        <div className="min-w-0">
+          <h1 className="font-title-sm text-title-sm font-bold text-primary tracking-tight truncate" title={session?.user?.name || "Volta"}>
+            {session?.user?.name || "Volta"}
+          </h1>
+          <p className="text-label-sm font-label-sm text-on-surface-variant truncate">
+            {role === "ADMIN" ? "Administrador Global" : role === "JEFE" ? "Jefe de Tienda" : "Empleado"}
+          </p>
+        </div>
       </div>
 
       {/* Navigation links list */}

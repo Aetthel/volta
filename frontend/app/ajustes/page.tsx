@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor } from "@/lib/theme";
+
 import {
   Store,
   Clock,
@@ -63,6 +65,7 @@ import {
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
 
 export default function AjustesPage() {
+  console.log("COLOR_PALETTES loaded:", COLOR_PALETTES);
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,6 +111,54 @@ export default function AjustesPage() {
   });
   const [isEditingTemplates, setIsEditingTemplates] = useState(false);
   const [savingTemplates, setSavingTemplates] = useState(false);
+  const updatePersonalizationSetting = (key: 'themeColor' | 'fontSizeLevel' | 'borderRadiusLevel', value: string) => {
+    // 1. Update local React state instantly for UI highlight
+    setProfile((prev) => ({ ...prev, [key]: value }));
+
+    // 2. Apply style changes directly to DOM instantly for live visual update
+    const root = document.documentElement;
+    if (key === 'themeColor') {
+      const palette = COLOR_PALETTES[value as keyof typeof COLOR_PALETTES];
+      if (palette) {
+        root.style.setProperty("--color-primary", palette.primary);
+        root.style.setProperty("--color-primary-container", palette.primaryContainer);
+        root.style.setProperty("--color-secondary", palette.secondary);
+        root.style.setProperty("--color-secondary-container", palette.secondaryContainer);
+      }
+    } else if (key === 'fontSizeLevel') {
+      const fontScale = FONT_SCALES[value as keyof typeof FONT_SCALES]?.scale;
+      if (fontScale) root.style.setProperty("--font-scale", fontScale);
+    } else if (key === 'borderRadiusLevel') {
+      const radiusScale = RADIUS_SCALES[value as keyof typeof RADIUS_SCALES]?.scale;
+      if (radiusScale) root.style.setProperty("--radius-scale", radiusScale);
+    }
+
+    // 3. Save to database in the background
+    fetch(`/api/backend/business/${businessId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        [key]: value
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to auto-save personalization settings");
+        return res.json();
+      })
+      .then(async (data) => {
+        // 4. Update NextAuth session in background so other tabs/sidebar stay in sync
+        if (update) {
+          await update({
+            [key]: data[key]
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Error auto-saving personalization:", err);
+      });
+  };
 
   const handleSaveAppointment = (data: any) => {
     console.log("Appointment booked from settings:", data);
@@ -289,6 +340,9 @@ export default function AjustesPage() {
       "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
     ownerName: "Sofía Martín",
     workerPhoto: DEFAULT_AVATAR, // Worker / Stylist photo
+    themeColor: "TEAL",
+    fontSizeLevel: "MEDIUM",
+    borderRadiusLevel: "MEDIUM",
   });
 
   const fetchProfile = () => {
@@ -312,7 +366,25 @@ export default function AjustesPage() {
             description: data.description || prev.description,
             ownerName: data.ownerName || prev.ownerName,
             workerPhoto: savedWorkerPhoto || prev.workerPhoto,
+            themeColor: getThemeColor(data.themeColor),
+            fontSizeLevel: data.fontSizeLevel || "MEDIUM",
+            borderRadiusLevel: data.borderRadiusLevel || "MEDIUM",
           }));
+
+          // Restore styling CSS variables in document root
+          const root = document.documentElement;
+          const resolvedTheme = getThemeColor(data.themeColor);
+          const palette = COLOR_PALETTES[resolvedTheme] || COLOR_PALETTES.CLINICAL_ELEGANCE;
+          root.style.setProperty("--color-primary", palette.primary);
+          root.style.setProperty("--color-primary-container", palette.primaryContainer);
+          root.style.setProperty("--color-secondary", palette.secondary);
+          root.style.setProperty("--color-secondary-container", palette.secondaryContainer);
+
+          const fontScale = FONT_SCALES[(data.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale;
+          root.style.setProperty("--font-scale", fontScale);
+
+          const radiusScale = RADIUS_SCALES[(data.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES]?.scale || RADIUS_SCALES.MEDIUM.scale;
+          root.style.setProperty("--radius-scale", radiusScale);
         }
       })
       .catch((e) => {
@@ -1071,6 +1143,17 @@ export default function AjustesPage() {
                 >
                   Gestión del Negocio
                 </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setActiveTab("personalizacion")}
+                  className={`pb-3 font-label-lg text-label-lg font-medium border-b-2 rounded-none shadow-none p-0 active:scale-100 ${
+                    activeTab === "personalizacion"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-on-surface-variant hover:text-on-surface"
+                  }`}
+                >
+                  Personalización
+                </Button>
               </>
             )}
           </div>
@@ -1660,6 +1743,116 @@ export default function AjustesPage() {
                     </form>
                   </CardContent>
                 </div>
+              </Card>
+            </div>
+          ) : activeTab === "personalizacion" ? (
+            /* Personalización Card */
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter mt-gutter animate-in fade-in duration-200">
+              <Card className="lg:col-span-12">
+                <CardHeader className="flex flex-row items-center justify-between pb-4">
+                  <CardTitle className="text-primary flex items-center gap-2">
+                    <Palette data-icon="palette" />
+                    <span>Personalización de Marca</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-6">
+                  {/* Color Palette Selector */}
+                  <div className="border-b border-outline-variant/35 pb-6">
+                    <h3 className="font-label-md text-label-md text-on-surface font-semibold mb-3">
+                      Paleta de Color de la Marca
+                    </h3>
+                    <p className="text-body-sm text-on-surface-variant mb-4">
+                      Selecciona el color primario para el panel del negocio. Las opciones se guardan automáticamente.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      {Object.entries(COLOR_PALETTES).map(([key, palette]) => {
+                        const isSelected = profile.themeColor === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => updatePersonalizationSetting('themeColor', key)}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 rounded-lg border text-body-sm font-medium transition-all cursor-pointer",
+                              isSelected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-outline-variant hover:bg-surface-variant text-on-surface-variant"
+                            )}
+                          >
+                            <span
+                              className="w-4 h-4 rounded-full border border-black/10"
+                              style={{ backgroundColor: palette.primary }}
+                            />
+                            {palette.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Font Scale Selector */}
+                  <div className="border-b border-outline-variant/35 pb-6">
+                    <h3 className="font-label-md text-label-md text-on-surface font-semibold mb-3">
+                      Tamaño del Texto
+                    </h3>
+                    <p className="text-body-sm text-on-surface-variant mb-4">
+                      Ajusta la escala de tipografía de toda la aplicación. Las opciones se guardan automáticamente.
+                    </p>
+                    <div className="flex gap-4">
+                      {Object.entries(FONT_SCALES).map(([key, scaleObj]) => {
+                        const isSelected = profile.fontSizeLevel === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => updatePersonalizationSetting('fontSizeLevel', key)}
+                            className={cn(
+                              "px-4 py-2.5 rounded-lg border text-body-sm font-medium transition-all flex-1 text-center cursor-pointer",
+                              isSelected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-outline-variant hover:bg-surface-variant text-on-surface-variant"
+                            )}
+                          >
+                            {scaleObj.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Border Radius Selector */}
+                  <div>
+                    <h3 className="font-label-md text-label-md text-on-surface font-semibold mb-3">
+                      Estilo de los Bordes
+                    </h3>
+                    <p className="text-body-sm text-on-surface-variant mb-4">
+                      Elige el nivel de redondeado de las tarjetas, botones y campos de entrada. Las opciones se guardan automáticamente.
+                    </p>
+                    <div className="flex gap-4">
+                      {Object.entries(RADIUS_SCALES).map(([key, radiusObj]) => {
+                        const isSelected = profile.borderRadiusLevel === key;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => updatePersonalizationSetting('borderRadiusLevel', key)}
+                            className={cn(
+                              "px-4 py-2.5 rounded-lg border text-body-sm font-medium transition-all flex-1 text-center cursor-pointer",
+                              isSelected
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-outline-variant hover:bg-surface-variant text-on-surface-variant"
+                            )}
+                            style={{
+                              borderRadius: key === "SMALL" ? "0px" : key === "MEDIUM" ? "8px" : "16px"
+                            }}
+                          >
+                            {radiusObj.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
             </div>
           ) : (

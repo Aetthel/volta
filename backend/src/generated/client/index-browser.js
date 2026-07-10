@@ -133,7 +133,10 @@ exports.Prisma.BusinessScalarFieldEnum = {
   welcomeMessage: 'welcomeMessage',
   reminderMessage: 'reminderMessage',
   whatsappStatus: 'whatsappStatus',
-  qrCode: 'qrCode'
+  qrCode: 'qrCode',
+  themeColor: 'themeColor',
+  fontSizeLevel: 'fontSizeLevel',
+  borderRadiusLevel: 'borderRadiusLevel'
 };
 
 exports.Prisma.UserScalarFieldEnum = {

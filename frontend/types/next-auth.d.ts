@@ -6,6 +6,9 @@ declare module "next-auth" {
       id?: string;
       role?: string;
       businessId?: string | null;
+      themeColor?: string;
+      fontSizeLevel?: string;
+      borderRadiusLevel?: string;
     } & DefaultSession["user"];
   }
 
@@ -13,6 +16,9 @@ declare module "next-auth" {
     id?: string;
     role?: string;
     businessId?: string | null;
+    themeColor?: string;
+    fontSizeLevel?: string;
+    borderRadiusLevel?: string;
   }
 }
 
@@ -21,5 +27,8 @@ declare module "next-auth/jwt" {
     id?: string;
     role?: string;
     businessId?: string | null;
+    themeColor?: string;
+    fontSizeLevel?: string;
+    borderRadiusLevel?: string;
   }
 }

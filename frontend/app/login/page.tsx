@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Check } from "lucide-react";
+import FaceIcon from "@/components/FaceIcon";
 import { signIn } from "next-auth/react";
 import { FieldGroup, Field, FieldLabel, Alert, Button, InputGroup } from "@/components/ui/volta-ui";
 
@@ -52,18 +53,8 @@ export default function LoginPage() {
       <div className="w-full max-w-[440px] mx-auto p-6 sm:p-10 flex flex-col items-center">
         
         {/* Brand Icon Logo */}
-        <div className="flex items-center justify-center w-12 h-12 bg-primary/10 text-primary rounded-xl mb-4">
-          <svg
-            className="w-7 h-7"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
+        <div className="flex items-center justify-center w-16 h-16 bg-primary/10 text-primary rounded-2xl mb-4">
+          <FaceIcon className="w-10 h-10" />
         </div>
 
         {/* Title */}
