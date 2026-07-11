@@ -11,7 +11,6 @@ export const authConfig = {
       return isLoggedIn;
     },
     async jwt({ token, user, trigger, session }) {
-      console.log("[NextAuth JWT] Before:", { trigger, tokenTheme: token.themeColor, sessionUserTheme: session?.user?.themeColor });
       if (user) {
         token.role = user.role;
         token.id = user.id;
@@ -28,7 +27,6 @@ export const authConfig = {
         if (themeColor) token.themeColor = themeColor;
         if (fontSizeLevel) token.fontSizeLevel = fontSizeLevel;
         if (borderRadiusLevel) token.borderRadiusLevel = borderRadiusLevel;
-        console.log("[NextAuth JWT] Updated token:", { themeColor, fontSizeLevel, borderRadiusLevel });
       }
       return token;
     },
@@ -41,7 +39,6 @@ export const authConfig = {
         session.user.fontSizeLevel = token.fontSizeLevel || "MEDIUM";
         session.user.borderRadiusLevel = token.borderRadiusLevel || "MEDIUM";
       }
-      console.log("[NextAuth Session] Output:", { userTheme: session.user.themeColor });
       return session;
     },
   },
