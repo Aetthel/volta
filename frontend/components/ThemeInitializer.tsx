@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor } from "@/lib/theme";
+import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, applyThemeColors } from "@/lib/theme";
 
 export default function ThemeInitializer() {
   const { data: session } = useSession();
@@ -16,10 +16,7 @@ export default function ThemeInitializer() {
 
     // Apply colors
     const palette = COLOR_PALETTES[themeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
-    root.style.setProperty("--color-primary", palette.primary);
-    root.style.setProperty("--color-primary-container", palette.primaryContainer);
-    root.style.setProperty("--color-secondary", palette.secondary);
-    root.style.setProperty("--color-secondary-container", palette.secondaryContainer);
+    applyThemeColors(root, palette);
 
     // Apply font-size scale
     const fontScale = FONT_SCALES[fontSizeLevel]?.scale || FONT_SCALES.MEDIUM.scale;

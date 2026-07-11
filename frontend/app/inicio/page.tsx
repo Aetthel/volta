@@ -365,7 +365,7 @@ export default function DashboardPage() {
       <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col">
           <PageHeader
             title={greeting + (session?.user?.name ? ` ${session.user.name.split(" ")[0]}` : "")}

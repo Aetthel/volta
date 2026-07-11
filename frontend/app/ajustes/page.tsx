@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor } from "@/lib/theme";
+import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, applyThemeColors } from "@/lib/theme";
 
 import {
   Store,
@@ -60,6 +60,7 @@ import {
   Button,
   Skeleton,
   PageHeader,
+  Combobox,
 } from "@/components/ui/volta-ui";
 
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
@@ -120,10 +121,7 @@ export default function AjustesPage() {
     if (key === 'themeColor') {
       const palette = COLOR_PALETTES[value as keyof typeof COLOR_PALETTES];
       if (palette) {
-        root.style.setProperty("--color-primary", palette.primary);
-        root.style.setProperty("--color-primary-container", palette.primaryContainer);
-        root.style.setProperty("--color-secondary", palette.secondary);
-        root.style.setProperty("--color-secondary-container", palette.secondaryContainer);
+        applyThemeColors(root, palette);
       }
     } else if (key === 'fontSizeLevel') {
       const fontScale = FONT_SCALES[value as keyof typeof FONT_SCALES]?.scale;
@@ -375,10 +373,7 @@ export default function AjustesPage() {
           const root = document.documentElement;
           const resolvedTheme = getThemeColor(data.themeColor);
           const palette = COLOR_PALETTES[resolvedTheme] || COLOR_PALETTES.CLINICAL_ELEGANCE;
-          root.style.setProperty("--color-primary", palette.primary);
-          root.style.setProperty("--color-primary-container", palette.primaryContainer);
-          root.style.setProperty("--color-secondary", palette.secondary);
-          root.style.setProperty("--color-secondary-container", palette.secondaryContainer);
+          applyThemeColors(root, palette);
 
           const fontScale = FONT_SCALES[(data.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale;
           root.style.setProperty("--font-scale", fontScale);
@@ -968,7 +963,7 @@ export default function AjustesPage() {
         <Sidebar onNewAppointmentClick={() => {}} />
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+        <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
           {/* Content Canvas */}
           <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
             {/* Toast Notification Banner */}
@@ -1088,7 +1083,7 @@ export default function AjustesPage() {
       <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           {/* Toast Notification Banner */}
@@ -2601,22 +2596,22 @@ export default function AjustesPage() {
 
                 <Field>
                   <FieldLabel htmlFor="workerRole">Rol de Usuario</FieldLabel>
-                  <div className="relative">
-                    <select
-                      id="workerRole"
-                      value={workerFormData.role}
-                      onChange={(e) =>
-                        setWorkerFormData({
-                          ...workerFormData,
-                          role: e.target.value as "JEFE" | "EMPLEADO",
-                        })
-                      }
-                      className="w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-md p-3.5 focus:border-primary focus:border-2 focus:outline-none transition-all"
-                    >
-                      <option value="EMPLEADO">Empleado (Staff)</option>
-                      <option value="JEFE">Jefe / Encargado</option>
-                    </select>
-                  </div>
+                  <Combobox
+                    id="workerRole"
+                    label="Seleccionar rol"
+                    value={workerFormData.role}
+                    onChange={(val) =>
+                      setWorkerFormData({
+                        ...workerFormData,
+                        role: val as "JEFE" | "EMPLEADO",
+                      })
+                    }
+                    options={[
+                      { value: "EMPLEADO", label: "Empleado (Staff)" },
+                      { value: "JEFE", label: "Jefe / Encargado" },
+                    ]}
+                    placeholder="Seleccionar rol..."
+                  />
                 </Field>
               </FieldGroup>
 

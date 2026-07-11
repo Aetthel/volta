@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google';
 import { SessionProvider } from "next-auth/react";
 import ThemeInitializer from '@/components/ThemeInitializer';
-import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor } from '@/lib/theme';
+import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, getThemeInlineStyles } from '@/lib/theme';
 import { auth } from '@/auth';
 import './globals.css';
 
@@ -31,14 +31,7 @@ export default async function RootLayout({
   const fontScale = FONT_SCALES[fontSizeLevel]?.scale || FONT_SCALES.MEDIUM.scale;
   const radiusScale = RADIUS_SCALES[borderRadiusLevel]?.scale || RADIUS_SCALES.MEDIUM.scale;
 
-  const inlineStyles = {
-    "--color-primary": palette.primary,
-    "--color-primary-container": palette.primaryContainer,
-    "--color-secondary": palette.secondary,
-    "--color-secondary-container": palette.secondaryContainer,
-    "--font-scale": fontScale,
-    "--radius-scale": radiusScale,
-  } as React.CSSProperties;
+  const inlineStyles = getThemeInlineStyles(palette, fontScale, radiusScale) as React.CSSProperties;
 
   return (
     <html lang="es" className={`${inter.variable}`} style={inlineStyles}>

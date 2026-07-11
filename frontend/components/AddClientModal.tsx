@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Phone, Mail, Pencil, Sparkles } from "lucide-react";
+import { createPortal } from "react-dom";
+import { X, User, Phone, Mail, Sparkles, Heart, Pencil, GripHorizontal, AlignLeft, ChevronDown } from "lucide-react";
 import {
   FieldGroup,
   Field,
@@ -33,7 +34,7 @@ const EMPTY_FORM = {
   surname: "",
   phone: "",
   email: "",
-  frequency: "Mensual",
+  frequency: "",
   notes: "",
 };
 
@@ -50,12 +51,13 @@ export default function AddClientModal({
   // Sync form when clientToEdit changes (open in edit mode)
   useEffect(() => {
     if (clientToEdit) {
+      const fullName = [clientToEdit.name, clientToEdit.surname].filter(Boolean).join(" ");
       setFormData({
-        name: clientToEdit.name ?? "",
-        surname: clientToEdit.surname ?? "",
+        name: fullName,
+        surname: "",
         phone: clientToEdit.phone ?? "",
         email: clientToEdit.email ?? "",
-        frequency: clientToEdit.frequentService ?? "Mensual",
+        frequency: clientToEdit.frequentService ?? "",
         notes: "",
       });
     } else {
@@ -63,7 +65,14 @@ export default function AddClientModal({
     }
   }, [clientToEdit, isOpen]);
 
+  const [mounted, setMounted] = useState(false);
+  const [showFrequencyDropdown, setShowFrequencyDropdown] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!isOpen) return null;
+  if (!mounted) return null;
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -76,33 +85,39 @@ export default function AddClientModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ ...formData, id: clientToEdit?.id });
+    const parts = formData.name.trim().split(/\s+/);
+    const parsedName = parts[0] || "";
+    const parsedSurname = parts.slice(1).join(" ");
+    
+    onSave({
+      ...formData,
+      name: parsedName,
+      surname: parsedSurname,
+      id: clientToEdit?.id
+    });
     setFormData(EMPTY_FORM);
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  const frequencyOptions = [
+    { value: "Mensual", label: "Mensual" },
+    { value: "Cada 2 meses", label: "Cada 2 meses" },
+    { value: "Ocasional", label: "Ocasional" },
+    { value: "Primera visita", label: "Primera visita" },
+  ];
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/5 transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal Content Card */}
-      <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant max-w-md w-full overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-          <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-3">
-            {isEditMode ? (
-              <Pencil className="w-5 h-5 text-primary" />
-            ) : (
-              <Sparkles className="w-5 h-5 text-primary" />
-            )}
-            <span>
-              {isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}
-            </span>
-          </h3>
+        <div className="px-5 pt-5 pb-1 flex justify-between items-center bg-transparent">
+          <GripHorizontal className="w-5 h-5 text-on-surface-variant/40" />
           <Button
             variant="ghost"
             onClick={onClose}
@@ -112,102 +127,151 @@ export default function AddClientModal({
           </Button>
         </div>
 
+        {/* Title */}
+        <div className="px-5 pb-1">
+          <h2 className="text-2xl font-medium text-on-surface">
+            {isEditMode ? "Editar Cliente" : "Añadir Cliente"}
+          </h2>
+        </div>
+
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-6 md:p-8 flex flex-col gap-6"
+          className="p-5 flex flex-col gap-5"
         >
-          {/* Section: Contact info */}
-          <div>
-            <div className="border-b border-outline-variant pb-1 mb-4">
-              <span className="text-primary font-label-lg text-label-lg uppercase tracking-wider font-semibold">
-                Información de contacto
-              </span>
+          <FieldGroup className="flex flex-col gap-5">
+            {/* Title / Name */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <FloatingInput
+                    id="name"
+                    label="Nombre Completo"
+                    type="text"
+                    required
+                    variant="borderless"
+                    className="text-body-lg font-normal !py-2"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                </Field>
+              </div>
             </div>
-            <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field>
-                <FloatingInput
-                  id="name"
-                  label="Nombre"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              </Field>
 
-              <Field>
-                <FloatingInput
-                  id="surname"
-                  label="Apellidos"
-                  type="text"
-                  required
-                  value={formData.surname}
-                  onChange={handleChange}
-                />
-              </Field>
-
-              <Field>
-                <FloatingInput
-                  id="phone"
-                  label="Teléfono"
-                  type="tel"
-                  required
-                  icon={Phone}
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </Field>
-
-              <Field>
-                <FloatingInput
-                  id="email"
-                  label="Correo electrónico"
-                  type="email"
-                  icon={Mail}
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </Field>
-            </FieldGroup>
-          </div>
-
-          {/* Section: Preferences */}
-          <div>
-            <div className="border-b border-outline-variant pb-1 mb-4">
-              <span className="text-primary font-label-lg text-label-lg uppercase tracking-wider font-semibold">
-                Perfil y Preferencias
-              </span>
+            {/* Phone */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <FloatingInput
+                    id="phone"
+                    label="Teléfono"
+                    type="tel"
+                    required
+                    variant="borderless"
+                    value={formData.phone}
+                    onChange={handleChange}
+                  />
+                </Field>
+              </div>
             </div>
-            <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field>
-                <FloatingSelect
-                  id="frequency"
-                  label="Frecuencia estimada"
-                  value={formData.frequency}
-                  onChange={handleChange}
-                >
-                  <option value="Mensual">Mensual</option>
-                  <option value="Cada 2 meses">Cada 2 meses</option>
-                  <option value="Ocasional">Ocasional</option>
-                  <option value="Primera visita">Primera visita</option>
-                </FloatingSelect>
-              </Field>
 
-              <Field className="md:col-span-2">
-                <FloatingTextarea
-                  id="notes"
-                  label="Notas de estilo y alergias"
-                  rows={3}
-                  value={formData.notes}
-                  onChange={handleChange}
-                />
-              </Field>
-            </FieldGroup>
-          </div>
+            {/* Email */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <FloatingInput
+                    id="email"
+                    label="Correo electrónico"
+                    type="email"
+                    variant="borderless"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Frequency Preference */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <div className="relative w-full">
+                    <div className="relative">
+                      <FloatingInput
+                        id="frequency-trigger"
+                        label="Frecuencia estimada"
+                        type="text"
+                        readOnly
+                        value={formData.frequency}
+                        onClick={() => setShowFrequencyDropdown(!showFrequencyDropdown)}
+                        className="cursor-pointer text-body-lg font-normal"
+                        variant="borderless"
+                      />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
+                    </div>
+
+                    {showFrequencyDropdown && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowFrequencyDropdown(false)}
+                        />
+                        <div className="absolute left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1">
+                          {frequencyOptions.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, frequency: opt.value }));
+                                setShowFrequencyDropdown(false);
+                              }}
+                              className="flex items-center justify-between w-full text-left p-3 hover:bg-on-surface/[0.04] rounded-lg transition-colors text-body-lg text-on-surface font-normal cursor-pointer"
+                            >
+                              <span>{opt.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Field>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <AlignLeft className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <FloatingTextarea
+                    id="notes"
+                    label="Notas de estilo y alergias"
+                    rows={3}
+                    variant="borderless"
+                    value={formData.notes}
+                    onChange={handleChange}
+                  />
+                </Field>
+              </div>
+            </div>
+          </FieldGroup>
 
           {/* Footer Actions */}
-          <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant">
+          <div className="flex justify-end gap-4 pt-4">
             <Button
               type="button"
               onClick={onClose}
@@ -226,6 +290,7 @@ export default function AddClientModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

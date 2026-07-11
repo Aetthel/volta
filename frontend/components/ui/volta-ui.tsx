@@ -3,6 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
+import { Search, ChevronDown, Check } from "lucide-react";
 import Header from "../Header";
 
 // FieldGroup
@@ -270,17 +271,33 @@ export interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputE
   label: string;
   icon?: React.ComponentType<any>;
   endAction?: React.ReactNode;
+  variant?: "outlined" | "minimal" | "borderless";
 }
 
 export const FloatingInput = React.forwardRef<
   HTMLInputElement,
   FloatingInputProps
->(({ className, label, icon: Icon, endAction, id, type, ...props }, ref) => {
+>((({ className, label, icon: Icon, endAction, id, type, variant = "outlined", ...props }, ref) => {
   return (
-    <div className="relative w-full group/input">
+    <div
+      className={cn(
+        "relative w-full group/input transition-all duration-200",
+        variant === "minimal"
+          ? "border-b border-outline-variant focus-within:border-primary hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-t-md px-3"
+          : "",
+        variant === "borderless"
+          ? "border-b border-transparent focus-within:border-primary focus-within:border-b hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-md focus-within:rounded-b-none focus-within:rounded-t-md px-3"
+          : ""
+      )}
+    >
       {/* Leading Icon */}
       {Icon && (
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none z-10">
+        <div
+          className={cn(
+            "absolute top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none z-10",
+            variant === "minimal" || variant === "borderless" ? "left-3" : "left-4"
+          )}
+        >
           <Icon className="w-5 h-5" />
         </div>
       )}
@@ -292,8 +309,13 @@ export const FloatingInput = React.forwardRef<
         type={type}
         placeholder=" "
         className={cn(
-          "peer block w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 pr-4",
-          Icon ? "pl-12" : "pl-4",
+          "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all",
+          variant === "minimal" || variant === "borderless"
+            ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
+            : "border border-outline rounded-sm focus:border-primary focus:border-2 py-3.5 pr-4",
+          variant === "minimal" || variant === "borderless"
+            ? (Icon ? "pl-8" : "pl-0")
+            : (Icon ? "pl-12" : "pl-4"),
           endAction ? "pr-12" : "pr-4",
           className,
         )}
@@ -304,11 +326,17 @@ export const FloatingInput = React.forwardRef<
       <label
         htmlFor={id}
         className={cn(
-          "absolute z-10 origin-left bg-surface-container-lowest px-1.5 text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
-          (type === "date" || type === "time")
-            ? "top-0 scale-[0.82] text-primary"
-            : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
-          Icon ? "left-12" : "left-4",
+          "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
+          variant === "minimal" || variant === "borderless" ? "bg-transparent" : "bg-surface-container-lowest px-1.5",
+          variant === "minimal" || variant === "borderless"
+            ? "top-1/2 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
+            : ((type === "date" || type === "time")
+                ? "top-0 scale-[0.82] text-primary"
+                : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]"
+              ),
+          variant === "minimal" || variant === "borderless"
+            ? (Icon ? "left-11" : "left-3")
+            : (Icon ? "left-12" : "left-4"),
         )}
       >
         {label}
@@ -322,7 +350,7 @@ export const FloatingInput = React.forwardRef<
       )}
     </div>
   );
-});
+}));
 FloatingInput.displayName = "FloatingInput";
 
 // FloatingSelect
@@ -384,21 +412,292 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
 );
 FloatingSelect.displayName = "FloatingSelect";
 
+// Combobox
+export interface ComboboxOption {
+  value: string;
+  label: string;
+  sublabel?: string;
+}
+
+export interface ComboboxProps {
+  label: string;
+  options: ComboboxOption[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  icon?: React.ComponentType<any>;
+  className?: string;
+  id?: string;
+  size?: "md" | "sm";
+  variant?: "outlined" | "minimal" | "borderless";
+  searchable?: boolean;
+}
+
+export const Combobox = React.forwardRef<HTMLDivElement, ComboboxProps>(
+  ({ label, options, value, onChange, placeholder = "Buscar...", icon: Icon, className, id, size = "md", variant = "outlined", searchable = true }, ref) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [searchQuery, setSearchQuery] = React.useState("");
+    const [mounted, setMounted] = React.useState(false);
+    const [coords, setCoords] = React.useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    const updateCoords = () => {
+      if (triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        setCoords({
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: rect.width,
+        });
+      }
+    };
+
+    React.useEffect(() => {
+      if (isOpen) {
+        updateCoords();
+        window.addEventListener("scroll", updateCoords, true);
+        window.addEventListener("resize", updateCoords);
+      }
+      return () => {
+        window.removeEventListener("scroll", updateCoords, true);
+        window.removeEventListener("resize", updateCoords);
+      };
+    }, [isOpen]);
+
+    React.useEffect(() => {
+      const handleOutsideClick = (e: MouseEvent) => {
+        const clickedInsideTrigger = containerRef.current && containerRef.current.contains(e.target as Node);
+        const clickedInsideDropdown = dropdownRef.current && dropdownRef.current.contains(e.target as Node);
+        if (!clickedInsideTrigger && !clickedInsideDropdown) {
+          setIsOpen(false);
+        }
+      };
+      if (isOpen) {
+        document.addEventListener("mousedown", handleOutsideClick);
+      }
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }, [isOpen]);
+
+    React.useEffect(() => {
+      if (!isOpen) {
+        setSearchQuery("");
+      }
+    }, [isOpen]);
+
+    const selectedOption = options.find((opt) => opt.value === value);
+
+    const filteredOptions = options.filter((opt) => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
+      return (
+        opt.label.toLowerCase().includes(query) ||
+        (opt.sublabel && opt.sublabel.toLowerCase().includes(query)) ||
+        opt.value.toLowerCase().includes(query)
+      );
+    });
+
+    return (
+      <div
+        ref={containerRef}
+        className={cn(
+          "relative w-full group/select transition-all duration-200",
+          variant === "minimal"
+            ? "border-b border-outline-variant focus-within:border-primary hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-t-md px-3"
+            : "",
+          variant === "borderless"
+            ? "border-b border-transparent focus-within:border-primary focus-within:border-b hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-md focus-within:rounded-b-none focus-within:rounded-t-md px-3"
+            : "",
+          className
+        )}
+        id={id}
+      >
+        {/* Trigger Button */}
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "flex w-full items-center bg-transparent text-on-surface focus:outline-none transition-all pr-10 cursor-pointer text-left select-none",
+            variant === "minimal" || variant === "borderless"
+              ? "border-0 rounded-none pt-5 pb-1 px-0 text-body-lg"
+              : (size === "sm" ? "h-8 py-1 rounded-lg text-label-md border border-outline px-4" : "py-3.5 rounded-xl text-body-lg border border-outline px-4"),
+            Icon ? (variant === "minimal" || variant === "borderless" ? "pl-8" : (size === "sm" ? "pl-9" : "pl-12")) : (variant === "minimal" || variant === "borderless" ? "pl-0" : (size === "sm" ? "pl-3" : "pl-4")),
+            isOpen && variant !== "minimal" && variant !== "borderless" ? (size === "sm" ? "h-8 py-[3px] border-primary border-2" : "py-3 border-primary border-2") : ""
+          )}
+        >
+          {Icon && (
+            <div
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none",
+                variant === "minimal" || variant === "borderless" ? "left-3" : "left-3"
+              )}
+            >
+              <Icon className={size === "sm" || variant === "minimal" || variant === "borderless" ? "w-4 h-4" : "w-5 h-5"} />
+            </div>
+          )}
+          
+          <span className="truncate w-full pr-2">
+            {selectedOption ? (
+              <span className="flex items-center gap-1.5 w-full">
+                <span className="truncate">{selectedOption.label}</span>
+                {selectedOption.sublabel && (
+                  <span className="text-on-surface-variant/80 text-body-md font-normal shrink-0">
+                    — {selectedOption.sublabel}
+                  </span>
+                )}
+              </span>
+            ) : (
+              <span className="text-on-surface-variant/50">
+                {variant === "minimal" || variant === "borderless" ? "" : placeholder}
+              </span>
+            )}
+          </span>
+
+          <div
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none",
+              variant === "minimal" || variant === "borderless" ? "right-3" : "right-3"
+            )}
+          >
+            <ChevronDown className={cn(size === "sm" || variant === "minimal" || variant === "borderless" ? "w-4 h-4" : "w-5 h-5", "transition-transform duration-200")} style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
+          </div>
+        </button>
+
+        {/* Floating Label */}
+        {label && (
+          <label
+            className={cn(
+              "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
+              variant === "minimal" || variant === "borderless" ? "bg-transparent" : "bg-surface-container-lowest px-1.5",
+              variant === "minimal" || variant === "borderless"
+                ? cn("top-1/2 -translate-y-1/2 text-body-lg", value ? "opacity-0 pointer-events-none" : "opacity-100")
+                : "top-0 scale-[0.82] text-primary",
+              variant === "minimal" || variant === "borderless"
+                ? (Icon ? "left-11" : "left-3")
+                : (Icon ? "left-12" : "left-4")
+            )}
+          >
+            {label}
+          </label>
+        )}
+
+        {/* Dropdown Panel in React Portal */}
+        {isOpen && mounted && createPortal(
+          <div
+            ref={dropdownRef}
+            style={{
+              position: "fixed",
+              top: `${coords.top}px`,
+              left: `${coords.left}px`,
+              width: `${coords.width}px`,
+            }}
+            className="bg-surface-container-high border border-outline-variant/60 rounded-xl shadow-xl shadow-primary/5 max-h-60 overflow-hidden flex flex-col z-[9999] animate-in fade-in slide-in-from-top-2 duration-150"
+          >
+            {/* Search Input Box */}
+            {searchable && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-surface-container-low border-b border-outline-variant/60 shrink-0">
+                <Search className="w-4 h-4 text-on-surface-variant shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={placeholder}
+                  className="w-full bg-transparent text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none"
+                  autoFocus
+                />
+              </div>
+            )}
+
+            {/* Options List */}
+            <div className="overflow-y-auto custom-scrollbar flex-1 py-1 max-h-48">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((opt) => {
+                  const isSelected = opt.value === value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        onChange(opt.value);
+                        setIsOpen(false);
+                      }}
+                      className={cn(
+                        "w-full mx-2 my-0.5 px-4 py-2.5 flex items-center justify-between text-left hover:bg-surface-variant/80 border-none rounded-lg active:scale-100 shadow-none font-normal text-body-md text-on-surface transition-colors cursor-pointer",
+                        isSelected ? "bg-primary/10 text-primary hover:bg-primary/15" : "",
+                        "max-w-[calc(100%-16px)]"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        {isSelected ? (
+                          <Check className="w-4 h-4 text-primary shrink-0" />
+                        ) : (
+                          <div className="w-4 h-4 shrink-0" /> // Spacer
+                        )}
+                        <span className={cn("truncate", isSelected ? "font-semibold" : "")}>
+                          {opt.label}
+                        </span>
+                      </div>
+                      {opt.sublabel && (
+                        <span className={cn("text-body-sm ml-2 shrink-0", isSelected ? "text-primary/80" : "text-on-surface-variant")}>
+                          {opt.sublabel}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="px-4 py-3 text-body-sm text-on-surface-variant/60 text-center select-none">
+                  No se encontraron resultados
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
+      </div>
+    );
+  }
+);
+Combobox.displayName = "Combobox";
+
 // FloatingTextarea
 export interface FloatingTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
+  variant?: "outlined" | "minimal" | "borderless";
 }
 
 export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTextareaProps>(
-  ({ className, label, id, ...props }, ref) => {
+  ({ className, label, id, variant = "outlined", ...props }, ref) => {
     return (
-      <div className="relative w-full group/textarea">
+      <div
+        className={cn(
+          "relative w-full group/textarea transition-all duration-200",
+          variant === "minimal"
+            ? "border-b border-outline-variant focus-within:border-primary hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-t-md px-3"
+            : "",
+          variant === "borderless"
+            ? "border-b border-transparent focus-within:border-primary focus-within:border-b hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-md focus-within:rounded-b-none focus-within:rounded-t-md px-3"
+            : ""
+        )}
+      >
         <textarea
           ref={ref}
           id={id}
           placeholder=" "
           className={cn(
-            "peer block w-full bg-transparent text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 px-4 resize-none",
+            "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all resize-none",
+            variant === "minimal" || variant === "borderless"
+              ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
+              : "border border-outline rounded-sm focus:border-primary focus:border-2 py-3.5 px-4",
             className
           )}
           {...props}
@@ -406,8 +705,11 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
         <label
           htmlFor={id}
           className={cn(
-            "absolute z-10 origin-left bg-surface-container-lowest px-1.5 text-on-surface-variant transition-all duration-200 pointer-events-none select-none top-6 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
-            "left-4"
+            "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
+            variant === "minimal" || variant === "borderless" ? "bg-transparent left-3" : "bg-surface-container-lowest px-1.5 left-4",
+            variant === "minimal" || variant === "borderless"
+              ? "top-5 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
+              : "top-6 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]"
           )}
         >
           {label}
@@ -896,17 +1198,17 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
       <section
         ref={ref}
         className={cn(
-          "flex flex-col md:flex-row md:items-center justify-between gap-gutter mb-gutter w-full",
+          "flex flex-col lg:flex-row lg:items-center justify-between gap-gutter mb-gutter w-full",
           className
         )}
         {...props}
       >
         <div className="flex-1 min-w-0 w-full">
           <div className="flex items-center gap-3 w-full">
-            <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1 truncate">
+            <h1 className="font-display text-headline-lg text-on-surface font-semibold mb-1">
               {title}
             </h1>
-            <div className="md:hidden ml-auto shrink-0">
+            <div className="lg:hidden ml-auto shrink-0">
               <Header />
             </div>
           </div>
@@ -917,7 +1219,7 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
           )}
         </div>
         
-        <div className="flex items-center gap-4 shrink-0 mt-2 md:mt-0 justify-between md:justify-end w-full md:w-auto">
+        <div className="flex items-center gap-4 shrink-0 mt-2 lg:mt-0 justify-between lg:justify-end w-full lg:w-auto">
           {actions ? (
             <div className="flex items-center gap-2">
               {actions}
@@ -925,7 +1227,7 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
           ) : (
             <div />
           )}
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <Header />
           </div>
         </div>

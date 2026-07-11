@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Calendar, Clock, User, Phone, Sparkles } from "lucide-react";
+import { createPortal } from "react-dom";
+import {
+  X,
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  Sparkles,
+  GripHorizontal,
+  ChevronDown,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import {
   FieldGroup,
@@ -43,7 +53,7 @@ const DEFAULT_SERVICES = [
   { name: "Coloración Premium", price: 85 },
   { name: "Tratamiento Keratina", price: 50 },
   { name: "Manicura", price: 20 },
-  { name: "Spa Facial", price: 40 }
+  { name: "Spa Facial", price: 40 },
 ];
 
 export default function NewAppointmentModal({
@@ -59,7 +69,7 @@ export default function NewAppointmentModal({
   const [formData, setFormData] = useState({
     clientName: "",
     clientPhone: "",
-    service: "Corte Caballero",
+    service: "",
     date: "",
     time: "10:00",
     stylist: "Volta",
@@ -80,6 +90,7 @@ export default function NewAppointmentModal({
   const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showServiceDropdown, setShowServiceDropdown] = useState(false);
   const [showConsentToast, setShowConsentToast] = useState(false);
   const [toastPhone, setToastPhone] = useState("");
 
@@ -124,7 +135,13 @@ export default function NewAppointmentModal({
     }
   }, [isOpen, businessId]);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!isOpen) return null;
+  if (!mounted) return null;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -243,7 +260,6 @@ export default function NewAppointmentModal({
       });
   };
 
-
   const [selectedHour, selectedMin] = (formData.time || "10:00").split(":");
 
   const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -257,23 +273,25 @@ export default function NewAppointmentModal({
     const [currentHour] = (formData.time || "10:00").split(":");
     setFormData((prev) => ({ ...prev, time: `${currentHour || "10"}:${m}` }));
   };
+  const serviceOptions = services.map((srv) => ({
+    value: srv.name,
+    label: srv.name,
+    sublabel: srv.price !== undefined ? `€${srv.price}` : undefined,
+  }));
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/5 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Content Card */}
-      <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant max-w-md w-full overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-          <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-3">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span>Reservar Nueva Cita</span>
-          </h3>
+        <div className="px-5 pt-5 pb-1 flex justify-between items-center bg-transparent">
+          <GripHorizontal className="w-5 h-5 text-on-surface-variant/40" />
           <Button
             variant="ghost"
             onClick={onClose}
@@ -283,155 +301,257 @@ export default function NewAppointmentModal({
           </Button>
         </div>
 
+        {/* Title */}
+        <div className="px-5 pb-1">
+          <h2 className="text-2xl font-medium text-on-surface">Reservar Cita</h2>
+        </div>
+
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-6 md:p-8 flex flex-col gap-6"
-        >
+        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
           {/* Client Details */}
-          <FieldGroup>
-            <Field>
-              <div className="relative w-full">
-                <FloatingInput
-                  id="clientName"
-                  label="Nombre del Cliente"
-                  type="text"
-                  required
-                  icon={User}
-                  value={formData.clientName}
-                  onChange={handleNameChange}
-                  onFocus={() => {
-                    if (
-                      formData.clientName.trim().length > 1 &&
-                      suggestions.length > 0
-                    ) {
-                      setShowSuggestions(true);
-                    }
-                  }}
-                />
-
-                {/* Autocomplete Suggestions list */}
-                {showSuggestions && (
-                  <>
-                    <div
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowSuggestions(false)}
+          <FieldGroup className="flex flex-col gap-5">
+            {/* Title / Client Name */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <User className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <div className="relative w-full">
+                    <FloatingInput
+                      id="clientName"
+                      label="Nombre del Cliente"
+                      type="text"
+                      required
+                      value={formData.clientName}
+                      onChange={handleNameChange}
+                      variant="borderless"
+                      className="text-body-lg font-normal !py-2"
+                      onFocus={() => {
+                        if (
+                          formData.clientName.trim().length > 1 &&
+                          suggestions.length > 0
+                        ) {
+                          setShowSuggestions(true);
+                        }
+                      }}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar z-50 py-1">
-                      {suggestions.map((client) => (
-                        <Button
-                          key={client.id}
-                          variant="ghost"
-                          type="button"
-                          onClick={() => handleSelectSuggestion(client)}
-                          className="w-full px-4 py-2 hover:bg-surface-variant flex items-center justify-between text-left border-none rounded-none active:scale-100 shadow-none font-normal"
-                        >
-                          <div className="flex flex-col text-left">
-                            <span className="text-body-md font-medium text-on-surface">
-                              {client.name} {client.surname}
-                            </span>
-                            <span className="text-body-xs text-on-surface-variant">
-                              {client.phone}
-                            </span>
-                          </div>
-                          <span className="text-body-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">
-                            Registrado
-                          </span>
-                        </Button>
-                      ))}
+
+                    {/* Autocomplete Suggestions list */}
+                    {showSuggestions && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowSuggestions(false)}
+                        />
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg max-h-48 overflow-y-auto custom-scrollbar z-50 py-1">
+                          {suggestions.map((client) => (
+                            <Button
+                              key={client.id}
+                              variant="ghost"
+                              type="button"
+                              onClick={() => handleSelectSuggestion(client)}
+                              className="w-full px-4 py-2 hover:bg-surface-variant flex items-center justify-between text-left border-none rounded-none active:scale-100 shadow-none font-normal"
+                            >
+                              <div className="flex flex-col text-left">
+                                <span className="text-body-md font-medium text-on-surface">
+                                  {client.name} {client.surname}
+                                </span>
+                                <span className="text-body-xs text-on-surface-variant">
+                                  {client.phone}
+                                </span>
+                              </div>
+                              <span className="text-body-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">
+                                Registrado
+                              </span>
+                            </Button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Field>
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <FloatingInput
+                    id="clientPhone"
+                    label="Teléfono"
+                    type="tel"
+                    required
+                    variant="borderless"
+                    value={formData.clientPhone}
+                    onChange={handleChange}
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Service */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <div className="relative w-full">
+                    <div className="relative">
+                      <FloatingInput
+                        id="service-trigger"
+                        label="Seleccionar servicio"
+                        type="text"
+                        readOnly
+                        value={formData.service ? `${formData.service} — ${serviceOptions.find(o => o.value === formData.service)?.sublabel || ""}` : ""}
+                        onClick={() => setShowServiceDropdown(!showServiceDropdown)}
+                        className="cursor-pointer text-body-lg font-normal"
+                        variant="borderless"
+                      />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
                     </div>
-                  </>
-                )}
+
+                    {showServiceDropdown && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowServiceDropdown(false)}
+                        />
+                        <div className="absolute left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1">
+                          {serviceOptions.map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, service: opt.value }));
+                                setShowServiceDropdown(false);
+                              }}
+                              className="flex items-center justify-between w-full text-left p-3 hover:bg-on-surface/[0.04] rounded-lg transition-colors text-body-lg text-on-surface font-normal cursor-pointer"
+                            >
+                              <span>{opt.label}</span>
+                              {opt.sublabel && (
+                                <span className="text-on-surface-variant text-body-sm font-normal">
+                                  {opt.sublabel}
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Field>
               </div>
-            </Field>
+            </div>
 
-            <Field>
-              <FloatingInput
-                id="clientPhone"
-                label="Teléfono"
-                type="tel"
-                required
-                icon={Phone}
-                value={formData.clientPhone}
-                onChange={handleChange}
-              />
-            </Field>
-
-            <Field>
-              <FloatingSelect
-                id="service"
-                label="Servicio"
-                value={formData.service}
-                onChange={handleChange}
-              >
-                {services.map((svc) => (
-                  <option key={svc.name} value={svc.name}>
-                    {svc.name} {svc.price !== undefined ? `(€${svc.price})` : ""}
-                  </option>
-                ))}
-              </FloatingSelect>
-            </Field>
-          </FieldGroup>
-
-          {/* Date and Time selection */}
-          <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field>
-              <FloatingInput
-                id="date"
-                label="Fecha"
-                type="date"
-                required
-                value={formData.date}
-                onChange={handleChange}
-              />
-            </Field>
-
-            <Field>
-              <div className="grid grid-cols-2 gap-2 w-full">
-                <FloatingSelect
-                  id="hour"
-                  label="Hora"
-                  value={selectedHour || "10"}
-                  onChange={handleHourChange}
-                  icon={Clock}
-                >
-                  {["09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"].map((h) => (
-                    <option key={h} value={h}>
-                      {h}
-                    </option>
-                  ))}
-                </FloatingSelect>
-                <FloatingSelect
-                  id="minute"
-                  label="Minuto"
-                  value={selectedMin || "00"}
-                  onChange={handleMinChange}
-                >
-                  {["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"].map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </FloatingSelect>
+            {/* Date and Time selection */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Clock className="w-5 h-5" />
               </div>
-            </Field>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <div className="flex flex-col md:flex-row md:items-center gap-4 w-full">
+                    {/* Date Picker */}
+                    <div className="flex-1 min-w-0">
+                      <FloatingInput
+                        id="date"
+                        label="Fecha"
+                        type="date"
+                        required
+                        variant="borderless"
+                        value={formData.date}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    {/* Time Selectors typed by hand */}
+                    <div className="flex items-center gap-1.5 shrink-0 px-2">
+                      <input
+                        type="text"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        value={selectedHour}
+                        onChange={(e) => {
+                          let val = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 2);
+                          if (val !== "") {
+                            const num = parseInt(val, 10);
+                            if (num > 23) val = "23";
+                          }
+                          const [, currentMin] = (
+                            formData.time || "10:00"
+                          ).split(":");
+                          setFormData((prev) => ({
+                            ...prev,
+                            time: `${val}:${currentMin || "00"}`,
+                          }));
+                        }}
+                        onBlur={() => {
+                          const [h, m] = (formData.time || "10:00").split(":");
+                          const paddedH = h.padStart(2, "0") || "10";
+                          setFormData((prev) => ({
+                            ...prev,
+                            time: `${paddedH}:${m}`,
+                          }));
+                        }}
+                        className="w-10 bg-transparent text-body-lg text-on-surface border-0 rounded-none focus:ring-0 py-1 outline-none text-center hover:bg-on-surface/[0.04] focus:bg-on-surface/[0.06] rounded-md transition-all duration-200"
+                        placeholder="10"
+                      />
+                      <span className="text-on-surface-variant/50 font-medium">
+                        :
+                      </span>
+                      <input
+                        type="text"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        value={selectedMin}
+                        onChange={(e) => {
+                          let val = e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 2);
+                          if (val !== "") {
+                            const num = parseInt(val, 10);
+                            if (num > 59) val = "59";
+                          }
+                          const [currentHour] = (
+                            formData.time || "10:00"
+                          ).split(":");
+                          setFormData((prev) => ({
+                            ...prev,
+                            time: `${currentHour || "10"}:${val}`,
+                          }));
+                        }}
+                        onBlur={() => {
+                          const [h, m] = (formData.time || "10:00").split(":");
+                          const paddedM = m.padStart(2, "0") || "00";
+                          setFormData((prev) => ({
+                            ...prev,
+                            time: `${h}:${paddedM}`,
+                          }));
+                        }}
+                        className="w-10 bg-transparent text-body-lg text-on-surface border-0 rounded-none focus:ring-0 py-1 outline-none text-center hover:bg-on-surface/[0.04] focus:bg-on-surface/[0.06] rounded-md transition-all duration-200"
+                        placeholder="00"
+                      />
+                    </div>
+                  </div>
+                </Field>
+              </div>
+            </div>
           </FieldGroup>
 
           {/* Footer Actions */}
-          <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              size="lg"
-            >
+          <div className="flex justify-end gap-4 pt-4">
+            <Button type="button" onClick={onClose} variant="outline" size="lg">
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-            >
+            <Button type="submit" variant="primary" size="lg">
               Reservar Cita
             </Button>
           </div>
@@ -462,6 +582,7 @@ export default function NewAppointmentModal({
           </div>
         </Alert>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 }

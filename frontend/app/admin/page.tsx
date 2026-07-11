@@ -84,7 +84,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
         <Sidebar onNewAppointmentClick={() => {}} />
-        <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+        <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
           <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col justify-center items-center">
             <div className="max-w-md w-full">
               <Alert variant="error" className="mb-4">
@@ -104,7 +104,7 @@ export default function AdminPage() {
       <Sidebar onNewAppointmentClick={() => {}} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader

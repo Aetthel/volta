@@ -308,7 +308,7 @@ export default function SedesPage() {
     return (
       <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
         <Sidebar onNewAppointmentClick={() => {}} />
-        <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+        <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
           <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col justify-center items-center">
             <div className="max-w-md w-full">
               <Alert variant="error" className="mb-4">
@@ -328,7 +328,7 @@ export default function SedesPage() {
       <Sidebar onNewAppointmentClick={() => {}} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader
@@ -475,7 +475,7 @@ export default function SedesPage() {
 
       {/* Add Business Modal Dialog */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm transition-opacity"

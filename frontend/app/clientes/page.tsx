@@ -26,7 +26,7 @@ import BottomNav from "@/components/BottomNav";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, Combobox } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -366,10 +366,14 @@ export default function ClientesPage() {
     (c) => c.lopdStatus === "Pendiente",
   ).length;
 
-  // Unique services for filter dropdown
   const uniqueServices = Array.from(
     new Set(clients.map((c) => c.frequentService).filter(Boolean))
   ).sort();
+
+  const serviceOptions = [
+    { value: "all", label: "Todos los servicios" },
+    ...uniqueServices.map((s: any) => ({ value: s, label: s })),
+  ];
 
   const filteredClients = clients.filter((c) => {
     const fullName = `${c.name} ${c.surname || ""}`.trim();
@@ -407,7 +411,7 @@ export default function ClientesPage() {
       <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         {/* Content Canvas */}
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader
@@ -435,7 +439,7 @@ export default function ClientesPage() {
           />
 
           {/* Stats Bento Grid */}
-          <section className="grid grid-cols-2 md:grid-cols-4 gap-gutter mb-gutter">
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
             <MetricCard
               title="Clientes Totales"
               value={clients.length}
@@ -494,19 +498,15 @@ export default function ClientesPage() {
                   />
                 </div>
                 {/* Service filter */}
-                <div className="relative">
-                  <select
-                    value={serviceFilter}
-                    onChange={(e) => { setServiceFilter(e.target.value); setCurrentPage(1); }}
-                    className="h-9 pl-3 pr-8 rounded-lg border border-outline-variant bg-surface bg-none text-label-md text-on-surface focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
-                  >
-                    <option value="all">Todos los servicios</option>
-                    {uniqueServices.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-on-surface-variant pointer-events-none rotate-90" />
-                </div>
+                <Combobox
+                  label=""
+                  value={serviceFilter}
+                  onChange={(val) => { setServiceFilter(val); setCurrentPage(1); }}
+                  options={serviceOptions}
+                  placeholder="Servicios..."
+                  size="sm"
+                  className="w-44"
+                />
                 {/* Quick activity pills */}
                 <div className="flex items-center gap-1">
                   {([

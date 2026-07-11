@@ -24,7 +24,7 @@ import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
-import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton } from "@/components/ui/volta-ui";
+import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, Combobox } from "@/components/ui/volta-ui";
 
 // Interface for calendar appointment item
 interface AppointmentItem {
@@ -653,6 +653,11 @@ export default function AgendaPage() {
     }
   }
 
+  const workerOptions = [
+    { value: "all", label: "Todos los Estilistas" },
+    ...workers.map((w: any) => ({ value: w.id, label: w.name })),
+  ];
+
   return (
     <div className="h-screen bg-surface flex flex-col md:flex-row overflow-hidden pb-16 md:pb-0">
       {/* Sidebar Navigation */}
@@ -710,16 +715,15 @@ export default function AgendaPage() {
               {/* Right: Stylist dropdown + view switcher + actions */}
               <div className="flex items-center gap-2">
                 {/* Stylist selector */}
-                <select
+                <Combobox
+                  label=""
                   value={selectedWorkerId}
-                  onChange={(e) => setSelectedWorkerId(e.target.value)}
-                  className="h-8 px-3 pr-7 rounded-lg border border-outline-variant bg-surface-container-low text-label-md text-on-surface font-medium focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
-                >
-                  <option value="all">Todos los Estilistas</option>
-                  {workers.map((w) => (
-                    <option key={w.id} value={w.id}>{w.name}</option>
-                  ))}
-                </select>
+                  onChange={(val) => setSelectedWorkerId(val)}
+                  options={workerOptions}
+                  placeholder="Estilistas..."
+                  size="sm"
+                  className="w-44"
+                />
 
                 {/* Week / Day toggle */}
                 <div className="flex rounded-lg overflow-hidden border border-outline-variant bg-surface-container-low p-[2px]">

@@ -15,11 +15,11 @@ El sistema SHALL estructurar componentes reutilizables como `Sidebar`, `BottomNa
 - **THEN** tanto el componente `Sidebar` como `BottomNav` muestran la pestaña del panel de administración con el nombre "Control Global" de forma unificada.
 
 ### Requirement: Modales interactivos de creación
-El sistema SHALL proporcionar diálogos modales para la adición de clientes (`AddClientModal`), la creación de servicios (`AddServiceModal`) y la creación de citas (`NewAppointmentModal`) utilizando componentes centralizados de control de entrada como `FloatingInput`, `Select` y `Textarea` para garantizar la consistencia visual y de comportamiento. Todos los campos de entrada de datos (`FloatingInput`, `Select` y `Textarea`) SHALL implementar un radio de esquina de 4px (`rounded-sm`) para diferenciarse de los contenedores generales.
+El sistema SHALL proporcionar diálogos modales para la adición de clientes (`AddClientModal`), la creación de servicios (`AddServiceModal`) y la creación de citas (`NewAppointmentModal`) utilizando componentes centralizados de control de entrada como `FloatingInput`, `Combobox` y `FloatingTextarea` para garantizar la consistencia visual y de comportamiento. Los controles de entrada SHALL soportar una variante minimalista (`variant="minimal"`) que elimine contornos y cajas, utilizando en su lugar alineación en filas guiadas por iconos y subrayados de foco. Toda la estructura del modal, sus botones y la redondez de los elementos SHALL ajustarse dinámicamente según la escala de redondez configurada por el usuario (`--radius-scale`) en lugar de fijar valores estáticos. Además, la capa de fondo (`backdrop`) SHALL ser translúcida clara (`bg-black/5` o `bg-transparent`) sin aplicar filtros de desenfoque de fondo.
 
 #### Scenario: Apertura y envío en modales de creación con controles estandarizados
-- **WHEN** el usuario pulsa en "Nueva Cita", "Añadir Cliente" o "Añadir Servicio" y completa el formulario correspondiente
-- **THEN** todos los campos de entrada de datos utilizan componentes unificados (`FloatingInput` para campos de texto simples con iconos, `Select` para menús desplegables y `Textarea` para áreas multilínea) con validaciones y estilos homogéneos, incluyendo bordes redondeados con radio de 4px (`rounded-sm`).
+- **WHEN** el usuario pulsa en "Nueva Cita" o "Añadir Cliente" y completa el formulario correspondiente
+- **THEN** todos los campos de entrada de datos utilizan componentes minimalistas (`FloatingInput`, `Combobox`, `FloatingTextarea`) en formato fila con un icono guía a la izquierda, bordes exteriores ausentes, y botones de confirmación en formato de píldoras escalables que respetan la escala de redondez activa del usuario, flotando sobre una capa de fondo clara no emborronada.
 
 ### Requirement: Componentes comunes de estado vacío y carga
 El sistema SHALL proporcionar componentes comunes para representar estados vacíos (`EmptyState`) y placeholders de carga animados (`Skeleton`) para garantizar que todas las páginas utilicen el mismo patrón visual al cargar datos o al mostrar vistas vacías.
@@ -106,4 +106,18 @@ El sistema SHALL garantizar que las tarjetas principales del dashboard (como Cit
 #### Scenario: Encabezado estándar para Citas de Hoy
 - **WHEN** se renderiza la página principal del dashboard
 - **THEN** el encabezado de la tarjeta "Citas de Hoy" MUST mostrar el CalendarIcon junto al título "Citas de Hoy" dentro del contenedor de cabecera flex, sin subtítulo de fecha ni badge de total de citas
+
+### Requirement: Selectores de cabecera y filtros mediante Combobox
+El sistema SHALL unificar los filtros de cabecera y selectores de opciones complejos (como el selector de estilistas en la vista de Agenda y el filtro de servicios en el listado de Clientes) utilizando el componente `Combobox` de estilo Google MD3 para permitir búsquedas dinámicas en tiempo real y consistencia estética.
+
+#### Scenario: Filtrado en tiempo real en los controles de página
+- **WHEN** el usuario hace clic en el filtro de servicios de clientes o el selector de estilistas en la agenda
+- **THEN** el sistema abre un panel flotante que permite escribir texto para filtrar las opciones al instante, visualizando las opciones coincidentes y unificando el diseño visual de la cabecera.
+
+### Requirement: Combobox no buscable para opciones simples
+El componente `Combobox` SHALL permitir la desactivación opcional de la barra de filtrado de texto superior (`searchable={false}`) para actuar como un desplegable directo de opciones fijas.
+
+#### Scenario: Desactivación de búsqueda en desplegables de hora y minuto
+- **WHEN** el componente `Combobox` se instancia con la propiedad `searchable={false}`
+- **THEN** el menú de opciones flotante oculta el input de búsqueda con lupa, mostrando únicamente la lista de opciones de forma estática.
 
