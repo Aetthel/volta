@@ -24,7 +24,7 @@ import BottomNav from "@/components/BottomNav";
 import Header from "@/components/Header";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
-import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, Combobox } from "@/components/ui/volta-ui";
+import { Button, Card, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, InlineSelect } from "@/components/ui/volta-ui";
 
 // Interface for calendar appointment item
 interface AppointmentItem {
@@ -208,6 +208,8 @@ export default function AgendaPage() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [editingAppointmentId, setEditingAppointmentId] = useState<string | null>(null);
+  const [appointmentModalTriggerRect, setAppointmentModalTriggerRect] = useState<DOMRect | null>(null);
+  const [clientModalTriggerRect, setClientModalTriggerRect] = useState<DOMRect | null>(null);
 
   const [viewMode, setViewMode] = useState<"week" | "day">("week");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -466,7 +468,7 @@ export default function AgendaPage() {
     );
   };
 
-  const handleGridClick = (dayIdx: number, topPx: number) => {
+  const handleGridClick = (dayIdx: number, topPx: number, e?: React.MouseEvent) => {
     const totalMinutes = Math.round(topPx / 1.5);
     const hour = 9 + Math.floor(totalMinutes / 60);
     const minute = Math.round((totalMinutes % 60) / 5) * 5;
@@ -483,6 +485,18 @@ export default function AgendaPage() {
 
     setPrefilledDate(dateString);
     setPrefilledTime(timeString);
+    if (e) {
+      setAppointmentModalTriggerRect({
+        left: e.clientX,
+        top: e.clientY,
+        right: e.clientX,
+        bottom: e.clientY,
+        width: 0,
+        height: 0
+      } as DOMRect);
+    } else {
+      setAppointmentModalTriggerRect(null);
+    }
     setIsAppointmentModalOpen(true);
   };
 
@@ -661,7 +675,10 @@ export default function AgendaPage() {
   return (
     <div className="h-screen bg-surface flex flex-col md:flex-row overflow-hidden pb-16 md:pb-0">
       {/* Sidebar Navigation */}
-      <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
+      <Sidebar onNewAppointmentClick={(e) => {
+        setAppointmentModalTriggerRect(e ? e.currentTarget.getBoundingClientRect() : null);
+        setIsAppointmentModalOpen(true);
+      }} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden md:ml-[240px]">
@@ -715,12 +732,12 @@ export default function AgendaPage() {
               {/* Right: Stylist dropdown + view switcher + actions */}
               <div className="flex items-center gap-2">
                 {/* Stylist selector */}
-                <Combobox
-                  label=""
+                <InlineSelect
+                  id="stylist-selector"
+                  label="Estilistas..."
                   value={selectedWorkerId}
                   onChange={(val) => setSelectedWorkerId(val)}
                   options={workerOptions}
-                  placeholder="Estilistas..."
                   size="sm"
                   className="w-44"
                 />
@@ -920,7 +937,7 @@ export default function AgendaPage() {
                         onMouseLeave={() => setHoverGuide(null)}
                         onClick={(e) => {
                           if (hoverGuide) {
-                            handleGridClick(hoverGuide.dayIndex, hoverGuide.top);
+                            handleGridClick(hoverGuide.dayIndex, hoverGuide.top, e);
                           }
                         }}
                       >
@@ -1084,7 +1101,10 @@ export default function AgendaPage() {
         {/* Mobile floating FAB action */}
         <Button
           variant="primary"
-          onClick={() => setIsAppointmentModalOpen(true)}
+          onClick={(e) => {
+            setAppointmentModalTriggerRect(e.currentTarget.getBoundingClientRect());
+            setIsAppointmentModalOpen(true);
+          }}
           className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg active:scale-95"
         >
           <Plus data-icon="plus" />
@@ -1101,6 +1121,7 @@ export default function AgendaPage() {
         onSave={handleSaveAppointment}
         initialDate={prefilledDate}
         initialTime={prefilledTime}
+        triggerRect={appointmentModalTriggerRect}
       />
 
       {/* Client Addition Modal */}
@@ -1108,6 +1129,7 @@ export default function AgendaPage() {
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
         onSave={(client) => console.log("New client saved: ", client)}
+        triggerRect={clientModalTriggerRect}
       />
     </div>
   );

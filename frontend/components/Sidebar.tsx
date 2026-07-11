@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/volta-ui";
 
 interface SidebarProps {
-  onNewAppointmentClick?: () => void;
+  onNewAppointmentClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {

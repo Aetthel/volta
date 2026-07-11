@@ -26,7 +26,7 @@ import BottomNav from "@/components/BottomNav";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, Combobox } from "@/components/ui/volta-ui";
+import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, InlineSelect } from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -109,6 +109,7 @@ export default function ClientesPage() {
   const businessId = session?.user?.businessId || "mock-business-id";
 
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [clientModalTriggerRect, setClientModalTriggerRect] = useState<DOMRect | null>(null);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -427,7 +428,10 @@ export default function ClientesPage() {
                   <span>Exportar</span>
                 </Button>
                 <Button
-                  onClick={() => setIsClientModalOpen(true)}
+                  onClick={(e) => {
+                    setClientModalTriggerRect(e.currentTarget.getBoundingClientRect());
+                    setIsClientModalOpen(true);
+                  }}
                   variant="primary"
                   className="flex items-center gap-1 px-4 sm:px-6 py-2 rounded-lg font-label-lg"
                 >
@@ -498,12 +502,12 @@ export default function ClientesPage() {
                   />
                 </div>
                 {/* Service filter */}
-                <Combobox
-                  label=""
+                <InlineSelect
+                  id="service-filter"
+                  label="Servicios..."
                   value={serviceFilter}
                   onChange={(val) => { setServiceFilter(val); setCurrentPage(1); }}
                   options={serviceOptions}
-                  placeholder="Servicios..."
                   size="sm"
                   className="w-44"
                 />
@@ -723,7 +727,10 @@ export default function ClientesPage() {
         </main>
 
         <Button
-          onClick={() => setIsClientModalOpen(true)}
+          onClick={(e) => {
+            setClientModalTriggerRect(e.currentTarget.getBoundingClientRect());
+            setIsClientModalOpen(true);
+          }}
           variant="primary"
           className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg"
         >
@@ -743,6 +750,7 @@ export default function ClientesPage() {
         }}
         onSave={handleSaveClient}
         clientToEdit={editingClient}
+        triggerRect={clientModalTriggerRect}
       />
 
       {/* Appointment booking Modal */}

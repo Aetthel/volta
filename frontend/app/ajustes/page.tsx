@@ -60,7 +60,7 @@ import {
   Button,
   Skeleton,
   PageHeader,
-  Combobox,
+  InlineSelect,
 } from "@/components/ui/volta-ui";
 
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
@@ -2502,7 +2502,7 @@ export default function AjustesPage() {
       {/* Worker Add/Edit Modal */}
       {isWorkerModalOpen && (
         <div className="fixed inset-0 bg-black/55 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-md shadow-2xl overflow-visible flex flex-col">
             <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
               <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary" />
@@ -2519,7 +2519,7 @@ export default function AjustesPage() {
 
             <form
               onSubmit={handleSaveWorker}
-              className="p-6 flex flex-col gap-6 overflow-y-auto"
+              className="p-6 flex flex-col gap-6"
             >
               {workerErrorMsg && (
                 <div className="bg-error-container border border-error-container/45 text-on-error-container p-4 rounded-xl font-medium text-body-md">
@@ -2596,7 +2596,7 @@ export default function AjustesPage() {
 
                 <Field>
                   <FieldLabel htmlFor="workerRole">Rol de Usuario</FieldLabel>
-                  <Combobox
+                  <InlineSelect
                     id="workerRole"
                     label="Seleccionar rol"
                     value={workerFormData.role}
@@ -2610,7 +2610,7 @@ export default function AjustesPage() {
                       { value: "EMPLEADO", label: "Empleado (Staff)" },
                       { value: "JEFE", label: "Jefe / Encargado" },
                     ]}
-                    placeholder="Seleccionar rol..."
+                    variant="outlined"
                   />
                 </Field>
               </FieldGroup>

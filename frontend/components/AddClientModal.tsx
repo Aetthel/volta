@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, User, Phone, Mail, Sparkles, Heart, Pencil, GripHorizontal, AlignLeft, ChevronDown } from "lucide-react";
+import { X, User, Phone, Mail, Sparkles, Heart, Pencil, GripHorizontal, AlignLeft } from "lucide-react";
 import {
   FieldGroup,
   Field,
@@ -10,6 +10,7 @@ import {
   Button,
   FloatingSelect,
   FloatingTextarea,
+  InlineSelect,
 } from "@/components/ui/volta-ui";
 
 interface ClientToEdit {
@@ -27,6 +28,7 @@ interface AddClientModalProps {
   onSave: (clientData: any) => void;
   /** Pass a client object to activate edit mode */
   clientToEdit?: ClientToEdit | null;
+  triggerRect?: { left: number; top: number; right: number; bottom: number; width: number; height: number; } | null;
 }
 
 const EMPTY_FORM = {
@@ -43,10 +45,51 @@ export default function AddClientModal({
   onClose,
   onSave,
   clientToEdit,
+  triggerRect,
 }: AddClientModalProps) {
   const isEditMode = !!clientToEdit;
 
   const [formData, setFormData] = useState(EMPTY_FORM);
+
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const lastIsOpen = useRef(isOpen);
+  const isFirstOpen = useRef(false);
+
+  if (isOpen && !lastIsOpen.current) {
+    isFirstOpen.current = true;
+    lastIsOpen.current = true;
+  } else if (!isOpen && lastIsOpen.current) {
+    lastIsOpen.current = false;
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("input") || (e.target as HTMLElement).closest("textarea")) return;
+
+    e.preventDefault();
+    setIsDragging(true);
+
+    const startX = e.clientX - position.x;
+    const startY = e.clientY - position.y;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      setPosition({
+        x: moveEvent.clientX - startX,
+        y: moveEvent.clientY - startY,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
 
   // Sync form when clientToEdit changes (open in edit mode)
   useEffect(() => {
@@ -63,10 +106,40 @@ export default function AddClientModal({
     } else {
       setFormData(EMPTY_FORM);
     }
-  }, [clientToEdit, isOpen]);
+
+    // Calculate initial coordinates next to clicked trigger button/space
+    if (triggerRect && window.innerWidth >= 768) {
+      const modalWidth = 448;
+      const modalHeight = 450;
+      
+      let targetX = triggerRect.right + 12;
+      if (targetX + modalWidth > window.innerWidth) {
+        targetX = triggerRect.left - modalWidth - 12;
+      }
+      targetX = Math.max(12, Math.min(targetX, window.innerWidth - modalWidth - 12));
+
+      let targetY = triggerRect.top;
+      if (targetY + modalHeight > window.innerHeight) {
+        targetY = Math.max(12, window.innerHeight - modalHeight - 12);
+      }
+      
+      setPosition({ x: targetX, y: targetY });
+    } else {
+      // Center modal on screen
+      const modalWidth = Math.min(448, window.innerWidth - 32);
+      const modalHeight = Math.min(450, window.innerHeight - 32);
+      const targetX = (window.innerWidth - modalWidth) / 2;
+      const targetY = (window.innerHeight - modalHeight) / 2;
+      setPosition({ x: targetX, y: targetY });
+    }
+
+    const timer = setTimeout(() => {
+      isFirstOpen.current = false;
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [clientToEdit, isOpen, triggerRect]);
 
   const [mounted, setMounted] = useState(false);
-  const [showFrequencyDropdown, setShowFrequencyDropdown] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -107,17 +180,31 @@ export default function AddClientModal({
   ];
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100]">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/5 transition-opacity"
         onClick={onClose}
       />
 
-      <div className="relative bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant max-w-md w-full overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200">
+      <div
+        style={{
+          position: "fixed",
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: "448px",
+          maxWidth: "calc(100vw - 32px)",
+          transition: (isDragging || isFirstOpen.current) ? "none" : undefined,
+          animation: isDragging ? "none" : undefined,
+        }}
+        className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200"
+      >
         {/* Header */}
-        <div className="px-5 pt-5 pb-1 flex justify-between items-center bg-transparent">
-          <GripHorizontal className="w-5 h-5 text-on-surface-variant/40" />
+        <div
+          onMouseDown={handleMouseDown}
+          className="px-5 pt-5 pb-1 flex justify-between items-center bg-transparent cursor-grab active:cursor-grabbing select-none"
+        >
+          <GripHorizontal className="w-5 h-5 text-on-surface-variant/40 pointer-events-none" />
           <Button
             variant="ghost"
             onClick={onClose}
@@ -207,45 +294,14 @@ export default function AddClientModal({
               </div>
               <div className="flex-1 min-w-0">
                 <Field>
-                  <div className="relative w-full">
-                    <div className="relative">
-                      <FloatingInput
-                        id="frequency-trigger"
-                        label="Frecuencia estimada"
-                        type="text"
-                        readOnly
-                        value={formData.frequency}
-                        onClick={() => setShowFrequencyDropdown(!showFrequencyDropdown)}
-                        className="cursor-pointer text-body-lg font-normal"
-                        variant="borderless"
-                      />
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
-                    </div>
-
-                    {showFrequencyDropdown && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-40"
-                          onClick={() => setShowFrequencyDropdown(false)}
-                        />
-                        <div className="absolute left-0 right-0 mt-1 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1">
-                          {frequencyOptions.map((opt) => (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => {
-                                setFormData((prev) => ({ ...prev, frequency: opt.value }));
-                                setShowFrequencyDropdown(false);
-                              }}
-                              className="flex items-center justify-between w-full text-left p-3 hover:bg-on-surface/[0.04] rounded-lg transition-colors text-body-lg text-on-surface font-normal cursor-pointer"
-                            >
-                              <span>{opt.label}</span>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  <InlineSelect
+                    id="frequency"
+                    label="Frecuencia estimada"
+                    value={formData.frequency}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, frequency: val }))}
+                    options={frequencyOptions}
+                    variant="borderless"
+                  />
                 </Field>
               </div>
             </div>

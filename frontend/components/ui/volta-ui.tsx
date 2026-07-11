@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import { Search, ChevronDown, Check } from "lucide-react";
+import { Search, ChevronDown, Check, Calendar } from "lucide-react";
 import Header from "../Header";
 
 // FieldGroup
@@ -328,10 +328,13 @@ export const FloatingInput = React.forwardRef<
         className={cn(
           "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
           variant === "minimal" || variant === "borderless" ? "bg-transparent" : "bg-surface-container-lowest px-1.5",
-          variant === "minimal" || variant === "borderless"
-            ? "top-1/2 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
-            : ((type === "date" || type === "time")
-                ? "top-0 scale-[0.82] text-primary"
+          (type === "date" || type === "time")
+            ? (variant === "minimal" || variant === "borderless"
+                ? "-top-2.5 scale-[0.82] text-primary"
+                : "top-0 scale-[0.82] text-primary"
+              )
+            : (variant === "minimal" || variant === "borderless"
+                ? "top-1/2 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
                 : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]"
               ),
           variant === "minimal" || variant === "borderless"
@@ -412,262 +415,304 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
 );
 FloatingSelect.displayName = "FloatingSelect";
 
-// Combobox
-export interface ComboboxOption {
+// InlineSelect
+export interface InlineSelectOption {
   value: string;
   label: string;
   sublabel?: string;
 }
 
-export interface ComboboxProps {
+export interface InlineSelectProps {
+  id: string;
   label: string;
-  options: ComboboxOption[];
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
-  icon?: React.ComponentType<any>;
-  className?: string;
-  id?: string;
-  size?: "md" | "sm";
+  options: InlineSelectOption[];
   variant?: "outlined" | "minimal" | "borderless";
-  searchable?: boolean;
+  size?: "md" | "sm";
+  className?: string;
 }
 
-export const Combobox = React.forwardRef<HTMLDivElement, ComboboxProps>(
-  ({ label, options, value, onChange, placeholder = "Buscar...", icon: Icon, className, id, size = "md", variant = "outlined", searchable = true }, ref) => {
-    const [isOpen, setIsOpen] = React.useState(false);
-    const [searchQuery, setSearchQuery] = React.useState("");
-    const [mounted, setMounted] = React.useState(false);
-    const [coords, setCoords] = React.useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+export const InlineSelect: React.FC<InlineSelectProps> = ({
+  id,
+  label,
+  value,
+  onChange,
+  options,
+  variant = "borderless",
+  size = "md",
+  className,
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [openUpward, setOpenUpward] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const selectedOption = options.find((o) => o.value === value);
 
-    const containerRef = React.useRef<HTMLDivElement>(null);
-    const triggerRef = React.useRef<HTMLButtonElement>(null);
-    const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const displayValue = selectedOption
+    ? (selectedOption.sublabel
+        ? `${selectedOption.label} — ${selectedOption.sublabel}`
+        : selectedOption.label)
+    : "";
 
-    React.useEffect(() => {
-      setMounted(true);
-    }, []);
-
-    const updateCoords = () => {
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        setCoords({
-          top: rect.bottom + 4,
-          left: rect.left,
-          width: rect.width,
-        });
+  React.useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const dropdownHeight = 240; // max-h-60 is 240px
+      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
       }
-    };
+    }
+  }, [isOpen]);
 
-    React.useEffect(() => {
-      if (isOpen) {
-        updateCoords();
-        window.addEventListener("scroll", updateCoords, true);
-        window.addEventListener("resize", updateCoords);
-      }
-      return () => {
-        window.removeEventListener("scroll", updateCoords, true);
-        window.removeEventListener("resize", updateCoords);
-      };
-    }, [isOpen]);
-
-    React.useEffect(() => {
-      const handleOutsideClick = (e: MouseEvent) => {
-        const clickedInsideTrigger = containerRef.current && containerRef.current.contains(e.target as Node);
-        const clickedInsideDropdown = dropdownRef.current && dropdownRef.current.contains(e.target as Node);
-        if (!clickedInsideTrigger && !clickedInsideDropdown) {
-          setIsOpen(false);
-        }
-      };
-      if (isOpen) {
-        document.addEventListener("mousedown", handleOutsideClick);
-      }
-      return () => {
-        document.removeEventListener("mousedown", handleOutsideClick);
-      };
-    }, [isOpen]);
-
-    React.useEffect(() => {
-      if (!isOpen) {
-        setSearchQuery("");
-      }
-    }, [isOpen]);
-
-    const selectedOption = options.find((opt) => opt.value === value);
-
-    const filteredOptions = options.filter((opt) => {
-      const query = searchQuery.toLowerCase().trim();
-      if (!query) return true;
-      return (
-        opt.label.toLowerCase().includes(query) ||
-        (opt.sublabel && opt.sublabel.toLowerCase().includes(query)) ||
-        opt.value.toLowerCase().includes(query)
-      );
-    });
-
-    return (
-      <div
-        ref={containerRef}
-        className={cn(
-          "relative w-full group/select transition-all duration-200",
-          variant === "minimal"
-            ? "border-b border-outline-variant focus-within:border-primary hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-t-md px-3"
-            : "",
-          variant === "borderless"
-            ? "border-b border-transparent focus-within:border-primary focus-within:border-b hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-md focus-within:rounded-b-none focus-within:rounded-t-md px-3"
-            : "",
-          className
-        )}
-        id={id}
-      >
-        {/* Trigger Button */}
-        <button
-          ref={triggerRef}
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className={cn(
-            "flex w-full items-center bg-transparent text-on-surface focus:outline-none transition-all pr-10 cursor-pointer text-left select-none",
-            variant === "minimal" || variant === "borderless"
-              ? "border-0 rounded-none pt-5 pb-1 px-0 text-body-lg"
-              : (size === "sm" ? "h-8 py-1 rounded-lg text-label-md border border-outline px-4" : "py-3.5 rounded-xl text-body-lg border border-outline px-4"),
-            Icon ? (variant === "minimal" || variant === "borderless" ? "pl-8" : (size === "sm" ? "pl-9" : "pl-12")) : (variant === "minimal" || variant === "borderless" ? "pl-0" : (size === "sm" ? "pl-3" : "pl-4")),
-            isOpen && variant !== "minimal" && variant !== "borderless" ? (size === "sm" ? "h-8 py-[3px] border-primary border-2" : "py-3 border-primary border-2") : ""
-          )}
-        >
-          {Icon && (
-            <div
-              className={cn(
-                "absolute top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none",
-                variant === "minimal" || variant === "borderless" ? "left-3" : "left-3"
-              )}
-            >
-              <Icon className={size === "sm" || variant === "minimal" || variant === "borderless" ? "w-4 h-4" : "w-5 h-5"} />
-            </div>
-          )}
-          
-          <span className="truncate w-full pr-2">
-            {selectedOption ? (
-              <span className="flex items-center gap-1.5 w-full">
-                <span className="truncate">{selectedOption.label}</span>
-                {selectedOption.sublabel && (
-                  <span className="text-on-surface-variant/80 text-body-md font-normal shrink-0">
-                    — {selectedOption.sublabel}
-                  </span>
-                )}
-              </span>
-            ) : (
-              <span className="text-on-surface-variant/50">
-                {variant === "minimal" || variant === "borderless" ? "" : placeholder}
-              </span>
-            )}
-          </span>
-
-          <div
-            className={cn(
-              "absolute top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none",
-              variant === "minimal" || variant === "borderless" ? "right-3" : "right-3"
-            )}
+  return (
+    <div ref={containerRef} className={cn("relative w-full", size === "sm" ? className : "")}>
+      <div className="relative">
+        {size === "sm" ? (
+          <button
+            id={`${id}-trigger`}
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex h-8 w-full items-center justify-between bg-surface bg-none text-label-md text-on-surface border border-outline rounded-lg focus:border-primary focus:border-2 focus:outline-none transition-all py-1 px-4 cursor-pointer pr-10 text-left select-none"
           >
-            <ChevronDown className={cn(size === "sm" || variant === "minimal" || variant === "borderless" ? "w-4 h-4" : "w-5 h-5", "transition-transform duration-200")} style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }} />
-          </div>
-        </button>
-
-        {/* Floating Label */}
-        {label && (
-          <label
-            className={cn(
-              "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
-              variant === "minimal" || variant === "borderless" ? "bg-transparent" : "bg-surface-container-lowest px-1.5",
-              variant === "minimal" || variant === "borderless"
-                ? cn("top-1/2 -translate-y-1/2 text-body-lg", value ? "opacity-0 pointer-events-none" : "opacity-100")
-                : "top-0 scale-[0.82] text-primary",
-              variant === "minimal" || variant === "borderless"
-                ? (Icon ? "left-11" : "left-3")
-                : (Icon ? "left-12" : "left-4")
-            )}
-          >
-            {label}
-          </label>
-        )}
-
-        {/* Dropdown Panel in React Portal */}
-        {isOpen && mounted && createPortal(
-          <div
-            ref={dropdownRef}
-            style={{
-              position: "fixed",
-              top: `${coords.top}px`,
-              left: `${coords.left}px`,
-              width: `${coords.width}px`,
-            }}
-            className="bg-surface-container-high border border-outline-variant/60 rounded-xl shadow-xl shadow-primary/5 max-h-60 overflow-hidden flex flex-col z-[9999] animate-in fade-in slide-in-from-top-2 duration-150"
-          >
-            {/* Search Input Box */}
-            {searchable && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-surface-container-low border-b border-outline-variant/60 shrink-0">
-                <Search className="w-4 h-4 text-on-surface-variant shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={placeholder}
-                  className="w-full bg-transparent text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none"
-                  autoFocus
-                />
-              </div>
-            )}
-
-            {/* Options List */}
-            <div className="overflow-y-auto custom-scrollbar flex-1 py-1 max-h-48">
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((opt) => {
-                  const isSelected = opt.value === value;
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        onChange(opt.value);
-                        setIsOpen(false);
-                      }}
-                      className={cn(
-                        "w-full mx-2 my-0.5 px-4 py-2.5 flex items-center justify-between text-left hover:bg-surface-variant/80 border-none rounded-lg active:scale-100 shadow-none font-normal text-body-md text-on-surface transition-colors cursor-pointer",
-                        isSelected ? "bg-primary/10 text-primary hover:bg-primary/15" : "",
-                        "max-w-[calc(100%-16px)]"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        {isSelected ? (
-                          <Check className="w-4 h-4 text-primary shrink-0" />
-                        ) : (
-                          <div className="w-4 h-4 shrink-0" /> // Spacer
-                        )}
-                        <span className={cn("truncate", isSelected ? "font-semibold" : "")}>
-                          {opt.label}
-                        </span>
-                      </div>
-                      {opt.sublabel && (
-                        <span className={cn("text-body-sm ml-2 shrink-0", isSelected ? "text-primary/80" : "text-on-surface-variant")}>
-                          {opt.sublabel}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="px-4 py-3 text-body-sm text-on-surface-variant/60 text-center select-none">
-                  No se encontraron resultados
-                </div>
-              )}
-            </div>
-          </div>,
-          document.body
+            <span className="truncate">{displayValue || label}</span>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
+          </button>
+        ) : (
+          <>
+            <FloatingInput
+              id={`${id}-trigger`}
+              label={label}
+              type="text"
+              readOnly
+              value={displayValue}
+              onClick={() => setIsOpen(!isOpen)}
+              className={cn("cursor-pointer text-body-lg font-normal", className)}
+              variant={variant}
+            />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
+          </>
         )}
       </div>
-    );
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className={cn(
+            "absolute left-0 right-0 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1",
+            openUpward ? "bottom-full mb-1" : "top-full mt-1"
+          )}>
+            {options.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className="flex items-center justify-between w-full text-left p-3 hover:bg-on-surface/[0.04] rounded-lg transition-colors text-body-lg text-on-surface font-normal cursor-pointer"
+              >
+                <span>{opt.label}</span>
+                {opt.sublabel && (
+                  <span className="text-on-surface-variant text-body-sm font-normal">
+                    {opt.sublabel}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+InlineSelect.displayName = "InlineSelect";
+
+// CalendarSelect
+export interface CalendarSelectProps {
+  id: string;
+  value: string; // "YYYY-MM-DD"
+  onChange: (value: string) => void;
+  variant?: "outlined" | "minimal" | "borderless";
+  className?: string;
+}
+
+export const CalendarSelect: React.FC<CalendarSelectProps> = ({
+  id,
+  value,
+  onChange,
+  variant = "borderless",
+  className,
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [openUpward, setOpenUpward] = React.useState(false);
+  const [alignRight, setAlignRight] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const currentDate = value ? new Date(value + "T00:00:00") : new Date();
+  const [viewDate, setViewDate] = React.useState(currentDate);
+
+  React.useEffect(() => {
+    if (value) {
+      setViewDate(new Date(value + "T00:00:00"));
+    }
+  }, [value]);
+
+  React.useEffect(() => {
+    if (isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const dropdownHeight = 310; // approximate calendar height
+      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+
+      // If calendar is too close to the right edge, align it to the right of the input field
+      if (rect.left + 288 > window.innerWidth && rect.right - 288 > 0) {
+        setAlignRight(true);
+      } else {
+        setAlignRight(false);
+      }
+    }
+  }, [isOpen]);
+
+  const formatDateLabel = (dateStr: string) => {
+    if (!dateStr) return "Seleccionar fecha";
+    const date = new Date(dateStr + "T00:00:00");
+    return date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const handlePrevMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
+  };
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const firstDayIndex = new Date(year, month, 1).getDay();
+  const startOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const days = [];
+  for (let i = 0; i < startOffset; i++) {
+    days.push(null);
   }
-);
-Combobox.displayName = "Combobox";
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push(d);
+  }
+
+  const monthNames = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <div className="relative">
+        <FloatingInput
+          id={`${id}-trigger`}
+          label=""
+          type="text"
+          readOnly
+          value={formatDateLabel(value)}
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn("cursor-pointer text-body-lg font-normal", className)}
+          variant={variant}
+        />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
+      </div>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div
+            className={cn(
+              "absolute bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-50 p-4 w-72 flex flex-col gap-3 select-none",
+              openUpward ? "bottom-full mb-1" : "top-full mt-1",
+              alignRight ? "right-0" : "left-0"
+            )}
+          >
+            {/* Month & controls */}
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handlePrevMonth}
+                className="p-1.5 hover:bg-on-surface/[0.04] rounded-lg text-on-surface cursor-pointer select-none font-semibold"
+              >
+                &larr;
+              </button>
+              <span className="text-body-md font-semibold text-on-surface">
+                {monthNames[month]} {year}
+              </span>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                className="p-1.5 hover:bg-on-surface/[0.04] rounded-lg text-on-surface cursor-pointer select-none font-semibold"
+              >
+                &rarr;
+              </button>
+            </div>
+
+            {/* Day labels */}
+            <div className="grid grid-cols-7 gap-1 text-center text-body-xs font-semibold text-on-surface-variant/60">
+              <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
+            </div>
+
+            {/* Days grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {days.map((day, idx) => {
+                if (day === null) {
+                  return <div key={`empty-${idx}`} />;
+                }
+                const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                const isSelected = dateString === value;
+                const isToday = new Date().toISOString().split("T")[0] === dateString;
+
+                return (
+                  <button
+                    key={dateString}
+                    type="button"
+                    onClick={() => {
+                      onChange(dateString);
+                      setIsOpen(false);
+                    }}
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-body-sm font-medium cursor-pointer transition-colors select-none",
+                      isSelected
+                        ? "bg-primary text-on-primary font-bold"
+                        : isToday
+                        ? "border border-primary text-primary"
+                        : "text-on-surface hover:bg-on-surface/[0.06]"
+                    )}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+CalendarSelect.displayName = "CalendarSelect";
 
 // FloatingTextarea
 export interface FloatingTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {

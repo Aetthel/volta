@@ -61,6 +61,8 @@ export default function DashboardPage() {
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [appointmentModalTriggerRect, setAppointmentModalTriggerRect] = useState<DOMRect | null>(null);
+  const [clientModalTriggerRect, setClientModalTriggerRect] = useState<DOMRect | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
@@ -362,7 +364,10 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       {/* Sidebar navigation */}
-      <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
+      <Sidebar onNewAppointmentClick={(e) => {
+        setAppointmentModalTriggerRect(e ? e.currentTarget.getBoundingClientRect() : null);
+        setIsAppointmentModalOpen(true);
+      }} />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
@@ -545,7 +550,10 @@ export default function DashboardPage() {
 
         {/* Mobile floating button */}
         <Button
-          onClick={() => setIsAppointmentModalOpen(true)}
+          onClick={(e) => {
+            setAppointmentModalTriggerRect(e.currentTarget.getBoundingClientRect());
+            setIsAppointmentModalOpen(true);
+          }}
           variant="ghost"
           className="md:hidden fixed bottom-20 right-6 z-40 p-4 bg-primary text-white rounded-full shadow-lg border-none"
         >
@@ -561,12 +569,14 @@ export default function DashboardPage() {
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
         onSave={handleSaveAppointment}
+        triggerRect={appointmentModalTriggerRect}
       />
 
       <AddClientModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
         onSave={() => fetchData()}
+        triggerRect={clientModalTriggerRect}
       />
     </div>
   );
