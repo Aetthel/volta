@@ -33,7 +33,7 @@ export default function AdminPage() {
     averageTicket: "€0",
     growth: "+0%",
   });
-  const [rankings, setRankings] = useState<any[]>([]);
+  const [rankings, setRankings] = useState<Array<{ rank: number; name: string; revenue: string; change: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAdminData = () => {

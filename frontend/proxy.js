@@ -13,7 +13,7 @@ export default auth((req) => {
   // Defined routes per role
   const adminRoutes = ["/admin", "/sedes", "/ajustes"];
   const jefeRoutes = ["/inicio", "/clientes", "/ajustes"];
-  const empleadoRoutes = ["/inicio", "/clientes"];
+  const empleadoRoutes = ["/inicio", "/clientes", "/ajustes"];
   const allProtectedRoutes = ["/inicio", "/clientes", "/sedes", "/ajustes", "/admin"];
 
   const isProtectedRoute = allProtectedRoutes.some(route => pathname.startsWith(route));

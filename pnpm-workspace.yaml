@@ -1,0 +1,9 @@
+packages:
+  - "frontend"
+  - "backend"
+allowBuilds:
+  '@prisma/engines': true
+  prisma: true
+  puppeteer: true
+  sharp: true
+  unrs-resolver: true

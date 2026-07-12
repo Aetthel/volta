@@ -14,19 +14,20 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
-COPY backend/package*.json ./backend/
-RUN npm ci --include=dev
+# Install pnpm and dependencies
+RUN corepack enable && corepack prepare pnpm@latest --activate
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
+RUN pnpm install --frozen-lockfile
 
 # Copy source
 COPY . .
 
 # Generate Prisma client
-RUN npm run --workspace=backend prisma:generate 2>/dev/null || npx prisma generate --schema=backend/prisma/schema.prisma
+RUN pnpm --filter backend prisma:generate 2>/dev/null || npx prisma generate --schema=backend/prisma/schema.prisma
 
 # Build Next.js for production
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" API_KEY="dummy" npm run --workspace=frontend build
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" API_KEY="dummy" pnpm --filter frontend build
 
 EXPOSE 3000 3001

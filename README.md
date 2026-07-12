@@ -82,26 +82,26 @@ Este comando iniciará:
 ### Paso 3: Inicializar la Base de Datos
 Si estás utilizando la base de datos levantada con Docker, ejecuta las migraciones de Prisma para configurar el esquema relacional:
 
-npm run --workspace=backend prisma:push
+pnpm --filter backend prisma:push
 
 También puedes ejecutar el script de inicialización de datos de prueba (seed):
 
-npm run --workspace=backend seed
+pnpm --filter backend seed
 
 ## Ejecución Local sin Docker
 
 Si prefieres ejecutar el proyecto directamente en tu máquina local:
 
 1. Instala las dependencias en la raíz del monorepo:
-   npm install
+   pnpm install
 
 2. Levanta una base de datos PostgreSQL local y asegúrate de que el DATABASE_URL en tu .env apunte a ella.
 
 3. Sincroniza el esquema de base de datos:
-   npm run --workspace=backend prisma:push
+   pnpm --filter backend prisma:push
 
 4. Inicia ambos servicios de manera concurrente usando el script raíz:
-   npm run dev
+   pnpm dev
 
 Esto iniciará el frontend y backend simultáneamente en los puertos configurados.
 

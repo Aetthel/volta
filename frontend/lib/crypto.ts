@@ -16,7 +16,7 @@ export function signToken(payload: object, secret: string): string {
 /**
  * Verifies a base64url-encoded JWT token and returns its decoded payload.
  */
-export function verifyToken(token: string, secret: string): any {
+export function verifyToken(token: string, secret: string): Record<string, unknown> | null {
   try {
     if (!token) return null;
     const parts = token.split(".");

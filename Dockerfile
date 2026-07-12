@@ -11,12 +11,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy root and workspace package files
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
-COPY backend/package*.json ./backend/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY frontend/package.json ./frontend/
+COPY backend/package.json ./backend/
 
 # Install dependencies using workspaces
-RUN npm install
+RUN corepack enable && corepack prepare pnpm@latest --activate && pnpm install
 
 COPY . .
 
@@ -27,4 +27,4 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 EXPOSE 3000
 
 # We use the root to run workspaces
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]

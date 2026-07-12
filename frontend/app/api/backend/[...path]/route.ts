@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { signToken } from "@/lib/crypto";
+import type { Session } from "next-auth";
 
 
 // Use db service name for backend inside Docker container, fallback to localhost for host development
@@ -13,7 +14,7 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
 
   const isPublicRoute = pathParts[0] === "lopd" || pathParts[0] === "health";
 
-  let session: any = null;
+  let session: Session | null = null;
   if (!isPublicRoute) {
     session = await auth();
     if (!session) {
@@ -55,7 +56,7 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
   }
 
 
-  let body: any = undefined;
+  let body: string | undefined = undefined;
   if (method !== "GET" && method !== "HEAD") {
     try {
       body = await request.text();
@@ -93,12 +94,11 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
     });
 
     const contentType = backendResponse.headers.get("content-type");
-    let responseData: any;
     if (contentType && contentType.includes("application/json")) {
-      responseData = await backendResponse.json();
+      const responseData: Record<string, unknown> = await backendResponse.json();
       return NextResponse.json(responseData, { status: backendResponse.status });
     } else {
-      responseData = await backendResponse.text();
+      const responseData = await backendResponse.text();
       return new Response(responseData, {
         status: backendResponse.status,
         headers: { "Content-Type": contentType || "text/plain" },

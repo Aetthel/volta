@@ -2,15 +2,11 @@
   "name": "volta",
   "version": "1.0.0",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=frontend\" \"npm run dev --workspace=backend\"",
-    "build": "npm run build --workspaces --if-present",
-    "start": "npm run start --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
+    "build": "pnpm --filter frontend build && pnpm --filter backend build",
+    "start": "pnpm --filter frontend start && pnpm --filter backend start",
+    "lint": "pnpm --filter frontend lint && pnpm --filter backend lint"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",

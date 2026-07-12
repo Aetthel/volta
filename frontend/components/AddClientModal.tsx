@@ -25,7 +25,7 @@ interface ClientToEdit {
 interface AddClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (clientData: any) => void;
+  onSave: (clientData: { name: string; surname: string; phone: string; email?: string; frequentService?: string; notes?: string }) => void;
   /** Pass a client object to activate edit mode */
   clientToEdit?: ClientToEdit | null;
   triggerRect?: { left: number; top: number; right: number; bottom: number; width: number; height: number; } | null;

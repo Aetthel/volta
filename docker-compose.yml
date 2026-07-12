@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:15
     container_name: volta-db
-    restart: always
+    restart: no
     environment:
       POSTGRES_USER: volta_user
       POSTGRES_PASSWORD: volta_password
@@ -15,7 +15,7 @@ services:
   backend:
     build: .
     container_name: volta-backend
-    restart: always
+    restart: no
     depends_on:
       - db
     env_file:
@@ -31,12 +31,12 @@ services:
       - wwebjs-auth:/app/.wwebjs_auth
     ports:
       - "3001:3001"
-    command: sh -c "cd /app/backend && npx prisma migrate deploy && cd /app && npm run dev --workspace=backend"
+    command: sh -c "cd /app/backend && npx prisma migrate deploy && cd /app && pnpm --filter backend dev"
 
   frontend:
     build: .
     container_name: volta-frontend
-    restart: always
+    restart: no
     depends_on:
       - db
       - backend
@@ -55,7 +55,7 @@ services:
       - /app/backend/node_modules
     ports:
       - "3000:3000"
-    command: npm run dev --workspace=frontend
+    command: pnpm --filter frontend dev
 
 volumes:
   postgres_data:

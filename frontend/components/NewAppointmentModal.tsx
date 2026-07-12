@@ -27,7 +27,7 @@ import {
 interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (appointmentData: any) => void;
+  onSave: (appointmentData: { clientName: string; clientPhone: string; service: string; date: string; time: string; workerId?: string }) => void;
   initialDate?: string;
   initialTime?: string;
   triggerRect?: { left: number; top: number; right: number; bottom: number; width: number; height: number; } | null;
@@ -247,7 +247,7 @@ export default function NewAppointmentModal({
     }
   };
 
-  const handleSelectSuggestion = (client: any) => {
+  const handleSelectSuggestion = (client: { name: string; surname?: string; phone: string }) => {
     const fullName = `${client.name} ${client.surname || ""}`.trim();
     setFormData((prev) => ({
       ...prev,

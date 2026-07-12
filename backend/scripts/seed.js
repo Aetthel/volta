@@ -1,10 +1,12 @@
-const prisma = require('../src/db');
-const bcrypt = require('bcryptjs');
+import prisma from '../src/config/db.js';
+import bcrypt from 'bcryptjs';
 
 async function main() {
   // Clear existing data to allow fresh seeds and avoid unique constraint failures
   await prisma.appointment.deleteMany();
   await prisma.client.deleteMany();
+  await prisma.service.deleteMany();
+  await prisma.businessHours.deleteMany();
   await prisma.user.deleteMany();
   await prisma.business.deleteMany();
 

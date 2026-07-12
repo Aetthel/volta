@@ -3,6 +3,10 @@ node_modules/
 .pnp
 .pnp.js
 
+# Package manager lock files (pnpm only)
+package-lock.json
+yarn.lock
+
 # Next.js
 .next/
 out/
