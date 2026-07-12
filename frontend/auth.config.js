@@ -2,9 +2,6 @@ export const authConfig = {
   pages: {
     signIn: "/login",
   },
-  // trustHost allows NextAuth to work behind proxies and tunnels (Cloudflare Tunnel,
-  // ngrok, etc.) without needing to set NEXTAUTH_URL / AUTH_URL explicitly.
-  trustHost: true,
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
@@ -15,6 +12,7 @@ export const authConfig = {
         token.role = user.role;
         token.id = user.id;
         token.businessId = user.businessId;
+        token.isDemo = user.isDemo || false;
         token.themeColor = user.themeColor || "TEAL";
         token.fontSizeLevel = user.fontSizeLevel || "MEDIUM";
         token.borderRadiusLevel = user.borderRadiusLevel || "MEDIUM";
@@ -35,6 +33,7 @@ export const authConfig = {
         session.user.role = token.role;
         session.user.id = token.id;
         session.user.businessId = token.businessId;
+        session.user.isDemo = token.isDemo || false;
         session.user.themeColor = token.themeColor || "TEAL";
         session.user.fontSizeLevel = token.fontSizeLevel || "MEDIUM";
         session.user.borderRadiusLevel = token.borderRadiusLevel || "MEDIUM";

@@ -109,8 +109,17 @@ export default function Header({
 
               <Button
                 variant="ghost"
-                onClick={() => {
+                onClick={async () => {
                   setIsDropdownOpen(false);
+                  if (session?.user?.businessId && session?.user?.isDemo) {
+                    try {
+                      await fetch(`/api/backend/demo?businessId=${session.user.businessId}`, {
+                        method: "DELETE",
+                      });
+                    } catch (e) {
+                      // Best-effort cleanup
+                    }
+                  }
                   signOut();
                 }}
                 className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none active:scale-100 rounded-none h-auto"

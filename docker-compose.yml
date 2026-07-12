@@ -21,6 +21,8 @@ services:
     env_file:
       - .env
     environment:
+      - CI=true
+      - PNPM_CONFIG_STORE_DIR=/root/.local/share/pnpm/store
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - PORT=3001
     volumes:
@@ -31,7 +33,7 @@ services:
       - wwebjs-auth:/app/.wwebjs_auth
     ports:
       - "3001:3001"
-    command: sh -c "cd /app/backend && npx prisma migrate deploy && cd /app && pnpm --filter backend dev"
+    command: sh -c "pnpm install && cd /app/backend && npx prisma migrate deploy && cd /app && pnpm --filter backend dev"
 
   frontend:
     build: .
@@ -43,6 +45,8 @@ services:
     env_file:
       - .env
     environment:
+      - CI=true
+      - PNPM_CONFIG_STORE_DIR=/root/.local/share/pnpm/store
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001
       # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
@@ -53,9 +57,10 @@ services:
       - /app/node_modules
       - /app/frontend/node_modules
       - /app/backend/node_modules
+      - /app/frontend/.next
     ports:
       - "3000:3000"
-    command: pnpm --filter frontend dev
+    command: sh -c "pnpm install && pnpm --filter frontend dev"
 
 volumes:
   postgres_data:

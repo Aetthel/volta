@@ -2,18 +2,27 @@ import * as lopdService from '../services/lopdService.js';
 import { computeHmac } from '../utils/index.js';
 import config from '../config/index.js';
 import { ApiResponse } from '../utils/index.js';
+import crypto from 'crypto';
 
-const verifyToken = (id, token) => {
-  const expectedToken = computeHmac(id, config.backendJwtSecret);
-  return token && token === expectedToken;
+const verifyToken = (id, token, exp) => {
+  if (!token || !id || !exp) return false;
+  const expiry = parseInt(exp, 10);
+  if (isNaN(expiry) || Date.now() > expiry) return false;
+  const tokenData = `${id}:${expiry}`;
+  const expectedToken = computeHmac(tokenData, config.backendJwtSecret);
+  try {
+    return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken));
+  } catch {
+    return false;
+  }
 };
 
 export const getConsent = async (req, res) => {
   const { id } = req.params;
-  const { token } = req.query;
+  const { token, exp } = req.query;
 
-  if (!verifyToken(id, token)) {
-    return res.status(400).json({ error: 'Invalid or missing signature token.' });
+  if (!verifyToken(id, token, exp)) {
+    return res.status(400).json({ error: 'Invalid, missing, or expired signature token.' });
   }
 
   const client = await lopdService.getClientConsent(id);
@@ -30,10 +39,10 @@ export const getConsent = async (req, res) => {
 
 export const acceptConsent = async (req, res) => {
   const { id } = req.params;
-  const { token } = req.query;
+  const { token, exp } = req.query;
 
-  if (!verifyToken(id, token)) {
-    return res.status(400).json({ error: 'Invalid or missing signature token.' });
+  if (!verifyToken(id, token, exp)) {
+    return res.status(400).json({ error: 'Invalid, missing, or expired signature token.' });
   }
 
   const client = await lopdService.getClientConsent(id);

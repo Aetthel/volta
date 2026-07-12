@@ -24,7 +24,7 @@ async function rateLimitedPost(request) {
 
   const response = await handlers.POST(request);
 
-  if (response.status !== 401) {
+  if (response.status === 200 || response.status === 302) {
     resetRateLimit(`login:${ip}`);
   }
 

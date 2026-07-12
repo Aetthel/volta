@@ -136,7 +136,9 @@ exports.Prisma.BusinessScalarFieldEnum = {
   qrCode: 'qrCode',
   themeColor: 'themeColor',
   fontSizeLevel: 'fontSizeLevel',
-  borderRadiusLevel: 'borderRadiusLevel'
+  borderRadiusLevel: 'borderRadiusLevel',
+  isDemo: 'isDemo',
+  demoExpiresAt: 'demoExpiresAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {

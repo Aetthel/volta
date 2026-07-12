@@ -138,8 +138,10 @@ async function runSentinel() {
  */
 async function sendConsentMessage(businessId, client) {
   const FRONTEND_URL = config.frontendUrl;
-  const token = computeHmac(client.id, config.backendJwtSecret);
-  const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}`;
+  const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+  const tokenData = `${client.id}:${expiry}`;
+  const token = computeHmac(tokenData, config.backendJwtSecret);
+  const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}&exp=${expiry}`;
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
 
 

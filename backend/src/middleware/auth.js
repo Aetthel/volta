@@ -1,33 +1,40 @@
 import config from '../config/index.js';
 import { verifyToken } from '../utils/crypto.js';
+import crypto from 'crypto';
 
 const API_KEY = config.apiKey;
 const JWT_SECRET = config.backendJwtSecret;
 
+function safeCompare(a, b) {
+  if (!a || !b) return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 const authenticate = (req, res, next) => {
   const apiKey = req.header('x-api-key');
-  if (!apiKey || apiKey !== API_KEY) {
+  if (!apiKey || !safeCompare(apiKey, API_KEY)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const authHeader = req.header('Authorization');
-  let userContext = { role: null, businessId: null, email: null };
-
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token, JWT_SECRET);
-    if (decoded) {
-      userContext = {
-        role: decoded.role || null,
-        businessId: decoded.businessId || null,
-        email: decoded.email || null,
-      };
-    } else {
-      return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
-    }
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: Missing token' });
   }
 
-  req.user = userContext;
+  const token = authHeader.substring(7);
+  const decoded = verifyToken(token, JWT_SECRET);
+  if (!decoded) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
+  }
+
+  req.user = {
+    role: decoded.role || null,
+    businessId: decoded.businessId || null,
+    email: decoded.email || null,
+  };
   next();
 };
 
@@ -38,7 +45,16 @@ const requireRole = (allowedRoles) => (req, res, next) => {
   next();
 };
 
+const requireApiKey = (req, res, next) => {
+  const apiKey = req.header('x-api-key');
+  if (!apiKey || !safeCompare(apiKey, API_KEY)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
 export {
   authenticate,
   requireRole,
+  requireApiKey,
 };

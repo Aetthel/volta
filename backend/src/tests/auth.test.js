@@ -43,14 +43,27 @@ describe('authenticate middleware', () => {
     });
   });
 
-  it('should call next with valid API key and no token', () => {
+  it('should return 401 if API key is valid but no JWT token', () => {
     req.header.mockImplementation((name) => {
       if (name === 'x-api-key') return MOCK_API_KEY;
       return undefined;
     });
     authenticate(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({ error: 'Unauthorized: Missing token' });
+  });
+
+  it('should call next with valid API key and valid JWT token', () => {
+    const payload = { role: 'ADMIN', businessId: 'biz-1', email: 'admin@test.com' };
+    const token = signToken(payload, MOCK_JWT_SECRET);
+    req.header.mockImplementation((name) => {
+      if (name === 'x-api-key') return MOCK_API_KEY;
+      if (name === 'Authorization') return `Bearer ${token}`;
+      return undefined;
+    });
+    authenticate(req, res, next);
     expect(next).toHaveBeenCalled();
-    expect(req.user).toEqual({ role: null, businessId: null, email: null });
+    expect(req.user).toEqual({ role: 'ADMIN', businessId: 'biz-1', email: 'admin@test.com' });
   });
 });
 

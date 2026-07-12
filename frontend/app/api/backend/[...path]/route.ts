@@ -10,9 +10,17 @@ const BACKEND_URL = process.env.BACKEND_INTERNAL_URL || "http://localhost:3001";
 async function proxyRequest(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const resolvedParams = await params;
   const pathParts = resolvedParams.path;
+
+  // Validate path parts — only allow alphanumeric, hyphens, underscores
+  for (const part of pathParts) {
+    if (!/^[a-zA-Z0-9_\-]+$/.test(part)) {
+      return NextResponse.json({ error: "Invalid path segment" }, { status: 400 });
+    }
+  }
+
   const path = pathParts.join("/");
 
-  const isPublicRoute = pathParts[0] === "lopd" || pathParts[0] === "health";
+  const isPublicRoute = pathParts[0] === "lopd" || pathParts[0] === "health" || pathParts[0] === "demo";
 
   let session: Session | null = null;
   if (!isPublicRoute) {
@@ -49,7 +57,8 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
       role: session.user.role || null,
       businessId: session.user.businessId || null,
       email: session.user.email || null,
-      exp: Date.now() + 5 * 60 * 1000, // 5 minutes expiration
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 5 * 60, // 5 minutes expiration
     };
     const token = signToken(payload, jwtSecret);
     headers.set("Authorization", `Bearer ${token}`);
@@ -101,7 +110,10 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
       const responseData = await backendResponse.text();
       return new Response(responseData, {
         status: backendResponse.status,
-        headers: { "Content-Type": contentType || "text/plain" },
+        headers: {
+          "Content-Type": contentType || "text/plain",
+          "X-Content-Type-Options": "nosniff",
+        },
       });
     }
   } catch (error) {

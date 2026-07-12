@@ -21,9 +21,11 @@ model Business {
   reminderMessage   String? // Custom reminder message template
   whatsappStatus    WhatsAppStatus  @default(DISCONNECTED)
   qrCode            String? // Current QR code for pairing
-  themeColor        String          @default("TEAL")
+  themeColor        String          @default("CLINICAL_ELEGANCE")
   fontSizeLevel     String          @default("MEDIUM")
   borderRadiusLevel String          @default("MEDIUM")
+  isDemo            Boolean         @default(false)
+  demoExpiresAt     DateTime?
   appointments      Appointment[]
   clients           Client[]
   hours             BusinessHours[]
@@ -68,7 +70,7 @@ model Client {
   lopdStatus      String        @default("Pendiente") // "Aceptado" or "Pendiente"
   avatarUrl       String?
   businessId      String
-  business        Business      @relation(fields: [businessId], references: [id])
+  business        Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   appointments    Appointment[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -83,7 +85,7 @@ model Appointment {
   appointmentDate DateTime
   status          AppointmentStatus @default(PENDING)
   businessId      String
-  business        Business          @relation(fields: [businessId], references: [id])
+  business        Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
   clientId        String?
   client          Client?           @relation(fields: [clientId], references: [id])
   serviceId       String?

@@ -1520,6 +1520,8 @@ export namespace Prisma {
     themeColor: string | null
     fontSizeLevel: string | null
     borderRadiusLevel: string | null
+    isDemo: boolean | null
+    demoExpiresAt: Date | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -1539,6 +1541,8 @@ export namespace Prisma {
     themeColor: string | null
     fontSizeLevel: string | null
     borderRadiusLevel: string | null
+    isDemo: boolean | null
+    demoExpiresAt: Date | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -1558,6 +1562,8 @@ export namespace Prisma {
     themeColor: number
     fontSizeLevel: number
     borderRadiusLevel: number
+    isDemo: number
+    demoExpiresAt: number
     _all: number
   }
 
@@ -1579,6 +1585,8 @@ export namespace Prisma {
     themeColor?: true
     fontSizeLevel?: true
     borderRadiusLevel?: true
+    isDemo?: true
+    demoExpiresAt?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -1598,6 +1606,8 @@ export namespace Prisma {
     themeColor?: true
     fontSizeLevel?: true
     borderRadiusLevel?: true
+    isDemo?: true
+    demoExpiresAt?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -1617,6 +1627,8 @@ export namespace Prisma {
     themeColor?: true
     fontSizeLevel?: true
     borderRadiusLevel?: true
+    isDemo?: true
+    demoExpiresAt?: true
     _all?: true
   }
 
@@ -1709,6 +1721,8 @@ export namespace Prisma {
     themeColor: string
     fontSizeLevel: string
     borderRadiusLevel: string
+    isDemo: boolean
+    demoExpiresAt: Date | null
     _count: BusinessCountAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
@@ -1745,6 +1759,8 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
+    isDemo?: boolean
+    demoExpiresAt?: boolean
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
     hours?: boolean | Business$hoursArgs<ExtArgs>
@@ -1770,6 +1786,8 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
+    isDemo?: boolean
+    demoExpiresAt?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1789,6 +1807,8 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
+    isDemo?: boolean
+    demoExpiresAt?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -1808,9 +1828,11 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
+    isDemo?: boolean
+    demoExpiresAt?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "isDemo" | "demoExpiresAt", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -1848,6 +1870,8 @@ export namespace Prisma {
       themeColor: string
       fontSizeLevel: string
       borderRadiusLevel: string
+      isDemo: boolean
+      demoExpiresAt: Date | null
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -2292,6 +2316,8 @@ export namespace Prisma {
     readonly themeColor: FieldRef<"Business", 'String'>
     readonly fontSizeLevel: FieldRef<"Business", 'String'>
     readonly borderRadiusLevel: FieldRef<"Business", 'String'>
+    readonly isDemo: FieldRef<"Business", 'Boolean'>
+    readonly demoExpiresAt: FieldRef<"Business", 'DateTime'>
   }
     
 
@@ -8620,7 +8646,9 @@ export namespace Prisma {
     qrCode: 'qrCode',
     themeColor: 'themeColor',
     fontSizeLevel: 'fontSizeLevel',
-    borderRadiusLevel: 'borderRadiusLevel'
+    borderRadiusLevel: 'borderRadiusLevel',
+    isDemo: 'isDemo',
+    demoExpiresAt: 'demoExpiresAt'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -8758,16 +8786,9 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'UserRole'
+   * Reference to a field of type 'Boolean'
    */
-  export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
-    
-
-
-  /**
-   * Reference to a field of type 'UserRole[]'
-   */
-  export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -8782,6 +8803,20 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserRole'
+   */
+  export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserRole[]'
+   */
+  export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
     
 
 
@@ -8810,13 +8845,6 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -8857,6 +8885,8 @@ export namespace Prisma {
     themeColor?: StringFilter<"Business"> | string
     fontSizeLevel?: StringFilter<"Business"> | string
     borderRadiusLevel?: StringFilter<"Business"> | string
+    isDemo?: BoolFilter<"Business"> | boolean
+    demoExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -8881,6 +8911,8 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
+    isDemo?: SortOrder
+    demoExpiresAt?: SortOrderInput | SortOrder
     appointments?: AppointmentOrderByRelationAggregateInput
     clients?: ClientOrderByRelationAggregateInput
     hours?: BusinessHoursOrderByRelationAggregateInput
@@ -8908,6 +8940,8 @@ export namespace Prisma {
     themeColor?: StringFilter<"Business"> | string
     fontSizeLevel?: StringFilter<"Business"> | string
     borderRadiusLevel?: StringFilter<"Business"> | string
+    isDemo?: BoolFilter<"Business"> | boolean
+    demoExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -8932,6 +8966,8 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
+    isDemo?: SortOrder
+    demoExpiresAt?: SortOrderInput | SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
@@ -8957,6 +8993,8 @@ export namespace Prisma {
     themeColor?: StringWithAggregatesFilter<"Business"> | string
     fontSizeLevel?: StringWithAggregatesFilter<"Business"> | string
     borderRadiusLevel?: StringWithAggregatesFilter<"Business"> | string
+    isDemo?: BoolWithAggregatesFilter<"Business"> | boolean
+    demoExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
   }
 
   export type UserWhereInput = {
@@ -9363,6 +9401,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -9387,6 +9427,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -9411,6 +9453,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -9435,6 +9479,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -9459,6 +9505,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -9478,6 +9526,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -9497,6 +9547,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type UserCreateInput = {
@@ -9950,6 +10002,22 @@ export namespace Prisma {
     not?: NestedEnumWhatsAppStatusFilter<$PrismaModel> | $Enums.WhatsAppStatus
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type AppointmentListRelationFilter = {
     every?: AppointmentWhereInput
     some?: AppointmentWhereInput
@@ -10022,6 +10090,8 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
+    isDemo?: SortOrder
+    demoExpiresAt?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -10041,6 +10111,8 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
+    isDemo?: SortOrder
+    demoExpiresAt?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -10060,6 +10132,8 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
+    isDemo?: SortOrder
+    demoExpiresAt?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -10106,6 +10180,28 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
     _max?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type EnumUserRoleFilter<$PrismaModel = never> = {
@@ -10312,11 +10408,6 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type BusinessHoursBusinessIdDayOfWeekCompoundUniqueInput = {
     businessId: string
     dayOfWeek: number
@@ -10371,14 +10462,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -10534,6 +10617,14 @@ export namespace Prisma {
 
   export type EnumWhatsAppStatusFieldUpdateOperationsInput = {
     set?: $Enums.WhatsAppStatus
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type AppointmentUpdateManyWithoutBusinessNestedInput = {
@@ -10820,10 +10911,6 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type BusinessUpdateOneRequiredWithoutHoursNestedInput = {
     create?: XOR<BusinessCreateWithoutHoursInput, BusinessUncheckedCreateWithoutHoursInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutHoursInput
@@ -10931,6 +11018,22 @@ export namespace Prisma {
     not?: NestedEnumWhatsAppStatusFilter<$PrismaModel> | $Enums.WhatsAppStatus
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -10997,6 +11100,28 @@ export namespace Prisma {
     _max?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.UserRole | EnumUserRoleFieldRefInput<$PrismaModel>
     in?: $Enums.UserRole[] | ListEnumUserRoleFieldRefInput<$PrismaModel>
@@ -11056,11 +11181,6 @@ export namespace Prisma {
     _max?: NestedEnumAppointmentStatusFilter<$PrismaModel>
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -11086,14 +11206,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -11445,6 +11557,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -11468,6 +11582,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -11507,6 +11623,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -11530,6 +11648,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11553,6 +11673,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -11576,6 +11698,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -11647,6 +11771,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -11670,6 +11796,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11709,6 +11837,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -11732,6 +11862,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -11835,6 +11967,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -11858,6 +11992,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -11957,6 +12093,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -11980,6 +12118,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -12019,6 +12159,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -12042,6 +12184,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -12065,6 +12209,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -12088,6 +12234,8 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
+    isDemo?: boolean
+    demoExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -12159,6 +12307,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -12182,6 +12332,8 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    isDemo?: BoolFieldUpdateOperationsInput | boolean
+    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput

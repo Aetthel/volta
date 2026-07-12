@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import FaceIcon from "@/components/FaceIcon";
 import {
   Calendar,
@@ -15,13 +17,16 @@ import {
   Star,
   ExternalLink,
   Mail,
-  Share2
+  Share2,
+  Loader2
 } from "lucide-react";
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [isCreatingDemo, setIsCreatingDemo] = useState(false);
+  const router = useRouter();
 
   // Monitor scroll for header styling (Task 2.2)
   useEffect(() => {
@@ -38,6 +43,31 @@ export default function RootPage() {
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
+  };
+
+  const handleVerDemo = async () => {
+    setIsCreatingDemo(true);
+    try {
+      const res = await fetch("/api/backend/demo", { method: "POST" });
+      if (!res.ok) throw new Error("Error creating demo");
+      const data = await res.json();
+
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        console.error("Demo auto-login failed");
+      } else {
+        router.push("/inicio");
+      }
+    } catch (err) {
+      console.error("Demo creation failed:", err);
+    } finally {
+      setIsCreatingDemo(false);
+    }
   };
 
   return (
@@ -129,9 +159,20 @@ export default function RootPage() {
                     variant="outline"
                     size="lg"
                     className="w-full sm:w-auto flex items-center justify-center gap-2"
+                    onClick={handleVerDemo}
+                    disabled={isCreatingDemo}
                   >
-                    Ver Demo
-                    <Play className="w-4 h-4 fill-primary" />
+                    {isCreatingDemo ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Creando demo...
+                      </>
+                    ) : (
+                      <>
+                        Crear Demo
+                        <Play className="w-4 h-4 fill-primary" />
+                      </>
+                    )}
                   </Button>
                 </a>
               </div>
@@ -670,11 +711,22 @@ export default function RootPage() {
                   Comenzar Prueba Gratuita
                 </Button>
               </Link>
-              <Link href="/login">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10">
-                  Agendar Demostración
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10"
+                onClick={handleVerDemo}
+                disabled={isCreatingDemo}
+              >
+                {isCreatingDemo ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Creando demo...
+                  </>
+                ) : (
+                  "Crear Demo"
+                )}
+              </Button>
             </div>
           </div>
         </section>

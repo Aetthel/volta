@@ -22,7 +22,7 @@ describe('errorHandler middleware', () => {
     errorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ code: 'P2002' })
+      expect.objectContaining({ error: 'Error en la base de datos' })
     );
   });
 

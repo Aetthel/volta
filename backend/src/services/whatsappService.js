@@ -29,6 +29,10 @@ class WhatsAppManager {
   }
 
   deleteSession(businessId) {
+    if (!/^[a-zA-Z0-9_-]+$/.test(businessId)) {
+      console.error(`[WhatsApp] Invalid businessId for session deletion: ${businessId}`);
+      return;
+    }
     const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
     if (fs.existsSync(sessionPath)) {
       console.log(`[WhatsApp] Deleting session directory for business: ${businessId}`);
@@ -204,7 +208,7 @@ class WhatsAppManager {
 
       // Only simulate in non-production environments to avoid masking real failures
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`[WhatsApp] [SIMULATION] Mock message sent: "${message}"`);
+        console.log(`[WhatsApp] [SIMULATION] Mock message sent to chat`);
         return { simulated: true, messageId: `mock-msg-${Date.now()}` };
       }
 

@@ -10,6 +10,7 @@ export default function LOPDConsentPage() {
   const searchParams = useSearchParams();
   const clientId = params?.id as string;
   const token = searchParams ? searchParams.get("token") : null;
+  const exp = searchParams ? searchParams.get("exp") : null;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -24,7 +25,10 @@ export default function LOPDConsentPage() {
   useEffect(() => {
     if (!clientId) return;
 
-    const query = token ? `?token=${encodeURIComponent(token)}` : "";
+    const queryParts = [];
+    if (token) queryParts.push(`token=${encodeURIComponent(token)}`);
+    if (exp) queryParts.push(`exp=${exp}`);
+    const query = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
     fetch(`/api/backend/lopd/${clientId}${query}`)
       .then((res) => {
         if (!res.ok)
@@ -49,7 +53,10 @@ export default function LOPDConsentPage() {
 
   const handleAccept = () => {
     setSubmitting(true);
-    const query = token ? `?token=${encodeURIComponent(token)}` : "";
+    const queryParts = [];
+    if (token) queryParts.push(`token=${encodeURIComponent(token)}`);
+    if (exp) queryParts.push(`exp=${exp}`);
+    const query = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
     fetch(`/api/backend/lopd/${clientId}/accept${query}`, {
       method: "POST",
     })

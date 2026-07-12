@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import prisma from "../backend/src/config/db.js";
+import prisma from "backend/db";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { authConfig } from "./auth.config";
@@ -10,6 +10,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET,
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -40,6 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email,
             role: user.role,
             businessId: user.businessId,
+            isDemo: user.business?.isDemo || false,
             themeColor: user.business?.themeColor || "TEAL",
             fontSizeLevel: user.business?.fontSizeLevel || "MEDIUM",
             borderRadiusLevel: user.business?.borderRadiusLevel || "MEDIUM",
