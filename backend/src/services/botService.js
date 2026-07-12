@@ -1,6 +1,7 @@
-const prisma = require('./db');
-const whatsappManager = require('./whatsapp');
-const config = require('./config');
+import prisma from '../config/db.js';
+import whatsappManager from './whatsappService.js';
+import config from '../config/index.js';
+import { computeHmac } from '../utils/crypto.js';
 
 /**
  * Formats a message template by replacing placeholders with actual data
@@ -137,8 +138,10 @@ async function runSentinel() {
  */
 async function sendConsentMessage(businessId, client) {
   const FRONTEND_URL = config.frontendUrl;
-  const consentUrl = `${FRONTEND_URL}/lopd/${client.id}`;
+  const token = computeHmac(client.id, config.backendJwtSecret);
+  const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}`;
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
+
 
   console.log(`[Bot] Triggering LOPD consent message for client ${client.name} (${client.phone})...`);
 
@@ -160,4 +163,4 @@ async function sendConsentMessage(businessId, client) {
 }
 
 
-module.exports = { runSentinel, sendWelcomeMessage, sendConsentMessage };
+export { runSentinel, sendWelcomeMessage, sendConsentMessage };

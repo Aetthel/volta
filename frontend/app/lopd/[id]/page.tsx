@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
 export default function LOPDConsentPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const clientId = params?.id as string;
+  const token = searchParams ? searchParams.get("token") : null;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -22,7 +24,8 @@ export default function LOPDConsentPage() {
   useEffect(() => {
     if (!clientId) return;
 
-    fetch(`/api/backend/lopd/${clientId}`)
+    const query = token ? `?token=${encodeURIComponent(token)}` : "";
+    fetch(`/api/backend/lopd/${clientId}${query}`)
       .then((res) => {
         if (!res.ok)
           throw new Error("Cliente no encontrado o enlace inválido.");
@@ -42,11 +45,12 @@ export default function LOPDConsentPage() {
         );
         setLoading(false);
       });
-  }, [clientId]);
+  }, [clientId, token]);
 
   const handleAccept = () => {
     setSubmitting(true);
-    fetch(`/api/backend/lopd/${clientId}/accept`, {
+    const query = token ? `?token=${encodeURIComponent(token)}` : "";
+    fetch(`/api/backend/lopd/${clientId}/accept${query}`, {
       method: "POST",
     })
       .then((res) => {

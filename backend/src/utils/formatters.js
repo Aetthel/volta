@@ -17,7 +17,7 @@ const normalizePhone = (phone) => {
   return digits;
 };
 
-module.exports = {
+export {
   normalizeString,
   normalizePhone,
 };

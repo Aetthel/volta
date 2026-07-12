@@ -1,23 +1,4 @@
-const path = require('path');
-if (!process.env.API_KEY) {
-  require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-}
-
-const API_KEY = process.env.API_KEY;
-
-const authenticate = (req, res, next) => {
-  const apiKey = req.header('x-api-key');
-  if (!apiKey || apiKey !== API_KEY) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  req.user = {
-    role: req.header('x-user-role') || null,
-    businessId: req.header('x-user-business-id') || null,
-  };
-
-  next();
-};
+import { z } from 'zod';
 
 const isValidId = (id) => {
   if (typeof id !== 'string') return false;
@@ -31,8 +12,6 @@ const validateId = (paramName) => (req, res, next) => {
   }
   next();
 };
-
-const { z } = require('zod');
 
 const validateBody = (schema) => (req, res, next) => {
   try {
@@ -50,8 +29,7 @@ const validateBody = (schema) => (req, res, next) => {
   }
 };
 
-module.exports = {
-  authenticate,
+export {
   isValidId,
   validateId,
   validateBody,

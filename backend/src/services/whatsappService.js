@@ -1,7 +1,10 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const path = require('path');
-const prisma = require('./db');
-const config = require('./config');
+import pkg from 'whatsapp-web.js';
+import path from 'path';
+import fs from 'fs';
+import prisma from '../config/db.js';
+import config from '../config/index.js';
+
+const { Client, LocalAuth } = pkg;
 
 class WhatsAppManager {
   constructor() {
@@ -26,7 +29,6 @@ class WhatsAppManager {
   }
 
   deleteSession(businessId) {
-    const fs = require('fs');
     const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
     if (fs.existsSync(sessionPath)) {
       console.log(`[WhatsApp] Deleting session directory for business: ${businessId}`);
@@ -49,7 +51,6 @@ class WhatsAppManager {
     // This happens when Docker recreates the container with a new hostname but the volume
     // persists — Chromium thinks the profile is "in use by another computer".
     // Note: process.cwd() in the backend workspace resolves to /app/backend.
-    const fs = require('fs');
     const sessionDir = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
     for (const lockFile of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
       const lockPath = path.join(sessionDir, lockFile);
@@ -212,9 +213,8 @@ class WhatsAppManager {
   }
 }
 
-// Singleton pattern for Next.js (Global object)
-if (!global.whatsappManager) {
-  global.whatsappManager = new WhatsAppManager();
+if (!globalThis.whatsappManager) {
+  globalThis.whatsappManager = new WhatsAppManager();
 }
 
-module.exports = global.whatsappManager;
+export default globalThis.whatsappManager;

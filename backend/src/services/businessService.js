@@ -1,0 +1,78 @@
+import prisma from '../config/db.js';
+
+export const getBusinessById = async (id) => {
+  return prisma.business.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      address: true,
+      logoUrl: true,
+      coverUrl: true,
+      description: true,
+      ownerName: true,
+      whatsappStatus: true,
+      qrCode: true,
+      themeColor: true,
+      fontSizeLevel: true,
+      borderRadiusLevel: true,
+    }
+  });
+};
+
+export const updateBusiness = async (id, updateData) => {
+  return prisma.business.update({
+    where: { id },
+    data: updateData,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      address: true,
+      logoUrl: true,
+      coverUrl: true,
+      description: true,
+      ownerName: true,
+      themeColor: true,
+      fontSizeLevel: true,
+      borderRadiusLevel: true,
+    }
+  });
+};
+
+export const getBusinessHours = async (businessId) => {
+  return prisma.businessHours.findMany({
+    where: { businessId },
+    orderBy: { dayOfWeek: 'asc' }
+  });
+};
+
+export const updateBusinessHours = async (businessId, hoursData) => {
+  return prisma.$transaction(async (tx) => {
+    for (const h of hoursData) {
+      await tx.businessHours.upsert({
+        where: {
+          businessId_dayOfWeek: {
+            businessId,
+            dayOfWeek: h.dayOfWeek
+          }
+        },
+        update: {
+          openTime: h.openTime,
+          closeTime: h.closeTime,
+          isClosed: h.isClosed
+        },
+        create: {
+          businessId,
+          dayOfWeek: h.dayOfWeek,
+          openTime: h.openTime,
+          closeTime: h.closeTime,
+          isClosed: h.isClosed
+        }
+      });
+    }
+  });
+};

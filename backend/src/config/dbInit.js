@@ -1,5 +1,5 @@
-const prisma = require('./db');
-const bcrypt = require('bcryptjs');
+import prisma from './db.js';
+import bcrypt from 'bcryptjs';
 
 /**
  * Ensures that mock businesses, admin, jefe, and employee users exist in the database,
@@ -28,47 +28,80 @@ async function ensureMockBusinessesExist() {
       }
     });
 
-    // Upsert Admin User
-    const hashedAdminPass = await bcrypt.hash('admin123', 10);
-    await prisma.user.upsert({
-      where: { email: 'admin@test.com' },
-      update: {},
-      create: {
-        id: 'mock-admin-id',
-        name: 'Admin Global',
-        email: 'admin@test.com',
-        password: hashedAdminPass,
-        role: 'ADMIN',
-      }
-    });
+    // Seed accounts conditionally based on environment
+    const isProduction = process.env.NODE_ENV === 'production';
 
-    // Upsert Jefe User
-    await prisma.user.upsert({
-      where: { email: 'jefe@test.com' },
-      update: {},
-      create: {
-        name: 'Jefe Glow',
-        email: 'jefe@test.com',
-        password: hashedPass,
-        role: 'JEFE',
-        businessId: 'mock-business-id',
-      }
-    });
+    if (!isProduction) {
+      // Seed default development Admin User
+      const hashedAdminPass = await bcrypt.hash('admin123', 10);
+      await prisma.user.upsert({
+        where: { email: 'admin@test.com' },
+        update: {},
+        create: {
+          id: 'mock-admin-id',
+          name: 'Admin Global',
+          email: 'admin@test.com',
+          password: hashedAdminPass,
+          role: 'ADMIN',
+        }
+      });
 
-    // Upsert Empleado User
-    await prisma.user.upsert({
-      where: { email: 'empleado@test.com' },
-      update: {},
-      create: {
-        name: 'Empleado Glow',
-        email: 'empleado@test.com',
-        password: hashedPass,
-        role: 'EMPLEADO',
-        businessId: 'mock-business-id',
-      }
-    });
+      // Seed default development Jefe User
+      await prisma.user.upsert({
+        where: { email: 'jefe@test.com' },
+        update: {},
+        create: {
+          name: 'Jefe Glow',
+          email: 'jefe@test.com',
+          password: hashedPass,
+          role: 'JEFE',
+          businessId: 'mock-business-id',
+        }
+      });
 
-    console.log('[API] Mock users and businesses verified/created in database.');
+      // Seed default development Empleado User
+      await prisma.user.upsert({
+        where: { email: 'empleado@test.com' },
+        update: {},
+        create: {
+          name: 'Empleado Glow',
+          email: 'empleado@test.com',
+          password: hashedPass,
+          role: 'EMPLEADO',
+          businessId: 'mock-business-id',
+        }
+      });
+      console.log('[API] Mock development users and businesses verified/created in database.');
+    } else {
+      // Production Admin initialization via environment variables
+      const initialAdminEmail = process.env.INITIAL_ADMIN_EMAIL;
+      const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+
+      if (initialAdminEmail && initialAdminPassword) {
+        const existingAdmin = await prisma.user.findFirst({
+          where: { role: 'ADMIN' }
+        });
+
+        if (!existingAdmin) {
+          console.log(`[dbInit] No admin found. Creating initial production admin with email: ${initialAdminEmail}`);
+          const hashedAdminPass = await bcrypt.hash(initialAdminPassword, 10);
+          await prisma.user.create({
+            data: {
+              name: 'Admin Producción',
+              email: initialAdminEmail,
+              password: hashedAdminPass,
+              role: 'ADMIN'
+            }
+          });
+        } else {
+          console.log('[dbInit] Admin user already exists. Skipping initial admin creation.');
+        }
+      } else {
+        console.warn('[dbInit] Production environment detected but INITIAL_ADMIN_EMAIL or INITIAL_ADMIN_PASSWORD is not set. No default admin will be created.');
+      }
+    }
+
+    console.log('[API] Database initialization checks completed.');
 
     // Seed example clients and appointments for demonstration if they don't exist yet
     if (process.env.NODE_ENV !== 'production') {
@@ -201,6 +234,6 @@ async function ensureMockBusinessesExist() {
   }
 }
 
-module.exports = {
+export {
   ensureMockBusinessesExist
 };

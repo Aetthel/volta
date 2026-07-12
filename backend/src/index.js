@@ -1,12 +1,25 @@
-const config = require('./config');
-const dbInit = require('./dbInit');
+import config from './config/index.js';
+import * as dbInit from './config/dbInit.js';
+import express from 'express';
+import prisma from './config/db.js';
+import cron from 'node-cron';
+import { runSentinel } from './services/botService.js';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { fileURLToPath } from 'url';
 
-const express = require('express');
-const prisma = require('./db');
-const cron = require('node-cron');
-const { runSentinel } = require('./bot');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+// Import modular routers
+import appointmentsRouter from './routes/appointments.js';
+import clientsRouter from './routes/clients.js';
+import whatsappRouter from './routes/whatsapp.js';
+import lopdRouter from './routes/lopd.js';
+import businessRouter from './routes/business.js';
+import servicesRouter from './routes/services.js';
+import adminRouter from './routes/admin.js';
+import usersRouter from './routes/users.js';
+
+// Global Error Handler Middleware
+import { errorHandler } from './middleware/index.js';
 
 const app = express();
 const PORT = config.port;
@@ -55,22 +68,22 @@ const publicLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Import and mount modular routers
-app.use('/api/appointments', require('./routes/appointments'));
-app.use('/api/clients', require('./routes/clients'));
-app.use('/api/whatsapp', require('./routes/whatsapp'));
-app.use('/api/lopd', publicLimiter, require('./routes/lopd'));
-app.use('/api/business', require('./routes/business'));
-app.use('/api/services', require('./routes/services'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/users', require('./routes/users'));
+// Mount modular routers
+app.use('/api/appointments', appointmentsRouter);
+app.use('/api/clients', clientsRouter);
+app.use('/api/whatsapp', whatsappRouter);
+app.use('/api/lopd', publicLimiter, lopdRouter);
+app.use('/api/business', businessRouter);
+app.use('/api/services', servicesRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/users', usersRouter);
 
-
+app.use(errorHandler);
 
 // Initialize whatsapp clients for already connected businesses on startup
 async function initActiveWhatsappClients() {
   try {
-    const whatsappManager = require('./whatsapp');
+    const { default: whatsappManager } = await import('./services/whatsappService.js');
     const connectedBusinesses = await prisma.business.findMany({
       where: { whatsappStatus: 'CONNECTED' },
       select: { id: true }
@@ -88,8 +101,10 @@ async function initActiveWhatsappClients() {
   }
 }
 
-// Start server (only if not required as a module)
-if (require.main === module) {
+// Start server (only if executed directly)
+const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+
+if (isMain) {
   dbInit.ensureMockBusinessesExist().then(() => {
     app.listen(PORT, () => {
       console.log(`[API] Server running on port ${PORT}`);
@@ -101,4 +116,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = app;
+export default app;

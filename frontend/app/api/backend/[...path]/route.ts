@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { signToken } from "@/lib/crypto";
+
 
 // Use db service name for backend inside Docker container, fallback to localhost for host development
 const BACKEND_URL = process.env.BACKEND_INTERNAL_URL || "http://localhost:3001";
@@ -24,11 +26,12 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
     }
   }
 
-  // Validate API_KEY at request-time (not module-level) so Next.js build doesn't fail
+  // Validate API_KEY and BACKEND_JWT_SECRET at request-time (not module-level) so Next.js build doesn't fail
   const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.error("[Proxy] FATAL: API_KEY environment variable is not set.");
-    return NextResponse.json({ error: "Proxy misconfiguration: API_KEY not set." }, { status: 503 });
+  const jwtSecret = process.env.BACKEND_JWT_SECRET;
+  if (!apiKey || !jwtSecret) {
+    console.error("[Proxy] FATAL: API_KEY or BACKEND_JWT_SECRET environment variable is not set.");
+    return NextResponse.json({ error: "Proxy misconfiguration: Secret keys not set." }, { status: 503 });
   }
 
   const { searchParams } = new URL(request.url);
@@ -41,13 +44,16 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
   headers.set("x-api-key", apiKey);
 
   if (session?.user) {
-    if (session.user.role) {
-      headers.set("x-user-role", session.user.role);
-    }
-    if (session.user.businessId) {
-      headers.set("x-user-business-id", session.user.businessId);
-    }
+    const payload = {
+      role: session.user.role || null,
+      businessId: session.user.businessId || null,
+      email: session.user.email || null,
+      exp: Date.now() + 5 * 60 * 1000, // 5 minutes expiration
+    };
+    const token = signToken(payload, jwtSecret);
+    headers.set("Authorization", `Bearer ${token}`);
   }
+
 
   let body: any = undefined;
   if (method !== "GET" && method !== "HEAD") {
