@@ -27,7 +27,21 @@ import {
 interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (appointmentData: { clientName: string; clientPhone: string; service: string; date: string; time: string; workerId?: string }) => void;
+  onSave: (appointmentData: {
+    id?: string;
+    clientName: string;
+    clientPhone: string;
+    service: string;
+    date?: string;
+    time?: string;
+    appointmentDate?: string;
+    businessId?: string;
+    status?: string;
+    clientId?: string | null;
+    serviceId?: string | null;
+    serviceName?: string | null;
+    workerId?: string;
+  }) => void;
   initialDate?: string;
   initialTime?: string;
   triggerRect?: { left: number; top: number; right: number; bottom: number; width: number; height: number; } | null;

@@ -22,7 +22,7 @@ interface ServiceToEdit {
 interface AddServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (serviceData: { name: string; price: number; duration: number; description?: string }) => void;
+  onSave: (serviceData: { id?: string; name: string; price: number; duration: number; description?: string }) => void;
   serviceToEdit?: ServiceToEdit | null;
 }
 

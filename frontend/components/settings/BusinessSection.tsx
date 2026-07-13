@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   Store, Clock, Briefcase, Camera, Save, Loader2, Plus, Pencil, X,
-  Users, UserPlus, Edit2, Trash2,
+  Users, UserPlus, Edit2, Trash2, User,
 } from "lucide-react";
 import type { BusinessProfile, BusinessHours, Service, Worker, ToastState } from "@/types/settings";
 import AddServiceModal from "@/components/AddServiceModal";
