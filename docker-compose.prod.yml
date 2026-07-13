@@ -7,7 +7,7 @@ services:
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
       - /opt/docker/volta/.env:/app/.env:ro
-    command: pnpm --filter backend start
+    command: sh -c "cd /app/backend && npx prisma migrate deploy && pnpm --filter backend start"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
