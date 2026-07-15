@@ -23,6 +23,11 @@ export const createBusiness = async (req, res) => {
 
 export const deleteBusiness = async (req, res) => {
   const { id } = req.params;
+  const business = await adminService.getAllBusinesses();
+  const exists = business.some(b => b.id === id);
+  if (!exists) {
+    return res.status(404).json({ error: 'Business not found' });
+  }
   await adminService.deleteBusiness(id);
   return ApiResponse.deleted(res);
 };

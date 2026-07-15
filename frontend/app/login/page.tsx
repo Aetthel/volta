@@ -23,20 +23,18 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const callbackUrl = email === "admin@test.com" ? "/admin" : "/inicio";
-
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: "/inicio",
       });
 
       if (result?.error) {
         setError("Correo electrónico o contraseña incorrectos");
         setIsLoading(false);
       } else {
-        router.push(callbackUrl);
+        router.push(result?.url || "/inicio");
       }
     } catch (err) {
       setError("Error de conexión al servidor de autenticación");
