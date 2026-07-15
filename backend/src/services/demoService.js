@@ -1,9 +1,13 @@
 import prisma from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import logger from '../utils/logger.js';
 
 const DEMO_DURATION_MINUTES = 30;
-const DEMO_PASSWORD = 'Demo1234';
+
+function generateDemoPassword() {
+  return crypto.randomBytes(12).toString('base64url');
+}
 
 function generateDemoId() {
   return crypto.randomInt(1000, 9999);
@@ -13,7 +17,8 @@ export const createDemo = async () => {
   const demoId = generateDemoId();
   const email = `demo-volta-${demoId}@volta.app`;
   const businessName = `Demo Volta #${demoId}`;
-  const hashedPass = await bcrypt.hash(DEMO_PASSWORD, 10);
+  const demoPassword = generateDemoPassword();
+  const hashedPass = await bcrypt.hash(demoPassword, 10);
   const expiresAt = new Date(Date.now() + DEMO_DURATION_MINUTES * 60 * 1000);
 
   return prisma.$transaction(async (tx) => {
@@ -158,7 +163,7 @@ export const createDemo = async () => {
 
     return {
       email,
-      password: DEMO_PASSWORD,
+      password: demoPassword,
       businessId: biz.id,
       businessName,
       expiresAt: expiresAt.toISOString(),
@@ -172,9 +177,15 @@ export const deleteDemo = async (businessId) => {
     return false;
   }
 
-  await prisma.appointment.deleteMany({ where: { businessId } });
-  await prisma.client.deleteMany({ where: { businessId } });
-  await prisma.business.delete({ where: { id: businessId } });
+  await prisma.$transaction(async (tx) => {
+    await tx.alert.deleteMany({ where: { user: { businessId } } });
+    await tx.appointment.deleteMany({ where: { businessId } });
+    await tx.client.deleteMany({ where: { businessId } });
+    await tx.service.deleteMany({ where: { businessId } });
+    await tx.businessHours.deleteMany({ where: { businessId } });
+    await tx.user.deleteMany({ where: { businessId } });
+    await tx.business.delete({ where: { id: businessId } });
+  });
   return true;
 };
 
@@ -191,12 +202,18 @@ export const cleanupExpiredDemos = async () => {
   let deletedCount = 0;
   for (const biz of expiredDemos) {
     try {
-      await prisma.appointment.deleteMany({ where: { businessId: biz.id } });
-      await prisma.client.deleteMany({ where: { businessId: biz.id } });
-      await prisma.business.delete({ where: { id: biz.id } });
+      await prisma.$transaction(async (tx) => {
+        await tx.alert.deleteMany({ where: { user: { businessId: biz.id } } });
+        await tx.appointment.deleteMany({ where: { businessId: biz.id } });
+        await tx.client.deleteMany({ where: { businessId: biz.id } });
+        await tx.service.deleteMany({ where: { businessId: biz.id } });
+        await tx.businessHours.deleteMany({ where: { businessId: biz.id } });
+        await tx.user.deleteMany({ where: { businessId: biz.id } });
+        await tx.business.delete({ where: { id: biz.id } });
+      });
       deletedCount++;
     } catch (err) {
-      console.error(`[Demo Cleanup] Failed to delete demo ${biz.id}:`, err);
+      logger.error(`[Demo Cleanup] Failed to delete demo ${biz.id}:`, err);
     }
   }
 

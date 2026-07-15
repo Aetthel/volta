@@ -2,18 +2,23 @@ const attempts = new Map();
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
-// Cleanup stale entries every 5 minutes to prevent memory leak
-setInterval(() => {
+let lastCleanup = Date.now();
+
+function cleanupStaleEntries() {
   const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL_MS) return;
+  lastCleanup = now;
   for (const [key, record] of attempts) {
     if (now - record.firstAttempt > WINDOW_MS) {
       attempts.delete(key);
     }
   }
-}, 5 * 60 * 1000);
+}
 
 export function checkRateLimit(key) {
+  cleanupStaleEntries();
   const now = Date.now();
   const record = attempts.get(key);
 

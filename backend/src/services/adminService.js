@@ -57,12 +57,28 @@ export const createBusiness = async ({ name, email, phone, address }, hashedPass
 };
 
 export const deleteBusiness = async (id) => {
-  await prisma.appointment.deleteMany({ where: { businessId: id } });
-  await prisma.client.deleteMany({ where: { businessId: id } });
-  return prisma.business.delete({ where: { id } });
+  return prisma.$transaction(async (tx) => {
+    await tx.alert.deleteMany({ where: { user: { businessId: id } } });
+    await tx.appointment.deleteMany({ where: { businessId: id } });
+    await tx.client.deleteMany({ where: { businessId: id } });
+    await tx.service.deleteMany({ where: { businessId: id } });
+    await tx.businessHours.deleteMany({ where: { businessId: id } });
+    await tx.user.deleteMany({ where: { businessId: id } });
+    return tx.business.delete({ where: { id } });
+  });
 };
 
 export const getDashboardData = async () => {
+  const now = new Date();
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  const businesses = await prisma.business.findMany({
+    select: { id: true, name: true }
+  });
+
+  const totalClients = await prisma.client.count();
+
   const servicePrices = {
     "Corte Caballero": 35,
     "Corte Dama": 45,
@@ -72,87 +88,80 @@ export const getDashboardData = async () => {
     "Spa Facial": 40,
   };
 
-  // Date ranges for growth calculation
-  const now = new Date();
-  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-
-  const businesses = await prisma.business.findMany({
-    include: {
-      appointments: {
-        include: {
-          client: true,
-          service: true
-        }
-      },
-      clients: true,
-      services: true
-    }
-  });
-
-  const totalClients = await prisma.client.count();
-
+  const rankings = [];
   let totalRevenue = 0;
   let totalThisMonth = 0;
   let totalLastMonth = 0;
 
-  const rankings = businesses.map((b) => {
+  for (const biz of businesses) {
+    const [appointments, services, clientsCount] = await Promise.all([
+      prisma.appointment.findMany({
+        where: { businessId: biz.id },
+        select: {
+          appointmentDate: true,
+          serviceName: true,
+          service: { select: { price: true } },
+          client: { select: { frequentService: true } }
+        }
+      }),
+      prisma.service.findMany({
+        where: { businessId: biz.id },
+        select: { name: true, price: true }
+      }),
+      prisma.client.count({ where: { businessId: biz.id } })
+    ]);
+
+    let bizRevenue = 0;
     let bizThisMonth = 0;
     let bizLastMonth = 0;
 
-    const bizRevenue = b.appointments.reduce((acc, app) => {
+    for (const app of appointments) {
       let price = null;
 
-      // 1. Direct link relation
       if (app.service && typeof app.service.price === 'number') {
         price = app.service.price;
       }
 
-      // 2. Custom service matching serviceName in b.services
       if (price === null && app.serviceName) {
-        const match = b.services.find(s => s.name === app.serviceName);
+        const match = services.find(s => s.name === app.serviceName);
         if (match && typeof match.price === 'number') {
           price = match.price;
         }
       }
 
-      // 3. Custom service matching frequentService in b.services
       if (price === null && app.client && app.client.frequentService) {
-        const match = b.services.find(s => s.name === app.client.frequentService);
+        const match = services.find(s => s.name === app.client.frequentService);
         if (match && typeof match.price === 'number') {
           price = match.price;
         }
       }
 
-      // 4. Fallback to servicePrices or 35
       if (price === null) {
         const serviceName = app.serviceName || app.client?.frequentService || "Corte Caballero";
         price = servicePrices[serviceName] || 35;
       }
 
+      bizRevenue += price;
       const apptDate = new Date(app.appointmentDate);
       if (apptDate >= startOfThisMonth) bizThisMonth++;
       else if (apptDate >= startOfLastMonth) bizLastMonth++;
-
-      return acc + price;
-    }, 0);
+    }
 
     totalRevenue += bizRevenue;
     totalThisMonth += bizThisMonth;
     totalLastMonth += bizLastMonth;
 
-    // Real growth: percentage change from last month to this month
     const changePercent = bizLastMonth === 0
       ? (bizThisMonth > 0 ? '+100%' : '0%')
       : `${bizThisMonth >= bizLastMonth ? '+' : ''}${Math.round(((bizThisMonth - bizLastMonth) / bizLastMonth) * 100)}%`;
 
-    return {
-      name: b.name,
+    rankings.push({
+      name: biz.name,
       revenue: bizRevenue,
-      clientsCount: b.clients.length,
+      clientsCount,
       change: changePercent,
-    };
-  });
+    });
+  }
 
   rankings.sort((a, b) => b.revenue - a.revenue);
 
@@ -166,7 +175,6 @@ export const getDashboardData = async () => {
   const totalAppointments = await prisma.appointment.count();
   const averageTicket = totalAppointments > 0 ? Math.round(totalRevenue / totalAppointments) : 35;
 
-  // Real global growth
   const globalGrowth = totalLastMonth === 0
     ? (totalThisMonth > 0 ? '+100%' : '0%')
     : `${totalThisMonth >= totalLastMonth ? '+' : ''}${Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100)}%`;

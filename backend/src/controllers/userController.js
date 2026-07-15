@@ -74,6 +74,9 @@ export const updateUser = async (req, res) => {
     if (role === 'ADMIN') {
       return res.status(403).json({ error: 'Forbidden: Cannot promote user to ADMIN' });
     }
+    if (role === 'JEFE') {
+      return res.status(403).json({ error: 'Forbidden: Cannot promote user to JEFE' });
+    }
   }
 
   const data = {};

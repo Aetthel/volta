@@ -3,6 +3,7 @@ import whatsappManager from './whatsappService.js';
 import config from '../config/index.js';
 import { computeHmac } from '../utils/crypto.js';
 import { maskPhone } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Formats a message template by replacing placeholders with actual data
@@ -37,7 +38,7 @@ async function sendWelcomeMessage(appointmentId) {
     if (!appt || !appt.business.welcomeMessage) return;
 
     if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
-      console.log(`[Bot] Skipping welcome message to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
+      logger.info(`[Bot] Skipping welcome message to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
       return;
     }
 
@@ -47,13 +48,13 @@ async function sendWelcomeMessage(appointmentId) {
       businessName: appt.business.name
     });
 
-    console.log(`[Bot] Sending welcome to ${maskPhone(appt.clientPhone)}...`);
+    logger.info(`[Bot] Sending welcome to ${maskPhone(appt.clientPhone)}...`);
     await whatsappManager.initClient(appt.businessId); // Ensure client is init
     await whatsappManager.waitForReady(appt.businessId, 45000);
     await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
 
   } catch (err) {
-    console.error(`[Bot] Error sending welcome message:`, err);
+    logger.error(`[Bot] Error sending welcome message:`, err);
   }
 }
 
@@ -61,7 +62,7 @@ async function sendWelcomeMessage(appointmentId) {
  * The Sentinel: Scans for pending appointments for the next day and sends notifications
  */
 async function runSentinel() {
-  console.log(`[Sentinel] Starting daily scanning process: ${new Date().toLocaleString()}`);
+  logger.info(`[Sentinel] Starting daily scanning process: ${new Date().toLocaleString()}`);
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -85,17 +86,17 @@ async function runSentinel() {
       }
     });
 
-    console.log(`[Sentinel] Found ${appointments.length} pending appointments for tomorrow.`);
+    logger.info(`[Sentinel] Found ${appointments.length} pending appointments for tomorrow.`);
 
     for (const appt of appointments) {
       try {
         if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
-          console.log(`[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
+          logger.info(`[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
           continue;
         }
 
         if (!appt.business.reminderMessage) {
-          console.log(`[Sentinel] No reminder template for ${appt.business.name}, skipping.`);
+          logger.info(`[Sentinel] No reminder template for ${appt.business.name}, skipping.`);
           continue;
         }
 
@@ -118,7 +119,7 @@ async function runSentinel() {
         await new Promise(resolve => setTimeout(resolve, delay));
 
       } catch (err) {
-        console.error(`[Sentinel] Error processing appointment ${appt.id}:`, err);
+        logger.error(`[Sentinel] Error processing appointment ${appt.id}:`, err);
         await prisma.appointment.update({
           where: { id: appt.id },
           data: { status: 'ERROR' }
@@ -126,7 +127,7 @@ async function runSentinel() {
       }
     }
   } catch (err) {
-    console.error(`[Sentinel] Fatal error:`, err);
+    logger.error(`[Sentinel] Fatal error:`, err);
   }
 }
 
@@ -141,12 +142,12 @@ async function sendConsentMessage(businessId, client) {
   const FRONTEND_URL = config.frontendUrl;
   const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
   const tokenData = `${client.id}:${expiry}`;
-  const token = computeHmac(tokenData, config.backendJwtSecret);
+  const token = computeHmac(tokenData, config.lopdHmacSecret);
   const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}&exp=${expiry}`;
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
 
 
-  console.log(`[Bot] Triggering LOPD consent for client ${client.id}`);
+  logger.info(`[Bot] Triggering LOPD consent for client ${client.id}`);
 
   try {
     // Ensure the client is initialised (restores session from disk after a restart)
@@ -158,10 +159,10 @@ async function sendConsentMessage(businessId, client) {
     await whatsappManager.waitForReady(businessId, 45000);
 
     await whatsappManager.sendMessage(businessId, client.phone, message);
-    console.log(`[WhatsApp] LOPD consent message sent to ${maskPhone(client.phone)}`);
+    logger.info(`[WhatsApp] LOPD consent message sent to ${maskPhone(client.phone)}`);
   } catch (wsErr) {
-    console.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);
-    console.error(`[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`);
+    logger.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);
+    logger.error(`[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`);
   }
 }
 

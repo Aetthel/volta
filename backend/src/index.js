@@ -43,8 +43,12 @@ app.use(helmet({
 }));
 
 // Schedule the Sentinel to run every day at 20:00
-cron.schedule('0 20 * * *', () => {
-  runSentinel();
+cron.schedule('0 20 * * *', async () => {
+  try {
+    await runSentinel();
+  } catch (err) {
+    console.error('[Sentinel] Unhandled error in cron:', err);
+  }
 });
 
 // Clean up expired demos every 5 minutes

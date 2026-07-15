@@ -83,6 +83,10 @@ export const updateHours = async (req, res) => {
     return res.status(404).json({ error: 'Business not found' });
   }
 
+  if (!Array.isArray(hoursData) || hoursData.length !== 7) {
+    return res.status(400).json({ error: 'Se deben proporcionar exactamente 7 días de horarios.' });
+  }
+
   await businessService.updateBusinessHours(id, hoursData);
   const updatedHours = await businessService.getBusinessHours(id);
 

@@ -1,4 +1,5 @@
 import prisma from '../config/db.js';
+import { logger } from '../utils/logger.js';
 
 // GET: Fetch all alerts for the authenticated user
 export const getAlerts = async (req, res) => {
@@ -14,7 +15,7 @@ export const getAlerts = async (req, res) => {
     });
     return res.json(alerts);
   } catch (error) {
-    console.error('Error fetching alerts:', error);
+    logger.error('Error fetching alerts:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -45,7 +46,7 @@ export const markAlertAsRead = async (req, res) => {
 
     return res.json(updatedAlert);
   } catch (error) {
-    console.error('Error marking alert as read:', error);
+    logger.error('Error marking alert as read:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -65,7 +66,7 @@ export const markAllAlertsAsRead = async (req, res) => {
     });
     return res.json({ success: true, message: 'All alerts marked as read' });
   } catch (error) {
-    console.error('Error marking all alerts as read:', error);
+    logger.error('Error marking all alerts as read:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -118,7 +119,7 @@ export const createAlert = async (req, res) => {
 
     return res.status(201).json({ success: true, count: createdAlerts.length });
   } catch (error) {
-    console.error('Error creating alert:', error);
+    logger.error('Error creating alert:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };

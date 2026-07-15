@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { logger } from '../utils/logger.js';
 
 const isValidId = (id) => {
   if (typeof id !== 'string') return false;
@@ -18,7 +19,7 @@ const validateBody = (schema) => (req, res, next) => {
     schema.parse(req.body);
     next();
   } catch (error) {
-    console.error('[Validation Error]', error);
+    logger.error('[Validation Error]', error);
     const details = error.errors
       ? error.errors.map((e) => ({ field: e.path.join('.'), message: e.message }))
       : error.message;

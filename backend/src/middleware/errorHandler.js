@@ -2,8 +2,9 @@
  * Global Express error handling middleware.
  * Formats API errors and handles custom and DB-level (Prisma) exceptions.
  */
+import { logger } from '../utils/logger.js';
 const errorHandler = (err, req, res, next) => {
-  console.error('[Global Error Handler]', {
+  logger.error('[Global Error Handler]', {
     message: err.message,
     name: err.name,
     path: req.originalUrl,

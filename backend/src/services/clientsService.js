@@ -2,6 +2,7 @@ import prisma from '../config/db.js';
 import { sendConsentMessage } from './botService.js';
 import whatsappManager from './whatsappService.js';
 import { maskPhone } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export const getClientsByBusiness = async (businessId) => {
   return await prisma.client.findMany({
@@ -25,7 +26,7 @@ export const createClient = async (clientData) => {
   });
 
   sendConsentMessage(businessId, client).catch((err) => {
-    console.error('[Clients Service] Error sending LOPD consent request:', err);
+    logger.error('[Clients Service] Error sending LOPD consent request:', err);
   });
 
   return client;
@@ -66,11 +67,11 @@ export const getClientById = async (id) => {
 
 export const resendConsent = async (client) => {
   sendConsentMessage(client.businessId, client).catch((err) => {
-    console.error('[Clients Service] Error resending LOPD consent request:', err);
+    logger.error('[Clients Service] Error resending LOPD consent request:', err);
   });
 };
 
 export const sendMessage = async (client, message) => {
   await whatsappManager.sendMessage(client.businessId, client.phone, message.trim());
-  console.log(`[WhatsApp] Custom message sent to ${maskPhone(client.phone)}`);
+  logger.info(`[WhatsApp] Custom message sent to ${maskPhone(client.phone)}`);
 };

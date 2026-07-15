@@ -3,14 +3,16 @@ import path from 'path';
 import fs from 'fs';
 import prisma from '../config/db.js';
 import config from '../config/index.js';
+import logger from '../utils/logger.js';
 
 const { Client, LocalAuth } = pkg;
 
 class WhatsAppManager {
   constructor() {
     this.clients = new Map();
-    // Track which businessIds have a fully-ready client
     this.readyClients = new Set();
+    // Lock map: businessId -> Promise resolving to the initialized client
+    this._initializing = new Map();
   }
 
   async updateStatus(businessId, status, qr = null) {
@@ -22,52 +24,65 @@ class WhatsAppManager {
           qrCode: qr
         }
       });
-      console.log(`[WhatsApp] Status updated for ${businessId}: ${status}`);
+      logger.info(`[WhatsApp] Status updated for ${businessId}: ${status}`);
     } catch (err) {
-      console.error(`[WhatsApp] Error updating status for ${businessId}:`, err);
+      logger.error(`[WhatsApp] Error updating status for ${businessId}:`, err);
     }
   }
 
   deleteSession(businessId) {
     if (!/^[a-zA-Z0-9_-]+$/.test(businessId)) {
-      console.error(`[WhatsApp] Invalid businessId for session deletion: ${businessId}`);
+      logger.error(`[WhatsApp] Invalid businessId for session deletion: ${businessId}`);
       return;
     }
     const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
     if (fs.existsSync(sessionPath)) {
-      console.log(`[WhatsApp] Deleting session directory for business: ${businessId}`);
+      logger.info(`[WhatsApp] Deleting session directory for business: ${businessId}`);
       try {
         fs.rmSync(sessionPath, { recursive: true, force: true });
       } catch (rmErr) {
-        console.error(`[WhatsApp] Failed to delete session directory for ${businessId}:`, rmErr);
+        logger.error(`[WhatsApp] Failed to delete session directory for ${businessId}:`, rmErr);
       }
     }
   }
 
   async initClient(businessId) {
+    // Return existing ready client
     if (this.clients.has(businessId)) {
       return this.clients.get(businessId);
     }
 
-    console.log(`[WhatsApp] Initializing client for business: ${businessId}`);
+    // If initialization is already in progress, wait for it
+    if (this._initializing.has(businessId)) {
+      return this._initializing.get(businessId);
+    }
 
-    // Remove Chromium's Singleton lock files if they exist from a previous crashed/killed process.
-    // This happens when Docker recreates the container with a new hostname but the volume
-    // persists — Chromium thinks the profile is "in use by another computer".
-    // Note: process.cwd() in the backend workspace resolves to /app/backend.
+    // Lock: start initialization
+    const initPromise = this._doInitClient(businessId);
+    this._initializing.set(businessId, initPromise);
+
+    try {
+      return await initPromise;
+    } finally {
+      this._initializing.delete(businessId);
+    }
+  }
+
+  async _doInitClient(businessId) {
+    logger.info(`[WhatsApp] Initializing client for business: ${businessId}`);
+
     const sessionDir = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
     for (const lockFile of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
       const lockPath = path.join(sessionDir, lockFile);
       if (fs.existsSync(lockPath)) {
         try {
           fs.unlinkSync(lockPath);
-          console.log(`[WhatsApp] Removed stale ${lockFile} for business: ${businessId}`);
+          logger.info(`[WhatsApp] Removed stale ${lockFile} for business: ${businessId}`);
         } catch (e) {
-          console.warn(`[WhatsApp] Could not remove ${lockFile}:`, e.message);
+          logger.warn(`[WhatsApp] Could not remove ${lockFile}:`, e.message);
         }
       }
     }
-
 
     const client = new Client({
       authStrategy: new LocalAuth({
@@ -90,39 +105,42 @@ class WhatsAppManager {
     });
 
     client.on('qr', (qr) => {
-      console.log(`[WhatsApp] QR Code received for business ${businessId}`);
+      logger.info(`[WhatsApp] QR Code received for business ${businessId}`);
       this.updateStatus(businessId, 'WAITING_QR', qr);
     });
 
     client.on('ready', () => {
-      console.log(`[WhatsApp] Client is ready for business: ${businessId}`);
+      logger.info(`[WhatsApp] Client is ready for business: ${businessId}`);
       this.readyClients.add(businessId);
       this.updateStatus(businessId, 'CONNECTED', null);
     });
 
     client.on('authenticated', () => {
-      console.log(`[WhatsApp] Client authenticated for business: ${businessId}`);
+      logger.info(`[WhatsApp] Client authenticated for business: ${businessId}`);
     });
 
     client.on('auth_failure', (msg) => {
-      console.error(`[WhatsApp] Authentication failure for business ${businessId}:`, msg);
+      logger.error(`[WhatsApp] Authentication failure for business ${businessId}:`, msg);
       this.readyClients.delete(businessId);
+      this.clients.delete(businessId);
       this.updateStatus(businessId, 'DISCONNECTED', null);
       this.deleteSession(businessId);
     });
 
     client.on('disconnected', (reason) => {
-      console.log(`[WhatsApp] Client disconnected for business ${businessId}:`, reason);
+      logger.info(`[WhatsApp] Client disconnected for business ${businessId}:`, reason);
       this.readyClients.delete(businessId);
-      this.updateStatus(businessId, 'DISCONNECTED', null);
       this.clients.delete(businessId);
+      this.updateStatus(businessId, 'DISCONNECTED', null);
     });
 
     this.clients.set(businessId, client);
-    client.initialize().catch(err => {
-      console.error(`[WhatsApp] Failed to initialize client for ${businessId}:`, err);
+    await client.initialize().catch(err => {
+      logger.error(`[WhatsApp] Failed to initialize client for ${businessId}:`, err);
+      this.clients.delete(businessId);
       this.readyClients.delete(businessId);
       this.updateStatus(businessId, 'DISCONNECTED', null);
+      throw err;
     });
 
     return client;
@@ -200,14 +218,14 @@ class WhatsAppManager {
     const chatId = `${cleanPhone}@c.us`;
 
     try {
-      console.log(`[WhatsApp] Sending message to ${chatId}...`);
+      logger.info(`[WhatsApp] Sending message to ${chatId}...`);
       return await client.sendMessage(chatId, message);
     } catch (err) {
-      console.error(`[WhatsApp] Failed to send message to ${chatId}:`, err.message);
+      logger.error(`[WhatsApp] Failed to send message to ${chatId}:`, err.message);
 
       // Only simulate in non-production environments to avoid masking real failures
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`[WhatsApp] [SIMULATION] Mock message sent to chat`);
+        logger.info(`[WhatsApp] [SIMULATION] Mock message sent to chat`);
         return { simulated: true, messageId: `mock-msg-${Date.now()}` };
       }
 

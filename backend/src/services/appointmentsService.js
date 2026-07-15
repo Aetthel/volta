@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { sendWelcomeMessage, sendConsentMessage } from './botService.js';
 import { normalizeString, normalizePhone } from '../utils/index.js';
+import logger from '../utils/logger.js';
 
 export const getAppointmentsByBusiness = async (businessId) => {
   return await prisma.appointment.findMany({
@@ -53,7 +54,7 @@ export const createAppointment = async (appointmentData) => {
         lastVisit: "Hoy"
       }
     });
-    console.log(`[Service] Automatically registered new LOPD-pending client: ${client.id}`);
+    logger.info(`[Service] Automatically registered new LOPD-pending client: ${client.id}`);
   }
 
   // Look up service by name to store ID and Name
@@ -89,11 +90,11 @@ export const createAppointment = async (appointmentData) => {
 
   if (client.lopdStatus === 'Aceptado') {
     sendWelcomeMessage(appointment.id).catch((err) => {
-      console.error('[Service] Error sending welcome message on appointment creation:', err);
+      logger.error('[Service] Error sending welcome message on appointment creation:', err);
     });
   } else {
     sendConsentMessage(businessId, client).catch((err) => {
-      console.error('[Service] Error sending LOPD consent request:', err);
+      logger.error('[Service] Error sending LOPD consent request:', err);
     });
   }
 

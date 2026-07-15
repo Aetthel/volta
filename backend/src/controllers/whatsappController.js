@@ -1,6 +1,7 @@
 import whatsappManager from '../services/whatsappService.js';
 import prisma from '../config/db.js';
 import { ApiResponse } from '../utils/index.js';
+import { logger } from '../utils/logger.js';
 
 export const initClient = async (req, res) => {
   const { businessId } = req.body;
@@ -53,7 +54,7 @@ export const disconnectClient = async (req, res) => {
     try {
       await client.destroy();
     } catch (destroyErr) {
-      console.error('[API] Warning: error during client destroy:', destroyErr);
+      logger.error('[API] Warning: error during client destroy:', destroyErr);
     }
     whatsappManager.clients.delete(businessId);
   }
