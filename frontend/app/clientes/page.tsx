@@ -106,7 +106,7 @@ const getAvatarColor = (name: string) => {
 
 export default function ClientesPage() {
   const { data: session } = useSession();
-  const businessId = session?.user?.businessId || "mock-business-id";
+  const businessId = session?.user?.businessId || "";
 
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [clientModalTriggerRect, setClientModalTriggerRect] = useState<DOMRect | null>(null);

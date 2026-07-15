@@ -26,7 +26,7 @@ import { errorHandler } from './middleware/index.js';
 const app = express();
 const PORT = config.port;
 
-app.set('trust proxy', 1);
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : false);
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -40,7 +40,6 @@ app.use(helmet({
       frameAncestors: ["'none'"],
     },
   },
-  crossOriginEmbedderPolicy: false,
 }));
 
 // Schedule the Sentinel to run every day at 20:00
@@ -78,8 +77,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 /**
  * Health check endpoint

@@ -2,7 +2,7 @@ import asyncHandler from './asyncHandler.js';
 import { computeHmac, signToken, verifyToken } from './crypto.js';
 import { normalizePhone, normalizeString } from './formatters.js';
 import { ApiResponse } from './apiResponse.js';
-import { logger } from './logger.js';
+import { logger, maskPhone, maskEmail } from './logger.js';
 
 export {
   asyncHandler,
@@ -13,4 +13,6 @@ export {
   normalizeString,
   ApiResponse,
   logger,
+  maskPhone,
+  maskEmail,
 };

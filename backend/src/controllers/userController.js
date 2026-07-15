@@ -34,8 +34,8 @@ export const createUser = async (req, res) => {
     if (businessId && businessId !== req.user.businessId) {
       return res.status(403).json({ error: 'Forbidden: Access denied to other business ID' });
     }
-    if (role === 'ADMIN') {
-      return res.status(403).json({ error: 'Forbidden: Cannot create ADMIN users' });
+    if (role === 'ADMIN' || role === 'JEFE') {
+      return res.status(403).json({ error: 'Forbidden: Cannot create ADMIN or JEFE users' });
     }
   }
 
@@ -68,7 +68,7 @@ export const updateUser = async (req, res) => {
     if (!targetUser || targetUser.businessId !== req.user.businessId) {
       return res.status(403).json({ error: 'Forbidden' });
     }
-    if (businessId && businessId !== req.user.businessId) {
+    if (businessId !== undefined && businessId !== req.user.businessId) {
       return res.status(403).json({ error: 'Forbidden: Cannot transfer user to another business' });
     }
     if (role === 'ADMIN') {
@@ -91,7 +91,7 @@ export const updateUser = async (req, res) => {
   }
   if (role) data.role = role;
   if (businessId !== undefined) {
-    data.businessId = businessId || null;
+    data.businessId = businessId;
   }
 
   const updated = await userService.updateUser(id, data);

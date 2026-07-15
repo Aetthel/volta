@@ -1,6 +1,7 @@
 import prisma from '../config/db.js';
 import { sendConsentMessage } from './botService.js';
 import whatsappManager from './whatsappService.js';
+import { maskPhone } from '../utils/logger.js';
 
 export const getClientsByBusiness = async (businessId) => {
   return await prisma.client.findMany({
@@ -31,7 +32,7 @@ export const createClient = async (clientData) => {
 };
 
 export const updateClient = async (id, clientData) => {
-  const { name, surname, email, phone, lopdStatus, lastVisit, frequentService } = clientData;
+  const { name, surname, email, phone, lastVisit, frequentService } = clientData;
 
   return await prisma.client.update({
     where: { id },
@@ -40,7 +41,6 @@ export const updateClient = async (id, clientData) => {
       surname,
       email,
       phone,
-      lopdStatus,
       lastVisit,
       frequentService
     }
@@ -72,5 +72,5 @@ export const resendConsent = async (client) => {
 
 export const sendMessage = async (client, message) => {
   await whatsappManager.sendMessage(client.businessId, client.phone, message.trim());
-  console.log(`[WhatsApp] Custom message sent to ${client.phone}`);
+  console.log(`[WhatsApp] Custom message sent to ${maskPhone(client.phone)}`);
 };

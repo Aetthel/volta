@@ -9,7 +9,7 @@ const verifyToken = (id, token, exp) => {
   const expiry = parseInt(exp, 10);
   if (isNaN(expiry) || Date.now() > expiry) return false;
   const tokenData = `${id}:${expiry}`;
-  const expectedToken = computeHmac(tokenData, config.backendJwtSecret);
+  const expectedToken = computeHmac(tokenData, config.lopdHmacSecret);
   try {
     return crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expectedToken));
   } catch {
@@ -19,7 +19,8 @@ const verifyToken = (id, token, exp) => {
 
 export const getConsent = async (req, res) => {
   const { id } = req.params;
-  const { token, exp } = req.query;
+  const token = req.headers['x-lopd-token'];
+  const exp = req.headers['x-lopd-exp'];
 
   if (!verifyToken(id, token, exp)) {
     return res.status(400).json({ error: 'Invalid, missing, or expired signature token.' });
@@ -39,7 +40,8 @@ export const getConsent = async (req, res) => {
 
 export const acceptConsent = async (req, res) => {
   const { id } = req.params;
-  const { token, exp } = req.query;
+  const token = req.headers['x-lopd-token'];
+  const exp = req.headers['x-lopd-exp'];
 
   if (!verifyToken(id, token, exp)) {
     return res.status(400).json({ error: 'Invalid, missing, or expired signature token.' });
@@ -52,13 +54,10 @@ export const acceptConsent = async (req, res) => {
 
   // Idempotencia — ya aceptado, nada que hacer
   if (client.lopdStatus === 'Aceptado') {
-    console.log(`[API] Client ${client.name} already accepted LOPD. Skipping.`);
     return ApiResponse.success(res, { success: true, client });
   }
 
   const { updatedClient } = await lopdService.acceptConsent(id);
-
-  console.log(`[API] Client ${client.name} (${client.phone}) accepted LOPD consent. Status updated to Aceptado.`);
 
   return ApiResponse.success(res, { success: true, client: updatedClient });
 };

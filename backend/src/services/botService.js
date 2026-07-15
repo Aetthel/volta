@@ -2,6 +2,7 @@ import prisma from '../config/db.js';
 import whatsappManager from './whatsappService.js';
 import config from '../config/index.js';
 import { computeHmac } from '../utils/crypto.js';
+import { maskPhone } from '../utils/logger.js';
 
 /**
  * Formats a message template by replacing placeholders with actual data
@@ -36,7 +37,7 @@ async function sendWelcomeMessage(appointmentId) {
     if (!appt || !appt.business.welcomeMessage) return;
 
     if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
-      console.log(`[Bot] Skipping welcome message to ${appt.clientPhone} (LOPD status: ${appt.client?.lopdStatus || 'unknown'})`);
+      console.log(`[Bot] Skipping welcome message to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
       return;
     }
 
@@ -46,7 +47,7 @@ async function sendWelcomeMessage(appointmentId) {
       businessName: appt.business.name
     });
 
-    console.log(`[Bot] Sending welcome to ${appt.clientPhone}...`);
+    console.log(`[Bot] Sending welcome to ${maskPhone(appt.clientPhone)}...`);
     await whatsappManager.initClient(appt.businessId); // Ensure client is init
     await whatsappManager.waitForReady(appt.businessId, 45000);
     await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
@@ -89,7 +90,7 @@ async function runSentinel() {
     for (const appt of appointments) {
       try {
         if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
-          console.log(`[Sentinel] Skipping reminder to ${appt.clientPhone} (LOPD status: ${appt.client?.lopdStatus || 'unknown'})`);
+          console.log(`[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
           continue;
         }
 
@@ -145,7 +146,7 @@ async function sendConsentMessage(businessId, client) {
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
 
 
-  console.log(`[Bot] Triggering LOPD consent message for client ${client.name} (${client.phone})...`);
+  console.log(`[Bot] Triggering LOPD consent for client ${client.id}`);
 
   try {
     // Ensure the client is initialised (restores session from disk after a restart)
@@ -157,9 +158,9 @@ async function sendConsentMessage(businessId, client) {
     await whatsappManager.waitForReady(businessId, 45000);
 
     await whatsappManager.sendMessage(businessId, client.phone, message);
-    console.log(`[WhatsApp] LOPD consent message sent to ${client.phone}`);
+    console.log(`[WhatsApp] LOPD consent message sent to ${maskPhone(client.phone)}`);
   } catch (wsErr) {
-    console.error(`[WhatsApp] Failed to send LOPD consent message to ${client.phone}:`, wsErr.message);
+    console.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);
     console.error(`[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`);
   }
 }

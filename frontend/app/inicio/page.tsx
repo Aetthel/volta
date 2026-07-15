@@ -61,7 +61,7 @@ const DEFAULT_SERVICES = [
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const businessId = session?.user?.businessId || "mock-business-id";
+  const businessId = session?.user?.businessId || "";
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);

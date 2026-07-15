@@ -14,14 +14,14 @@ export const getAppointments = async (req, res) => {
 };
 
 export const createAppointment = async (req, res) => {
-  const { businessId } = req.body;
+  const { clientName, clientPhone, appointmentDate, businessId, service } = req.body;
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
     return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
   }
 
-  const appointment = await appointmentsService.createAppointment(req.body);
+  const appointment = await appointmentsService.createAppointment({ clientName, clientPhone, appointmentDate, businessId, service });
   return ApiResponse.created(res, appointment);
 };
 
@@ -38,7 +38,8 @@ export const updateAppointment = async (req, res) => {
     return res.status(403).json({ error: 'Forbidden: Access denied to this appointment' });
   }
 
-  const updated = await appointmentsService.updateAppointment(id, req.body, appt.businessId);
+  const { clientName, clientPhone, appointmentDate, status, serviceName } = req.body;
+  const updated = await appointmentsService.updateAppointment(id, { clientName, clientPhone, appointmentDate, status, serviceName }, appt.businessId);
   return ApiResponse.success(res, updated);
 };
 

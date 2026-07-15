@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL || !process.env.API_KEY) {
 }
 
 // Startup environment variables verification
-const REQUIRED_ENV_VARS = ['DATABASE_URL', 'API_KEY', 'BACKEND_JWT_SECRET'];
+const REQUIRED_ENV_VARS = ['DATABASE_URL', 'API_KEY', 'BACKEND_JWT_SECRET', 'LOPD_HMAC_SECRET'];
 const missingVars = REQUIRED_ENV_VARS.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
@@ -24,6 +24,7 @@ const config = {
   databaseUrl: process.env.DATABASE_URL,
   apiKey: process.env.API_KEY,
   backendJwtSecret: process.env.BACKEND_JWT_SECRET,
+  lopdHmacSecret: process.env.LOPD_HMAC_SECRET,
   port: process.env.BACKEND_PORT || (process.env.PORT && process.env.PORT !== '3000' ? process.env.PORT : 3001),
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,

@@ -14,14 +14,14 @@ export const getClients = async (req, res) => {
 };
 
 export const createClient = async (req, res) => {
-  const { businessId } = req.body;
+  const { name, surname, email, phone, businessId } = req.body;
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
     return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
   }
 
-  const client = await clientsService.createClient(req.body);
+  const client = await clientsService.createClient({ name, surname, email, phone, businessId });
   return ApiResponse.created(res, client);
 };
 
@@ -36,7 +36,8 @@ export const updateClient = async (req, res) => {
     }
   }
 
-  const client = await clientsService.updateClient(id, req.body);
+  const { name, surname, email, phone, lastVisit, frequentService } = req.body;
+  const client = await clientsService.updateClient(id, { name, surname, email, phone, lastVisit, frequentService });
   return ApiResponse.success(res, client);
 };
 

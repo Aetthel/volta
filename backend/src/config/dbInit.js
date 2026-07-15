@@ -17,7 +17,7 @@ async function ensureMockBusinessesExist() {
       });
 
       if (!existingAdmin) {
-        console.log(`[dbInit] No admin found. Creating initial admin with email: ${initialAdminEmail}`);
+        console.log('[dbInit] No admin found. Creating initial admin.');
         const hashedAdminPass = await bcrypt.hash(initialAdminPassword, 10);
         await prisma.user.create({
           data: {

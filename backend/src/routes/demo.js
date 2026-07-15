@@ -15,6 +15,6 @@ const demoLimiter = rateLimit({
 });
 
 router.post('/', requireApiKey, demoLimiter, asyncHandler(demoController.createDemo));
-router.delete('/', requireApiKey, asyncHandler(demoController.deleteDemo));
+router.delete('/', requireApiKey, demoLimiter, asyncHandler(demoController.deleteDemo));
 
 export default router;
