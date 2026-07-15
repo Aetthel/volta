@@ -3,6 +3,16 @@ const attempts = new Map();
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 
+// Cleanup stale entries every 5 minutes to prevent memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, record] of attempts) {
+    if (now - record.firstAttempt > WINDOW_MS) {
+      attempts.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
 export function checkRateLimit(key) {
   const now = Date.now();
   const record = attempts.get(key);

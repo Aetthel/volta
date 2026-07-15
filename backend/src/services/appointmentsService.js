@@ -53,7 +53,7 @@ export const createAppointment = async (appointmentData) => {
         lastVisit: "Hoy"
       }
     });
-    console.log(`[Service] Automatically registered new LOPD-pending client: ${firstName} ${surname || ""}`);
+    console.log(`[Service] Automatically registered new LOPD-pending client: ${client.id}`);
   }
 
   // Look up service by name to store ID and Name

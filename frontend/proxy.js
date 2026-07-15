@@ -4,9 +4,9 @@ import { authConfig } from "./auth.config";
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
-  const isLoggedIn = !!req.auth;
   const { nextUrl } = req;
   const pathname = nextUrl.pathname;
+  const isLoggedIn = !!req.auth;
 
   const isLoginRoute = pathname === "/login";
 
@@ -24,7 +24,7 @@ export default auth((req) => {
   }
 
   const user = req.auth?.user;
-  const role = user?.role;
+  const role = req.auth?.role || user?.role;
 
   // 2. If logged in and on the login page, redirect to their home page
   if (isLoggedIn && user && isLoginRoute) {

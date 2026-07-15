@@ -203,7 +203,7 @@ const getWeekDates = (anchorDate: Date) => {
 
 export default function AgendaPage() {
   const { data: session } = useSession();
-  const businessId = session?.user?.businessId || "mock-business-id";
+  const businessId = session?.user?.businessId || "";
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -1128,7 +1128,7 @@ export default function AgendaPage() {
       <AddClientModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        onSave={(client) => console.log("New client saved: ", client)}
+        onSave={() => setIsClientModalOpen(false)}
         triggerRect={clientModalTriggerRect}
       />
     </div>

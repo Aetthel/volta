@@ -54,7 +54,7 @@ describe('authenticate middleware', () => {
   });
 
   it('should call next with valid API key and valid JWT token', () => {
-    const payload = { role: 'ADMIN', businessId: 'biz-1', email: 'admin@test.com' };
+    const payload = { id: 'user-1', role: 'ADMIN', businessId: 'biz-1', email: 'admin@test.com' };
     const token = signToken(payload, MOCK_JWT_SECRET);
     req.header.mockImplementation((name) => {
       if (name === 'x-api-key') return MOCK_API_KEY;
@@ -63,7 +63,7 @@ describe('authenticate middleware', () => {
     });
     authenticate(req, res, next);
     expect(next).toHaveBeenCalled();
-    expect(req.user).toEqual({ role: 'ADMIN', businessId: 'biz-1', email: 'admin@test.com' });
+    expect(req.user).toEqual({ id: 'user-1', role: 'ADMIN', businessId: 'biz-1', email: 'admin@test.com' });
   });
 });
 

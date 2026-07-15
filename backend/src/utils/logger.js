@@ -1,6 +1,30 @@
 /**
  * Simple, dependencies-free structured logger with colors.
+ * Includes privacy-safe masking helpers for PII (personally identifiable information).
  */
+
+/**
+ * Mask a phone number, showing only last 4 digits.
+ * Example: "+34612345678" -> "*********5678"
+ */
+export function maskPhone(phone) {
+  if (!phone || typeof phone !== 'string') return '****';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length <= 4) return '****';
+  return '*'.repeat(digits.length - 4) + digits.slice(-4);
+}
+
+/**
+ * Mask an email, showing only first char and domain.
+ * Example: "john@example.com" -> "j***@example.com"
+ */
+export function maskEmail(email) {
+  if (!email || typeof email !== 'string') return '***@***';
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return '***@***';
+  return local[0] + '***@' + domain;
+}
+
 export const logger = {
   info(message, meta = null) {
     this._log('INFO', message, meta);

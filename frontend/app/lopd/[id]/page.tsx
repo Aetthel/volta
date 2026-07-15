@@ -9,8 +9,6 @@ export default function LOPDConsentPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const clientId = params?.id as string;
-  const token = searchParams ? searchParams.get("token") : null;
-  const exp = searchParams ? searchParams.get("exp") : null;
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,11 +23,28 @@ export default function LOPDConsentPage() {
   useEffect(() => {
     if (!clientId) return;
 
-    const queryParts = [];
-    if (token) queryParts.push(`token=${encodeURIComponent(token)}`);
-    if (exp) queryParts.push(`exp=${exp}`);
-    const query = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
-    fetch(`/api/backend/lopd/${clientId}${query}`)
+    // Extract token from URL on first load and store in sessionStorage
+    const urlToken = searchParams?.get("token");
+    const urlExp = searchParams?.get("exp");
+    if (urlToken && urlExp) {
+      sessionStorage.setItem("lopd_token", urlToken);
+      sessionStorage.setItem("lopd_exp", urlExp);
+      // Clean URL to remove token from address bar / history
+      window.history.replaceState({}, "", `/lopd/${clientId}`);
+    }
+
+    const token = sessionStorage.getItem("lopd_token");
+    const exp = sessionStorage.getItem("lopd_exp");
+
+    if (!token || !exp) {
+      setError("Enlace de consentimiento inválido o expirado.");
+      setLoading(false);
+      return;
+    }
+
+    fetch(`/api/backend/lopd/${clientId}`, {
+      headers: { "x-lopd-token": token, "x-lopd-exp": exp },
+    })
       .then((res) => {
         if (!res.ok)
           throw new Error("Cliente no encontrado o enlace inválido.");
@@ -49,16 +64,16 @@ export default function LOPDConsentPage() {
         );
         setLoading(false);
       });
-  }, [clientId, token]);
+  }, [clientId, searchParams]);
 
   const handleAccept = () => {
     setSubmitting(true);
-    const queryParts = [];
-    if (token) queryParts.push(`token=${encodeURIComponent(token)}`);
-    if (exp) queryParts.push(`exp=${exp}`);
-    const query = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
-    fetch(`/api/backend/lopd/${clientId}/accept${query}`, {
+    const token = sessionStorage.getItem("lopd_token");
+    const exp = sessionStorage.getItem("lopd_exp");
+
+    fetch(`/api/backend/lopd/${clientId}/accept`, {
       method: "POST",
+      headers: { "x-lopd-token": token || "", "x-lopd-exp": exp || "" },
     })
       .then((res) => {
         if (!res.ok) throw new Error("No se pudo procesar la aceptación.");

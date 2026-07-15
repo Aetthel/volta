@@ -49,7 +49,7 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
       {appointments.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
           {appointments.map((app) => (
-            <Card key={app.id} className="p-4 flex items-center justify-between border-l-[6px] border-l-primary bg-white rounded-default shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:border-l-primary/80 transition-all duration-200 gap-4">
+            <Card key={app.id} className="p-4 flex items-center justify-between bg-white rounded-default shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 gap-4">
               <div className="flex items-center gap-3.5 min-w-0">
                 {app.avatarUrl ? (
                   <img

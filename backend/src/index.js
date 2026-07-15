@@ -18,6 +18,7 @@ import servicesRouter from './routes/services.js';
 import adminRouter from './routes/admin.js';
 import usersRouter from './routes/users.js';
 import demoRouter from './routes/demo.js';
+import alertsRouter from './routes/alerts.js';
 
 // Global Error Handler Middleware
 import { errorHandler } from './middleware/index.js';
@@ -25,7 +26,7 @@ import { errorHandler } from './middleware/index.js';
 const app = express();
 const PORT = config.port;
 
-app.set('trust proxy', 1);
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : false);
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -39,7 +40,6 @@ app.use(helmet({
       frameAncestors: ["'none'"],
     },
   },
-  crossOriginEmbedderPolicy: false,
 }));
 
 // Schedule the Sentinel to run every day at 20:00
@@ -77,8 +77,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ limit: '5mb', extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 /**
  * Health check endpoint
@@ -115,6 +115,7 @@ app.use('/api/business', globalLimiter, businessRouter);
 app.use('/api/services', globalLimiter, servicesRouter);
 app.use('/api/admin', globalLimiter, adminRouter);
 app.use('/api/users', globalLimiter, usersRouter);
+app.use('/api/alerts', globalLimiter, alertsRouter);
 
 app.use(errorHandler);
 

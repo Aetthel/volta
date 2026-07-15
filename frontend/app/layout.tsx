@@ -3,6 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import ThemeInitializer from '@/components/ThemeInitializer';
 import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, getThemeInlineStyles } from '@/lib/theme';
 import { auth } from '@/auth';
+import { AlertsProvider } from '@/lib/alerts';
 import './globals.css';
 
 const inter = Inter({
@@ -37,8 +38,10 @@ export default async function RootLayout({
     <html lang="es" className={`${inter.variable}`} style={inlineStyles}>
       <body className="min-h-screen font-sans font-normal bg-surface text-on-surface antialiased">
         <SessionProvider>
-          <ThemeInitializer />
-          {children}
+          <AlertsProvider>
+            <ThemeInitializer />
+            {children}
+          </AlertsProvider>
         </SessionProvider>
       </body>
     </html>

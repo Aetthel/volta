@@ -52,8 +52,17 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
   headers.set("Content-Type", "application/json");
   headers.set("x-api-key", apiKey);
 
+  // Pass LOPD headers for consent routes
+  if (pathParts[0] === "lopd") {
+    const lopdToken = request.headers.get("x-lopd-token");
+    const lopdExp = request.headers.get("x-lopd-exp");
+    if (lopdToken) headers.set("x-lopd-token", lopdToken);
+    if (lopdExp) headers.set("x-lopd-exp", lopdExp);
+  }
+
   if (session?.user) {
     const payload = {
+      id: session.user.id || null,
       role: session.user.role || null,
       businessId: session.user.businessId || null,
       email: session.user.email || null,

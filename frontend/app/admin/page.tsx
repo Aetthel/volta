@@ -27,6 +27,58 @@ export default function AdminPage() {
   const [selectedRange, setSelectedRange] = useState("Últimos 30 días");
   const [activeBar, setActiveBar] = useState<string | null>(null);
 
+  // Alerts Broadcasting States
+  const [alertForm, setAlertForm] = useState({
+    title: "",
+    description: "",
+    type: "NOTIFICACION",
+    targetRole: "", // Empty string means "Todos"
+  });
+  const [isAlertSending, setIsAlertSending] = useState(false);
+  const [alertStatus, setAlertStatus] = useState<{ success?: boolean; error?: string } | null>(null);
+
+  const handleSendAlert = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!alertForm.title.trim() || !alertForm.description.trim()) return;
+    setIsAlertSending(true);
+    setAlertStatus(null);
+    try {
+      const payload: any = {
+        type: alertForm.type,
+        title: alertForm.title,
+        description: alertForm.description,
+      };
+      if (alertForm.targetRole) {
+        payload.targetRole = alertForm.targetRole;
+      }
+
+      const res = await fetch("/api/backend/alerts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAlertStatus({ success: true });
+        setAlertForm({
+          title: "",
+          description: "",
+          type: "NOTIFICACION",
+          targetRole: "",
+        });
+      } else {
+        setAlertStatus({ error: data.error || "Ocurrió un error al enviar la alerta." });
+      }
+    } catch (err: any) {
+      setAlertStatus({ error: err.message || "Error de red al conectar con el servidor." });
+    } finally {
+      setIsAlertSending(false);
+    }
+  };
+
   const [kpis, setKpis] = useState({
     totalRevenue: "€0",
     totalClients: "0",
@@ -331,6 +383,113 @@ export default function AdminPage() {
               </div>
             </section>
           )}
+
+          {/* Alerts Broadcasting Panel */}
+          <section className="mt-gutter mb-gutter">
+            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6">
+              <h3 className="font-medium text-xl text-on-surface mb-2">
+                Emitir Alerta del Sistema
+              </h3>
+              <p className="text-body-sm text-on-surface-variant mb-6">
+                Envía una notificación emergente, aviso crítico o mensaje informativo a los usuarios del sistema.
+              </p>
+
+              {alertStatus?.success && (
+                <Alert variant="success" className="mb-4">
+                  ¡Alerta enviada correctamente a los usuarios objetivo!
+                </Alert>
+              )}
+
+              {alertStatus?.error && (
+                <Alert variant="error" className="mb-4">
+                  {alertStatus.error}
+                </Alert>
+              )}
+
+              <form onSubmit={handleSendAlert} className="flex flex-col gap-4 max-w-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Title */}
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="alert-title" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                      Título de la Alerta
+                    </label>
+                    <input
+                      id="alert-title"
+                      type="text"
+                      required
+                      placeholder="Ej: Mantenimiento Programado"
+                      value={alertForm.title}
+                      onChange={(e) => setAlertForm((prev) => ({ ...prev, title: e.target.value }))}
+                      className="px-4 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md"
+                    />
+                  </div>
+
+                  {/* Type and Target */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="alert-type" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                        Tipo
+                      </label>
+                      <select
+                        id="alert-type"
+                        value={alertForm.type}
+                        onChange={(e) => setAlertForm((prev) => ({ ...prev, type: e.target.value }))}
+                        className="px-3 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md"
+                      >
+                        <option value="EMERGENTE">Emergente (Inicio)</option>
+                        <option value="AVISO">Aviso (Crítico)</option>
+                        <option value="NOTIFICACION">Notificación</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="alert-target" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                        Destinatarios
+                      </label>
+                      <select
+                        id="alert-target"
+                        value={alertForm.targetRole}
+                        onChange={(e) => setAlertForm((prev) => ({ ...prev, targetRole: e.target.value }))}
+                        className="px-3 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md"
+                      >
+                        <option value="">Todos los Roles</option>
+                        <option value="JEFE">Solo Dueños (JEFE)</option>
+                        <option value="EMPLEADO">Solo Empleados</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="alert-desc" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                    Contenido / Descripción
+                  </label>
+                  <textarea
+                    id="alert-desc"
+                    required
+                    rows={3}
+                    placeholder="Escribe el mensaje detallado aquí..."
+                    value={alertForm.description}
+                    onChange={(e) => setAlertForm((prev) => ({ ...prev, description: e.target.value }))}
+                    className="px-4 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md resize-none"
+                  />
+                </div>
+
+                {/* Submit button */}
+                <div className="mt-2 flex">
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={isAlertSending || !alertForm.title.trim() || !alertForm.description.trim()}
+                    className="py-2.5 px-6 font-bold shadow-md rounded-xl active:scale-[0.98] disabled:opacity-50"
+                  >
+                    {isAlertSending ? "Enviando..." : "Emitir Notificación"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </section>
         </main>
 
         {/* Mobile menu bar */}

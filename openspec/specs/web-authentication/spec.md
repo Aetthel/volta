@@ -4,18 +4,18 @@
 TBD - created by archiving change web-dashboard-auth. Update Purpose after archive.
 ## Requirements
 ### Requirement: Multi-role Authentication
-The system SHALL provide a secure login interface that supports two distinct roles: `ADMIN` and `BUSINESS`.
+The system SHALL provide a secure login interface and routing proxy that supports distinct roles including `ADMIN`, `JEFE`, and `EMPLEADO`, and resolves user roles correctly in both API and middleware contexts.
 
 #### Scenario: Successful Admin Login
 - **WHEN** a user with the `ADMIN` role enters valid credentials
 - **THEN** the system redirects them to the Admin Dashboard (`/admin`)
 
 #### Scenario: Successful Business Login
-- **WHEN** a user with the `BUSINESS` role enters valid credentials
-- **THEN** the system redirects them to their Business Dashboard (`/dashboard`)
+- **WHEN** a user with the `JEFE` or `EMPLEADO` role enters valid credentials
+- **THEN** the system redirects them to their Business Dashboard (`/inicio`)
 
 #### Scenario: Unauthorized Access Attempt
-- **WHEN** an unauthenticated user tries to access protected routes (`/admin` or `/dashboard`)
+- **WHEN** an unauthenticated user tries to access protected routes
 - **THEN** the system redirects them to the login page
 
 ### Requirement: Secure Password Management
@@ -33,7 +33,7 @@ The login interface SHALL render as a flat, single-column centered layout direct
 - **THEN** the login form elements are vertically and horizontally centered on the viewport in a flat, borderless structure
 
 ### Requirement: Client-side Page Authorization for Administrative Routes
-The dashboard application must check user roles before rendering administrative pages to prevent unauthorized access.
+The dashboard application MUST check user roles before rendering administrative pages to prevent unauthorized access.
 
 #### Scenario: Non-admin user tries to access /admin or /sedes
 - **WHEN** a logged-in user with role EMPLEADO or JEFE navigates to `/admin` or `/sedes`
@@ -56,5 +56,4 @@ The backend SHALL enforce strict role checks on admin endpoints to verify that t
 #### Scenario: Non-admin role tries to access admin routes
 - **WHEN** a user with role `EMPLEADO` or `JEFE` attempts to access any route under `/api/admin`
 - **THEN** the backend rejects the request with a 403 Forbidden status
-
 

@@ -22,7 +22,7 @@ const errorHandler = (err, req, res, next) => {
 
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
-    error: statusCode === 500 ? 'Error interno del servidor' : err.message,
+    error: statusCode === 500 ? 'Error interno del servidor' : 'Error en la petición',
   });
 };
 

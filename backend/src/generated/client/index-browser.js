@@ -200,6 +200,17 @@ exports.Prisma.ServiceScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AlertScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  title: 'title',
+  description: 'description',
+  isRead: 'isRead',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -232,13 +243,20 @@ exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
   ERROR: 'ERROR'
 };
 
+exports.AlertType = exports.$Enums.AlertType = {
+  EMERGENTE: 'EMERGENTE',
+  AVISO: 'AVISO',
+  NOTIFICACION: 'NOTIFICACION'
+};
+
 exports.Prisma.ModelName = {
   Business: 'Business',
   User: 'User',
   Client: 'Client',
   Appointment: 'Appointment',
   BusinessHours: 'BusinessHours',
-  Service: 'Service'
+  Service: 'Service',
+  Alert: 'Alert'
 };
 
 /**

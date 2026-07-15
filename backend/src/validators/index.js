@@ -31,7 +31,6 @@ export const updateClientSchema = z.object({
   surname: z.string().optional().nullable(),
   email: z.string().email("Formato de email no válido").optional().nullable().or(z.string().length(0)),
   phone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido").optional(),
-  lopdStatus: z.string().optional(),
   lastVisit: z.string().optional().nullable(),
   frequentService: z.string().optional().nullable()
 });
@@ -49,7 +48,7 @@ export const updateAppointmentSchema = z.object({
   clientName: z.string().min(2, "El nombre debe tener al menos 2 caracteres").optional(),
   clientPhone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido").optional(),
   appointmentDate: z.string().datetime("Formato de fecha no válido (debe ser ISO 8601 UTC)").optional(),
-  status: z.string().optional(),
+  status: z.enum(['PENDING', 'SENT', 'ERROR']).optional(),
   serviceName: z.string().optional().nullable()
 });
 
@@ -87,8 +86,8 @@ export const updateBusinessSchema = z.object({
 
 export const updateHoursSchema = z.array(z.object({
   dayOfWeek: z.number().min(0).max(6),
-  openTime: z.string(),
-  closeTime: z.string(),
+  openTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora no válido (debe ser HH:MM)"),
+  closeTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora no válido (debe ser HH:MM)"),
   isClosed: z.boolean()
 }));
 

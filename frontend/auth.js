@@ -9,18 +9,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
-  secret: process.env.AUTH_SECRET,
-  cookies: {
-    sessionToken: {
-      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-      },
-    },
-  },
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -52,6 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: user.role,
             businessId: user.businessId,
             isDemo: user.business?.isDemo || false,
+            demoExpiresAt: user.business?.demoExpiresAt ? user.business.demoExpiresAt.toISOString() : null,
             themeColor: user.business?.themeColor || "TEAL",
             fontSizeLevel: user.business?.fontSizeLevel || "MEDIUM",
             borderRadiusLevel: user.business?.borderRadiusLevel || "MEDIUM",
