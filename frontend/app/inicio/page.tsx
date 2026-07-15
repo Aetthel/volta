@@ -21,8 +21,12 @@ import {
   MoreVertical,
   Search,
   Briefcase,
+  X,
+  Sparkles,
+  ChevronLeft,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useAlerts } from "@/lib/alerts";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
@@ -527,7 +531,7 @@ export default function DashboardPage() {
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                 {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="p-4 flex items-center justify-between border-l-[6px] border-l-outline-variant bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] h-[84px]">
+                  <Card key={i} className="p-4 flex items-center justify-between bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] h-[84px]">
                     <div className="flex items-center gap-3.5 min-w-0">
                       <Skeleton className="w-12 h-12 rounded-full shrink-0" />
                       <div className="flex flex-col gap-1.5">
@@ -578,6 +582,151 @@ export default function DashboardPage() {
         onSave={() => fetchData()}
         triggerRect={clientModalTriggerRect}
       />
+
+      {/* Welcome Popup Modal Carousel */}
+      <DashboardAlertsCarousel />
+    </div>
+  );
+}
+
+function DemoCountdown({ expiresAt }: { expiresAt: string }) {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const calculateTime = () => {
+      const difference = new Date(expiresAt).getTime() - Date.now();
+      if (difference <= 0) {
+        setTimeLeft("Expirado");
+        return;
+      }
+      const mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((difference % (1000 * 60)) / 1000);
+      setTimeLeft(`${mins}:${secs.toString().padStart(2, "0")}`);
+    };
+
+    calculateTime();
+    const interval = setInterval(calculateTime, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  return (
+    <span className="font-mono bg-error/10 text-error px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0">
+      Restan {timeLeft}
+    </span>
+  );
+}
+
+function DashboardAlertsCarousel() {
+  const { alerts, markAsRead } = useAlerts();
+  const { data: session } = useSession();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const emergentes = alerts.filter((a) => a.type === "EMERGENTE" && !a.isRead);
+  const total = emergentes.length;
+
+  useEffect(() => {
+    if (activeIndex >= total && total > 0) {
+      setActiveIndex(total - 1);
+    }
+  }, [total, activeIndex]);
+
+  if (total === 0) return null;
+
+  const current = emergentes[activeIndex];
+  if (!current) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-transparent z-[100] flex items-center justify-center animate-in fade-in duration-200"
+      onClick={() => markAsRead(current.id)}
+    >
+      <div 
+        className="bg-surface-container-lowest border border-outline-variant rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] w-full max-w-2xl mx-4 relative overflow-hidden animate-in zoom-in duration-200 flex flex-col pointer-events-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        
+        {/* Top Decorative Banner (Linear/Stripe style) */}
+        <div className="h-40 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-outline-variant/40 flex items-center justify-center relative overflow-hidden shrink-0">
+          {/* Decorative glowing blobs */}
+          <div className="absolute -left-12 -top-12 w-36 h-36 rounded-full bg-primary/5 blur-2xl" />
+          <div className="absolute -right-12 -bottom-12 w-36 h-36 rounded-full bg-primary/5 blur-2xl" />
+          
+          {/* Close Button */}
+          <button
+            onClick={() => markAsRead(current.id)}
+            className="absolute top-4 right-4 p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors z-20 border border-transparent hover:border-outline-variant/40"
+            aria-label="Cerrar"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Content Area */}
+        <div className="p-8 flex flex-col">
+          {/* Badges Row */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[10px] uppercase tracking-wider font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-md border border-primary/15">
+              Novedad
+            </span>
+            {session?.user?.isDemo && session.user.demoExpiresAt && (
+              <DemoCountdown expiresAt={session.user.demoExpiresAt} />
+            )}
+          </div>
+
+          {/* Title */}
+          <h3 className="text-2xl font-semibold text-on-surface leading-snug tracking-tight">
+            {current.title}
+          </h3>
+
+          {/* Description */}
+          <p className="text-body-md text-on-surface-variant/90 mt-3 leading-relaxed">
+            {current.description}
+          </p>
+
+          {/* Divider */}
+          <div className="h-px bg-outline-variant/40 my-6" />
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between">
+            {/* Dots */}
+            <div className="flex items-center gap-1.5">
+              {emergentes.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveIndex(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === activeIndex ? "bg-primary w-5" : "bg-outline-variant hover:bg-outline w-2"
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* Navigation (Linear style) */}
+            <div className="flex items-center gap-3">
+              {total > 1 && (
+                <div className="flex items-center gap-1 bg-surface-container-low border border-outline-variant/60 rounded-xl p-0.5">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1))}
+                    className="p-1 rounded-lg hover:bg-surface-variant/80 w-8 h-8 flex items-center justify-center shrink-0 border-none shadow-none"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <div className="w-px h-4 bg-outline-variant/60" />
+                  <Button
+                    variant="ghost"
+                    onClick={() => setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1))}
+                    className="p-1 rounded-lg hover:bg-surface-variant/80 w-8 h-8 flex items-center justify-center shrink-0 border-none shadow-none"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

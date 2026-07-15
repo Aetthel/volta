@@ -31,7 +31,7 @@ export const createDemo = async () => {
       }
     });
 
-    await tx.user.create({
+    const demoUser = await tx.user.create({
       data: {
         name: 'Dueño Demo',
         email,
@@ -39,6 +39,46 @@ export const createDemo = async () => {
         role: 'JEFE',
         businessId: biz.id,
       }
+    });
+
+    await tx.alert.createMany({
+      data: [
+        {
+          type: 'EMERGENTE',
+          title: '¡Bienvenido a tu Demo de Volta!',
+          description: 'Esta demo tiene una duración de 30 minutos. Hemos preparado datos ficticios en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.',
+          userId: demoUser.id,
+          isRead: false
+        },
+        {
+          type: 'EMERGENTE',
+          title: 'Gestión Completa de Clientes',
+          description: 'Visita la sección de Clientes para consultar expedientes, enviar enlaces de firma LOPD y ver estadísticas de visitas recurrentes.',
+          userId: demoUser.id,
+          isRead: false
+        },
+        {
+          type: 'EMERGENTE',
+          title: 'Automatización por WhatsApp',
+          description: 'El sistema permite automatizar recordatorios y confirmaciones. Puedes simularlo vinculando un número en la sección de Ajustes.',
+          userId: demoUser.id,
+          isRead: false
+        },
+        {
+          type: 'AVISO',
+          title: 'Conexión de WhatsApp pendiente',
+          description: 'Para enviar recordatorios automáticos de citas a tus clientes, recuerda vincular tu cuenta de WhatsApp desde la pantalla de Ajustes.',
+          userId: demoUser.id,
+          isRead: false
+        },
+        {
+          type: 'NOTIFICACION',
+          title: 'Asistente Virtual Activado',
+          description: 'El bot de recordatorios diarios se ha iniciado correctamente para la sede Demo Volta.',
+          userId: demoUser.id,
+          isRead: false
+        }
+      ]
     });
 
     await tx.service.createMany({

@@ -49,7 +49,14 @@ export default function RootPage() {
     setIsCreatingDemo(true);
     try {
       const res = await fetch("/api/backend/demo", { method: "POST" });
-      if (!res.ok) throw new Error("Error creating demo");
+      if (!res.ok) {
+        let errMsg = "Error creating demo";
+        try {
+          const errData = await res.json();
+          if (errData?.error) errMsg = errData.error;
+        } catch (_) {}
+        throw new Error(errMsg);
+      }
       const data = await res.json();
 
       const result = await signIn("credentials", {
@@ -60,11 +67,13 @@ export default function RootPage() {
 
       if (result?.error) {
         console.error("Demo auto-login failed");
+        alert("Error al iniciar sesión automáticamente en la demo.");
       } else {
         router.push("/inicio");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Demo creation failed:", err);
+      alert(err.message || "Error al crear la demo. Inténtalo de nuevo.");
     } finally {
       setIsCreatingDemo(false);
     }
@@ -154,8 +163,7 @@ export default function RootPage() {
                     Empezar Gratis
                   </Button>
                 </Link>
-                <a href="#features" className="w-full sm:w-auto">
-                  <Button
+                 <Button
                     variant="outline"
                     size="lg"
                     className="w-full sm:w-auto flex items-center justify-center gap-2"
@@ -174,7 +182,6 @@ export default function RootPage() {
                       </>
                     )}
                   </Button>
-                </a>
               </div>
             </div>
 
@@ -183,54 +190,66 @@ export default function RootPage() {
               <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
               <div className="absolute -bottom-12 -left-12 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
               
-              {/* Ultra Clean White Dashboard Mockup */}
-              <div className="w-full h-full bg-white rounded-2xl border border-outline-variant p-4 shadow-xl hover:rotate-0 transition-transform duration-700 relative z-10 flex flex-col gap-3">
+              {/* Ultra Clean White Clients Mockup */}
+              <div className="w-full h-full bg-white rounded-2xl border border-outline-variant p-4 shadow-xl transition-all duration-350 relative z-10 flex flex-col gap-3.5 text-left overflow-hidden">
                 {/* Mockup Header */}
-                <div className="flex items-center justify-between border-b border-outline-variant/40 pb-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-error/40"></span>
-                    <span className="w-3 h-3 rounded-full bg-amber-400/40"></span>
-                    <span className="w-3 h-3 rounded-full bg-emerald-400/40"></span>
-                  </div>
-                  <div className="w-32 h-4 bg-surface-container rounded"></div>
-                  <div className="w-8 h-8 rounded-full bg-surface-container"></div>
+                <div className="flex items-center border-b border-outline-variant/40 pb-3 mb-1 shrink-0">
+                  <span className="text-title-sm font-bold text-on-surface">Directorio de Clientes</span>
                 </div>
 
-                {/* Mockup Body */}
-                <div className="flex-1 flex gap-3 overflow-hidden">
-                  {/* Mockup Sidebar */}
-                  <div className="w-16 md:w-24 bg-surface-container-low rounded-lg p-2 flex flex-col gap-2">
-                    <div className="w-full h-4 bg-surface-container rounded-sm"></div>
-                    <div className="w-full h-4 bg-primary/20 rounded-sm"></div>
-                    <div className="w-full h-4 bg-surface-container rounded-sm"></div>
-                    <div className="w-full h-4 bg-surface-container rounded-sm"></div>
+                {/* Search Bar Mockup */}
+                <div className="flex gap-2">
+                  <div className="flex-1 h-8 rounded-lg bg-surface-container border border-outline-variant/30 px-3 flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 rounded-full border-2 border-on-surface-variant/40"></span>
+                    <div className="w-24 h-2 bg-on-surface-variant/20 rounded"></div>
                   </div>
+                  <div className="w-16 h-8 rounded-lg bg-surface-container border border-outline-variant/30 flex items-center justify-center text-label-xs text-on-surface-variant">Filtrar</div>
+                </div>
 
-                  {/* Mockup Calendar Grid */}
-                  <div className="flex-1 bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-2 flex flex-col gap-2">
-                    <div className="flex justify-between items-center border-b border-outline-variant/20 pb-2">
-                      <div className="w-16 h-3 bg-surface-container rounded"></div>
-                      <div className="flex gap-1">
-                        <div className="w-4 h-3 bg-surface-container rounded"></div>
-                        <div className="w-4 h-3 bg-surface-container rounded"></div>
+                {/* Clients Table Mockup */}
+                <div className="flex-grow flex flex-col gap-2.5 overflow-hidden">
+                  {/* Client Row 1 */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container/30 border border-outline-variant/20 hover:bg-surface-container/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center text-title-xs shrink-0">AG</div>
+                      <div>
+                        <div className="text-title-xs font-semibold text-on-surface">Ana García</div>
+                        <div className="text-[10px] text-on-surface-variant leading-none mt-0.5">+34 611 234 567</div>
                       </div>
                     </div>
-                    {/* Mock Calendar Slots */}
-                    <div className="flex-1 grid grid-cols-3 gap-2">
-                      <div className="border border-dashed border-outline-variant/30 rounded p-1 flex flex-col gap-1">
-                        <div className="w-full h-2.5 bg-primary/30 rounded-sm"></div>
-                        <div className="w-2/3 h-2 bg-surface-container rounded-sm"></div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">Aceptado</span>
+                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Coloración</span>
+                    </div>
+                  </div>
+
+                  {/* Client Row 2 */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container/30 border border-outline-variant/20 hover:bg-surface-container/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-secondary/10 text-secondary font-bold flex items-center justify-center text-title-xs shrink-0">MP</div>
+                      <div>
+                        <div className="text-title-xs font-semibold text-on-surface">Marco Polo</div>
+                        <div className="text-[10px] text-on-surface-variant leading-none mt-0.5">+34 622 345 678</div>
                       </div>
-                      <div className="border border-dashed border-outline-variant/30 rounded p-1"></div>
-                      <div className="border border-dashed border-outline-variant/30 rounded p-1 flex flex-col gap-1">
-                        <div className="w-full h-2.5 bg-secondary-container rounded-sm"></div>
-                        <div className="w-1/2 h-2 bg-surface-container rounded-sm"></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">Aceptado</span>
+                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Corte</span>
+                    </div>
+                  </div>
+
+                  {/* Client Row 3 */}
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container/30 border border-outline-variant/20 hover:bg-surface-container/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-600 font-bold flex items-center justify-center text-title-xs shrink-0">SM</div>
+                      <div>
+                        <div className="text-title-xs font-semibold text-on-surface">Sofía Martín</div>
+                        <div className="text-[10px] text-on-surface-variant leading-none mt-0.5">+34 633 456 789</div>
                       </div>
-                      <div className="border border-dashed border-outline-variant/30 rounded p-1"></div>
-                      <div className="border border-dashed border-outline-variant/30 rounded p-1 flex flex-col gap-1">
-                        <div className="w-full h-2.5 bg-primary/30 rounded-sm"></div>
-                      </div>
-                      <div className="border border-dashed border-outline-variant/30 rounded p-1"></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">Pendiente</span>
+                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Manicura</span>
                     </div>
                   </div>
                 </div>
@@ -282,13 +301,48 @@ export default function RootPage() {
               
               {/* Media Placeholder */}
               <div className="order-2 md:order-1">
-                <div className="bg-white rounded-2xl shadow-lg border border-outline-variant aspect-video flex flex-col items-center justify-center p-6 relative group overflow-hidden">
-                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <Calendar className="w-16 h-16 text-primary/30 mb-4" />
-                  <div className="border border-dashed border-outline-variant/60 rounded-xl px-6 py-4 flex items-center justify-center bg-surface-container-lowest/80 backdrop-blur-sm shadow-sm">
-                    <span className="text-body-md font-medium text-on-surface-variant">
-                      Interfaz de Calendario Avanzado
-                    </span>
+                <div className="bg-white rounded-2xl shadow-lg border border-outline-variant min-h-[300px] flex flex-col p-5 relative group overflow-hidden text-left justify-between">
+                  {/* Calendar Top Bar */}
+                  <div className="flex items-center border-b border-outline-variant/40 pb-3 mb-4 shrink-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-title-sm font-bold text-on-surface">Hoy (Vista Diaria)</span>
+                    </div>
+                  </div>
+
+                  {/* Day Grid Mockup */}
+                  <div className="flex-grow flex flex-col justify-between">
+                    {/* Time Slot 09:00 */}
+                    <div className="h-14 flex gap-3 items-start relative pt-1">
+                      <span className="text-[10px] font-medium text-on-surface-variant/60 w-8 select-none">09:00</span>
+                      <div className="flex-grow h-px bg-outline-variant/40 mt-1.5"></div>
+                      {/* Appointment Card */}
+                      <div className="absolute left-11 right-4 top-1 bottom-1 bg-primary/10 border-l-4 border-primary rounded-r p-2 flex flex-col justify-center">
+                        <div className="text-[11px] font-bold text-primary leading-tight">Marco Polo</div>
+                        <div className="text-[9px] text-primary/80 mt-0.5">Corte Caballero • 09:00 - 09:45</div>
+                      </div>
+                    </div>
+
+                    {/* Time Slot 10:00 */}
+                    <div className="h-16 flex gap-3 items-start relative pt-1">
+                      <span className="text-[10px] font-medium text-on-surface-variant/60 w-8 select-none">10:00</span>
+                      <div className="flex-grow h-px bg-outline-variant/40 mt-1.5"></div>
+                      {/* Appointment Card */}
+                      <div className="absolute left-11 right-4 top-1 bottom-1 bg-secondary-container/20 border-l-4 border-secondary rounded-r p-2 flex flex-col justify-center z-10 shadow-sm">
+                        <div className="text-[11px] font-bold text-secondary leading-tight">Ana García</div>
+                        <div className="text-[9px] text-secondary/80 mt-0.5">Coloración Premium • 10:00 - 11:30</div>
+                      </div>
+                    </div>
+
+                    {/* Time Slot 11:00 */}
+                    <div className="h-14 flex gap-3 items-start relative pt-1">
+                      <span className="text-[10px] font-medium text-on-surface-variant/60 w-8 select-none">11:00</span>
+                      <div className="flex-grow h-px bg-outline-variant/40 mt-1.5"></div>
+                      {/* Appointment Card */}
+                      <div className="absolute left-11 right-4 top-1 bottom-1 bg-amber-500/10 border-l-4 border-amber-500 rounded-r p-2 flex flex-col justify-center">
+                        <div className="text-[11px] font-bold text-amber-700 leading-tight">Sofía Martín</div>
+                        <div className="text-[9px] text-amber-700/80 mt-0.5">Manicura Completa • 11:00 - 11:45</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -366,13 +420,56 @@ export default function RootPage() {
 
               {/* Media Placeholder */}
               <div>
-                <div className="bg-white rounded-2xl shadow-lg border border-outline-variant aspect-video flex flex-col items-center justify-center p-6 relative group overflow-hidden">
-                  <div className="absolute inset-0 bg-secondary-container/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <BarChart3 className="w-16 h-16 text-secondary/30 mb-4" />
-                  <div className="border border-dashed border-outline-variant/60 rounded-xl px-6 py-4 flex items-center justify-center bg-surface-container-lowest/80 backdrop-blur-sm shadow-sm">
-                    <span className="text-body-md font-medium text-on-surface-variant">
-                      Dashboard Financiero y Métricas
-                    </span>
+                <div className="bg-white rounded-2xl shadow-lg border border-outline-variant min-h-[300px] flex flex-col p-5 relative group overflow-hidden text-left gap-4">
+                  {/* Dashboard Top Bar */}
+                  <div className="flex items-center border-b border-outline-variant/40 pb-3 mb-1 shrink-0">
+                    <span className="text-title-sm font-bold text-on-surface">Resumen Financiero</span>
+                  </div>
+
+                  {/* KPI Cards Grid */}
+                  <div className="grid grid-cols-3 gap-3 shrink-0">
+                    <div className="bg-surface-container/30 border border-outline-variant/30 rounded-xl p-3 flex flex-col justify-center">
+                      <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Ingresos</span>
+                      <span className="text-title-lg font-bold text-on-surface mt-1">2.450€</span>
+                      <span className="text-[9px] text-emerald-600 font-bold mt-0.5">↑ 12.4%</span>
+                    </div>
+                    <div className="bg-surface-container/30 border border-outline-variant/30 rounded-xl p-3 flex flex-col justify-center">
+                      <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Citas</span>
+                      <span className="text-title-lg font-bold text-on-surface mt-1">142</span>
+                      <span className="text-[9px] text-emerald-600 font-bold mt-0.5">↑ 8.2%</span>
+                    </div>
+                    <div className="bg-surface-container/30 border border-outline-variant/30 rounded-xl p-3 flex flex-col justify-center">
+                      <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Retención</span>
+                      <span className="text-title-lg font-bold text-on-surface mt-1">85%</span>
+                      <span className="text-[9px] text-emerald-600 font-bold mt-0.5">Excelente</span>
+                    </div>
+                  </div>
+
+                  {/* Financial Bar Chart Mockup */}
+                  <div className="flex-grow flex flex-col gap-2 overflow-hidden">
+                    <span className="text-[10px] font-bold text-on-surface-variant shrink-0">Facturación Semanal</span>
+                    <div className="h-24 flex items-end justify-between px-2 pt-2 gap-4">
+                      {/* Bar 1 */}
+                      <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                        <div className="w-full bg-primary/20 hover:bg-primary/30 transition-colors rounded-t-md" style={{ height: "45%" }}></div>
+                        <span className="text-[8px] font-medium text-on-surface-variant/60 select-none">Sem 1</span>
+                      </div>
+                      {/* Bar 2 */}
+                      <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                        <div className="w-full bg-primary/20 hover:bg-primary/30 transition-colors rounded-t-md" style={{ height: "60%" }}></div>
+                        <span className="text-[8px] font-medium text-on-surface-variant/60 select-none">Sem 2</span>
+                      </div>
+                      {/* Bar 3 */}
+                      <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                        <div className="w-full bg-primary/60 hover:bg-primary/70 transition-colors rounded-t-md" style={{ height: "85%" }}></div>
+                        <span className="text-[8px] font-medium text-on-surface-variant/60 select-none">Sem 3</span>
+                      </div>
+                      {/* Bar 4 */}
+                      <div className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                        <div className="w-full bg-primary/30 hover:bg-primary/40 transition-colors rounded-t-md" style={{ height: "50%" }}></div>
+                        <span className="text-[8px] font-medium text-on-surface-variant/60 select-none">Sem 4</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

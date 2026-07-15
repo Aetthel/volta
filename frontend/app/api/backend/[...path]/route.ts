@@ -54,6 +54,7 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
 
   if (session?.user) {
     const payload = {
+      id: session.user.id || null,
       role: session.user.role || null,
       businessId: session.user.businessId || null,
       email: session.user.email || null,

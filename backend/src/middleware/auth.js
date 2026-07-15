@@ -31,6 +31,7 @@ const authenticate = (req, res, next) => {
   }
 
   req.user = {
+    id: decoded.id || null,
     role: decoded.role || null,
     businessId: decoded.businessId || null,
     email: decoded.email || null,
