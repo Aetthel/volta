@@ -7,6 +7,12 @@ services:
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
       - /opt/docker/volta/.env:/app/.env:ro
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - API_KEY=${API_KEY}
+      - BACKEND_JWT_SECRET=${BACKEND_JWT_SECRET}
+      - LOPD_HMAC_SECRET=${LOPD_HMAC_SECRET}
+      - NODE_ENV=production
     command: sh -c "cd /app/backend && npx prisma migrate deploy && pnpm --filter backend start"
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -21,8 +27,15 @@ services:
     volumes:
       - /opt/docker/volta/.env:/app/.env:ro
     environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - API_KEY=${API_KEY}
+      - BACKEND_JWT_SECRET=${BACKEND_JWT_SECRET}
+      - LOPD_HMAC_SECRET=${LOPD_HMAC_SECRET}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
       - BACKEND_INTERNAL_URL=http://backend:3001
       - AUTH_TRUST_HOST=true
+      - NODE_ENV=production
     command: pnpm --filter frontend start
     ports:
       - "${PORT_HOST:-3001}:${PORT:-3000}"
