@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 import { useAlerts } from "@/lib/alerts";
@@ -40,6 +41,7 @@ export default function Header({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [emergenteIndex, setEmergenteIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
 
   const { data: session } = useSession();
   const [workerPhoto, setWorkerPhoto] = useState<string | null>(null);
@@ -76,6 +78,58 @@ export default function Header({
     ? session.user.name.replace(/\s*\([^)]*\)/g, "")
     : "Volta";
 
+  // Grouping helper functions
+  const getGroupTitle = (dateStr: string | Date) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    }
+  };
+
+  const getRelativeTime = (dateStr: string | Date) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (60 * 1000));
+    const diffHrs = Math.floor(diffMins / 60);
+
+    if (diffMins < 1) return "Justo ahora";
+    if (diffMins < 60) return `Hace ${diffMins} min`;
+    if (diffHrs < 24) return `Hace ${diffHrs} h`;
+    return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const unreadCount = standardAlerts.filter((a) => !a.isRead).length;
+  const filteredAlerts = standardAlerts.filter(
+    (a) => activeTab === "all" || !a.isRead,
+  );
+
+  const groupKeys: string[] = [];
+  const groupedAlerts: { [key: string]: typeof standardAlerts } = {};
+
+  filteredAlerts.forEach((alert) => {
+    const title = getGroupTitle(alert.createdAt);
+    if (!groupKeys.includes(title)) {
+      groupKeys.push(title);
+    }
+    if (!groupedAlerts[title]) {
+      groupedAlerts[title] = [];
+    }
+    groupedAlerts[title].push(alert);
+  });
+
   return (
     <div className="flex items-center gap-3 shrink-0">
       {/* Notification Bell */}
@@ -101,8 +155,47 @@ export default function Header({
               onClick={() => setIsNotificationsOpen(false)}
             />
 
-            {/* Notification Dropdown (matches NewAppointmentModal style) */}
+            {/* Notification Dropdown (redesigned matching the screenshot) */}
             <div className="absolute right-0 mt-2 w-[420px] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-40 flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
+                <h2 className="font-display text-headline-sm font-bold text-on-surface">Notificaciones</h2>
+                <button 
+                  onClick={() => setIsNotificationsOpen(false)} 
+                  className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors"
+                  aria-label="Cerrar"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Segmented control tabs */}
+              <div className="px-6 py-3 border-b border-outline-variant/20">
+                <div className="flex bg-surface-container-low rounded-xl p-1 border border-outline-variant/40">
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                      activeTab === 'all'
+                        ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/30"
+                        : "text-on-surface-variant hover:text-on-surface"
+                    }`}
+                  >
+                    Todas
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('unread')}
+                    className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                      activeTab === 'unread'
+                        ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/30"
+                        : "text-on-surface-variant hover:text-on-surface"
+                    }`}
+                  >
+                    No leídas {unreadCount > 0 && `(${unreadCount})`}
+                  </button>
+                </div>
+              </div>
+
               {/* Pinned Emergente Carousel */}
               {totalEmergentes > 0 && currentEmergente && (
                 <div className="p-4 bg-primary/5 border-b border-outline-variant">
@@ -179,71 +272,107 @@ export default function Header({
                 </div>
               )}
 
-              {/* Scrollable Avisos and Notificaciones */}
-              <div className="max-h-80 overflow-y-auto divide-y divide-outline-variant/40">
-                {standardAlerts.length === 0 ? (
-                  <div className="p-8 text-center text-body-sm text-on-surface-variant/70">
-                    No tienes avisos ni notificaciones.
+              {/* Scrollable Avisos and Notificaciones grouped by date */}
+              <div className="flex-1 max-h-[360px] overflow-y-auto px-6 py-4 divide-y divide-outline-variant/10">
+                {groupKeys.length === 0 ? (
+                  <div className="p-8 text-center flex flex-col items-center justify-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant/40">
+                      <Bell className="w-6 h-6" />
+                    </div>
+                    <div className="text-body-sm text-on-surface-variant/70 font-medium">
+                      No tienes avisos ni notificaciones.
+                    </div>
                   </div>
                 ) : (
-                  standardAlerts.map((alert) => {
-                    const isAviso = alert.type === "AVISO";
-                    return (
-                      <div
-                        key={alert.id}
-                        onClick={() => !alert.isRead && markAsRead(alert.id)}
-                        className={`p-4 text-left transition-colors relative flex gap-3 cursor-pointer ${
-                          alert.isRead
-                            ? "opacity-60 bg-surface/30"
-                            : "hover:bg-surface-variant/40"
-                        } ${isAviso ? "border-l-4 border-amber-500 bg-amber-500/[0.02]" : "border-l-4 border-primary bg-primary/[0.02]"}`}
-                      >
-                        <div className="mt-0.5 shrink-0">
-                          {isAviso ? (
-                            <AlertTriangle className="w-5 h-5 text-amber-500" />
-                          ) : (
-                            <Info className="w-5 h-5 text-primary" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-body-md font-semibold text-on-surface leading-tight flex items-center justify-between gap-2">
-                            <span className="truncate">{alert.title}</span>
-                            {!alert.isRead && (
-                              <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                            )}
-                          </div>
-                          <div className="text-body-sm text-on-surface-variant/90 mt-1 leading-relaxed line-clamp-2">
-                            {alert.description}
-                          </div>
-                          <div className="text-xs text-on-surface-variant/50 mt-1.5">
-                            {new Date(alert.createdAt).toLocaleTimeString(
-                              "es-ES",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              },
-                            )}
-                          </div>
-                        </div>
+                  groupKeys.map((groupKey) => (
+                    <div key={groupKey} className="py-4 first:pt-0 last:pb-0">
+                      {/* Group Title Header */}
+                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-4 mt-1 first:mt-0">
+                        {groupKey === "Today" ? "Hoy" : groupKey === "Yesterday" ? "Ayer" : groupKey}
                       </div>
-                    );
-                  })
+
+                      {/* Group Items */}
+                      <div className="flex flex-col gap-5">
+                        {groupedAlerts[groupKey].map((alert) => {
+                          const isAviso = alert.type === "AVISO";
+                          const timeText = getRelativeTime(alert.createdAt);
+                          const timestamp = groupKey === "Today" ? `Hoy • ${timeText}` : groupKey === "Yesterday" ? `Ayer • ${timeText}` : `${groupKey} • ${new Date(alert.createdAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
+
+                          return (
+                            <div
+                              key={alert.id}
+                              className={`flex gap-3 text-left transition-all ${alert.isRead ? "opacity-60" : ""}`}
+                            >
+                              {/* Left Icon Container with unread badge */}
+                              <div className="relative shrink-0">
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low border border-outline-variant/30">
+                                  {isAviso ? (
+                                    <AlertTriangle className="w-5 h-5 text-amber-500" />
+                                  ) : (
+                                    <FileText className="w-5 h-5 text-primary" />
+                                  )}
+                                </div>
+                                {!alert.isRead && (
+                                  <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-primary rounded-full ring-2 ring-surface-container-lowest"></span>
+                                )}
+                              </div>
+
+                              {/* Content area */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-body-md font-semibold text-on-surface leading-tight">
+                                  {alert.title}
+                                </h4>
+                                <p className="text-body-sm text-on-surface-variant/90 mt-1 leading-relaxed">
+                                  {alert.description}
+                                </p>
+                                <div className="text-xs text-on-surface-variant/50 mt-1.5">
+                                  {timestamp}
+                                </div>
+
+                                {!alert.isRead && (
+                                  <div className="flex gap-4 mt-3">
+                                    <button
+                                      onClick={() => markAsRead(alert.id)}
+                                      className="px-3.5 py-1.5 text-xs font-semibold border border-outline-variant hover:border-outline rounded-xl hover:bg-surface-variant/40 text-on-surface transition-colors shadow-sm"
+                                    >
+                                      Revisar
+                                    </button>
+                                    <button
+                                      onClick={() => markAsRead(alert.id)}
+                                      className="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors"
+                                    >
+                                      Marcar como leído
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
 
               {/* Footer */}
-              {hasUnread && (
-                <div className="p-3 border-t border-outline-variant bg-surface-container-low flex justify-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
+              <div className="p-4 border-t border-outline-variant/30 bg-surface-container-lowest flex items-center justify-between">
+                <Link
+                  href="/ajustes"
+                  onClick={() => setIsNotificationsOpen(false)}
+                  className="text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors px-3 py-2 hover:bg-surface-variant/40 rounded-xl"
+                >
+                  Ir a Ajustes
+                </Link>
+                {hasUnread && (
+                  <button
                     onClick={() => markAllAsRead()}
-                    className="text-xs text-primary hover:bg-primary/5 py-2 px-4 h-auto font-semibold w-full text-center border-none shadow-none active:scale-[0.98]"
+                    className="px-3.5 py-2 text-xs font-semibold border border-outline-variant hover:border-outline rounded-xl hover:bg-surface-variant/40 text-on-surface transition-all active:scale-[0.98] shadow-sm"
                   >
                     Marcar todo como leído
-                  </Button>
-                </div>
-              )}
+                  </button>
+                )}
+              </div>
             </div>
           </>
         )}
