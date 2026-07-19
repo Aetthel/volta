@@ -10,7 +10,7 @@ export const authConfig = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production" || process.env.AUTH_TRUST_HOST === "true",
+        secure: process.env.NODE_ENV === "production",
       },
     },
   },
