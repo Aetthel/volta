@@ -76,3 +76,26 @@ export const updateBusinessHours = async (businessId, hoursData) => {
     }
   });
 };
+
+export const getBusinessWhatsApp = async (businessId) => {
+  return prisma.business.findUnique({
+    where: { id: businessId },
+    select: {
+      whatsappStatus: true,
+      qrCode: true,
+      welcomeMessage: true,
+      reminderMessage: true,
+    }
+  });
+};
+
+export const updateBusinessTemplates = async (businessId, data) => {
+  return prisma.business.update({
+    where: { id: businessId },
+    data,
+    select: {
+      welcomeMessage: true,
+      reminderMessage: true
+    }
+  });
+};

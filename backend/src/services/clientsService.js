@@ -2,7 +2,7 @@ import prisma from '../config/db.js';
 import { sendConsentMessage } from './botService.js';
 import whatsappManager from './whatsappService.js';
 import { maskPhone } from '../utils/logger.js';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 export const getClientsByBusiness = async (businessId) => {
   return await prisma.client.findMany({

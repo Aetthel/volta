@@ -106,3 +106,13 @@ export const createBusinessSchema = z.object({
   address: z.string().optional().nullable(),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres").regex(/[0-9]/, "La contraseña debe contener al menos un número")
 });
+
+// Alerts Validation Schemas
+export const createAlertSchema = z.object({
+  type: z.enum(['EMERGENTE', 'AVISO', 'NOTIFICACION'], { errorMap: () => ({ message: "Tipo de alerta no válido" }) }),
+  title: z.string().min(1, "El título es requerido"),
+  description: z.string().min(1, "La descripción es requerida"),
+  targetUserId: z.string().optional(),
+  targetBusinessId: z.string().optional(),
+  targetRole: z.enum(['ADMIN', 'JEFE', 'EMPLEADO']).optional()
+});

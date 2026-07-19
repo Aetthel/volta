@@ -3,7 +3,7 @@ import whatsappManager from './whatsappService.js';
 import config from '../config/index.js';
 import { computeHmac } from '../utils/crypto.js';
 import { maskPhone } from '../utils/logger.js';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Formats a message template by replacing placeholders with actual data

@@ -1,17 +1,46 @@
-name: Build & Push Volta Image
+name: Lint, Test & Deploy
 
 on:
   push:
     branches: [main]
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  quality:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint frontend
+        run: pnpm --filter frontend lint
+
+      - name: Lint backend
+        run: pnpm --filter backend lint
+
+      - name: Run backend tests
+        run: pnpm --filter backend test
+
   build-and-push:
     name: Build and push Docker image
+    needs: quality
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -49,6 +78,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # Cache layers between builds for faster subsequent builds
           cache-from: type=gha
           cache-to: type=gha,mode=max

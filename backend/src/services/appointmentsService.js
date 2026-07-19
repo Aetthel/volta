@@ -1,7 +1,7 @@
 import prisma from '../config/db.js';
 import { sendWelcomeMessage, sendConsentMessage } from './botService.js';
 import { normalizeString, normalizePhone } from '../utils/index.js';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 export const getAppointmentsByBusiness = async (businessId) => {
   return await prisma.appointment.findMany({

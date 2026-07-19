@@ -16,12 +16,12 @@ export const getBusiness = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const business = await businessService.getBusinessById(id);
   if (!business) {
-    return res.status(404).json({ error: 'Business not found' });
+    return res.status(404).json({ error: 'Negocio no encontrado' });
   }
 
   return ApiResponse.success(res, business);
@@ -33,7 +33,7 @@ export const updateBusiness = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const updated = await businessService.updateBusiness(id, {
@@ -58,7 +58,7 @@ export const getHours = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const hours = await businessService.getBusinessHours(id);
@@ -75,12 +75,12 @@ export const updateHours = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to other business' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const business = await businessService.getBusinessById(id);
   if (!business) {
-    return res.status(404).json({ error: 'Business not found' });
+    return res.status(404).json({ error: 'Negocio no encontrado' });
   }
 
   if (!Array.isArray(hoursData) || hoursData.length !== 7) {

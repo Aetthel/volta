@@ -1,4 +1,9 @@
 import prisma from '../config/db.js';
+import bcrypt from 'bcryptjs';
+
+export const hashPassword = async (password) => {
+  return bcrypt.hash(password, 10);
+};
 
 export const getUsers = async (where = {}) => {
   return prisma.user.findMany({
@@ -27,15 +32,21 @@ export const getUserByEmail = async (email) => {
 };
 
 export const createUser = async (userData) => {
-  return prisma.user.create({
-    data: userData
-  });
+  const data = { ...userData };
+  if (data.password) {
+    data.password = await hashPassword(data.password);
+  }
+  return prisma.user.create({ data });
 };
 
 export const updateUser = async (id, updateData) => {
+  const data = { ...updateData };
+  if (data.password) {
+    data.password = await hashPassword(data.password);
+  }
   return prisma.user.update({
     where: { id },
-    data: updateData
+    data
   });
 };
 

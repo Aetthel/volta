@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import prisma from '../config/db.js';
 import config from '../config/index.js';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 
 const { Client, LocalAuth } = pkg;
 

@@ -24,6 +24,14 @@ COPY . .
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
+# Create non-root user and set ownership
+RUN groupadd --gid 1001 volta && \
+    useradd --uid 1001 --gid volta --shell /bin/sh --create-home volta && \
+    mkdir -p /app/.wwebjs_auth && \
+    chown -R volta:volta /app
+
+USER volta
+
 EXPOSE 3000
 
 # We use the root to run workspaces

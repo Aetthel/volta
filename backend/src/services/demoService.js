@@ -1,7 +1,8 @@
 import prisma from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
+import { deleteBusinessCascade } from './adminService.js';
 
 const DEMO_DURATION_MINUTES = 30;
 
@@ -178,13 +179,7 @@ export const deleteDemo = async (businessId) => {
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.alert.deleteMany({ where: { user: { businessId } } });
-    await tx.appointment.deleteMany({ where: { businessId } });
-    await tx.client.deleteMany({ where: { businessId } });
-    await tx.service.deleteMany({ where: { businessId } });
-    await tx.businessHours.deleteMany({ where: { businessId } });
-    await tx.user.deleteMany({ where: { businessId } });
-    await tx.business.delete({ where: { id: businessId } });
+    await deleteBusinessCascade(businessId, tx);
   });
   return true;
 };
@@ -203,13 +198,7 @@ export const cleanupExpiredDemos = async () => {
   for (const biz of expiredDemos) {
     try {
       await prisma.$transaction(async (tx) => {
-        await tx.alert.deleteMany({ where: { user: { businessId: biz.id } } });
-        await tx.appointment.deleteMany({ where: { businessId: biz.id } });
-        await tx.client.deleteMany({ where: { businessId: biz.id } });
-        await tx.service.deleteMany({ where: { businessId: biz.id } });
-        await tx.businessHours.deleteMany({ where: { businessId: biz.id } });
-        await tx.user.deleteMany({ where: { businessId: biz.id } });
-        await tx.business.delete({ where: { id: biz.id } });
+        await deleteBusinessCascade(biz.id, tx);
       });
       deletedCount++;
     } catch (err) {

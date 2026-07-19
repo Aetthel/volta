@@ -23,12 +23,12 @@ export const getConsent = async (req, res) => {
   const exp = req.headers['x-lopd-exp'];
 
   if (!verifyToken(id, token, exp)) {
-    return res.status(400).json({ error: 'Invalid, missing, or expired signature token.' });
+    return res.status(400).json({ error: 'Token de firma inválido, faltante o expirado.' });
   }
 
   const client = await lopdService.getClientConsent(id);
   if (!client) {
-    return res.status(404).json({ error: 'Client not found' });
+    return res.status(404).json({ error: 'Cliente no encontrado' });
   }
 
   return ApiResponse.success(res, {
@@ -44,12 +44,12 @@ export const acceptConsent = async (req, res) => {
   const exp = req.headers['x-lopd-exp'];
 
   if (!verifyToken(id, token, exp)) {
-    return res.status(400).json({ error: 'Invalid, missing, or expired signature token.' });
+    return res.status(400).json({ error: 'Token de firma inválido, faltante o expirado.' });
   }
 
   const client = await lopdService.getClientConsent(id);
   if (!client) {
-    return res.status(404).json({ error: 'Client not found' });
+    return res.status(404).json({ error: 'Cliente no encontrado' });
   }
 
   // Idempotencia — ya aceptado, nada que hacer

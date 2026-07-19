@@ -6,7 +6,7 @@ export const getAppointments = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const appointments = await appointmentsService.getAppointmentsByBusiness(businessId);
@@ -18,7 +18,7 @@ export const createAppointment = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const appointment = await appointmentsService.createAppointment({ clientName, clientPhone, appointmentDate, businessId, service });
@@ -30,12 +30,12 @@ export const updateAppointment = async (req, res) => {
 
   const appt = await appointmentsService.getAppointmentById(id);
   if (!appt) {
-    return res.status(404).json({ error: 'Appointment not found' });
+    return res.status(404).json({ error: 'Cita no encontrada' });
   }
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && appt.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to this appointment' });
+    return res.status(403).json({ error: 'Acceso denegado a esta cita' });
   }
 
   const { clientName, clientPhone, appointmentDate, status, serviceName } = req.body;
@@ -48,12 +48,12 @@ export const deleteAppointment = async (req, res) => {
 
   const appt = await appointmentsService.getAppointmentById(id);
   if (!appt) {
-    return res.status(404).json({ error: 'Appointment not found' });
+    return res.status(404).json({ error: 'Cita no encontrada' });
   }
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && appt.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to this appointment' });
+    return res.status(403).json({ error: 'Acceso denegado a esta cita' });
   }
 
   await appointmentsService.deleteAppointment(id);

@@ -1,5 +1,5 @@
 import * as catalogService from '../services/catalogService.js';
-import prisma from '../config/db.js';
+import * as businessService from '../services/businessService.js';
 import { ApiResponse } from '../utils/index.js';
 
 export const getServices = async (req, res) => {
@@ -7,7 +7,7 @@ export const getServices = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const services = await catalogService.getServicesByBusiness(businessId, true);
@@ -19,12 +19,12 @@ export const createService = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
-  const business = await prisma.business.findUnique({ where: { id: businessId } });
+  const business = await businessService.getBusinessById(businessId);
   if (!business) {
-    return res.status(404).json({ error: 'Business not found' });
+    return res.status(404).json({ error: 'Negocio no encontrado' });
   }
 
   const service = await catalogService.createService({
@@ -44,12 +44,12 @@ export const updateService = async (req, res) => {
 
   const service = await catalogService.getServiceById(id);
   if (!service) {
-    return res.status(404).json({ error: 'Service not found' });
+    return res.status(404).json({ error: 'Servicio no encontrado' });
   }
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && service.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to this service' });
+    return res.status(403).json({ error: 'Acceso denegado a este servicio' });
   }
 
   const updated = await catalogService.updateService(id, {
@@ -68,12 +68,12 @@ export const deleteService = async (req, res) => {
 
   const service = await catalogService.getServiceById(id);
   if (!service) {
-    return res.status(404).json({ error: 'Service not found' });
+    return res.status(404).json({ error: 'Servicio no encontrado' });
   }
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && service.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to this service' });
+    return res.status(403).json({ error: 'Acceso denegado a este servicio' });
   }
 
   await catalogService.softDeleteService(id);

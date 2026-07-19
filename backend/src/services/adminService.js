@@ -1,4 +1,20 @@
 import prisma from '../config/db.js';
+import bcrypt from 'bcryptjs';
+
+/**
+ * Cascade-delete a business and all its related data within a transaction.
+ * Accepts an optional `tx` (Prisma transaction client) to compose with callers.
+ */
+export const deleteBusinessCascade = async (businessId, tx) => {
+  const executor = tx || prisma;
+  await executor.alert.deleteMany({ where: { user: { businessId } } });
+  await executor.appointment.deleteMany({ where: { businessId } });
+  await executor.client.deleteMany({ where: { businessId } });
+  await executor.service.deleteMany({ where: { businessId } });
+  await executor.businessHours.deleteMany({ where: { businessId } });
+  await executor.user.deleteMany({ where: { businessId } });
+  await executor.business.delete({ where: { id: businessId } });
+};
 
 export const getAllBusinesses = async () => {
   return prisma.business.findMany({
@@ -6,8 +22,10 @@ export const getAllBusinesses = async () => {
   });
 };
 
-export const createBusiness = async ({ name, email, phone, address }, hashedPass) => {
+export const createBusiness = async ({ name, email, phone, address }, password) => {
   return prisma.$transaction(async (tx) => {
+    const hashedPass = await bcrypt.hash(password, 10);
+
     const biz = await tx.business.create({
       data: {
         name,
@@ -58,13 +76,7 @@ export const createBusiness = async ({ name, email, phone, address }, hashedPass
 
 export const deleteBusiness = async (id) => {
   return prisma.$transaction(async (tx) => {
-    await tx.alert.deleteMany({ where: { user: { businessId: id } } });
-    await tx.appointment.deleteMany({ where: { businessId: id } });
-    await tx.client.deleteMany({ where: { businessId: id } });
-    await tx.service.deleteMany({ where: { businessId: id } });
-    await tx.businessHours.deleteMany({ where: { businessId: id } });
-    await tx.user.deleteMany({ where: { businessId: id } });
-    return tx.business.delete({ where: { id } });
+    await deleteBusinessCascade(id, tx);
   });
 };
 

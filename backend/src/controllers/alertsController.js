@@ -5,7 +5,7 @@ import { logger } from '../utils/logger.js';
 export const getAlerts = async (req, res) => {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized: Missing user ID' });
+    return res.status(401).json({ error: 'No autorizado: ID de usuario faltante' });
   }
 
   try {
@@ -16,7 +16,7 @@ export const getAlerts = async (req, res) => {
     return res.json(alerts);
   } catch (error) {
     logger.error('Error fetching alerts:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
@@ -26,7 +26,7 @@ export const markAlertAsRead = async (req, res) => {
   const alertId = req.params.id;
 
   if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'No autorizado' });
   }
 
   try {
@@ -36,7 +36,7 @@ export const markAlertAsRead = async (req, res) => {
     });
 
     if (!alert || alert.userId !== userId) {
-      return res.status(404).json({ error: 'Alert not found or unauthorized' });
+      return res.status(404).json({ error: 'Alerta no encontrada o no autorizado' });
     }
 
     const updatedAlert = await prisma.alert.update({
@@ -47,7 +47,7 @@ export const markAlertAsRead = async (req, res) => {
     return res.json(updatedAlert);
   } catch (error) {
     logger.error('Error marking alert as read:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
@@ -56,7 +56,7 @@ export const markAllAlertsAsRead = async (req, res) => {
   const userId = req.user?.id;
 
   if (!userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'No autorizado' });
   }
 
   try {
@@ -67,17 +67,13 @@ export const markAllAlertsAsRead = async (req, res) => {
     return res.json({ success: true, message: 'All alerts marked as read' });
   } catch (error) {
     logger.error('Error marking all alerts as read:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
 // POST: Create alerts (Admin broadcast or backend triggers)
 export const createAlert = async (req, res) => {
   const { type, title, description, targetUserId, targetBusinessId, targetRole } = req.body;
-
-  if (!type || !title || !description) {
-    return res.status(400).json({ error: 'Type, title, and description are required' });
-  }
 
   try {
     let where = {};
@@ -97,7 +93,7 @@ export const createAlert = async (req, res) => {
     const users = await prisma.user.findMany({ where });
 
     if (users.length === 0) {
-      return res.status(404).json({ error: 'No matching target users found' });
+      return res.status(404).json({ error: 'No se encontraron usuarios objetivo' });
     }
 
     const createdAlerts = await Promise.all(
@@ -117,6 +113,6 @@ export const createAlert = async (req, res) => {
     return res.status(201).json({ success: true, count: createdAlerts.length });
   } catch (error) {
     logger.error('Error creating alert:', error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

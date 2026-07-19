@@ -1,6 +1,5 @@
 import * as userService from '../services/userService.js';
 import { ApiResponse } from '../utils/index.js';
-import bcrypt from 'bcryptjs';
 
 export const getUsers = async (req, res) => {
   const { businessId } = req.query;
@@ -32,10 +31,10 @@ export const createUser = async (req, res) => {
   // Check tenant isolation
   if (req.user.role !== 'ADMIN') {
     if (businessId && businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Forbidden: Access denied to other business ID' });
+      return res.status(403).json({ error: 'Acceso denegado a otro negocio' });
     }
     if (role === 'ADMIN' || role === 'JEFE') {
-      return res.status(403).json({ error: 'Forbidden: Cannot create ADMIN or JEFE users' });
+      return res.status(403).json({ error: 'No se pueden crear usuarios ADMIN o JEFE' });
     }
   }
 
@@ -45,11 +44,10 @@ export const createUser = async (req, res) => {
     return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await userService.createUser({
     name,
     email,
-    password: hashedPassword,
+    password,
     role,
     businessId: (req.user.role !== 'ADMIN' ? req.user.businessId : businessId) || null
   });
@@ -66,16 +64,16 @@ export const updateUser = async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     const targetUser = await userService.getUserById(id);
     if (!targetUser || targetUser.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Forbidden' });
+      return res.status(403).json({ error: 'Acceso denegado' });
     }
     if (businessId !== undefined && businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Forbidden: Cannot transfer user to another business' });
+      return res.status(403).json({ error: 'No se puede transferir usuario a otro negocio' });
     }
     if (role === 'ADMIN') {
-      return res.status(403).json({ error: 'Forbidden: Cannot promote user to ADMIN' });
+      return res.status(403).json({ error: 'No se puede promover usuario a ADMIN' });
     }
     if (role === 'JEFE') {
-      return res.status(403).json({ error: 'Forbidden: Cannot promote user to JEFE' });
+      return res.status(403).json({ error: 'No se puede promover usuario a JEFE' });
     }
   }
 
@@ -90,7 +88,7 @@ export const updateUser = async (req, res) => {
     data.email = email;
   }
   if (password) {
-    data.password = await bcrypt.hash(password, 10);
+    data.password = password;
   }
   if (role) data.role = role;
   if (businessId !== undefined) {
@@ -110,7 +108,7 @@ export const deleteUser = async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     const targetUser = await userService.getUserById(id);
     if (!targetUser || targetUser.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Forbidden' });
+      return res.status(403).json({ error: 'Acceso denegado' });
     }
   }
 

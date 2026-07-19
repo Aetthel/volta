@@ -48,4 +48,3 @@ export const logger = {
     console.log(`${color}[${timestamp}] [${level}] ${message}${metaString}\x1b[0m`);
   }
 };
-export default logger;

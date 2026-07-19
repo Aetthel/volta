@@ -6,7 +6,7 @@ export const getClients = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const clients = await clientsService.getClientsByBusiness(businessId);
@@ -18,7 +18,7 @@ export const createClient = async (req, res) => {
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access to this business is not allowed' });
+    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
   const client = await clientsService.createClient({ name, surname, email, phone, businessId });
@@ -32,7 +32,7 @@ export const updateClient = async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     const client = await clientsService.getClientById(id);
     if (!client || client.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
+      return res.status(403).json({ error: 'Acceso denegado a este cliente' });
     }
   }
 
@@ -48,7 +48,7 @@ export const deleteClient = async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     const client = await clientsService.getClientById(id);
     if (!client || client.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
+      return res.status(403).json({ error: 'Acceso denegado a este cliente' });
     }
   }
 
@@ -61,12 +61,12 @@ export const resendConsent = async (req, res) => {
 
   const client = await clientsService.getClientById(id);
   if (!client) {
-    return res.status(404).json({ error: 'Client not found' });
+    return res.status(404).json({ error: 'Cliente no encontrado' });
   }
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && client.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
+    return res.status(403).json({ error: 'Acceso denegado a este cliente' });
   }
 
   await clientsService.resendConsent(client);
@@ -83,12 +83,12 @@ export const sendMessage = async (req, res) => {
 
   const client = await clientsService.getClientById(id);
   if (!client) {
-    return res.status(404).json({ error: 'Client not found' });
+    return res.status(404).json({ error: 'Cliente no encontrado' });
   }
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && client.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Forbidden: Access denied to this client' });
+    return res.status(403).json({ error: 'Acceso denegado a este cliente' });
   }
 
   await clientsService.sendMessage(client, message);

@@ -1,6 +1,5 @@
 import * as adminService from '../services/adminService.js';
 import { ApiResponse } from '../utils/index.js';
-import bcrypt from 'bcryptjs';
 
 export const getBusinesses = async (req, res) => {
   const businesses = await adminService.getAllBusinesses();
@@ -9,14 +8,13 @@ export const getBusinesses = async (req, res) => {
 
 export const createBusiness = async (req, res) => {
   const { name, email, phone, address, password } = req.body;
-  const hashedPass = await bcrypt.hash(password, 10);
 
   const business = await adminService.createBusiness({
     name,
     email,
     phone,
     address
-  }, hashedPass);
+  }, password);
 
   return ApiResponse.success(res, business);
 };
@@ -26,7 +24,7 @@ export const deleteBusiness = async (req, res) => {
   const business = await adminService.getAllBusinesses();
   const exists = business.some(b => b.id === id);
   if (!exists) {
-    return res.status(404).json({ error: 'Business not found' });
+    return res.status(404).json({ error: 'Negocio no encontrado' });
   }
   await adminService.deleteBusiness(id);
   return ApiResponse.deleted(res);
