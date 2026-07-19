@@ -27,8 +27,15 @@ async function rateLimitedPost(request) {
   let loginSuccess = false;
   const setCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
   const setCookieHeader = response.headers.get("set-cookie") || "";
+  
+  console.log(`[RateLimiter] POST callback response status: ${response.status}`);
+  console.log(`[RateLimiter] Set-Cookie header: "${setCookieHeader}"`);
+  console.log(`[RateLimiter] getSetCookie() array:`, setCookies);
+
   const hasSessionCookie = (setCookieHeader && setCookieHeader.includes("session-token")) || 
                            setCookies.some(cookie => cookie.toLowerCase().includes("session-token"));
+  
+  console.log(`[RateLimiter] Detected session cookie: ${hasSessionCookie}`);
 
   if (hasSessionCookie) {
     loginSuccess = true;
