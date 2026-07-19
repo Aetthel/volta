@@ -15,6 +15,7 @@
     "seed": "node scripts/seed.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "lint": "echo 'No linting configured for backend'",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit"
   },
   "dependencies": {
