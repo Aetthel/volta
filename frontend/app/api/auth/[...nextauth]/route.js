@@ -25,26 +25,9 @@ async function rateLimitedPost(request) {
   const response = await handlers.POST(request);
 
   let loginSuccess = false;
-  if (response.status === 302) {
-    const location = response.headers.get("Location");
-    const isErrorRedirect = location && (location.includes("error=") || location.includes("/login?"));
-    if (!isErrorRedirect) {
-      loginSuccess = true;
-    }
-  } else if (response.status === 200) {
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
-      try {
-        const data = await response.clone().json();
-        if (data && !data.error && data.ok !== false) {
-          loginSuccess = true;
-        }
-      } catch (e) {
-        // Ignored: fallback or ignore JSON parse errors
-      }
-    } else {
-      loginSuccess = true;
-    }
+  const setCookie = response.headers.get("set-cookie");
+  if (setCookie && setCookie.includes("session-token")) {
+    loginSuccess = true;
   }
 
   if (loginSuccess) {
