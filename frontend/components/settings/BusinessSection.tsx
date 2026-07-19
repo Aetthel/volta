@@ -208,7 +208,13 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
                 <div className="flex items-center gap-4 mb-6">
                   <div className="relative group shrink-0">
                     <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
-                      <img src={profile.logoUrl || "/logo.png"} alt="Foto del Negocio" className="w-full h-full object-cover" />
+                      {profile.logoUrl ? (
+                        <img src={profile.logoUrl} alt="Foto del Negocio" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
+                          <Store className="w-8 h-8" />
+                        </div>
+                      )}
                     </div>
                     <input type="file" ref={businessLogoInputRef} onChange={handleBusinessLogoChange} accept="image/*" className="hidden" />
                     <Button type="button" variant="ghost" onClick={() => businessLogoInputRef.current?.click()}
@@ -253,7 +259,13 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
               <div className="flex items-center gap-4 mb-6">
                 <div className="shrink-0">
                   <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
-                    <img src={profile.logoUrl || "/logo.png"} alt="Foto del Negocio" className="w-full h-full object-cover" />
+                    {profile.logoUrl ? (
+                      <img src={profile.logoUrl} alt="Foto del Negocio" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-[#b0c4de]/30 text-slate-600">
+                        <Store className="w-8 h-8" />
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5">

@@ -44,7 +44,7 @@ export default function AjustesPage() {
     email: "contacto@volta.com",
     phone: "+34 912 345 678",
     address: "Calle de Velázquez, 45, Madrid",
-    logoUrl: "/logo.png",
+    logoUrl: "",
     coverUrl: "",
     description: "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
     ownerName: "Sofía Martín",
