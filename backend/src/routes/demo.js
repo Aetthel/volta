@@ -8,7 +8,7 @@ const router = express.Router();
 
 const demoLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
+  max: process.env.NODE_ENV === 'production' ? 3 : 1000,
   message: { error: 'Has creado demasiadas demos. Inténtalo de nuevo más tarde.' },
   standardHeaders: true,
   legacyHeaders: false,
