@@ -25,9 +25,9 @@ if (missingVars.length > 0) {
 
 const config = {
   databaseUrl: process.env.DATABASE_URL,
-  apiKey: process.env.API_KEY,
-  backendJwtSecret: process.env.BACKEND_JWT_SECRET,
-  lopdHmacSecret: process.env.LOPD_HMAC_SECRET,
+  apiKey: process.env.API_KEY || (process.env.NODE_ENV === 'test' ? 'test-api-key' : undefined),
+  backendJwtSecret: process.env.BACKEND_JWT_SECRET || (process.env.NODE_ENV === 'test' ? 'test-jwt-secret' : undefined),
+  lopdHmacSecret: process.env.LOPD_HMAC_SECRET || (process.env.NODE_ENV === 'test' ? 'test-lopd-hmac-secret' : undefined),
   port: process.env.BACKEND_PORT || (process.env.PORT && process.env.PORT !== '3000' ? process.env.PORT : 3001),
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
