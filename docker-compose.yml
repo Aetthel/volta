@@ -4,9 +4,9 @@ services:
     container_name: volta-db
     restart: no
     environment:
-      POSTGRES_USER: volta_user
-      POSTGRES_PASSWORD: volta_password
-      POSTGRES_DB: volta_db
+      POSTGRES_USER: ${POSTGRES_USER:-volta_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-volta_password}
+      POSTGRES_DB: ${POSTGRES_DB:-volta_db}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -23,7 +23,7 @@ services:
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/root/.local/share/pnpm/store
-      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - DATABASE_URL=${DATABASE_URL:-postgresql://volta_user:volta_password@db:5432/volta_db?schema=public}
       - PORT=3001
     volumes:
       - .:/app
@@ -47,7 +47,7 @@ services:
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/root/.local/share/pnpm/store
-      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - DATABASE_URL=${DATABASE_URL:-postgresql://volta_user:volta_password@db:5432/volta_db?schema=public}
       - BACKEND_INTERNAL_URL=http://backend:3001
       # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
       # header set by Cloudflare Tunnel / any reverse proxy, avoiding redirect loops.

@@ -79,22 +79,19 @@ export const createAlert = async (req, res) => {
     return res.status(400).json({ error: 'Type, title, and description are required' });
   }
 
-  // Non-admins can only create alerts for themselves or users of their own business
-  if (req.user?.role !== 'ADMIN') {
-    if (targetBusinessId && targetBusinessId !== req.user?.businessId) {
-      return res.status(403).json({ error: 'Forbidden: Cannot create alerts for other businesses' });
-    }
-  }
-
   try {
-    const where = {};
-    if (targetUserId) where.id = targetUserId;
-    if (targetBusinessId) where.businessId = targetBusinessId;
-    if (targetRole) where.role = targetRole;
+    let where = {};
 
-    // Enforce business constraint for non-admins if target filters are vague
-    if (req.user?.role !== 'ADMIN' && !targetUserId && !targetBusinessId) {
+    if (req.user?.role === 'ADMIN') {
+      // Admin can target any user across any business
+      if (targetUserId) where.id = targetUserId;
+      if (targetBusinessId) where.businessId = targetBusinessId;
+      if (targetRole) where.role = targetRole;
+    } else {
+      // Non-admin: always scope to their own business, ignore targetBusinessId
       where.businessId = req.user?.businessId;
+      if (targetUserId) where.id = targetUserId;
+      if (targetRole) where.role = targetRole;
     }
 
     const users = await prisma.user.findMany({ where });
