@@ -20,6 +20,9 @@ services:
       - backend
     volumes:
       - /opt/docker/volta/.env:/app/.env:ro
+    environment:
+      - BACKEND_INTERNAL_URL=http://backend:3001
+      - AUTH_TRUST_HOST=true
     command: pnpm --filter frontend start
     ports:
       - "${PORT_HOST:-3001}:${PORT:-3000}"
