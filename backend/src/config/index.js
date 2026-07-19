@@ -14,8 +14,8 @@ const REQUIRED_ENV_VARS = ['DATABASE_URL', 'API_KEY', 'BACKEND_JWT_SECRET', 'LOP
 const missingVars = REQUIRED_ENV_VARS.filter(varName => !process.env[varName]);
 
 if (missingVars.length > 0) {
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    console.warn(`[WARN] Missing runtime environment variables: ${missingVars.join(', ')} (Bypassed during Next.js build)`);
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'test') {
+    console.warn(`[WARN] Missing runtime environment variables: ${missingVars.join(', ')} (Bypassed during ${process.env.NODE_ENV === 'test' ? 'tests' : 'Next.js build'})`);
   } else {
     console.error(`\x1b[31m[FATAL] Missing required environment variables: ${missingVars.join(', ')}\x1b[0m`);
     console.error('Please verify your .env configuration file.');
