@@ -25,8 +25,12 @@ async function rateLimitedPost(request) {
   const response = await handlers.POST(request);
 
   let loginSuccess = false;
-  const setCookie = response.headers.get("set-cookie");
-  if (setCookie && setCookie.includes("session-token")) {
+  const setCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
+  const setCookieHeader = response.headers.get("set-cookie") || "";
+  const hasSessionCookie = (setCookieHeader && setCookieHeader.includes("session-token")) || 
+                           setCookies.some(cookie => cookie.toLowerCase().includes("session-token"));
+
+  if (hasSessionCookie) {
     loginSuccess = true;
   }
 

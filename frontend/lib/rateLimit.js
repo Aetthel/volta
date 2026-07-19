@@ -1,7 +1,7 @@
 const attempts = new Map();
 
 const WINDOW_MS = 15 * 60 * 1000;
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = process.env.NODE_ENV === "production" ? 5 : 100;
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
 let lastCleanup = Date.now();
