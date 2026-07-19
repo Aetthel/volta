@@ -24,18 +24,30 @@ export const createAppointment = async (appointmentData) => {
     throw error;
   }
 
-  const clients = await prisma.client.findMany({
-    where: { businessId }
-  });
-
-  const inputName = normalizeString(clientName);
   const inputPhone = normalizePhone(clientPhone);
 
-  let client = clients.find((c) => {
-    const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
-    const existingPhone = normalizePhone(c.phone);
-    return existingName === inputName || existingPhone === inputPhone;
+  // 1. Try to find client by exact phone number first
+  let client = await prisma.client.findFirst({
+    where: {
+      businessId,
+      phone: inputPhone
+    }
   });
+
+  // 2. Fall back to searching by name and surname if phone didn't match
+  if (!client) {
+    const parts = clientName.trim().split(/\s+/);
+    const firstName = parts[0];
+    const surname = parts.slice(1).join(" ");
+
+    client = await prisma.client.findFirst({
+      where: {
+        businessId,
+        name: { equals: firstName, mode: 'insensitive' },
+        surname: { equals: surname || "", mode: 'insensitive' }
+      }
+    });
+  }
 
   if (!client) {
     const parts = clientName.trim().split(" ");

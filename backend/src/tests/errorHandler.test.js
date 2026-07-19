@@ -43,7 +43,7 @@ describe('errorHandler middleware', () => {
     errorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'Not found' })
+      expect.objectContaining({ error: 'Error en la petición' })
     );
   });
 

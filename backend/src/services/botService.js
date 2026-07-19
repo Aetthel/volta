@@ -100,6 +100,16 @@ async function runSentinel() {
           continue;
         }
 
+        // Fail fast: skip immediately if the business WhatsApp link is not connected
+        if (appt.business.whatsappStatus === 'DISCONNECTED' || appt.business.whatsappStatus === 'WAITING_QR') {
+          logger.warn(`[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)}: Business ${appt.business.name} WhatsApp status is ${appt.business.whatsappStatus}`);
+          await prisma.appointment.update({
+            where: { id: appt.id },
+            data: { status: 'ERROR' }
+          });
+          continue;
+        }
+
         const message = formatMessage(appt.business.reminderMessage, {
           clientName: appt.clientName,
           appointmentDate: appt.appointmentDate,

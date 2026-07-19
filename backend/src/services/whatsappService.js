@@ -170,33 +170,49 @@ class WhatsAppManager {
         return reject(new Error(`No client found for business ${businessId}`));
       }
 
-      const timer = setTimeout(() => {
-        reject(new Error(`[WhatsApp] Timeout waiting for client to be ready (business: ${businessId})`));
-      }, timeoutMs);
+      let resolved = false;
 
-      const cleanup = () => clearTimeout(timer);
-
-      client.once('ready', () => {
-        cleanup();
+      const onReady = () => {
+        finish();
         resolve();
-      });
+      };
 
       // Fail fast: if a QR is requested it means the session expired and
       // the user needs to re-scan — no point waiting the full timeout.
-      client.once('qr', () => {
-        cleanup();
+      const onQr = () => {
+        finish();
         reject(new Error(`[WhatsApp] Session expired — QR re-scan required (business: ${businessId})`));
-      });
+      };
 
-      client.once('auth_failure', () => {
-        cleanup();
+      const onAuthFailure = () => {
+        finish();
         reject(new Error(`[WhatsApp] Auth failure while waiting for ready (business: ${businessId})`));
-      });
+      };
 
-      client.once('disconnected', () => {
-        cleanup();
+      const onDisconnected = () => {
+        finish();
         reject(new Error(`[WhatsApp] Client disconnected while waiting for ready (business: ${businessId})`));
-      });
+      };
+
+      const timer = setTimeout(() => {
+        finish();
+        reject(new Error(`[WhatsApp] Timeout waiting for client to be ready (business: ${businessId})`));
+      }, timeoutMs);
+
+      const finish = () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timer);
+        client.off('ready', onReady);
+        client.off('qr', onQr);
+        client.off('auth_failure', onAuthFailure);
+        client.off('disconnected', onDisconnected);
+      };
+
+      client.once('ready', onReady);
+      client.once('qr', onQr);
+      client.once('auth_failure', onAuthFailure);
+      client.once('disconnected', onDisconnected);
     });
   }
 
