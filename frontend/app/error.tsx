@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
-import { Alert, Button } from "@/components/ui/volta-ui";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -34,33 +34,29 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
         </div>
 
         {/* Technical details Alert */}
-        <Alert variant="error" className="text-left w-full">
+        <div className="p-4 rounded-md text-body-md font-medium border flex gap-3 items-start bg-error-container border-error-container/60 text-on-error-container text-left w-full">
           <span className="font-mono text-body-sm break-all">
             {error.message || "Error desconocido del sistema"}
           </span>
-        </Alert>
+        </div>
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row w-full gap-3 mt-2">
-          <Button
+          <button
             onClick={() => reset()}
-            variant="primary"
-            size="lg"
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary text-on-primary font-medium rounded-xl hover:opacity-90 transition-opacity"
           >
-            <RefreshCw data-icon="refresh-cw" />
+            <RefreshCw className="w-4 h-4" />
             <span>Reintentar</span>
-          </Button>
+          </button>
           
-          <Button
-            onClick={() => window.location.href = "/"}
-            variant="outline"
-            size="lg"
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 shadow-none"
+          <Link
+            href="/"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border border-outline-variant text-on-surface font-medium rounded-xl hover:bg-surface-variant transition-colors"
           >
-            <Home data-icon="home" />
+            <Home className="w-4 h-4" />
             <span>Ir al Inicio</span>
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

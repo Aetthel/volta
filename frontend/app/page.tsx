@@ -123,7 +123,7 @@ export default function RootPage() {
                 Login
               </Button>
             </Link>
-            <Link href="/login">
+            <Link href="/register">
               <Button variant="primary" size="md">
                 Get Started
               </Button>
@@ -152,7 +152,7 @@ export default function RootPage() {
                 La plataforma todo en uno para peluquerías y centros de estética que buscan profesionalidad, eficiencia y una experiencia de cliente superior.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <Link href="/login" className="w-full sm:w-auto">
+                <Link href="/register" className="w-full sm:w-auto">
                   <Button variant="primary" size="lg" className="w-full sm:w-auto shadow-md">
                     Empezar Gratis
                   </Button>
@@ -530,7 +530,7 @@ export default function RootPage() {
                 </div>
                 
                 <div className="mt-8 space-y-3">
-                  <Link href="/login">
+                  <Link href="/register">
                     <Button variant="outline" size="lg" className="w-full">
                       Probar 14 días gratis
                     </Button>

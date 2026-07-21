@@ -20,7 +20,11 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
 
   const path = pathParts.join("/");
 
-  const isPublicRoute = pathParts[0] === "lopd" || pathParts[0] === "health" || pathParts[0] === "demo";
+  const isPublicRoute =
+    pathParts[0] === "lopd" ||
+    pathParts[0] === "health" ||
+    pathParts[0] === "demo" ||
+    (pathParts[0] === "users" && pathParts[1] === "register");
 
   let session: Session | null = null;
   if (!isPublicRoute) {

@@ -41,6 +41,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             businessId: user.businessId,
             isDemo: user.business?.isDemo || false,
             demoExpiresAt: user.business?.demoExpiresAt ? user.business.demoExpiresAt.toISOString() : null,
+            businessType: user.business?.businessType || null,
+            subscriptionPlan: user.business?.subscriptionPlan || "PRO",
             themeColor: user.business?.themeColor || "TEAL",
             fontSizeLevel: user.business?.fontSizeLevel || "MEDIUM",
             borderRadiusLevel: user.business?.borderRadiusLevel || "MEDIUM",

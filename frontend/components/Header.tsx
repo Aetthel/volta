@@ -20,7 +20,6 @@ import {
   FileText,
   ArrowRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/volta-ui";
 import { useAlerts } from "@/lib/alerts";
 
 interface HeaderProps {
@@ -33,7 +32,7 @@ interface HeaderProps {
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
 
-export default function Header({
+function HeaderContent({
   searchPlaceholder = "Buscar...",
   searchValue = "",
   onSearchChange,
@@ -48,10 +47,11 @@ export default function Header({
   const [workerPhoto, setWorkerPhoto] = useState<string | null>(null);
   const { alerts, markAsRead, markAllAsRead, hasUnread } = useAlerts();
 
-  const emergenteAlerts = alerts.filter(
+  const safeAlerts = Array.isArray(alerts) ? alerts : [];
+  const emergenteAlerts = safeAlerts.filter(
     (a) => a.type === "EMERGENTE" && !a.isRead,
   );
-  const standardAlerts = alerts.filter((a) => a.type !== "EMERGENTE");
+  const standardAlerts = safeAlerts.filter((a) => a.type !== "EMERGENTE");
   const totalEmergentes = emergenteAlerts.length;
   const currentEmergente = emergenteAlerts[emergenteIndex];
 
@@ -135,18 +135,16 @@ export default function Header({
     <div className="flex items-center gap-3 shrink-0">
       {/* Notification Bell */}
       <div className="relative">
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-          className="p-2.5 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary relative shadow-none w-9 h-9 flex items-center justify-center"
+          className="p-2.5 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary relative shadow-none w-9 h-9 flex items-center justify-center transition-colors cursor-pointer"
           aria-label="Notificaciones"
         >
           <Bell data-icon="bell" className="w-[18px] h-[18px]" />
           {hasUnread && (
             <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-surface"></span>
           )}
-        </Button>
+        </button>
 
         {isNotificationsOpen && (
           <>
@@ -374,21 +372,18 @@ export default function Header({
       </div>
 
       {/* Help Icon */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="p-2.5 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary w-9 h-9 shadow-none flex items-center justify-center"
+      <button
+        className="p-2.5 hover:bg-surface-variant rounded-full text-on-surface-variant hover:text-primary w-9 h-9 shadow-none flex items-center justify-center transition-colors cursor-pointer"
         aria-label="Ayuda"
       >
         <HelpCircle data-icon="help" className="w-[18px] h-[18px]" />
-      </Button>
+      </button>
 
       {/* Avatar Profile with Dropdown */}
       <div className="relative">
-        <Button
-          variant="ghost"
+        <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="relative w-9 h-9 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary p-0 bg-surface-container shadow-none active:scale-95 flex items-center justify-center"
+          className="relative w-9 h-9 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary p-0 bg-surface-container shadow-none active:scale-95 flex items-center justify-center transition-all cursor-pointer"
         >
           {workerPhoto && workerPhoto !== DEFAULT_AVATAR ? (
             <img
@@ -401,7 +396,7 @@ export default function Header({
               <User data-icon="user" className="w-[18px] h-[18px]" />
             </div>
           )}
-        </Button>
+        </button>
 
         {/* Dropdown Menu */}
         {isDropdownOpen && (
@@ -425,8 +420,7 @@ export default function Header({
                 <span>Ajustes</span>
               </Link>
 
-              <Button
-                variant="ghost"
+              <button
                 onClick={async () => {
                   setIsDropdownOpen(false);
                   if (session?.user?.businessId && session?.user?.isDemo) {
@@ -444,15 +438,25 @@ export default function Header({
                   signOut({ callbackUrl: "/login" });
                   localStorage.removeItem("stylist_worker_photo");
                 }}
-                className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none active:scale-100 rounded-none h-auto"
+                className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none cursor-pointer rounded-none h-auto"
               >
                 <LogOut data-icon="logout" className="text-error w-4 h-4" />
                 <span>Cerrar Sesión</span>
-              </Button>
+              </button>
             </div>
           </>
         )}
       </div>
     </div>
   );
+}
+
+export default function Header(props: HeaderProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || typeof window === "undefined") return null;
+  return <HeaderContent {...props} />;
 }

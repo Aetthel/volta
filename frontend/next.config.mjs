@@ -2,6 +2,10 @@ import path from 'path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
+  experimental: {
+    prerenderEarlyExit: false,
+  },
   turbopack: {
     root: path.resolve(process.cwd(), ".."),
   },

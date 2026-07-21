@@ -24,7 +24,7 @@ interface AlertsContextType {
 
 const AlertsContext = createContext<AlertsContextType | undefined>(undefined);
 
-export function AlertsProvider({ children }: { children: React.ReactNode }) {
+function AlertsProviderClient({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,6 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
 
   const markAsRead = async (id: string) => {
     try {
-      // Optimistic update
       setAlerts((prev) =>
         prev.map((alert) => (alert.id === id ? { ...alert, isRead: true } : alert))
       );
@@ -56,7 +55,6 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!res.ok) {
-        // Rollback if request fails
         fetchAlerts();
       }
     } catch (e) {
@@ -67,7 +65,6 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
 
   const markAllAsRead = async () => {
     try {
-      // Optimistic update
       setAlerts((prev) => prev.map((alert) => ({ ...alert, isRead: true })));
 
       const res = await fetch("/api/backend/alerts/read-all", {
@@ -83,13 +80,11 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Initial load and periodic polling
   useEffect(() => {
     if (status === "authenticated") {
       setIsLoading(true);
       fetchAlerts().finally(() => setIsLoading(false));
 
-      // Poll every 30 seconds
       const interval = setInterval(() => {
         fetchAlerts();
       }, 30000);
@@ -121,10 +116,40 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+export function AlertsProvider({ children }: { children: React.ReactNode }) {
+  if (typeof window === "undefined") {
+    return (
+      <AlertsContext.Provider
+        value={{
+          alerts: [],
+          isLoading: false,
+          fetchAlerts: async () => {},
+          markAsRead: async () => {},
+          markAllAsRead: async () => {},
+          hasUnread: false,
+          unreadCount: 0,
+        }}
+      >
+        {children}
+      </AlertsContext.Provider>
+    );
+  }
+
+  return <AlertsProviderClient>{children}</AlertsProviderClient>;
+}
+
 export function useAlerts() {
   const context = useContext(AlertsContext);
   if (context === undefined) {
-    throw new Error("useAlerts must be used within an AlertsProvider");
+    return {
+      alerts: [],
+      isLoading: false,
+      fetchAlerts: async () => {},
+      markAsRead: async () => {},
+      markAllAsRead: async () => {},
+      hasUnread: false,
+      unreadCount: 0,
+    };
   }
   return context;
 }

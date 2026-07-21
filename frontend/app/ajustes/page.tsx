@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getThemeColor, applyThemeColors, COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES } from "@/lib/theme";

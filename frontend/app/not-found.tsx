@@ -1,7 +1,5 @@
-"use client";
-
+import Link from "next/link";
 import { HelpCircle, Home } from "lucide-react";
-import { Button } from "@/components/ui/volta-ui";
 
 export default function NotFoundPage() {
   return (
@@ -25,15 +23,13 @@ export default function NotFoundPage() {
 
         {/* Action Button */}
         <div className="w-full mt-2">
-          <Button
-            onClick={() => window.location.href = "/"}
-            variant="primary"
-            size="lg"
-            className="w-full py-3 px-6 active:scale-[0.98]"
+          <Link
+            href="/"
+            className="w-full py-3 px-6 bg-primary text-on-primary font-medium rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
           >
-            <Home data-icon="home" />
+            <Home className="w-4 h-4" />
             <span>Volver al Inicio</span>
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import * as userService from '../services/userService.js';
 import { ApiResponse } from '../utils/index.js';
+import prisma from '../config/db.js';
 
 export const getUsers = async (req, res) => {
   const { businessId } = req.query;
@@ -114,4 +115,52 @@ export const deleteUser = async (req, res) => {
 
   await userService.deleteUser(id);
   return ApiResponse.deleted(res);
+};
+
+export const registerUser = async (req, res) => {
+  const { name, email, password, businessName, phone, businessType } = req.body;
+
+  // 1. Check if user email already exists
+  const existingUser = await userService.getUserByEmail(email);
+  if (existingUser) {
+    return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+  }
+
+  // 2. Create Business with 10-day trial in Plan Pro (25€)
+  const demoExpiresAt = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+  const business = await prisma.business.create({
+    data: {
+      name: businessName,
+      phone,
+      email,
+      ownerName: name,
+      businessType: businessType || 'Peluquería / Barbería',
+      subscriptionPlan: 'PRO',
+      isDemo: true,
+      demoExpiresAt
+    }
+  });
+
+  // 3. Create ADMIN User for the new Business
+  const user = await userService.createUser({
+    name,
+    email,
+    password,
+    role: 'ADMIN',
+    businessId: business.id
+  });
+
+  const { password: _, ...sanitizedUser } = user;
+
+  return ApiResponse.created(res, {
+    user: sanitizedUser,
+    business: {
+      id: business.id,
+      name: business.name,
+      businessType: business.businessType,
+      subscriptionPlan: business.subscriptionPlan,
+      isDemo: business.isDemo,
+      demoExpiresAt: business.demoExpiresAt
+    }
+  });
 };

@@ -138,7 +138,9 @@ exports.Prisma.BusinessScalarFieldEnum = {
   fontSizeLevel: 'fontSizeLevel',
   borderRadiusLevel: 'borderRadiusLevel',
   isDemo: 'isDemo',
-  demoExpiresAt: 'demoExpiresAt'
+  demoExpiresAt: 'demoExpiresAt',
+  businessType: 'businessType',
+  subscriptionPlan: 'subscriptionPlan'
 };
 
 exports.Prisma.UserScalarFieldEnum = {

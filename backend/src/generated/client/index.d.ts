@@ -1657,6 +1657,8 @@ export namespace Prisma {
     borderRadiusLevel: string | null
     isDemo: boolean | null
     demoExpiresAt: Date | null
+    businessType: string | null
+    subscriptionPlan: string | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -1678,6 +1680,8 @@ export namespace Prisma {
     borderRadiusLevel: string | null
     isDemo: boolean | null
     demoExpiresAt: Date | null
+    businessType: string | null
+    subscriptionPlan: string | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -1699,6 +1703,8 @@ export namespace Prisma {
     borderRadiusLevel: number
     isDemo: number
     demoExpiresAt: number
+    businessType: number
+    subscriptionPlan: number
     _all: number
   }
 
@@ -1722,6 +1728,8 @@ export namespace Prisma {
     borderRadiusLevel?: true
     isDemo?: true
     demoExpiresAt?: true
+    businessType?: true
+    subscriptionPlan?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -1743,6 +1751,8 @@ export namespace Prisma {
     borderRadiusLevel?: true
     isDemo?: true
     demoExpiresAt?: true
+    businessType?: true
+    subscriptionPlan?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -1764,6 +1774,8 @@ export namespace Prisma {
     borderRadiusLevel?: true
     isDemo?: true
     demoExpiresAt?: true
+    businessType?: true
+    subscriptionPlan?: true
     _all?: true
   }
 
@@ -1858,6 +1870,8 @@ export namespace Prisma {
     borderRadiusLevel: string
     isDemo: boolean
     demoExpiresAt: Date | null
+    businessType: string | null
+    subscriptionPlan: string
     _count: BusinessCountAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
@@ -1896,6 +1910,8 @@ export namespace Prisma {
     borderRadiusLevel?: boolean
     isDemo?: boolean
     demoExpiresAt?: boolean
+    businessType?: boolean
+    subscriptionPlan?: boolean
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
     hours?: boolean | Business$hoursArgs<ExtArgs>
@@ -1923,6 +1939,8 @@ export namespace Prisma {
     borderRadiusLevel?: boolean
     isDemo?: boolean
     demoExpiresAt?: boolean
+    businessType?: boolean
+    subscriptionPlan?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1944,6 +1962,8 @@ export namespace Prisma {
     borderRadiusLevel?: boolean
     isDemo?: boolean
     demoExpiresAt?: boolean
+    businessType?: boolean
+    subscriptionPlan?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -1965,9 +1985,11 @@ export namespace Prisma {
     borderRadiusLevel?: boolean
     isDemo?: boolean
     demoExpiresAt?: boolean
+    businessType?: boolean
+    subscriptionPlan?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "isDemo" | "demoExpiresAt", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "isDemo" | "demoExpiresAt" | "businessType" | "subscriptionPlan", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -2007,6 +2029,8 @@ export namespace Prisma {
       borderRadiusLevel: string
       isDemo: boolean
       demoExpiresAt: Date | null
+      businessType: string | null
+      subscriptionPlan: string
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -2453,6 +2477,8 @@ export namespace Prisma {
     readonly borderRadiusLevel: FieldRef<"Business", 'String'>
     readonly isDemo: FieldRef<"Business", 'Boolean'>
     readonly demoExpiresAt: FieldRef<"Business", 'DateTime'>
+    readonly businessType: FieldRef<"Business", 'String'>
+    readonly subscriptionPlan: FieldRef<"Business", 'String'>
   }
     
 
@@ -9915,7 +9941,9 @@ export namespace Prisma {
     fontSizeLevel: 'fontSizeLevel',
     borderRadiusLevel: 'borderRadiusLevel',
     isDemo: 'isDemo',
-    demoExpiresAt: 'demoExpiresAt'
+    demoExpiresAt: 'demoExpiresAt',
+    businessType: 'businessType',
+    subscriptionPlan: 'subscriptionPlan'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -10182,6 +10210,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFilter<"Business"> | string
     isDemo?: BoolFilter<"Business"> | boolean
     demoExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    businessType?: StringNullableFilter<"Business"> | string | null
+    subscriptionPlan?: StringFilter<"Business"> | string
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -10208,6 +10238,8 @@ export namespace Prisma {
     borderRadiusLevel?: SortOrder
     isDemo?: SortOrder
     demoExpiresAt?: SortOrderInput | SortOrder
+    businessType?: SortOrderInput | SortOrder
+    subscriptionPlan?: SortOrder
     appointments?: AppointmentOrderByRelationAggregateInput
     clients?: ClientOrderByRelationAggregateInput
     hours?: BusinessHoursOrderByRelationAggregateInput
@@ -10237,6 +10269,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFilter<"Business"> | string
     isDemo?: BoolFilter<"Business"> | boolean
     demoExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    businessType?: StringNullableFilter<"Business"> | string | null
+    subscriptionPlan?: StringFilter<"Business"> | string
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -10263,6 +10297,8 @@ export namespace Prisma {
     borderRadiusLevel?: SortOrder
     isDemo?: SortOrder
     demoExpiresAt?: SortOrderInput | SortOrder
+    businessType?: SortOrderInput | SortOrder
+    subscriptionPlan?: SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
@@ -10290,6 +10326,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringWithAggregatesFilter<"Business"> | string
     isDemo?: BoolWithAggregatesFilter<"Business"> | boolean
     demoExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    businessType?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    subscriptionPlan?: StringWithAggregatesFilter<"Business"> | string
   }
 
   export type UserWhereInput = {
@@ -10771,6 +10809,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -10797,6 +10837,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -10823,6 +10865,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -10849,6 +10893,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -10875,6 +10921,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -10896,6 +10944,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -10917,6 +10967,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
   }
 
   export type UserCreateInput = {
@@ -11540,6 +11592,8 @@ export namespace Prisma {
     borderRadiusLevel?: SortOrder
     isDemo?: SortOrder
     demoExpiresAt?: SortOrder
+    businessType?: SortOrder
+    subscriptionPlan?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -11561,6 +11615,8 @@ export namespace Prisma {
     borderRadiusLevel?: SortOrder
     isDemo?: SortOrder
     demoExpiresAt?: SortOrder
+    businessType?: SortOrder
+    subscriptionPlan?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -11582,6 +11638,8 @@ export namespace Prisma {
     borderRadiusLevel?: SortOrder
     isDemo?: SortOrder
     demoExpiresAt?: SortOrder
+    businessType?: SortOrder
+    subscriptionPlan?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -13151,6 +13209,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -13176,6 +13236,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -13247,6 +13309,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -13272,6 +13336,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13327,6 +13393,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -13352,6 +13420,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -13425,6 +13495,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -13450,6 +13522,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13491,6 +13565,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -13516,6 +13592,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -13621,6 +13699,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -13646,6 +13726,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13747,6 +13829,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -13772,6 +13856,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -13813,6 +13899,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -13838,6 +13926,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13863,6 +13953,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -13888,6 +13980,8 @@ export namespace Prisma {
     borderRadiusLevel?: string
     isDemo?: boolean
     demoExpiresAt?: Date | string | null
+    businessType?: string | null
+    subscriptionPlan?: string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -13961,6 +14055,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -13986,6 +14082,8 @@ export namespace Prisma {
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     isDemo?: BoolFieldUpdateOperationsInput | boolean
     demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    subscriptionPlan?: StringFieldUpdateOperationsInput | string
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput

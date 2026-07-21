@@ -9,6 +9,52 @@ export const getAlerts = async (req, res) => {
   }
 
   try {
+    // Check if user's business is in trial mode and evaluate milestone alerts
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { business: true }
+    });
+
+    if (user?.business?.isDemo && user?.business?.demoExpiresAt) {
+      const expiresDate = new Date(user.business.demoExpiresAt);
+      const diffMs = expiresDate.getTime() - Date.now();
+      const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+      if (daysLeft <= 3 && daysLeft > 0) {
+        const title = `Prueba Plan Pro: ${daysLeft} día${daysLeft === 1 ? '' : 's'} restante${daysLeft === 1 ? '' : 's'}`;
+        const existing = await prisma.alert.findFirst({
+          where: { userId, title }
+        });
+        if (!existing) {
+          await prisma.alert.create({
+            data: {
+              type: 'AVISO',
+              title,
+              description: 'Tu período de prueba gratuita del Plan Pro finaliza pronto. Elige tu plan en Ajustes para mantener todas las funciones activas.',
+              userId,
+              isRead: false
+            }
+          });
+        }
+      } else if (daysLeft === 0) {
+        const title = 'Período de prueba gratuita finalizado';
+        const existing = await prisma.alert.findFirst({
+          where: { userId, title }
+        });
+        if (!existing) {
+          await prisma.alert.create({
+            data: {
+              type: 'AVISO',
+              title,
+              description: 'Tu prueba de 10 días ha expirado. Elige el Plan Base (18€/mes) o Plan Pro (25€/mes) para continuar utilizando Volta.',
+              userId,
+              isRead: false
+            }
+          });
+        }
+      }
+    }
+
     const alerts = await prisma.alert.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' }
