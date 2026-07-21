@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import FaceIcon from "@/components/FaceIcon";
 import {
   Calendar,
   BarChart3,
@@ -91,11 +90,6 @@ export default function RootPage() {
         }`}
       >
         <div className="flex justify-between items-center px-6 md:px-16 lg:px-24 xl:px-32 max-w-container-max mx-auto">
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <FaceIcon className="w-11 h-11 text-primary" />
-          </Link>
-
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
             <a

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   CheckCircle,
   FileText,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 import { useAlerts } from "@/lib/alerts";
@@ -198,74 +199,67 @@ export default function Header({
 
               {/* Pinned Emergente Carousel */}
               {totalEmergentes > 0 && currentEmergente && (
-                <div className="p-4 bg-primary/5 border-b border-outline-variant">
-                  <div className="bg-surface-container-lowest border border-primary/20 rounded-xl p-4 shadow-sm relative flex flex-col">
-                    {/* Close / Mark as Read Button */}
-                    <button
-                      onClick={() => markAsRead(currentEmergente.id)}
-                      className="absolute top-3 right-3 p-1 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors border border-transparent hover:border-outline-variant/40"
-                      aria-label="Marcar como leído"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-
+                <div className="p-4 bg-primary/[0.03] border-b border-outline-variant/40">
+                  <div className="bg-surface-container-lowest border border-primary/15 rounded-xl p-4 shadow-sm relative flex flex-col gap-3">
+                    {/* Top row: icon + title + close */}
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex gap-3 pr-6">
-                        <div>
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Sparkles className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
                           <div className="text-body-md font-semibold text-on-surface leading-tight">
                             {currentEmergente.title}
                           </div>
-                          <div className="text-body-sm text-on-surface-variant mt-1.5 leading-relaxed">
+                          <div className="text-body-sm text-on-surface-variant mt-1 leading-relaxed line-clamp-2">
                             {currentEmergente.description}
                           </div>
                         </div>
                       </div>
+                      <button
+                        onClick={() => markAsRead(currentEmergente.id)}
+                        className="p-1 rounded-lg text-on-surface-variant/50 hover:bg-surface-variant/80 hover:text-primary transition-colors shrink-0"
+                        aria-label="Marcar como leído"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between">
-                      {/* Carousel Dots */}
+                    {/* Bottom row: dots + nav */}
+                    <div className="flex items-center justify-between pt-1">
                       <div className="flex gap-1.5">
                         {emergenteAlerts.map((_, idx) => (
                           <button
                             key={idx}
                             onClick={() => setEmergenteIndex(idx)}
-                            className={`w-2 h-2 rounded-full transition-colors ${
+                            className={`rounded-full transition-all duration-300 ${
                               idx === emergenteIndex
-                                ? "bg-primary"
-                                : "bg-outline-variant"
+                                ? "bg-primary w-4 h-1.5"
+                                : "bg-outline-variant hover:bg-outline w-1.5 h-1.5"
                             }`}
                           />
                         ))}
                       </div>
-
-                      {/* Carousel actions */}
-                      <div className="flex items-center gap-3.5">
+                      <div className="flex items-center gap-2">
                         {totalEmergentes > 1 && (
-                          <div className="flex items-center gap-1.5">
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                setEmergenteIndex((prev) =>
-                                  prev === 0 ? totalEmergentes - 1 : prev - 1,
-                                )
-                              }
-                              className="p-1 rounded hover:bg-surface-variant w-6 h-6 flex items-center justify-center border-none shadow-none"
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              onClick={() =>
-                                setEmergenteIndex((prev) =>
-                                  prev === totalEmergentes - 1 ? 0 : prev + 1,
-                                )
-                              }
-                              className="p-1 rounded hover:bg-surface-variant w-6 h-6 flex items-center justify-center border-none shadow-none"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <span className="text-[11px] text-on-surface-variant/50 font-medium">
+                            {emergenteIndex + 1}/{totalEmergentes}
+                          </span>
                         )}
+                        <div className="flex items-center gap-0.5">
+                          <button
+                            onClick={() => setEmergenteIndex((prev) => prev === 0 ? totalEmergentes - 1 : prev - 1)}
+                            className="p-1 rounded-md hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setEmergenteIndex((prev) => prev === totalEmergentes - 1 ? 0 : prev + 1)}
+                            className="p-1 rounded-md hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors"
+                          >
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -333,9 +327,10 @@ export default function Header({
                                   <div className="flex gap-4 mt-3">
                                     <button
                                       onClick={() => markAsRead(alert.id)}
-                                      className="px-3.5 py-1.5 text-xs font-semibold border border-outline-variant hover:border-outline rounded-xl hover:bg-surface-variant/40 text-on-surface transition-colors shadow-sm"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary rounded-lg hover:bg-primary/15 transition-colors"
                                     >
                                       Revisar
+                                      <ArrowRight className="w-3 h-3" />
                                     </button>
                                     <button
                                       onClick={() => markAsRead(alert.id)}
@@ -446,7 +441,7 @@ export default function Header({
                       // Best-effort cleanup
                     }
                   }
-                  signOut();
+                  signOut({ callbackUrl: "/login" });
                   localStorage.removeItem("stylist_worker_photo");
                 }}
                 className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-error hover:bg-error-container/20 transition-colors w-full justify-start border-none shadow-none active:scale-100 rounded-none h-auto"

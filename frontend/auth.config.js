@@ -1,4 +1,5 @@
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: "/login",
   },
@@ -15,6 +16,15 @@ export const authConfig = {
     },
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch {
+        // Fall back to baseUrl if URL parsing fails
+      }
+      return baseUrl;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       return isLoggedIn;

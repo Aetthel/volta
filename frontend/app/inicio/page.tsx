@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -591,17 +592,21 @@ export default function DashboardPage() {
 
 function DemoCountdown({ expiresAt }: { expiresAt: string }) {
   const [timeLeft, setTimeLeft] = useState("");
+  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
+    const TOTAL_DURATION = 30 * 60 * 1000;
     const calculateTime = () => {
       const difference = new Date(expiresAt).getTime() - Date.now();
       if (difference <= 0) {
         setTimeLeft("Expirado");
+        setProgress(0);
         return;
       }
       const mins = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const secs = Math.floor((difference % (1000 * 60)) / 1000);
       setTimeLeft(`${mins}:${secs.toString().padStart(2, "0")}`);
+      setProgress(Math.max(0, (difference / TOTAL_DURATION) * 100));
     };
 
     calculateTime();
@@ -609,10 +614,24 @@ function DemoCountdown({ expiresAt }: { expiresAt: string }) {
     return () => clearInterval(interval);
   }, [expiresAt]);
 
+  const variant = progress <= 20 ? "error" : progress <= 40 ? "warning" : "primary";
+
   return (
-    <span className="font-mono bg-error/10 text-error px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0">
-      Restan {timeLeft}
-    </span>
+    <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1.5 bg-surface-container-low border border-outline-variant/40 rounded-lg px-2.5 py-1">
+        <Clock className="w-3 h-3 text-on-surface-variant" />
+        <span className="font-mono text-xs font-semibold text-on-surface">{timeLeft}</span>
+      </div>
+      <div className="h-1.5 w-16 rounded-full bg-outline-variant/30 overflow-hidden">
+        <div
+          className={cn(
+            "h-full rounded-full transition-all duration-1000 ease-linear",
+            variant === "error" ? "bg-error" : variant === "warning" ? "bg-amber-500" : "bg-primary"
+          )}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -635,98 +654,100 @@ function DashboardAlertsCarousel() {
   const current = emergentes[activeIndex];
   if (!current) return null;
 
-  return (
-    <div 
-      className="fixed inset-0 bg-transparent z-[100] flex items-center justify-center animate-in fade-in duration-200"
-      onClick={() => markAsRead(current.id)}
-    >
-      <div 
-        className="bg-surface-container-lowest border border-outline-variant rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] w-full max-w-2xl mx-4 relative overflow-hidden animate-in zoom-in duration-200 flex flex-col pointer-events-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+  const handleClose = () => markAsRead(current.id);
+  const handleNext = () => {
+    if (activeIndex < total - 1) {
+      setActiveIndex((prev) => prev + 1);
+    } else {
+      markAsRead(current.id);
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={handleClose}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" />
+      {/* Modal Card */}
+      <div className="relative bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
         
-        {/* Top Decorative Banner (Linear/Stripe style) */}
-        <div className="h-40 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-outline-variant/40 flex items-center justify-center relative overflow-hidden shrink-0">
-          {/* Decorative glowing blobs */}
-          <div className="absolute -left-12 -top-12 w-36 h-36 rounded-full bg-primary/5 blur-2xl" />
-          <div className="absolute -right-12 -bottom-12 w-36 h-36 rounded-full bg-primary/5 blur-2xl" />
-          
-          {/* Close Button */}
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="text-[10px] uppercase tracking-wider">
+                Novedad
+              </Badge>
+              {session?.user?.isDemo && session.user.demoExpiresAt && (
+                <DemoCountdown expiresAt={session.user.demoExpiresAt} />
+              )}
+            </div>
+          </div>
           <button
-            onClick={() => markAsRead(current.id)}
-            className="absolute top-4 right-4 p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors z-20 border border-transparent hover:border-outline-variant/40"
+            onClick={handleClose}
+            className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content Area */}
-        <div className="p-8 flex flex-col">
-          {/* Badges Row */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-[10px] uppercase tracking-wider font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-md border border-primary/15">
-              Novedad
-            </span>
-            {session?.user?.isDemo && session.user.demoExpiresAt && (
-              <DemoCountdown expiresAt={session.user.demoExpiresAt} />
-            )}
-          </div>
-
-          {/* Title */}
-          <h3 className="text-2xl font-semibold text-on-surface leading-snug tracking-tight">
+        {/* Content */}
+        <div className="px-6 py-5 flex-1 overflow-y-auto custom-scrollbar">
+          <h3 className="text-title-lg font-semibold text-on-surface leading-snug tracking-tight">
             {current.title}
           </h3>
-
-          {/* Description */}
-          <p className="text-body-md text-on-surface-variant/90 mt-3 leading-relaxed">
+          <p className="text-body-md text-on-surface-variant/90 mt-2.5 leading-relaxed">
             {current.description}
           </p>
+        </div>
 
-          {/* Divider */}
-          <div className="h-px bg-outline-variant/40 my-6" />
-
-          {/* Footer Actions */}
-          <div className="flex items-center justify-between">
-            {/* Dots */}
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-outline-variant/30 flex items-center justify-between">
+          {/* Left: Dots + counter */}
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               {emergentes.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveIndex(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === activeIndex ? "bg-primary w-5" : "bg-outline-variant hover:bg-outline w-2"
+                  className={`rounded-full transition-all duration-300 ${
+                    idx === activeIndex
+                      ? "bg-primary w-5 h-2"
+                      : "bg-outline-variant hover:bg-outline w-2 h-2"
                   }`}
                 />
               ))}
             </div>
+            {total > 1 && (
+              <span className="text-label-sm text-on-surface-variant/60 font-medium">
+                {activeIndex + 1} de {total}
+              </span>
+            )}
+          </div>
 
-            {/* Navigation (Linear style) */}
-            <div className="flex items-center gap-3">
-              {total > 1 && (
-                <div className="flex items-center gap-1 bg-surface-container-low border border-outline-variant/60 rounded-xl p-0.5">
-                  <Button
-                    variant="ghost"
-                    onClick={() => setActiveIndex((prev) => (prev === 0 ? total - 1 : prev - 1))}
-                    className="p-1 rounded-lg hover:bg-surface-variant/80 w-8 h-8 flex items-center justify-center shrink-0 border-none shadow-none"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <div className="w-px h-4 bg-outline-variant/60" />
-                  <Button
-                    variant="ghost"
-                    onClick={() => setActiveIndex((prev) => (prev === total - 1 ? 0 : prev + 1))}
-                    className="p-1 rounded-lg hover:bg-surface-variant/80 w-8 h-8 flex items-center justify-center shrink-0 border-none shadow-none"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClose}
+              className="text-on-surface-variant"
+            >
+              Cerrar
+            </Button>
+            {total > 1 && (
+              <Button variant="primary" size="sm" onClick={handleNext}>
+                {activeIndex < total - 1 ? "Siguiente" : "Entendido"}
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
-
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
