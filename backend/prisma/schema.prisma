@@ -26,6 +26,8 @@ model Business {
   borderRadiusLevel String        @default("MEDIUM")
   isDemo          Boolean         @default(false)
   demoExpiresAt   DateTime?
+  businessType    String?         // e.g. Peluquería / Barbería, Estética, etc.
+  subscriptionPlan String         @default("PRO") // "BASE" (18€/mes) or "PRO" (25€/mes)
   appointments    Appointment[]
   clients         Client[]
   hours           BusinessHours[]

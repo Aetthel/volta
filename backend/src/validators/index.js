@@ -116,3 +116,12 @@ export const createAlertSchema = z.object({
   targetBusinessId: z.string().optional(),
   targetRole: z.enum(['ADMIN', 'JEFE', 'EMPLEADO']).optional()
 });
+
+export const registerSchema = z.object({
+  name: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  email: z.string().email("Formato de email no válido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+  businessName: z.string().min(2, "El nombre del negocio debe tener al menos 2 caracteres"),
+  phone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido"),
+  businessType: z.string().optional().nullable()
+});

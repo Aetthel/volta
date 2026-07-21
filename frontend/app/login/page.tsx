@@ -139,7 +139,7 @@ export default function LoginPage() {
           <span className="text-body-md text-on-surface-variant font-medium text-center">
             ¿No tienes una cuenta de Volta?
           </span>
-          <Link href="/login" className="w-full">
+          <Link href="/register" className="w-full">
             <Button
               variant="outline"
               size="md"

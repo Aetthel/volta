@@ -1,10 +1,13 @@
 import express from 'express';
 import { authenticate, validateId, validateBody } from '../middleware/index.js';
-import { createUserSchema, updateUserSchema } from '../validators/index.js';
+import { createUserSchema, updateUserSchema, registerSchema } from '../validators/index.js';
 import * as userController from '../controllers/userController.js';
 import { asyncHandler } from '../utils/index.js';
 
 const router = express.Router();
+
+// POST /api/users/register (Public registration)
+router.post('/register', validateBody(registerSchema), asyncHandler(userController.registerUser));
 
 // GET /api/users
 router.get('/', authenticate, validateId('businessId'), asyncHandler(userController.getUsers));

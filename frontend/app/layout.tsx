@@ -1,9 +1,7 @@
 import { Inter } from 'next/font/google';
-import { SessionProvider } from "next-auth/react";
-import ThemeInitializer from '@/components/ThemeInitializer';
+import ClientProvidersWrapper from '@/components/ClientProvidersWrapper';
 import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, getThemeInlineStyles } from '@/lib/theme';
 import { auth } from '@/auth';
-import { AlertsProvider } from '@/lib/alerts';
 import './globals.css';
 
 const inter = Inter({
@@ -11,6 +9,8 @@ const inter = Inter({
   variable: '--font-sans',
   display: 'swap',
 });
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: 'Volta - Gestión de Salones',
@@ -22,7 +22,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (e) {
+    session = null;
+  }
   const themeColor = getThemeColor(session?.user?.themeColor);
   const fontSizeLevel = (session?.user?.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES;
   const borderRadiusLevel = (session?.user?.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES;
@@ -35,14 +40,9 @@ export default async function RootLayout({
   const inlineStyles = getThemeInlineStyles(palette, fontScale, radiusScale) as React.CSSProperties;
 
   return (
-    <html lang="es" className={`${inter.variable}`} style={inlineStyles}>
-      <body className="min-h-screen font-sans font-normal bg-surface text-on-surface antialiased">
-        <SessionProvider>
-          <AlertsProvider>
-            <ThemeInitializer />
-            {children}
-          </AlertsProvider>
-        </SessionProvider>
+    <html lang="es" className={`${inter.variable}`}>
+      <body className="min-h-screen font-sans font-normal bg-surface text-on-surface antialiased" style={inlineStyles}>
+        <ClientProvidersWrapper session={session}>{children}</ClientProvidersWrapper>
       </body>
     </html>
   );
