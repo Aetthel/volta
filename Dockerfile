@@ -27,7 +27,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Create non-root user and set ownership
 RUN groupadd --gid 1001 volta && \
     useradd --uid 1001 --gid volta --shell /bin/sh --create-home volta && \
-    mkdir -p /app/.wwebjs_auth && \
+    mkdir -p /app/backend/.wwebjs_auth && \
     chown -R volta:volta /app
 
 USER volta

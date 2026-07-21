@@ -25,7 +25,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma client
-RUN pnpm --filter backend prisma:generate 2>/dev/null || npx prisma generate --schema=backend/prisma/schema.prisma
+RUN pnpm --filter backend prisma:generate
 
 # Build Next.js for production
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" API_KEY="dummy" pnpm --filter frontend build
@@ -33,9 +33,11 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" API_KEY="dummy"
 # Create non-root user and set ownership
 RUN groupadd --gid 1001 volta && \
     useradd --uid 1001 --gid volta --shell /bin/sh --create-home volta && \
-    mkdir -p /app/.wwebjs_auth && \
+    mkdir -p /app/backend/.wwebjs_auth && \
     chown -R volta:volta /app
 
 USER volta
 
 EXPOSE 3000 3001
+
+CMD ["pnpm", "start"]

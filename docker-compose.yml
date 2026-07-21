@@ -11,18 +11,24 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-volta_user} -d ${POSTGRES_DB:-volta_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: .
     container_name: volta-backend
     restart: no
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       - CI=true
-      - PNPM_CONFIG_STORE_DIR=/root/.local/share/pnpm/store
+      - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - PORT=3001
     volumes:
@@ -30,7 +36,7 @@ services:
       - /app/node_modules
       - /app/frontend/node_modules
       - /app/backend/node_modules
-      - wwebjs-auth:/app/.wwebjs_auth
+      - wwebjs-auth:/app/backend/.wwebjs_auth
     ports:
       - "3001:3001"
     command: sh -c "pnpm install && cd /app/backend && npx prisma migrate deploy && cd /app && pnpm --filter backend dev"
@@ -46,7 +52,7 @@ services:
       - .env
     environment:
       - CI=true
-      - PNPM_CONFIG_STORE_DIR=/root/.local/share/pnpm/store
+      - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001
       # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
