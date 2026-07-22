@@ -4,15 +4,20 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, applyThemeColors } from "@/lib/theme";
 
-function ThemeInitializerClient() {
+export default function ThemeInitializer() {
   const { data: session } = useSession();
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const root = document.documentElement;
 
-    const themeColor = getThemeColor(session?.user?.themeColor);
-    const fontSizeLevel = (session?.user?.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES;
-    const borderRadiusLevel = (session?.user?.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES;
+    const localColor = localStorage.getItem("volta_theme_color");
+    const localFont = localStorage.getItem("volta_font_size");
+    const localRadius = localStorage.getItem("volta_border_radius");
+
+    const themeColor = getThemeColor(localColor || session?.user?.themeColor);
+    const fontSizeLevel = (localFont || session?.user?.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES;
+    const borderRadiusLevel = (localRadius || session?.user?.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES;
 
     // Apply colors
     const palette = COLOR_PALETTES[themeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
@@ -28,9 +33,4 @@ function ThemeInitializerClient() {
   }, [session?.user?.themeColor, session?.user?.fontSizeLevel, session?.user?.borderRadiusLevel]);
 
   return null;
-}
-
-export default function ThemeInitializer() {
-  if (typeof window === "undefined") return null;
-  return <ThemeInitializerClient />;
 }

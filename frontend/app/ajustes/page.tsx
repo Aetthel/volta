@@ -65,24 +65,31 @@ export default function AjustesPage() {
       .then((data) => {
         if (data && !data.error) {
           const savedWorkerPhoto = typeof window !== "undefined" ? localStorage.getItem("stylist_worker_photo") || "" : "";
+          const localColor = typeof window !== "undefined" ? localStorage.getItem("volta_theme_color") : null;
+          const localFont = typeof window !== "undefined" ? localStorage.getItem("volta_font_size") : null;
+          const localRadius = typeof window !== "undefined" ? localStorage.getItem("volta_border_radius") : null;
+
+          const activeColor = getThemeColor(localColor || data.themeColor);
+          const activeFont = localFont || data.fontSizeLevel || "MEDIUM";
+          const activeRadius = localRadius || data.borderRadiusLevel || "MEDIUM";
+
           setProfile((prev) => ({
             ...prev,
             name: data.name, email: data.email, phone: data.phone,
             address: data.address || prev.address, logoUrl: data.logoUrl || prev.logoUrl,
             coverUrl: data.coverUrl || prev.coverUrl, description: data.description || prev.description,
-            ownerName: data.ownerName || prev.ownerName,
             workerPhoto: savedWorkerPhoto || prev.workerPhoto,
-            themeColor: getThemeColor(data.themeColor),
-            fontSizeLevel: data.fontSizeLevel || "MEDIUM",
-            borderRadiusLevel: data.borderRadiusLevel || "MEDIUM",
+            themeColor: activeColor,
+            fontSizeLevel: activeFont,
+            borderRadiusLevel: activeRadius,
           }));
 
           // Apply theme CSS variables
           const root = document.documentElement;
-          const palette = COLOR_PALETTES[getThemeColor(data.themeColor)] || COLOR_PALETTES.CLINICAL_ELEGANCE;
+          const palette = COLOR_PALETTES[activeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
           applyThemeColors(root, palette);
-          root.style.setProperty("--font-scale", FONT_SCALES[(data.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale);
-          root.style.setProperty("--radius-scale", RADIUS_SCALES[(data.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES]?.scale || RADIUS_SCALES.MEDIUM.scale);
+          root.style.setProperty("--font-scale", FONT_SCALES[activeFont as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale);
+          root.style.setProperty("--radius-scale", RADIUS_SCALES[activeRadius as keyof typeof RADIUS_SCALES]?.scale || RADIUS_SCALES.MEDIUM.scale);
         }
       })
       .catch(() => {});
