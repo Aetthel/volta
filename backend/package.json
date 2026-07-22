@@ -15,7 +15,6 @@
     "start": "node src/index.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "db:reset": "node scripts/reset-db.js",
     "lint": "echo 'No linting configured for backend'",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit"
   },
