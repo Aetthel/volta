@@ -53,7 +53,27 @@ export type Alert = $Result.DefaultSelection<Prisma.$AlertPayload>
  * Enums
  */
 export namespace $Enums {
-  export const UserRole: {
+  export const SubscriptionPlan: {
+  BASIC: 'BASIC',
+  PRO: 'PRO',
+  ENTERPRISE: 'ENTERPRISE'
+};
+
+export type SubscriptionPlan = (typeof SubscriptionPlan)[keyof typeof SubscriptionPlan]
+
+
+export const SubscriptionStatus: {
+  DEMO_SANDBOX: 'DEMO_SANDBOX',
+  TRIALING: 'TRIALING',
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
+export const UserRole: {
   ADMIN: 'ADMIN',
   JEFE: 'JEFE',
   EMPLEADO: 'EMPLEADO'
@@ -89,6 +109,14 @@ export const AlertType: {
 export type AlertType = (typeof AlertType)[keyof typeof AlertType]
 
 }
+
+export type SubscriptionPlan = $Enums.SubscriptionPlan
+
+export const SubscriptionPlan: typeof $Enums.SubscriptionPlan
+
+export type SubscriptionStatus = $Enums.SubscriptionStatus
+
+export const SubscriptionStatus: typeof $Enums.SubscriptionStatus
 
 export type UserRole = $Enums.UserRole
 
@@ -1647,7 +1675,6 @@ export namespace Prisma {
     logoUrl: string | null
     coverUrl: string | null
     description: string | null
-    ownerName: string | null
     welcomeMessage: string | null
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus | null
@@ -1655,10 +1682,11 @@ export namespace Prisma {
     themeColor: string | null
     fontSizeLevel: string | null
     borderRadiusLevel: string | null
-    isDemo: boolean | null
-    demoExpiresAt: Date | null
     businessType: string | null
-    subscriptionPlan: string | null
+    subscriptionPlan: $Enums.SubscriptionPlan | null
+    subscriptionStatus: $Enums.SubscriptionStatus | null
+    trialExpiresAt: Date | null
+    sandboxExpiresAt: Date | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -1670,7 +1698,6 @@ export namespace Prisma {
     logoUrl: string | null
     coverUrl: string | null
     description: string | null
-    ownerName: string | null
     welcomeMessage: string | null
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus | null
@@ -1678,10 +1705,11 @@ export namespace Prisma {
     themeColor: string | null
     fontSizeLevel: string | null
     borderRadiusLevel: string | null
-    isDemo: boolean | null
-    demoExpiresAt: Date | null
     businessType: string | null
-    subscriptionPlan: string | null
+    subscriptionPlan: $Enums.SubscriptionPlan | null
+    subscriptionStatus: $Enums.SubscriptionStatus | null
+    trialExpiresAt: Date | null
+    sandboxExpiresAt: Date | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -1693,7 +1721,6 @@ export namespace Prisma {
     logoUrl: number
     coverUrl: number
     description: number
-    ownerName: number
     welcomeMessage: number
     reminderMessage: number
     whatsappStatus: number
@@ -1701,10 +1728,11 @@ export namespace Prisma {
     themeColor: number
     fontSizeLevel: number
     borderRadiusLevel: number
-    isDemo: number
-    demoExpiresAt: number
     businessType: number
     subscriptionPlan: number
+    subscriptionStatus: number
+    trialExpiresAt: number
+    sandboxExpiresAt: number
     _all: number
   }
 
@@ -1718,7 +1746,6 @@ export namespace Prisma {
     logoUrl?: true
     coverUrl?: true
     description?: true
-    ownerName?: true
     welcomeMessage?: true
     reminderMessage?: true
     whatsappStatus?: true
@@ -1726,10 +1753,11 @@ export namespace Prisma {
     themeColor?: true
     fontSizeLevel?: true
     borderRadiusLevel?: true
-    isDemo?: true
-    demoExpiresAt?: true
     businessType?: true
     subscriptionPlan?: true
+    subscriptionStatus?: true
+    trialExpiresAt?: true
+    sandboxExpiresAt?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -1741,7 +1769,6 @@ export namespace Prisma {
     logoUrl?: true
     coverUrl?: true
     description?: true
-    ownerName?: true
     welcomeMessage?: true
     reminderMessage?: true
     whatsappStatus?: true
@@ -1749,10 +1776,11 @@ export namespace Prisma {
     themeColor?: true
     fontSizeLevel?: true
     borderRadiusLevel?: true
-    isDemo?: true
-    demoExpiresAt?: true
     businessType?: true
     subscriptionPlan?: true
+    subscriptionStatus?: true
+    trialExpiresAt?: true
+    sandboxExpiresAt?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -1764,7 +1792,6 @@ export namespace Prisma {
     logoUrl?: true
     coverUrl?: true
     description?: true
-    ownerName?: true
     welcomeMessage?: true
     reminderMessage?: true
     whatsappStatus?: true
@@ -1772,10 +1799,11 @@ export namespace Prisma {
     themeColor?: true
     fontSizeLevel?: true
     borderRadiusLevel?: true
-    isDemo?: true
-    demoExpiresAt?: true
     businessType?: true
     subscriptionPlan?: true
+    subscriptionStatus?: true
+    trialExpiresAt?: true
+    sandboxExpiresAt?: true
     _all?: true
   }
 
@@ -1860,7 +1888,6 @@ export namespace Prisma {
     logoUrl: string | null
     coverUrl: string | null
     description: string | null
-    ownerName: string | null
     welcomeMessage: string | null
     reminderMessage: string | null
     whatsappStatus: $Enums.WhatsAppStatus
@@ -1868,10 +1895,11 @@ export namespace Prisma {
     themeColor: string
     fontSizeLevel: string
     borderRadiusLevel: string
-    isDemo: boolean
-    demoExpiresAt: Date | null
     businessType: string | null
-    subscriptionPlan: string
+    subscriptionPlan: $Enums.SubscriptionPlan
+    subscriptionStatus: $Enums.SubscriptionStatus
+    trialExpiresAt: Date | null
+    sandboxExpiresAt: Date | null
     _count: BusinessCountAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
@@ -1900,7 +1928,6 @@ export namespace Prisma {
     logoUrl?: boolean
     coverUrl?: boolean
     description?: boolean
-    ownerName?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1908,10 +1935,11 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
-    isDemo?: boolean
-    demoExpiresAt?: boolean
     businessType?: boolean
     subscriptionPlan?: boolean
+    subscriptionStatus?: boolean
+    trialExpiresAt?: boolean
+    sandboxExpiresAt?: boolean
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
     hours?: boolean | Business$hoursArgs<ExtArgs>
@@ -1929,7 +1957,6 @@ export namespace Prisma {
     logoUrl?: boolean
     coverUrl?: boolean
     description?: boolean
-    ownerName?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1937,10 +1964,11 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
-    isDemo?: boolean
-    demoExpiresAt?: boolean
     businessType?: boolean
     subscriptionPlan?: boolean
+    subscriptionStatus?: boolean
+    trialExpiresAt?: boolean
+    sandboxExpiresAt?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1952,7 +1980,6 @@ export namespace Prisma {
     logoUrl?: boolean
     coverUrl?: boolean
     description?: boolean
-    ownerName?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1960,10 +1987,11 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
-    isDemo?: boolean
-    demoExpiresAt?: boolean
     businessType?: boolean
     subscriptionPlan?: boolean
+    subscriptionStatus?: boolean
+    trialExpiresAt?: boolean
+    sandboxExpiresAt?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -1975,7 +2003,6 @@ export namespace Prisma {
     logoUrl?: boolean
     coverUrl?: boolean
     description?: boolean
-    ownerName?: boolean
     welcomeMessage?: boolean
     reminderMessage?: boolean
     whatsappStatus?: boolean
@@ -1983,13 +2010,14 @@ export namespace Prisma {
     themeColor?: boolean
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
-    isDemo?: boolean
-    demoExpiresAt?: boolean
     businessType?: boolean
     subscriptionPlan?: boolean
+    subscriptionStatus?: boolean
+    trialExpiresAt?: boolean
+    sandboxExpiresAt?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "ownerName" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "isDemo" | "demoExpiresAt" | "businessType" | "subscriptionPlan", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "businessType" | "subscriptionPlan" | "subscriptionStatus" | "trialExpiresAt" | "sandboxExpiresAt", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -2019,7 +2047,6 @@ export namespace Prisma {
       logoUrl: string | null
       coverUrl: string | null
       description: string | null
-      ownerName: string | null
       welcomeMessage: string | null
       reminderMessage: string | null
       whatsappStatus: $Enums.WhatsAppStatus
@@ -2027,10 +2054,11 @@ export namespace Prisma {
       themeColor: string
       fontSizeLevel: string
       borderRadiusLevel: string
-      isDemo: boolean
-      demoExpiresAt: Date | null
       businessType: string | null
-      subscriptionPlan: string
+      subscriptionPlan: $Enums.SubscriptionPlan
+      subscriptionStatus: $Enums.SubscriptionStatus
+      trialExpiresAt: Date | null
+      sandboxExpiresAt: Date | null
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -2467,7 +2495,6 @@ export namespace Prisma {
     readonly logoUrl: FieldRef<"Business", 'String'>
     readonly coverUrl: FieldRef<"Business", 'String'>
     readonly description: FieldRef<"Business", 'String'>
-    readonly ownerName: FieldRef<"Business", 'String'>
     readonly welcomeMessage: FieldRef<"Business", 'String'>
     readonly reminderMessage: FieldRef<"Business", 'String'>
     readonly whatsappStatus: FieldRef<"Business", 'WhatsAppStatus'>
@@ -2475,10 +2502,11 @@ export namespace Prisma {
     readonly themeColor: FieldRef<"Business", 'String'>
     readonly fontSizeLevel: FieldRef<"Business", 'String'>
     readonly borderRadiusLevel: FieldRef<"Business", 'String'>
-    readonly isDemo: FieldRef<"Business", 'Boolean'>
-    readonly demoExpiresAt: FieldRef<"Business", 'DateTime'>
     readonly businessType: FieldRef<"Business", 'String'>
-    readonly subscriptionPlan: FieldRef<"Business", 'String'>
+    readonly subscriptionPlan: FieldRef<"Business", 'SubscriptionPlan'>
+    readonly subscriptionStatus: FieldRef<"Business", 'SubscriptionStatus'>
+    readonly trialExpiresAt: FieldRef<"Business", 'DateTime'>
+    readonly sandboxExpiresAt: FieldRef<"Business", 'DateTime'>
   }
     
 
@@ -9932,7 +9960,6 @@ export namespace Prisma {
     logoUrl: 'logoUrl',
     coverUrl: 'coverUrl',
     description: 'description',
-    ownerName: 'ownerName',
     welcomeMessage: 'welcomeMessage',
     reminderMessage: 'reminderMessage',
     whatsappStatus: 'whatsappStatus',
@@ -9940,10 +9967,11 @@ export namespace Prisma {
     themeColor: 'themeColor',
     fontSizeLevel: 'fontSizeLevel',
     borderRadiusLevel: 'borderRadiusLevel',
-    isDemo: 'isDemo',
-    demoExpiresAt: 'demoExpiresAt',
     businessType: 'businessType',
-    subscriptionPlan: 'subscriptionPlan'
+    subscriptionPlan: 'subscriptionPlan',
+    subscriptionStatus: 'subscriptionStatus',
+    trialExpiresAt: 'trialExpiresAt',
+    sandboxExpiresAt: 'sandboxExpiresAt'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -10095,9 +10123,30 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
+   * Reference to a field of type 'SubscriptionPlan'
    */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+  export type EnumSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionPlan'>
+    
+
+
+  /**
+   * Reference to a field of type 'SubscriptionPlan[]'
+   */
+  export type ListEnumSubscriptionPlanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionPlan[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'SubscriptionStatus'
+   */
+  export type EnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'SubscriptionStatus[]'
+   */
+  export type ListEnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus[]'>
     
 
 
@@ -10158,6 +10207,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -10200,7 +10256,6 @@ export namespace Prisma {
     logoUrl?: StringNullableFilter<"Business"> | string | null
     coverUrl?: StringNullableFilter<"Business"> | string | null
     description?: StringNullableFilter<"Business"> | string | null
-    ownerName?: StringNullableFilter<"Business"> | string | null
     welcomeMessage?: StringNullableFilter<"Business"> | string | null
     reminderMessage?: StringNullableFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusFilter<"Business"> | $Enums.WhatsAppStatus
@@ -10208,10 +10263,11 @@ export namespace Prisma {
     themeColor?: StringFilter<"Business"> | string
     fontSizeLevel?: StringFilter<"Business"> | string
     borderRadiusLevel?: StringFilter<"Business"> | string
-    isDemo?: BoolFilter<"Business"> | boolean
-    demoExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     businessType?: StringNullableFilter<"Business"> | string | null
-    subscriptionPlan?: StringFilter<"Business"> | string
+    subscriptionPlan?: EnumSubscriptionPlanFilter<"Business"> | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFilter<"Business"> | $Enums.SubscriptionStatus
+    trialExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    sandboxExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -10228,7 +10284,6 @@ export namespace Prisma {
     logoUrl?: SortOrderInput | SortOrder
     coverUrl?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
-    ownerName?: SortOrderInput | SortOrder
     welcomeMessage?: SortOrderInput | SortOrder
     reminderMessage?: SortOrderInput | SortOrder
     whatsappStatus?: SortOrder
@@ -10236,10 +10291,11 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
-    isDemo?: SortOrder
-    demoExpiresAt?: SortOrderInput | SortOrder
     businessType?: SortOrderInput | SortOrder
     subscriptionPlan?: SortOrder
+    subscriptionStatus?: SortOrder
+    trialExpiresAt?: SortOrderInput | SortOrder
+    sandboxExpiresAt?: SortOrderInput | SortOrder
     appointments?: AppointmentOrderByRelationAggregateInput
     clients?: ClientOrderByRelationAggregateInput
     hours?: BusinessHoursOrderByRelationAggregateInput
@@ -10259,7 +10315,6 @@ export namespace Prisma {
     logoUrl?: StringNullableFilter<"Business"> | string | null
     coverUrl?: StringNullableFilter<"Business"> | string | null
     description?: StringNullableFilter<"Business"> | string | null
-    ownerName?: StringNullableFilter<"Business"> | string | null
     welcomeMessage?: StringNullableFilter<"Business"> | string | null
     reminderMessage?: StringNullableFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusFilter<"Business"> | $Enums.WhatsAppStatus
@@ -10267,10 +10322,11 @@ export namespace Prisma {
     themeColor?: StringFilter<"Business"> | string
     fontSizeLevel?: StringFilter<"Business"> | string
     borderRadiusLevel?: StringFilter<"Business"> | string
-    isDemo?: BoolFilter<"Business"> | boolean
-    demoExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     businessType?: StringNullableFilter<"Business"> | string | null
-    subscriptionPlan?: StringFilter<"Business"> | string
+    subscriptionPlan?: EnumSubscriptionPlanFilter<"Business"> | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFilter<"Business"> | $Enums.SubscriptionStatus
+    trialExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    sandboxExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
@@ -10287,7 +10343,6 @@ export namespace Prisma {
     logoUrl?: SortOrderInput | SortOrder
     coverUrl?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
-    ownerName?: SortOrderInput | SortOrder
     welcomeMessage?: SortOrderInput | SortOrder
     reminderMessage?: SortOrderInput | SortOrder
     whatsappStatus?: SortOrder
@@ -10295,10 +10350,11 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
-    isDemo?: SortOrder
-    demoExpiresAt?: SortOrderInput | SortOrder
     businessType?: SortOrderInput | SortOrder
     subscriptionPlan?: SortOrder
+    subscriptionStatus?: SortOrder
+    trialExpiresAt?: SortOrderInput | SortOrder
+    sandboxExpiresAt?: SortOrderInput | SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
@@ -10316,7 +10372,6 @@ export namespace Prisma {
     logoUrl?: StringNullableWithAggregatesFilter<"Business"> | string | null
     coverUrl?: StringNullableWithAggregatesFilter<"Business"> | string | null
     description?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    ownerName?: StringNullableWithAggregatesFilter<"Business"> | string | null
     welcomeMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
     reminderMessage?: StringNullableWithAggregatesFilter<"Business"> | string | null
     whatsappStatus?: EnumWhatsAppStatusWithAggregatesFilter<"Business"> | $Enums.WhatsAppStatus
@@ -10324,10 +10379,11 @@ export namespace Prisma {
     themeColor?: StringWithAggregatesFilter<"Business"> | string
     fontSizeLevel?: StringWithAggregatesFilter<"Business"> | string
     borderRadiusLevel?: StringWithAggregatesFilter<"Business"> | string
-    isDemo?: BoolWithAggregatesFilter<"Business"> | boolean
-    demoExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
     businessType?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    subscriptionPlan?: StringWithAggregatesFilter<"Business"> | string
+    subscriptionPlan?: EnumSubscriptionPlanWithAggregatesFilter<"Business"> | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusWithAggregatesFilter<"Business"> | $Enums.SubscriptionStatus
+    trialExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    sandboxExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
   }
 
   export type UserWhereInput = {
@@ -10799,7 +10855,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -10807,10 +10862,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -10827,7 +10883,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -10835,10 +10890,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -10855,7 +10911,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -10863,10 +10918,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -10883,7 +10939,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -10891,10 +10946,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -10911,7 +10967,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -10919,10 +10974,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -10934,7 +10990,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -10942,10 +10997,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -10957,7 +11013,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -10965,10 +11020,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type UserCreateInput = {
@@ -11502,9 +11558,18 @@ export namespace Prisma {
     not?: NestedEnumWhatsAppStatusFilter<$PrismaModel> | $Enums.WhatsAppStatus
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+  export type EnumSubscriptionPlanFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanFilter<$PrismaModel> | $Enums.SubscriptionPlan
+  }
+
+  export type EnumSubscriptionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionStatus | EnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionStatusFilter<$PrismaModel> | $Enums.SubscriptionStatus
   }
 
   export type DateTimeNullableFilter<$PrismaModel = never> = {
@@ -11582,7 +11647,6 @@ export namespace Prisma {
     logoUrl?: SortOrder
     coverUrl?: SortOrder
     description?: SortOrder
-    ownerName?: SortOrder
     welcomeMessage?: SortOrder
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
@@ -11590,10 +11654,11 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
-    isDemo?: SortOrder
-    demoExpiresAt?: SortOrder
     businessType?: SortOrder
     subscriptionPlan?: SortOrder
+    subscriptionStatus?: SortOrder
+    trialExpiresAt?: SortOrder
+    sandboxExpiresAt?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -11605,7 +11670,6 @@ export namespace Prisma {
     logoUrl?: SortOrder
     coverUrl?: SortOrder
     description?: SortOrder
-    ownerName?: SortOrder
     welcomeMessage?: SortOrder
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
@@ -11613,10 +11677,11 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
-    isDemo?: SortOrder
-    demoExpiresAt?: SortOrder
     businessType?: SortOrder
     subscriptionPlan?: SortOrder
+    subscriptionStatus?: SortOrder
+    trialExpiresAt?: SortOrder
+    sandboxExpiresAt?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -11628,7 +11693,6 @@ export namespace Prisma {
     logoUrl?: SortOrder
     coverUrl?: SortOrder
     description?: SortOrder
-    ownerName?: SortOrder
     welcomeMessage?: SortOrder
     reminderMessage?: SortOrder
     whatsappStatus?: SortOrder
@@ -11636,10 +11700,11 @@ export namespace Prisma {
     themeColor?: SortOrder
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
-    isDemo?: SortOrder
-    demoExpiresAt?: SortOrder
     businessType?: SortOrder
     subscriptionPlan?: SortOrder
+    subscriptionStatus?: SortOrder
+    trialExpiresAt?: SortOrder
+    sandboxExpiresAt?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -11688,12 +11753,24 @@ export namespace Prisma {
     _max?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
   }
 
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+  export type EnumSubscriptionPlanWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionPlan
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+  }
+
+  export type EnumSubscriptionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionStatus | EnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionStatusWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionStatusFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionStatusFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -11924,6 +12001,11 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type BusinessHoursBusinessIdDayOfWeekCompoundUniqueInput = {
     businessId: string
     dayOfWeek: number
@@ -11978,6 +12060,14 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -12190,8 +12280,12 @@ export namespace Prisma {
     set?: $Enums.WhatsAppStatus
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
+  export type EnumSubscriptionPlanFieldUpdateOperationsInput = {
+    set?: $Enums.SubscriptionPlan
+  }
+
+  export type EnumSubscriptionStatusFieldUpdateOperationsInput = {
+    set?: $Enums.SubscriptionStatus
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -12524,6 +12618,10 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type BusinessUpdateOneRequiredWithoutHoursNestedInput = {
     create?: XOR<BusinessCreateWithoutHoursInput, BusinessUncheckedCreateWithoutHoursInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutHoursInput
@@ -12649,9 +12747,18 @@ export namespace Prisma {
     not?: NestedEnumWhatsAppStatusFilter<$PrismaModel> | $Enums.WhatsAppStatus
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
+  export type NestedEnumSubscriptionPlanFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanFilter<$PrismaModel> | $Enums.SubscriptionPlan
+  }
+
+  export type NestedEnumSubscriptionStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionStatus | EnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionStatusFilter<$PrismaModel> | $Enums.SubscriptionStatus
   }
 
   export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
@@ -12731,12 +12838,24 @@ export namespace Prisma {
     _max?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
   }
 
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+  export type NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionPlan
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionPlanFilter<$PrismaModel>
+  }
+
+  export type NestedEnumSubscriptionStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionStatus | EnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionStatus[] | ListEnumSubscriptionStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionStatusWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionStatusFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionStatusFilter<$PrismaModel>
   }
 
   export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -12812,6 +12931,11 @@ export namespace Prisma {
     _max?: NestedEnumAppointmentStatusFilter<$PrismaModel>
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -12837,6 +12961,14 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -13199,7 +13331,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13207,10 +13338,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -13226,7 +13358,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13234,10 +13365,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -13299,7 +13431,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13307,10 +13438,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -13326,7 +13458,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13334,10 +13465,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13383,7 +13515,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13391,10 +13522,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -13410,7 +13542,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13418,10 +13549,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -13485,7 +13617,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13493,10 +13624,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -13512,7 +13644,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13520,10 +13651,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13555,7 +13687,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13563,10 +13694,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -13582,7 +13714,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13590,10 +13721,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -13689,7 +13821,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13697,10 +13828,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -13716,7 +13848,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13724,10 +13855,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13819,7 +13951,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13827,10 +13958,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
@@ -13846,7 +13978,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13854,10 +13985,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
@@ -13889,7 +14021,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13897,10 +14028,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
@@ -13916,7 +14048,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -13924,10 +14055,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
@@ -13943,7 +14075,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13951,10 +14082,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
@@ -13970,7 +14102,6 @@ export namespace Prisma {
     logoUrl?: string | null
     coverUrl?: string | null
     description?: string | null
-    ownerName?: string | null
     welcomeMessage?: string | null
     reminderMessage?: string | null
     whatsappStatus?: $Enums.WhatsAppStatus
@@ -13978,10 +14109,11 @@ export namespace Prisma {
     themeColor?: string
     fontSizeLevel?: string
     borderRadiusLevel?: string
-    isDemo?: boolean
-    demoExpiresAt?: Date | string | null
     businessType?: string | null
-    subscriptionPlan?: string
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
@@ -14045,7 +14177,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -14053,10 +14184,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
@@ -14072,7 +14204,6 @@ export namespace Prisma {
     logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
     coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    ownerName?: NullableStringFieldUpdateOperationsInput | string | null
     welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
     reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
     whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
@@ -14080,10 +14211,11 @@ export namespace Prisma {
     themeColor?: StringFieldUpdateOperationsInput | string
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
-    isDemo?: BoolFieldUpdateOperationsInput | boolean
-    demoExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
-    subscriptionPlan?: StringFieldUpdateOperationsInput | string
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
