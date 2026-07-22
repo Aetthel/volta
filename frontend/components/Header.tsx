@@ -423,7 +423,7 @@ function HeaderContent({
               <button
                 onClick={async () => {
                   setIsDropdownOpen(false);
-                  if (session?.user?.businessId && session?.user?.isDemo) {
+                  if (session?.user?.businessId && session?.user?.subscriptionStatus === "DEMO_SANDBOX") {
                     try {
                       await fetch(
                         `/api/backend/demo?businessId=${session.user.businessId}`,

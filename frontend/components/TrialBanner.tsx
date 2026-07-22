@@ -9,14 +9,14 @@ function TrialBannerContent() {
   const [isVisible, setIsVisible] = useState(true);
   const { data: session } = useSession();
 
-  const isDemo = session?.user?.isDemo;
-  const demoExpiresAtStr = session?.user?.demoExpiresAt;
+  const isTrialing = session?.user?.subscriptionStatus === "TRIALING";
+  const trialExpiresAtStr = session?.user?.trialExpiresAt;
 
-  if (!isDemo || !demoExpiresAtStr || !isVisible) {
+  if (!isTrialing || !trialExpiresAtStr || !isVisible) {
     return null;
   }
 
-  const expiresDate = new Date(demoExpiresAtStr);
+  const expiresDate = new Date(trialExpiresAtStr);
   const now = new Date();
   const diffMs = expiresDate.getTime() - now.getTime();
   const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
@@ -48,7 +48,7 @@ function TrialBannerContent() {
           <div className="truncate">
             {isExpired ? (
               <span>
-                <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Base 18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
+                <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Básico 18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
               </span>
             ) : isUrgent ? (
               <span>
@@ -57,7 +57,7 @@ function TrialBannerContent() {
               </span>
             ) : (
               <span>
-                Estás disfrutando de <strong>10 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
+                Estás disfrutando de <strong>14 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
                 <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong>.
               </span>
             )}

@@ -684,8 +684,8 @@ function DashboardAlertsCarousel() {
               <Badge variant="default" className="text-[10px] uppercase tracking-wider">
                 Novedad
               </Badge>
-              {session?.user?.isDemo && session.user.demoExpiresAt && (
-                <DemoCountdown expiresAt={session.user.demoExpiresAt} />
+              {session?.user?.subscriptionStatus === "TRIALING" && session.user.trialExpiresAt && (
+                <DemoCountdown expiresAt={session.user.trialExpiresAt} />
               )}
             </div>
           </div>

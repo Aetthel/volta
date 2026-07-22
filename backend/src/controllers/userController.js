@@ -131,8 +131,8 @@ export const registerUser = async (req, res) => {
     return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
   }
 
-  // 2. Create Business with 14-day trial in Plan Pro (25€)
-  const demoExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  // 2. Create Business with 14-day trial in Plan Pro
+  const trialExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
   const business = await prisma.business.create({
     data: {
       name: businessName,
@@ -140,8 +140,8 @@ export const registerUser = async (req, res) => {
       email: cleanEmail,
       businessType: businessType || 'Peluquería / Barbería',
       subscriptionPlan: 'PRO',
-      isDemo: true,
-      demoExpiresAt
+      subscriptionStatus: 'TRIALING',
+      trialExpiresAt
     }
   });
 
@@ -163,8 +163,8 @@ export const registerUser = async (req, res) => {
       name: business.name,
       businessType: business.businessType,
       subscriptionPlan: business.subscriptionPlan,
-      isDemo: business.isDemo,
-      demoExpiresAt: business.demoExpiresAt
+      subscriptionStatus: business.subscriptionStatus,
+      trialExpiresAt: business.trialExpiresAt
     }
   });
 };
