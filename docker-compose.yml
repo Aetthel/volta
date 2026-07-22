@@ -63,10 +63,9 @@ services:
       - /app/node_modules
       - /app/frontend/node_modules
       - /app/backend/node_modules
-      - /app/frontend/.next
     ports:
       - "3000:3000"
-    command: sh -c "pnpm install && pnpm --filter frontend dev"
+    command: sh -c "mkdir -p /app/frontend/.next && chmod -R 777 /app/frontend/.next 2>/dev/null || true; pnpm install && pnpm --filter frontend dev"
 
 volumes:
   postgres_data:
