@@ -29,8 +29,10 @@ services:
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
-      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - DATABASE_URL=${DATABASE_URL:-postgresql://volta_user:volta_password@db:5432/volta_db?schema=public}
       - PORT=3001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - .:/app
       - /app/node_modules
@@ -53,11 +55,13 @@ services:
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
-      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - DATABASE_URL=${DATABASE_URL:-postgresql://volta_user:volta_password@db:5432/volta_db?schema=public}
       - BACKEND_INTERNAL_URL=http://backend:3001
       # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
       # header set by Cloudflare Tunnel / any reverse proxy, avoiding redirect loops.
       - AUTH_TRUST_HOST=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - .:/app
       - /app/node_modules
