@@ -391,7 +391,7 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
                 setToast({ show: true, text: newValue ? "Reservas públicas activadas" : "Reservas públicas desactivadas" });
                 setTimeout(() => setToast({ show: false, text: "" }), 3000);
               }}
-              className="font-medium text-xs px-3 py-1.5"
+              className="font-semibold text-xs px-3 py-1.5 rounded-xl active:scale-[0.98]"
             >
               {profile.enablePublicBooking !== false ? "Activado" : "Desactivado"}
             </Button>
@@ -404,7 +404,7 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
               <div className="flex flex-col gap-2 p-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl">
                 <span className="font-semibold text-xs text-primary uppercase tracking-wider">Tu Enlace de Reserva:</span>
                 <div className="flex items-center gap-2">
-                  <code className="text-xs bg-surface-container px-2.5 py-2 rounded-lg truncate flex-1 font-mono text-on-surface border border-outline-variant/40">
+                  <code className="text-xs bg-surface-container px-3 py-2 rounded-xl truncate flex-1 font-mono text-on-surface border border-outline-variant/40">
                     {typeof window !== "undefined" ? `${window.location.origin}/booking/${businessId}` : `/booking/${businessId}`}
                   </code>
                   <Button
@@ -416,7 +416,7 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
                       setToast({ show: true, text: "¡Enlace copiado al portapapeles!" });
                       setTimeout(() => setToast({ show: false, text: "" }), 3000);
                     }}
-                    className="text-xs text-primary font-semibold hover:bg-primary/10 rounded-lg p-2.5 shadow-none shrink-0"
+                    className="text-xs text-primary font-semibold hover:bg-primary/10 rounded-xl p-2.5 shadow-none shrink-0 active:scale-95"
                     title="Copiar enlace"
                   >
                     <Copy className="w-4 h-4" />
@@ -440,10 +440,10 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
               const url = `${window.location.origin}/booking/${businessId}`;
               window.open(url, "_blank");
             }}
-            className="text-xs font-semibold flex items-center gap-1.5"
+            className="text-xs font-semibold rounded-xl flex items-center gap-1.5 active:scale-[0.98]"
           >
             <span>Ver Página Web</span>
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5 text-primary" />
           </Button>
         </CardFooter>
       </Card>
@@ -498,7 +498,7 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
               setToast({ show: true, text: "Gestión de facturación disponible próximamente" });
               setTimeout(() => setToast({ show: false, text: "" }), 3000);
             }}
-            className="text-xs font-semibold"
+            className="text-xs font-semibold rounded-xl active:scale-[0.98]"
           >
             Ver Facturas
           </Button>
@@ -509,7 +509,7 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
               setToast({ show: true, text: "Cambio de plan disponible próximamente" });
               setTimeout(() => setToast({ show: false, text: "" }), 3000);
             }}
-            className="text-xs font-semibold"
+            className="text-xs font-semibold rounded-xl active:scale-[0.98]"
           >
             Cambiar Plan
           </Button>
