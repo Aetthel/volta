@@ -29,11 +29,11 @@ export const createDemo = async () => {
         email,
         phone: `+34 600 ${String(demoId).padStart(4, '0')}`,
         address: 'Calle de Gran Vía, 28, Madrid',
-        ownerName: 'Dueño Demo',
         welcomeMessage: '¡Hola {{clientName}}! Tu cita en {{businessName}} está confirmada para el {{appointmentDate}} a las {{appointmentTime}}.',
         reminderMessage: 'Hola {{clientName}}, te recordamos tu cita mañana a las {{appointmentTime}} en {{businessName}}.',
-        isDemo: true,
-        demoExpiresAt: expiresAt,
+        subscriptionPlan: 'PRO',
+        subscriptionStatus: 'DEMO_SANDBOX',
+        sandboxExpiresAt: expiresAt,
       }
     });
 
@@ -51,8 +51,8 @@ export const createDemo = async () => {
       data: [
         {
           type: 'EMERGENTE',
-          title: '¡Bienvenido a tu Demo de Volta!',
-          description: 'Esta demo tiene una duración de 30 minutos. Hemos preparado datos ficticios en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.',
+          title: '¡Bienvenido a tu Demo Sandbox!',
+          description: 'Esta demo tiene una duración de 20 minutos. Hemos preparado datos ficticios en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.',
           userId: demoUser.id,
           isRead: false
         },
@@ -174,7 +174,7 @@ export const createDemo = async () => {
 
 export const deleteDemo = async (businessId) => {
   const biz = await prisma.business.findUnique({ where: { id: businessId } });
-  if (!biz || !biz.isDemo) {
+  if (!biz || biz.subscriptionStatus !== 'DEMO_SANDBOX') {
     return false;
   }
 
@@ -188,8 +188,8 @@ export const cleanupExpiredDemos = async () => {
   const now = new Date();
   const expiredDemos = await prisma.business.findMany({
     where: {
-      isDemo: true,
-      demoExpiresAt: { lt: now },
+      subscriptionStatus: 'DEMO_SANDBOX',
+      sandboxExpiresAt: { lt: now },
     },
     select: { id: true },
   });
