@@ -13,7 +13,6 @@ export const createSandboxDemo = async (req, res) => {
         name: 'Salón Volta Demo (20 min)',
         phone: '34600000000',
         email: `${sandboxId}@demo.volta.es`,
-        businessType: 'Peluquería / Barbería',
         subscriptionPlan: 'PRO',
         subscriptionStatus: 'DEMO_SANDBOX',
         sandboxExpiresAt
