@@ -3,6 +3,10 @@ import { ApiResponse } from '../utils/index.js';
 import prisma from '../config/db.js';
 
 export const getUsers = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
   const { businessId } = req.query;
   const where = {};
 
@@ -27,6 +31,10 @@ export const getUsers = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
   const { name, email, password, role, businessId } = req.body;
 
   // Check tenant isolation
@@ -58,6 +66,10 @@ export const createUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
   const { id } = req.params;
   const { name, email, password, role, businessId } = req.body;
 
@@ -103,6 +115,10 @@ export const updateUser = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
   const { id } = req.params;
 
   // If not admin, check target user ownership
