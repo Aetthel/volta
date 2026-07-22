@@ -3,6 +3,10 @@ import { ApiResponse } from '../utils/index.js';
 import prisma from '../config/db.js';
 
 export const getUsers = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
   const { businessId } = req.query;
   const where = {};
 
