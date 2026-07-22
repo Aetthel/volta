@@ -579,7 +579,9 @@ export default function RegisterPage() {
           {currentStep === 4 && (
             <Button
               type="button"
-              onClick={() => router.push("/inicio")}
+              onClick={() => {
+                window.location.href = "/inicio";
+              }}
               variant="primary"
               className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer"
             >

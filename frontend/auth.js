@@ -19,8 +19,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Database fallback
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+          const cleanEmail = credentials.email.trim().toLowerCase();
+          const user = await prisma.user.findFirst({
+            where: {
+              email: {
+                equals: cleanEmail,
+                mode: "insensitive"
+              }
+            },
             include: { business: true }
           });
 
