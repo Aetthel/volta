@@ -22,8 +22,7 @@ services:
     container_name: volta-backend
     restart: no
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     env_file:
       - .env
     environment:
