@@ -11,6 +11,7 @@ export interface BusinessProfile {
   themeColor: string;
   fontSizeLevel: string;
   borderRadiusLevel: string;
+  enablePublicBooking?: boolean;
 }
 
 export interface UserForm {
@@ -46,6 +47,7 @@ export interface Service {
   price: number;
   duration: number;
   description?: string;
+  capacity?: number;
 }
 
 export interface MessageTemplates {

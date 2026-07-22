@@ -137,6 +137,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   fontSizeLevel: 'fontSizeLevel',
   borderRadiusLevel: 'borderRadiusLevel',
   businessType: 'businessType',
+  enablePublicBooking: 'enablePublicBooking',
   subscriptionPlan: 'subscriptionPlan',
   subscriptionStatus: 'subscriptionStatus',
   trialExpiresAt: 'trialExpiresAt',
@@ -197,6 +198,7 @@ exports.Prisma.ServiceScalarFieldEnum = {
   description: 'description',
   duration: 'duration',
   price: 'price',
+  capacity: 'capacity',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

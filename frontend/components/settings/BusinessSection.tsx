@@ -289,6 +289,53 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
                   <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider">Descripción del Negocio</span>
                   <p className="font-body-lg text-body-lg font-medium text-on-surface leading-relaxed whitespace-pre-wrap">{profile.description || "Sin descripción disponible."}</p>
                 </div>
+
+                <div className="flex flex-col sm:col-span-2 border-t border-outline-variant/35 pt-4 gap-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-label-md text-label-md text-on-surface font-semibold">Reserva Online Pública</span>
+                      <p className="text-body-xs text-on-surface-variant">Permite a tus clientes reservar cita directamente desde un enlace web público sin necesidad de crear cuenta.</p>
+                    </div>
+                    <Button
+                      variant={profile.enablePublicBooking !== false ? "primary" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        const newValue = profile.enablePublicBooking === false ? true : false;
+                        setProfile(prev => ({ ...prev, enablePublicBooking: newValue }));
+                        fetch(`/api/backend/business/${businessId}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ enablePublicBooking: newValue })
+                        });
+                        setToast({ show: true, text: newValue ? "Reservas públicas activadas" : "Reservas públicas desactivadas" });
+                        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+                      }}
+                    >
+                      {profile.enablePublicBooking !== false ? "Activado" : "Desactivado"}
+                    </Button>
+                  </div>
+                  {profile.enablePublicBooking !== false && (
+                    <div className="flex items-center gap-2 p-3 bg-surface-container-low border border-outline-variant/60 rounded-lg text-body-sm text-on-surface">
+                      <span className="font-medium text-primary shrink-0">Enlace Público:</span>
+                      <code className="text-xs bg-surface-container px-2 py-1 rounded truncate flex-1">
+                        {typeof window !== "undefined" ? `${window.location.origin}/booking/${businessId}` : `/booking/${businessId}`}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const url = `${window.location.origin}/booking/${businessId}`;
+                          navigator.clipboard.writeText(url);
+                          setToast({ show: true, text: "¡Enlace copiado al portapapeles!" });
+                          setTimeout(() => setToast({ show: false, text: "" }), 3000);
+                        }}
+                        className="text-xs text-primary font-semibold hover:underline shadow-none"
+                      >
+                        Copiar
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </div>

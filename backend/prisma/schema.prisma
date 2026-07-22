@@ -38,6 +38,7 @@ model Business {
   fontSizeLevel      String             @default("MEDIUM")
   borderRadiusLevel  String             @default("MEDIUM")
   businessType       String?            // e.g. Peluquería / Barbería, Estética, etc.
+  enablePublicBooking Boolean            @default(true)
   subscriptionPlan   SubscriptionPlan   @default(PRO)
   subscriptionStatus SubscriptionStatus @default(TRIALING)
   trialExpiresAt     DateTime?
@@ -141,6 +142,7 @@ model Service {
   description String?
   duration    Int           // Duration in minutes
   price       Float         // Price in Euros
+  capacity    Int           @default(1) // Max participants per session
   isActive    Boolean       @default(true)
   appointments Appointment[]
   createdAt   DateTime      @default(now())

@@ -1683,6 +1683,7 @@ export namespace Prisma {
     fontSizeLevel: string | null
     borderRadiusLevel: string | null
     businessType: string | null
+    enablePublicBooking: boolean | null
     subscriptionPlan: $Enums.SubscriptionPlan | null
     subscriptionStatus: $Enums.SubscriptionStatus | null
     trialExpiresAt: Date | null
@@ -1706,6 +1707,7 @@ export namespace Prisma {
     fontSizeLevel: string | null
     borderRadiusLevel: string | null
     businessType: string | null
+    enablePublicBooking: boolean | null
     subscriptionPlan: $Enums.SubscriptionPlan | null
     subscriptionStatus: $Enums.SubscriptionStatus | null
     trialExpiresAt: Date | null
@@ -1729,6 +1731,7 @@ export namespace Prisma {
     fontSizeLevel: number
     borderRadiusLevel: number
     businessType: number
+    enablePublicBooking: number
     subscriptionPlan: number
     subscriptionStatus: number
     trialExpiresAt: number
@@ -1754,6 +1757,7 @@ export namespace Prisma {
     fontSizeLevel?: true
     borderRadiusLevel?: true
     businessType?: true
+    enablePublicBooking?: true
     subscriptionPlan?: true
     subscriptionStatus?: true
     trialExpiresAt?: true
@@ -1777,6 +1781,7 @@ export namespace Prisma {
     fontSizeLevel?: true
     borderRadiusLevel?: true
     businessType?: true
+    enablePublicBooking?: true
     subscriptionPlan?: true
     subscriptionStatus?: true
     trialExpiresAt?: true
@@ -1800,6 +1805,7 @@ export namespace Prisma {
     fontSizeLevel?: true
     borderRadiusLevel?: true
     businessType?: true
+    enablePublicBooking?: true
     subscriptionPlan?: true
     subscriptionStatus?: true
     trialExpiresAt?: true
@@ -1896,6 +1902,7 @@ export namespace Prisma {
     fontSizeLevel: string
     borderRadiusLevel: string
     businessType: string | null
+    enablePublicBooking: boolean
     subscriptionPlan: $Enums.SubscriptionPlan
     subscriptionStatus: $Enums.SubscriptionStatus
     trialExpiresAt: Date | null
@@ -1936,6 +1943,7 @@ export namespace Prisma {
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
     businessType?: boolean
+    enablePublicBooking?: boolean
     subscriptionPlan?: boolean
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
@@ -1965,6 +1973,7 @@ export namespace Prisma {
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
     businessType?: boolean
+    enablePublicBooking?: boolean
     subscriptionPlan?: boolean
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
@@ -1988,6 +1997,7 @@ export namespace Prisma {
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
     businessType?: boolean
+    enablePublicBooking?: boolean
     subscriptionPlan?: boolean
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
@@ -2011,13 +2021,14 @@ export namespace Prisma {
     fontSizeLevel?: boolean
     borderRadiusLevel?: boolean
     businessType?: boolean
+    enablePublicBooking?: boolean
     subscriptionPlan?: boolean
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
     sandboxExpiresAt?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "businessType" | "subscriptionPlan" | "subscriptionStatus" | "trialExpiresAt" | "sandboxExpiresAt", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "businessType" | "enablePublicBooking" | "subscriptionPlan" | "subscriptionStatus" | "trialExpiresAt" | "sandboxExpiresAt", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -2055,6 +2066,7 @@ export namespace Prisma {
       fontSizeLevel: string
       borderRadiusLevel: string
       businessType: string | null
+      enablePublicBooking: boolean
       subscriptionPlan: $Enums.SubscriptionPlan
       subscriptionStatus: $Enums.SubscriptionStatus
       trialExpiresAt: Date | null
@@ -2503,6 +2515,7 @@ export namespace Prisma {
     readonly fontSizeLevel: FieldRef<"Business", 'String'>
     readonly borderRadiusLevel: FieldRef<"Business", 'String'>
     readonly businessType: FieldRef<"Business", 'String'>
+    readonly enablePublicBooking: FieldRef<"Business", 'Boolean'>
     readonly subscriptionPlan: FieldRef<"Business", 'SubscriptionPlan'>
     readonly subscriptionStatus: FieldRef<"Business", 'SubscriptionStatus'>
     readonly trialExpiresAt: FieldRef<"Business", 'DateTime'>
@@ -7667,11 +7680,13 @@ export namespace Prisma {
   export type ServiceAvgAggregateOutputType = {
     duration: number | null
     price: number | null
+    capacity: number | null
   }
 
   export type ServiceSumAggregateOutputType = {
     duration: number | null
     price: number | null
+    capacity: number | null
   }
 
   export type ServiceMinAggregateOutputType = {
@@ -7681,6 +7696,7 @@ export namespace Prisma {
     description: string | null
     duration: number | null
     price: number | null
+    capacity: number | null
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7693,6 +7709,7 @@ export namespace Prisma {
     description: string | null
     duration: number | null
     price: number | null
+    capacity: number | null
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7705,6 +7722,7 @@ export namespace Prisma {
     description: number
     duration: number
     price: number
+    capacity: number
     isActive: number
     createdAt: number
     updatedAt: number
@@ -7715,11 +7733,13 @@ export namespace Prisma {
   export type ServiceAvgAggregateInputType = {
     duration?: true
     price?: true
+    capacity?: true
   }
 
   export type ServiceSumAggregateInputType = {
     duration?: true
     price?: true
+    capacity?: true
   }
 
   export type ServiceMinAggregateInputType = {
@@ -7729,6 +7749,7 @@ export namespace Prisma {
     description?: true
     duration?: true
     price?: true
+    capacity?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -7741,6 +7762,7 @@ export namespace Prisma {
     description?: true
     duration?: true
     price?: true
+    capacity?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -7753,6 +7775,7 @@ export namespace Prisma {
     description?: true
     duration?: true
     price?: true
+    capacity?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -7852,6 +7875,7 @@ export namespace Prisma {
     description: string | null
     duration: number
     price: number
+    capacity: number
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -7883,6 +7907,7 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    capacity?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7898,6 +7923,7 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    capacity?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7911,6 +7937,7 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    capacity?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7924,12 +7951,13 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    capacity?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "name" | "description" | "duration" | "price" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["service"]>
+  export type ServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "name" | "description" | "duration" | "price" | "capacity" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["service"]>
   export type ServiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     appointments?: boolean | Service$appointmentsArgs<ExtArgs>
@@ -7955,6 +7983,7 @@ export namespace Prisma {
       description: string | null
       duration: number
       price: number
+      capacity: number
       isActive: boolean
       createdAt: Date
       updatedAt: Date
@@ -8389,6 +8418,7 @@ export namespace Prisma {
     readonly description: FieldRef<"Service", 'String'>
     readonly duration: FieldRef<"Service", 'Int'>
     readonly price: FieldRef<"Service", 'Float'>
+    readonly capacity: FieldRef<"Service", 'Int'>
     readonly isActive: FieldRef<"Service", 'Boolean'>
     readonly createdAt: FieldRef<"Service", 'DateTime'>
     readonly updatedAt: FieldRef<"Service", 'DateTime'>
@@ -9968,6 +9998,7 @@ export namespace Prisma {
     fontSizeLevel: 'fontSizeLevel',
     borderRadiusLevel: 'borderRadiusLevel',
     businessType: 'businessType',
+    enablePublicBooking: 'enablePublicBooking',
     subscriptionPlan: 'subscriptionPlan',
     subscriptionStatus: 'subscriptionStatus',
     trialExpiresAt: 'trialExpiresAt',
@@ -10043,6 +10074,7 @@ export namespace Prisma {
     description: 'description',
     duration: 'duration',
     price: 'price',
+    capacity: 'capacity',
     isActive: 'isActive',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -10119,6 +10151,13 @@ export namespace Prisma {
    * Reference to a field of type 'WhatsAppStatus[]'
    */
   export type ListEnumWhatsAppStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WhatsAppStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -10207,13 +10246,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -10264,6 +10296,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFilter<"Business"> | string
     borderRadiusLevel?: StringFilter<"Business"> | string
     businessType?: StringNullableFilter<"Business"> | string | null
+    enablePublicBooking?: BoolFilter<"Business"> | boolean
     subscriptionPlan?: EnumSubscriptionPlanFilter<"Business"> | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFilter<"Business"> | $Enums.SubscriptionStatus
     trialExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
@@ -10292,6 +10325,7 @@ export namespace Prisma {
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
     businessType?: SortOrderInput | SortOrder
+    enablePublicBooking?: SortOrder
     subscriptionPlan?: SortOrder
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrderInput | SortOrder
@@ -10323,6 +10357,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFilter<"Business"> | string
     borderRadiusLevel?: StringFilter<"Business"> | string
     businessType?: StringNullableFilter<"Business"> | string | null
+    enablePublicBooking?: BoolFilter<"Business"> | boolean
     subscriptionPlan?: EnumSubscriptionPlanFilter<"Business"> | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFilter<"Business"> | $Enums.SubscriptionStatus
     trialExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
@@ -10351,6 +10386,7 @@ export namespace Prisma {
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
     businessType?: SortOrderInput | SortOrder
+    enablePublicBooking?: SortOrder
     subscriptionPlan?: SortOrder
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrderInput | SortOrder
@@ -10380,6 +10416,7 @@ export namespace Prisma {
     fontSizeLevel?: StringWithAggregatesFilter<"Business"> | string
     borderRadiusLevel?: StringWithAggregatesFilter<"Business"> | string
     businessType?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    enablePublicBooking?: BoolWithAggregatesFilter<"Business"> | boolean
     subscriptionPlan?: EnumSubscriptionPlanWithAggregatesFilter<"Business"> | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusWithAggregatesFilter<"Business"> | $Enums.SubscriptionStatus
     trialExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
@@ -10706,6 +10743,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"Service"> | string | null
     duration?: IntFilter<"Service"> | number
     price?: FloatFilter<"Service"> | number
+    capacity?: IntFilter<"Service"> | number
     isActive?: BoolFilter<"Service"> | boolean
     createdAt?: DateTimeFilter<"Service"> | Date | string
     updatedAt?: DateTimeFilter<"Service"> | Date | string
@@ -10720,6 +10758,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10737,6 +10776,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"Service"> | string | null
     duration?: IntFilter<"Service"> | number
     price?: FloatFilter<"Service"> | number
+    capacity?: IntFilter<"Service"> | number
     isActive?: BoolFilter<"Service"> | boolean
     createdAt?: DateTimeFilter<"Service"> | Date | string
     updatedAt?: DateTimeFilter<"Service"> | Date | string
@@ -10751,6 +10791,7 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10771,6 +10812,7 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"Service"> | string | null
     duration?: IntWithAggregatesFilter<"Service"> | number
     price?: FloatWithAggregatesFilter<"Service"> | number
+    capacity?: IntWithAggregatesFilter<"Service"> | number
     isActive?: BoolWithAggregatesFilter<"Service"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Service"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Service"> | Date | string
@@ -10863,6 +10905,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -10891,6 +10934,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -10919,6 +10963,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -10947,6 +10992,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -10975,6 +11021,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -10998,6 +11045,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11021,6 +11069,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11364,6 +11413,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11378,6 +11428,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11390,6 +11441,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11404,6 +11456,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11417,6 +11470,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11428,6 +11482,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11440,6 +11495,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11558,6 +11614,11 @@ export namespace Prisma {
     not?: NestedEnumWhatsAppStatusFilter<$PrismaModel> | $Enums.WhatsAppStatus
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type EnumSubscriptionPlanFilter<$PrismaModel = never> = {
     equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
     in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
@@ -11655,6 +11716,7 @@ export namespace Prisma {
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
     businessType?: SortOrder
+    enablePublicBooking?: SortOrder
     subscriptionPlan?: SortOrder
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrder
@@ -11678,6 +11740,7 @@ export namespace Prisma {
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
     businessType?: SortOrder
+    enablePublicBooking?: SortOrder
     subscriptionPlan?: SortOrder
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrder
@@ -11701,6 +11764,7 @@ export namespace Prisma {
     fontSizeLevel?: SortOrder
     borderRadiusLevel?: SortOrder
     businessType?: SortOrder
+    enablePublicBooking?: SortOrder
     subscriptionPlan?: SortOrder
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrder
@@ -11751,6 +11815,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
     _max?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type EnumSubscriptionPlanWithAggregatesFilter<$PrismaModel = never> = {
@@ -12001,11 +12073,6 @@ export namespace Prisma {
     not?: NestedIntFilter<$PrismaModel> | number
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type BusinessHoursBusinessIdDayOfWeekCompoundUniqueInput = {
     businessId: string
     dayOfWeek: number
@@ -12062,14 +12129,6 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
   export type FloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -12088,6 +12147,7 @@ export namespace Prisma {
     description?: SortOrder
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12096,6 +12156,7 @@ export namespace Prisma {
   export type ServiceAvgOrderByAggregateInput = {
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
   }
 
   export type ServiceMaxOrderByAggregateInput = {
@@ -12105,6 +12166,7 @@ export namespace Prisma {
     description?: SortOrder
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12117,6 +12179,7 @@ export namespace Prisma {
     description?: SortOrder
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12125,6 +12188,7 @@ export namespace Prisma {
   export type ServiceSumOrderByAggregateInput = {
     duration?: SortOrder
     price?: SortOrder
+    capacity?: SortOrder
   }
 
   export type FloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -12278,6 +12342,10 @@ export namespace Prisma {
 
   export type EnumWhatsAppStatusFieldUpdateOperationsInput = {
     set?: $Enums.WhatsAppStatus
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type EnumSubscriptionPlanFieldUpdateOperationsInput = {
@@ -12618,10 +12686,6 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type BusinessUpdateOneRequiredWithoutHoursNestedInput = {
     create?: XOR<BusinessCreateWithoutHoursInput, BusinessUncheckedCreateWithoutHoursInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutHoursInput
@@ -12747,6 +12811,11 @@ export namespace Prisma {
     not?: NestedEnumWhatsAppStatusFilter<$PrismaModel> | $Enums.WhatsAppStatus
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedEnumSubscriptionPlanFilter<$PrismaModel = never> = {
     equals?: $Enums.SubscriptionPlan | EnumSubscriptionPlanFieldRefInput<$PrismaModel>
     in?: $Enums.SubscriptionPlan[] | ListEnumSubscriptionPlanFieldRefInput<$PrismaModel>
@@ -12836,6 +12905,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
     _max?: NestedEnumWhatsAppStatusFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedEnumSubscriptionPlanWithAggregatesFilter<$PrismaModel = never> = {
@@ -12931,11 +13008,6 @@ export namespace Prisma {
     _max?: NestedEnumAppointmentStatusFilter<$PrismaModel>
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -12961,14 +13033,6 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
@@ -13108,6 +13172,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13120,6 +13185,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13287,6 +13353,7 @@ export namespace Prisma {
     description?: StringNullableFilter<"Service"> | string | null
     duration?: IntFilter<"Service"> | number
     price?: FloatFilter<"Service"> | number
+    capacity?: IntFilter<"Service"> | number
     isActive?: BoolFilter<"Service"> | boolean
     createdAt?: DateTimeFilter<"Service"> | Date | string
     updatedAt?: DateTimeFilter<"Service"> | Date | string
@@ -13339,6 +13406,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13366,6 +13434,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13439,6 +13508,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13466,6 +13536,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13523,6 +13594,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13550,6 +13622,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13625,6 +13698,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13652,6 +13726,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13695,6 +13770,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13722,6 +13798,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13778,6 +13855,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13791,6 +13869,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13829,6 +13908,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13856,6 +13936,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13924,6 +14005,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13937,6 +14019,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13959,6 +14042,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -13986,6 +14070,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -14029,6 +14114,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14056,6 +14142,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14083,6 +14170,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -14110,6 +14198,7 @@ export namespace Prisma {
     fontSizeLevel?: string
     borderRadiusLevel?: string
     businessType?: string | null
+    enablePublicBooking?: boolean
     subscriptionPlan?: $Enums.SubscriptionPlan
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
@@ -14185,6 +14274,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14212,6 +14302,7 @@ export namespace Prisma {
     fontSizeLevel?: StringFieldUpdateOperationsInput | string
     borderRadiusLevel?: StringFieldUpdateOperationsInput | string
     businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
     subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14337,6 +14428,7 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: number
+    capacity?: number
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14459,6 +14551,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14471,6 +14564,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14483,6 +14577,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
+    capacity?: IntFieldUpdateOperationsInput | number
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
