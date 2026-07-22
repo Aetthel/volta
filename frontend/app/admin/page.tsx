@@ -20,6 +20,7 @@ import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import TrialBanner from "@/components/TrialBanner";
 import MetricCard from "@/components/MetricCard";
 import { Button, PageHeader, Skeleton, Alert } from "@/components/ui/volta-ui";
 
@@ -160,6 +161,7 @@ export default function AdminPage() {
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         {/* Content Canvas */}
+        <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader
             title="Panel de Control Global"

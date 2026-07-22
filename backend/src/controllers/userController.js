@@ -119,21 +119,25 @@ export const deleteUser = async (req, res) => {
 
 export const registerUser = async (req, res) => {
   const { name, email, password, businessName, phone, businessType } = req.body;
+  const cleanEmail = email ? email.trim().toLowerCase() : '';
 
-  // 1. Check if user email already exists
-  const existingUser = await userService.getUserByEmail(email);
+  if (!cleanEmail) {
+    return res.status(400).json({ error: 'El correo electrónico es requerido.' });
+  }
+
+  // 1. Check if user email already exists (case-insensitive)
+  const existingUser = await userService.getUserByEmail(cleanEmail);
   if (existingUser) {
     return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
   }
 
-  // 2. Create Business with 10-day trial in Plan Pro (25€)
-  const demoExpiresAt = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+  // 2. Create Business with 14-day trial in Plan Pro (25€)
+  const demoExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
   const business = await prisma.business.create({
     data: {
       name: businessName,
       phone,
-      email,
-      ownerName: name,
+      email: cleanEmail,
       businessType: businessType || 'Peluquería / Barbería',
       subscriptionPlan: 'PRO',
       isDemo: true,
@@ -141,12 +145,12 @@ export const registerUser = async (req, res) => {
     }
   });
 
-  // 3. Create ADMIN User for the new Business
+  // 3. Create JEFE User (Business Owner/Manager) for the new Business
   const user = await userService.createUser({
     name,
-    email,
+    email: cleanEmail,
     password,
-    role: 'ADMIN',
+    role: 'JEFE',
     businessId: business.id
   });
 

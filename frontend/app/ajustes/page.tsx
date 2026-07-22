@@ -9,6 +9,7 @@ import type { BusinessProfile, ToastState } from "@/types/settings";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import TrialBanner from "@/components/TrialBanner";
 import Toast from "@/components/settings/Toast";
 import ProfileSection from "@/components/settings/ProfileSection";
 import MessagesSection from "@/components/settings/MessagesSection";
@@ -118,6 +119,7 @@ export default function AjustesPage() {
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       <Sidebar onNewAppointmentClick={() => {}} />
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
+        <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           <Toast toast={toast} />
 
@@ -202,6 +204,7 @@ function AdminView({ toast, setToast }: { toast: ToastState; setToast: (t: Toast
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       <Sidebar onNewAppointmentClick={() => {}} />
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
+        <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           <Toast toast={toast} />
           <PageHeader title="Ajustes de Administrador" description="Gestiona tus credenciales de acceso y perfil de administrador." />

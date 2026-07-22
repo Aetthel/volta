@@ -13,9 +13,9 @@
     "dev": "nodemon src/index.js",
     "build": "pnpm prisma:generate",
     "start": "node src/index.js",
-    "seed": "node scripts/seed.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
+    "db:reset": "node scripts/reset-db.js",
     "lint": "echo 'No linting configured for backend'",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit"
   },

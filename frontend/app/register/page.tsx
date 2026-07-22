@@ -3,133 +3,95 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  Eye,
-  EyeOff,
-  Building2,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  Sparkles,
-  ArrowRight,
-  ArrowLeft,
-  Check,
-  Scissors,
-  Heart,
-  Stethoscope,
-  SmilePlus,
-  Dumbbell,
-  Briefcase,
-  ChevronRight,
-} from "lucide-react";
-import FaceIcon from "@/components/FaceIcon";
+import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { Alert, Button } from "@/components/ui/volta-ui";
 
-/* ── Business types with icons ── */
-const BUSINESS_TYPES = [
+/* ── Sector options matching Screenshot 1 ── */
+const SECTORS = [
   {
     id: "peluqueria",
-    label: "Peluquería / Barbería",
-    description: "Cortes, peinados, coloración",
-    icon: Scissors,
+    label: "Peluquería",
+    description: "Cortes, peinados, coloración y tratamientos capilares para todos los públicos.",
   },
   {
     id: "estetica",
-    label: "Estética / Belleza / Uñas",
-    description: "Tratamientos faciales, manicura",
-    icon: Heart,
+    label: "Centro de Estética",
+    description: "Tratamientos faciales, corporales, depilación, manicura y pedicura avanzada.",
+  },
+  {
+    id: "barberia",
+    label: "Barbería",
+    description: "Corte masculino clásico y moderno, arreglo de barba y afeitado tradicional.",
+  },
+  {
+    id: "spa",
+    label: "Spa & Wellness",
+    description: "Masajes, circuitos termales, aromaterapia y relajación integral profunda.",
   },
   {
     id: "clinica",
     label: "Clínica / Fisioterapia",
-    description: "Rehabilitación, salud, bienestar",
-    icon: Stethoscope,
-  },
-  {
-    id: "odontologia",
-    label: "Odontología",
-    description: "Clínica dental, ortodoncia",
-    icon: SmilePlus,
+    description: "Rehabilitación, salud, bienestar y consultas especializadas.",
   },
   {
     id: "fitness",
     label: "Personal Trainer / Fitness",
-    description: "Entrenamiento personal, gym",
-    icon: Dumbbell,
-  },
-  {
-    id: "consultoria",
-    label: "Consultoría / Servicios",
-    description: "Asesoría, servicios profesionales",
-    icon: Briefcase,
+    description: "Entrenamiento personal, preparación física y seguimiento deportivo.",
   },
 ];
 
 const TOTAL_STEPS = 4;
 
-/* ── Step indicator component ── */
-function StepIndicator({
-  currentStep,
-  totalSteps,
-}: {
-  currentStep: number;
-  totalSteps: number;
-}) {
-  const labels = ["Sector", "Negocio", "Cuenta", "Confirmar"];
+/* ── Top Step Indicator matching Screenshots 1, 2, 3, 4 ── */
+function StepIndicator({ currentStep }: { currentStep: number }) {
+  const steps = [
+    { num: 1, label: "Sector" },
+    { num: 2, label: "Detalles" },
+    { num: 3, label: "Cuenta" },
+    { num: 4, label: "Listo" },
+  ];
 
   return (
-    <div className="flex items-center w-full max-w-md mx-auto mb-8">
-      {Array.from({ length: totalSteps }, (_, i) => {
-        const stepNum = i + 1;
-        const isCompleted = currentStep > stepNum;
-        const isActive = currentStep === stepNum;
+    <div className="flex items-center justify-start gap-3 sm:gap-6 mb-10 text-body-sm">
+      {steps.map((step, idx) => {
+        const isCompleted = currentStep > step.num;
+        const isActive = currentStep === step.num;
 
         return (
-          <div key={stepNum} className="flex items-center flex-1 last:flex-none">
-            {/* Step circle + label */}
-            <div className="flex flex-col items-center gap-1.5">
+          <div key={step.num} className="flex items-center gap-3 sm:gap-6">
+            <div className="flex items-center gap-2">
               <div
                 className={`
-                  w-9 h-9 rounded-full flex items-center justify-center text-label-md font-bold
-                  transition-all duration-400 ease-out
-                  ${isCompleted
-                    ? "bg-primary text-on-primary scale-90"
-                    : isActive
-                    ? "bg-primary text-on-primary ring-4 ring-primary/20 scale-105"
-                    : "bg-surface-container-high text-on-surface-variant/50"
+                  w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
+                  ${
+                    isCompleted
+                      ? "bg-primary text-white"
+                      : isActive
+                      ? "bg-primary text-white ring-4 ring-primary/20"
+                      : "bg-surface-container-high text-on-surface-variant/60"
                   }
                 `}
               >
-                {isCompleted ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  stepNum
-                )}
+                {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.num}
               </div>
               <span
-                className={`
-                  text-[0.65rem] font-semibold tracking-wide uppercase transition-colors duration-300
-                  ${isActive ? "text-primary" : isCompleted ? "text-on-surface-variant" : "text-on-surface-variant/40"}
-                `}
+                className={`font-medium transition-colors duration-200 ${
+                  isActive || isCompleted
+                    ? "text-primary font-semibold"
+                    : "text-on-surface-variant/60"
+                }`}
               >
-                {labels[i]}
+                {step.label}
               </span>
             </div>
 
-            {/* Connector line */}
-            {i < totalSteps - 1 && (
-              <div className="flex-1 mx-2 mt-[-1.25rem]">
-                <div className="h-[2px] bg-surface-container-high rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
-                    style={{
-                      width: isCompleted ? "100%" : isActive ? "50%" : "0%",
-                    }}
-                  />
-                </div>
-              </div>
+            {idx < steps.length - 1 && (
+              <div
+                className={`h-[2px] w-8 sm:w-14 rounded-full transition-colors duration-300 ${
+                  currentStep > step.num ? "bg-primary" : "bg-outline-variant/30"
+                }`}
+              />
             )}
           </div>
         );
@@ -138,85 +100,94 @@ function StepIndicator({
   );
 }
 
-/* ── Step wrapper with animation ── */
-function StepContent({
-  isVisible,
-  direction,
-  children,
-}: {
-  isVisible: boolean;
-  direction: "forward" | "backward";
-  children: React.ReactNode;
-}) {
-  if (!isVisible) return null;
-
-  return (
-    <div
-      className="w-full animate-in fade-in duration-300"
-      style={{
-        animation: `stepSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ── Main page ── */
+/* ── Main Registration Component ── */
 export default function RegisterPage() {
   const router = useRouter();
 
-  // Step state
+  // Form State
   const [currentStep, setCurrentStep] = useState(1);
-  const [direction, setDirection] = useState<"forward" | "backward">("forward");
-
-  // Form data
-  const [businessType, setBusinessType] = useState("");
+  const [sector, setSector] = useState("");
   const [businessName, setBusinessName] = useState("");
+  const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
+  const [website, setWebsite] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
-  const goNext = useCallback(() => {
-    setDirection("forward");
+
+
+  // Step validation check
+  const validateStep = (step: number) => {
     setError("");
-    setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS));
-  }, []);
+    if (step === 1) {
+      if (!sector) {
+        setError("Por favor, selecciona un sector para continuar.");
+        return false;
+      }
+    } else if (step === 2) {
+      if (!businessName.trim()) {
+        setError("Por favor, introduce el nombre de tu negocio.");
+        return false;
+      }
+      if (businessName.trim().length < 2) {
+        setError("El nombre del negocio debe tener al menos 2 caracteres.");
+        return false;
+      }
+      if (!phone.trim()) {
+        setError("Por favor, introduce un teléfono de contacto.");
+        return false;
+      }
+      if (phone.trim().length < 6) {
+        setError("Por favor, introduce un teléfono de contacto válido.");
+        return false;
+      }
+    } else if (step === 3) {
+      if (!name.trim()) {
+        setError("Por favor, introduce tu nombre completo.");
+        return false;
+      }
+      if (!email.trim() || !email.includes("@")) {
+        setError("Por favor, introduce un correo electrónico válido.");
+        return false;
+      }
+      if (!password || password.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres.");
+        return false;
+      }
+      if (confirmPassword && password !== confirmPassword) {
+        setError("Las contraseñas no coinciden.");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const goNext = () => {
+    if (validateStep(currentStep)) {
+      setError("");
+      setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS));
+    }
+  };
 
   const goBack = useCallback(() => {
-    setDirection("backward");
     setError("");
     setCurrentStep((s) => Math.max(s - 1, 1));
   }, []);
 
-  // Validation per step
-  const canProceed = useCallback(() => {
-    switch (currentStep) {
-      case 1:
-        return businessType !== "";
-      case 2:
-        return businessName.trim().length >= 2 && phone.trim().length >= 6;
-      case 3:
-        return (
-          name.trim().length >= 2 &&
-          email.includes("@") &&
-          password.length >= 6
-        );
-      default:
-        return true;
+  const selectedSector = SECTORS.find((s) => s.id === sector);
+
+  // Submit registration at step 3
+  const handleRegisterSubmit = async () => {
+    if (!validateStep(3)) {
+      return;
     }
-  }, [currentStep, businessType, businessName, phone, name, email, password]);
 
-  const selectedBusiness = BUSINESS_TYPES.find((t) => t.id === businessType);
-
-  const handleSubmit = async () => {
     setIsLoading(true);
     setError("");
 
@@ -230,7 +201,7 @@ export default function RegisterPage() {
           password,
           businessName,
           phone,
-          businessType: selectedBusiness?.label || businessType,
+          businessType: selectedSector?.label || sector,
         }),
       });
 
@@ -242,21 +213,15 @@ export default function RegisterPage() {
         return;
       }
 
-      setSuccess(true);
-
       // Auto sign-in
-      const signInResult = await signIn("credentials", {
+      await signIn("credentials", {
         email,
         password,
         redirect: false,
-        callbackUrl: "/inicio",
       });
 
-      if (signInResult?.error) {
-        router.push("/login?registered=true");
-      } else {
-        router.push(signInResult?.url || "/inicio");
-      }
+      setIsLoading(false);
+      setCurrentStep(4);
     } catch (err) {
       setError("Error de conexión al servidor");
       setIsLoading(false);
@@ -264,494 +229,387 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between p-4 sm:p-10 select-none overflow-y-auto">
-      {/* Spacer */}
-      <div className="hidden sm:block flex-1" />
+    <div className="min-h-screen bg-surface select-none py-12 px-6 md:px-16 lg:px-24 max-w-4xl mx-auto flex flex-col justify-between">
+      <div>
+        {/* Step Indicator Bar */}
+        <StepIndicator currentStep={currentStep} />
 
-      {/* Main container */}
-      <div className="w-full max-w-[560px] mx-auto flex flex-col items-center">
-        {/* Brand + title */}
-        <div className="flex items-center justify-center w-14 h-14 bg-primary/10 text-primary rounded-2xl mb-3">
-          <FaceIcon className="w-9 h-9" />
-        </div>
+        {/* ═══════════════ STEP 1 — Sector ═══════════════ */}
+        {currentStep === 1 && (
+          <div className="animate-in fade-in duration-300">
+            {/* Header with top margin from progress bar */}
+            <div className="mt-8 sm:mt-12 mb-8">
+              <h1 className="font-display text-[2.75rem] sm:text-[3.5rem] lg:text-[3.75rem] font-bold text-on-surface leading-[1.08] mb-3 tracking-tight">
+                ¿A qué sector pertenece tu negocio?
+              </h1>
+              <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
+                Personalizaremos tu experiencia en Volta basándonos en tu tipo de establecimiento. Podrás cambiar esto más adelante en la configuración.
+              </p>
+            </div>
 
-        <h1 className="font-display text-headline-lg text-on-surface font-bold mb-1 text-center">
-          Crear Cuenta
-        </h1>
+            {error && (
+              <Alert variant="error" className="py-2.5 px-4 text-body-md rounded-xl mb-6">
+                {error}
+              </Alert>
+            )}
 
-        {/* Trial badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary text-label-md rounded-full font-semibold mb-6">
-          <Sparkles className="w-4 h-4" />
-          <span>10 Días de Prueba Gratis — Plan Pro 25€</span>
-        </div>
+            {/* Grid of sector cards — NO icons as requested */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              {SECTORS.map((item) => {
+                const isSelected = sector === item.id;
 
-        {/* Step indicator */}
-        <StepIndicator currentStep={currentStep} totalSteps={TOTAL_STEPS} />
-
-        {/* ═══════════════ STEP 1 — Business Type ═══════════════ */}
-        <StepContent isVisible={currentStep === 1} direction={direction}>
-          <div className="text-center mb-5">
-            <h2 className="text-title-lg font-semibold text-on-surface mb-1">
-              ¿Cuál es tu sector?
-            </h2>
-            <p className="text-body-md text-on-surface-variant">
-              Selecciona el tipo de negocio que mejor te represente
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-            {BUSINESS_TYPES.map((type) => {
-              const Icon = type.icon;
-              const isSelected = businessType === type.id;
-
-              return (
-                <button
-                  key={type.id}
-                  type="button"
-                  onClick={() => setBusinessType(type.id)}
-                  className={`
-                    group relative flex items-center gap-3.5 p-4 rounded-xl border-2 text-left cursor-pointer
-                    transition-all duration-200 ease-out
-                    ${isSelected
-                      ? "border-primary bg-primary/[0.06] shadow-sm"
-                      : "border-outline-variant/60 bg-surface-container-lowest hover:border-outline hover:bg-surface-container-low"
-                    }
-                  `}
-                >
-                  {/* Icon */}
-                  <div
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setSector(item.id);
+                      setError("");
+                    }}
                     className={`
-                      flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200
-                      ${isSelected
-                        ? "bg-primary text-on-primary"
-                        : "bg-surface-container-high text-on-surface-variant group-hover:bg-primary/10 group-hover:text-primary"
+                      relative text-left p-6 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between
+                      ${
+                        isSelected
+                          ? "border-primary bg-primary/[0.03] shadow-sm"
+                          : "border-outline-variant/40 bg-surface-container-lowest hover:border-outline-variant hover:bg-surface-container-low"
                       }
                     `}
                   >
-                    <Icon className="w-5 h-5" />
-                  </div>
+                    <div>
+                      <h3 className="font-display text-title-md font-bold text-on-surface mb-1.5">
+                        {item.label}
+                      </h3>
+                      <p className="text-body-sm text-on-surface-variant/80 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
 
-                  {/* Text */}
-                  <div className="flex-1 min-w-0">
-                    <div
-                      className={`text-body-md font-semibold truncate transition-colors ${
-                        isSelected ? "text-primary" : "text-on-surface"
-                      }`}
-                    >
-                      {type.label}
-                    </div>
-                    <div className="text-body-sm text-on-surface-variant/70 truncate">
-                      {type.description}
-                    </div>
-                  </div>
-
-                  {/* Check indicator */}
-                  {isSelected && (
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+                    {isSelected && (
+                      <div className="mt-4 flex justify-end">
+                        <span className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center">
+                          <Check className="w-3 h-3" />
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+        )}
 
-          <Button
-            type="button"
-            disabled={!canProceed()}
-            onClick={goNext}
-            variant="primary"
-            className="w-full py-3 px-6 font-semibold shadow-md rounded-lg"
-          >
-            Continuar
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </StepContent>
+        {/* ═══════════════ STEP 2 — Detalles del Negocio ═══════════════ */}
+        {currentStep === 2 && (
+          <div className="animate-in fade-in duration-300">
+            {/* Header with top margin from progress bar */}
+            <div className="mt-8 sm:mt-12 mb-8">
+              <h1 className="font-display text-[2.75rem] sm:text-[3.5rem] lg:text-[3.75rem] font-bold text-on-surface leading-[1.08] mb-3 tracking-tight">
+                Detalles del Negocio
+              </h1>
+              <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
+                Ingresa la información pública de tu negocio para que los clientes puedan encontrarte.
+              </p>
+            </div>
 
-        {/* ═══════════════ STEP 2 — Business Details ═══════════════ */}
-        <StepContent isVisible={currentStep === 2} direction={direction}>
-          <div className="text-center mb-5">
-            <h2 className="text-title-lg font-semibold text-on-surface mb-1">
-              Datos de tu negocio
-            </h2>
-            <p className="text-body-md text-on-surface-variant">
-              Cuéntanos sobre{" "}
-              {selectedBusiness
-                ? `tu ${selectedBusiness.label.split("/")[0].trim().toLowerCase()}`
-                : "tu negocio"}
-            </p>
-          </div>
+            {error && (
+              <Alert variant="error" className="py-2.5 px-4 text-body-md rounded-xl mb-6">
+                {error}
+              </Alert>
+            )}
 
-          <div className="flex flex-col gap-4 mb-6 w-full">
-            {/* Business Name */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="businessName"
-                className="text-body-sm font-semibold text-on-surface-variant"
-              >
-                Nombre del Negocio / Centro
-              </label>
-              <div className="relative">
-                <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-on-surface-variant/50" />
+            {/* Form Fields — NO icons inside inputs as requested */}
+            <div className="flex flex-col gap-6 sm:gap-8 mb-10">
+              {/* Nombre del Negocio */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="businessName" className="text-body-sm font-semibold text-on-surface">
+                  Nombre del Negocio <span className="text-primary">*</span>
+                </label>
                 <input
                   id="businessName"
                   type="text"
                   required
                   value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="Ej. Clínica Volta / Peluquería Studio"
-                  className="block w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
+                  onChange={(e) => {
+                    setBusinessName(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="Ej. Studio 54 Hair & Beauty"
+                  className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
                 />
               </div>
-            </div>
 
-            {/* Phone */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="phone"
-                className="text-body-sm font-semibold text-on-surface-variant"
-              >
-                Teléfono de Contacto
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-on-surface-variant/50" />
+              {/* Dirección */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="address" className="text-body-sm font-semibold text-on-surface">
+                  Dirección
+                </label>
                 <input
-                  id="phone"
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+34 600 000 000"
-                  className="block w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
+                  id="address"
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Calle Principal 123, Ciudad"
+                  className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
                 />
+              </div>
+
+              {/* 2 Columns: Phone & Website */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="phone" className="text-body-sm font-semibold text-on-surface">
+                    Teléfono de Contacto <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      if (error) setError("");
+                    }}
+                    placeholder="+34 600 000 000"
+                    className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="website" className="text-body-sm font-semibold text-on-surface">
+                    Sitio Web (Opcional)
+                  </label>
+                  <input
+                    id="website"
+                    type="url"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="www.misalon.com"
+                    className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
+                  />
+                </div>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Navigation */}
-          <div className="flex gap-3 w-full">
-            <Button
-              type="button"
-              onClick={goBack}
-              variant="outline"
-              className="py-3 px-5 font-semibold rounded-lg border-outline-variant"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Atrás
-            </Button>
-            <Button
-              type="button"
-              disabled={!canProceed()}
-              onClick={goNext}
-              variant="primary"
-              className="flex-1 py-3 px-6 font-semibold shadow-md rounded-lg"
-            >
-              Continuar
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </StepContent>
+        {/* ═══════════════ STEP 3 — Crear Cuenta / Detalles del Usuario ═══════════════ */}
+        {currentStep === 3 && (
+          <div className="animate-in fade-in duration-300">
+            {/* Header with top margin from progress bar */}
+            <div className="mt-8 sm:mt-12 mb-8">
+              <h1 className="font-display text-[2.75rem] sm:text-[3.5rem] lg:text-[3.75rem] font-bold text-on-surface leading-[1.08] mb-3 tracking-tight">
+                Crear Cuenta
+              </h1>
+              <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
+                Por favor, completa la información del usuario para continuar con el registro.
+              </p>
+            </div>
 
-        {/* ═══════════════ STEP 3 — Account ═══════════════ */}
-        <StepContent isVisible={currentStep === 3} direction={direction}>
-          <div className="text-center mb-5">
-            <h2 className="text-title-lg font-semibold text-on-surface mb-1">
-              Crea tu cuenta
-            </h2>
-            <p className="text-body-md text-on-surface-variant">
-              Estos serán tus datos de acceso a Volta
-            </p>
-          </div>
+            {error && (
+              <Alert variant="error" className="py-2.5 px-4 text-body-md rounded-xl mb-6">
+                {error}
+              </Alert>
+            )}
 
-          {error && (
-            <Alert
-              variant="error"
-              className="py-2.5 px-4 text-body-md rounded-lg mb-4"
-            >
-              {error}
-            </Alert>
-          )}
-
-          <div className="flex flex-col gap-4 mb-6 w-full">
-            {/* Owner name */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="name"
-                className="text-body-sm font-semibold text-on-surface-variant"
-              >
-                Tu Nombre Completo
-              </label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-on-surface-variant/50" />
+            {/* Form Fields — NO icons inside inputs as requested */}
+            <div className="flex flex-col gap-6 sm:gap-8 mb-10">
+              {/* Nombre Completo */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="name" className="text-body-sm font-semibold text-on-surface">
+                  Nombre Completo <span className="text-primary">*</span>
+                </label>
                 <input
                   id="name"
                   type="text"
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej. María García"
-                  className="block w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="Ej. Ana García"
+                  className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
                 />
               </div>
-            </div>
 
-            {/* Email */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="email"
-                className="text-body-sm font-semibold text-on-surface-variant"
-              >
-                Correo Electrónico
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-on-surface-variant/50" />
+              {/* Correo Electrónico */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="email" className="text-body-sm font-semibold text-on-surface">
+                  Correo Electrónico <span className="text-primary">*</span>
+                </label>
                 <input
                   id="email"
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ejemplo@negocio.com"
-                  className="block w-full pl-11 pr-4 py-3 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="ana@ejemplo.com"
+                  className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
                 />
               </div>
-            </div>
 
-            {/* Password */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="password"
-                className="text-body-sm font-semibold text-on-surface-variant"
-              >
-                Contraseña
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-on-surface-variant/50" />
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="block w-full pl-11 pr-12 py-3 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all placeholder-outline-variant/60 shadow-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer p-1 rounded-full"
-                  aria-label={
-                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
-                  }
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-[18px] h-[18px]" />
-                  ) : (
-                    <Eye className="w-[18px] h-[18px]" />
-                  )}
-                </button>
-              </div>
-              {/* Password strength hint */}
-              {password.length > 0 && (
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="flex-1 flex gap-1">
-                    {[1, 2, 3, 4].map((level) => (
-                      <div
-                        key={level}
-                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                          password.length >= level * 3
-                            ? password.length >= 10
-                              ? "bg-primary"
-                              : password.length >= 6
-                              ? "bg-yellow-500"
-                              : "bg-error"
-                            : "bg-surface-container-high"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[0.65rem] font-medium text-on-surface-variant/60">
-                    {password.length < 6
-                      ? "Débil"
-                      : password.length < 10
-                      ? "Aceptable"
-                      : "Fuerte"}
+              {/* 2 Columns: Contraseña & Confirmar Contraseña */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="password" className="text-body-sm font-semibold text-on-surface">
+                    Contraseña <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (error) setError("");
+                    }}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
+                  />
+                  <span className="text-[0.7rem] text-on-surface-variant/60">
+                    Mínimo 6 caracteres
                   </span>
                 </div>
-              )}
-            </div>
-          </div>
 
-          {/* Navigation */}
-          <div className="flex gap-3 w-full">
-            <Button
-              type="button"
-              onClick={goBack}
-              variant="outline"
-              className="py-3 px-5 font-semibold rounded-lg border-outline-variant"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Atrás
-            </Button>
-            <Button
-              type="button"
-              disabled={!canProceed()}
-              onClick={goNext}
-              variant="primary"
-              className="flex-1 py-3 px-6 font-semibold shadow-md rounded-lg"
-            >
-              Revisar y Confirmar
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </StepContent>
-
-        {/* ═══════════════ STEP 4 — Confirm ═══════════════ */}
-        <StepContent isVisible={currentStep === 4} direction={direction}>
-          <div className="text-center mb-5">
-            <h2 className="text-title-lg font-semibold text-on-surface mb-1">
-              Todo listo — Revisa tus datos
-            </h2>
-            <p className="text-body-md text-on-surface-variant">
-              Confirma que todo está correcto antes de crear tu cuenta
-            </p>
-          </div>
-
-          {error && (
-            <Alert
-              variant="error"
-              className="py-2.5 px-4 text-body-md rounded-lg mb-4"
-            >
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert
-              variant="success"
-              className="py-2.5 px-4 text-body-md rounded-lg mb-4"
-            >
-              ¡Cuenta creada correctamente! Iniciando sesión...
-            </Alert>
-          )}
-
-          {/* Summary card */}
-          <div className="w-full rounded-xl border border-outline-variant/60 bg-surface-container-lowest overflow-hidden mb-6">
-            {/* Section: Business */}
-            <div className="p-4 border-b border-outline-variant/40">
-              <div className="text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant/50 mb-2.5">
-                Tu Negocio
-              </div>
-              <div className="flex items-center gap-3">
-                {selectedBusiness && (
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
-                    <selectedBusiness.icon className="w-[18px] h-[18px]" />
-                  </div>
-                )}
-                <div>
-                  <div className="text-body-md font-semibold text-on-surface">
-                    {businessName}
-                  </div>
-                  <div className="text-body-sm text-on-surface-variant">
-                    {selectedBusiness?.label} · {phone}
-                  </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="confirmPassword" className="text-body-sm font-semibold text-on-surface">
+                    Confirmar Contraseña <span className="text-primary">*</span>
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      if (error) setError("");
+                    }}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3.5 bg-surface-container-lowest text-body-md text-on-surface border border-outline-variant/60 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all placeholder-outline-variant/50 shadow-sm"
+                  />
                 </div>
               </div>
             </div>
+          </div>
+        )}
 
-            {/* Section: Account */}
-            <div className="p-4 border-b border-outline-variant/40">
-              <div className="text-[0.65rem] font-bold uppercase tracking-widest text-on-surface-variant/50 mb-2.5">
-                Tu Cuenta
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 text-body-md text-on-surface">
-                  <User className="w-4 h-4 text-on-surface-variant/50 flex-shrink-0" />
-                  {name}
-                </div>
-                <div className="flex items-center gap-2 text-body-md text-on-surface">
-                  <Mail className="w-4 h-4 text-on-surface-variant/50 flex-shrink-0" />
-                  {email}
-                </div>
-              </div>
-            </div>
-
-            {/* Section: Plan */}
-            <div className="p-4 bg-primary/[0.04]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-body-md font-semibold text-primary">
-                    Plan Pro — 10 días gratis
-                  </span>
-                </div>
-                <span className="text-label-md font-bold text-primary">
-                  25€/mes
-                </span>
-              </div>
-              <p className="text-body-sm text-on-surface-variant mt-1 ml-6">
-                Sin tarjeta de crédito · Cancela cuando quieras
+        {/* ═══════════════ STEP 4 — ¡Todo listo! ═══════════════ */}
+        {currentStep === 4 && (
+          <div className="animate-in fade-in duration-300">
+            {/* Header with top margin from progress bar */}
+            <div className="mt-8 sm:mt-12 mb-8">
+              <h1 className="font-display text-[2.75rem] sm:text-[3.5rem] lg:text-[3.75rem] font-bold text-on-surface leading-[1.08] mb-3 tracking-tight">
+                ¡Todo listo!
+              </h1>
+              <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
+                Tu negocio ha sido configurado correctamente. Ya puedes empezar a gestionar tus citas, clientes y servicios desde tu nuevo panel de control.
               </p>
             </div>
-          </div>
 
-          {/* Navigation */}
-          <div className="flex gap-3 w-full">
+            {/* Summary Box matching Screenshot 4 */}
+            <div className="w-full rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-6 mb-8 space-y-4 shadow-sm">
+              <div className="flex justify-between items-center py-2 border-b border-outline-variant/20">
+                <span className="text-body-md text-on-surface-variant">Sector</span>
+                <span className="text-body-md font-bold text-on-surface">
+                  {selectedSector?.label || "Peluquería y Estética"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-outline-variant/20">
+                <span className="text-body-md text-on-surface-variant">Negocio</span>
+                <span className="text-body-md font-bold text-on-surface">
+                  {businessName || "Volta Studio"}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-body-md text-on-surface-variant">Usuario</span>
+                <span className="text-body-md font-bold text-on-surface">
+                  {email || "admin@negocio.com"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════ Bottom Navigation Bar (No horizontal rule line) ═══════════════ */}
+        <div className="flex items-center justify-between w-full mt-16 sm:mt-24 pt-4">
+          {/* Back button */}
+          {currentStep > 1 && currentStep < 4 ? (
             <Button
               type="button"
               onClick={goBack}
-              disabled={isLoading || success}
+              disabled={isLoading}
               variant="outline"
-              className="py-3 px-5 font-semibold rounded-lg border-outline-variant"
+              className="px-6 py-3 rounded-xl font-semibold border-outline-variant/60 flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Atrás
+              Anterior
             </Button>
+          ) : (
+            <div />
+          )}
+
+          {/* Next / Submit / Dashboard button */}
+          {currentStep < 3 && (
             <Button
               type="button"
-              disabled={isLoading || success}
-              onClick={handleSubmit}
+              onClick={goNext}
               variant="primary"
-              className="flex-1 py-3 px-6 font-semibold shadow-md rounded-lg"
+              className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer"
             >
-              {isLoading
-                ? "Creando cuenta..."
-                : success
-                ? "¡Cuenta creada!"
-                : "Empezar 10 Días Gratis"}
-              {!isLoading && !success && <Sparkles className="w-4 h-4" />}
+              Siguiente
+              <ArrowRight className="w-4 h-4" />
             </Button>
-          </div>
-        </StepContent>
+          )}
 
-        {/* Login link */}
-        <div className="mt-6 w-full flex items-center justify-center gap-2 text-body-md text-on-surface-variant">
-          <span>¿Ya tienes una cuenta?</span>
-          <Link
-            href="/login"
-            className="font-semibold text-primary hover:text-primary-container transition-colors hover:underline"
-          >
-            Iniciar Sesión
-          </Link>
+          {currentStep === 3 && (
+            <Button
+              type="button"
+              disabled={isLoading}
+              onClick={handleRegisterSubmit}
+              variant="primary"
+              className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer"
+            >
+              {isLoading ? "Creando cuenta..." : "Siguiente"}
+              {!isLoading && <ArrowRight className="w-4 h-4" />}
+            </Button>
+          )}
+
+          {currentStep === 4 && (
+            <Button
+              type="button"
+              onClick={() => router.push("/inicio")}
+              variant="primary"
+              className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer"
+            >
+              Ir al Dashboard
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          )}
         </div>
+
+        {/* Footer note matching Screenshot 4 */}
+        {currentStep === 4 && (
+          <p className="text-body-xs text-on-surface-variant/50 mt-6 text-left">
+            Sistema seguro verificado · Volta Platform
+          </p>
+        )}
+
+        {/* Link to login if on steps 1-3 */}
+        {currentStep < 4 && (
+          <div className="mt-8 text-left text-body-md text-on-surface-variant">
+            <span>¿Ya tienes una cuenta? </span>
+            <Link
+              href="/login"
+              className="font-semibold text-primary hover:underline transition-all"
+            >
+              Iniciar Sesión
+            </Link>
+          </div>
+        )}
       </div>
-
-      {/* Spacer */}
-      <div className="hidden sm:block flex-1" />
-
-      {/* Step slide-in animation */}
-      <style jsx global>{`
-        @keyframes stepSlideIn {
-          from {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }
+

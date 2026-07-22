@@ -26,7 +26,7 @@ function TrialBannerContent() {
 
   return (
     <div
-      className={`w-full px-4 py-2 text-body-sm font-medium border-b flex items-center justify-between gap-4 transition-colors z-20 shrink-0 select-none ${
+      className={`w-full py-2 text-body-sm font-medium border-b transition-colors z-20 shrink-0 select-none ${
         isExpired
           ? "bg-error/10 text-error border-error/20"
           : isUrgent
@@ -34,58 +34,60 @@ function TrialBannerContent() {
           : "bg-primary/10 text-primary border-primary/20"
       }`}
     >
-      {/* Icon + Message */}
-      <div className="flex items-center gap-2.5 min-w-0">
-        {isExpired ? (
-          <AlertTriangle className="w-4 h-4 text-error shrink-0" />
-        ) : isUrgent ? (
-          <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-        ) : (
-          <Sparkles className="w-4 h-4 text-primary shrink-0" />
-        )}
-
-        <div className="truncate">
+      <div className="max-w-container-max mx-auto px-gutter w-full flex items-center justify-between gap-4">
+        {/* Icon + Message */}
+        <div className="flex items-center gap-2.5 min-w-0">
           {isExpired ? (
-            <span>
-              <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Base 18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
-            </span>
+            <AlertTriangle className="w-4 h-4 text-error shrink-0" />
           ) : isUrgent ? (
-            <span>
-              <strong>¡Últimos días de prueba!</strong> Te quedan{" "}
-              <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong> de prueba gratuita en Plan Pro (25€/mes).
-            </span>
+            <Clock className="w-4 h-4 text-amber-600 shrink-0" />
           ) : (
-            <span>
-              Estás disfrutando de <strong>10 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
-              <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong>.
-            </span>
+            <Sparkles className="w-4 h-4 text-primary shrink-0" />
           )}
-        </div>
-      </div>
 
-      {/* Action Button & Dismiss */}
-      <div className="flex items-center gap-2 shrink-0">
-        <Link href="/ajustes">
+          <div className="truncate">
+            {isExpired ? (
+              <span>
+                <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Base 18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
+              </span>
+            ) : isUrgent ? (
+              <span>
+                <strong>¡Últimos días de prueba!</strong> Te quedan{" "}
+                <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong> de prueba gratuita en Plan Pro (25€/mes).
+              </span>
+            ) : (
+              <span>
+                Estás disfrutando de <strong>10 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
+                <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong>.
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Action Button & Dismiss */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Link href="/ajustes">
+            <button
+              className={`py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
+                isExpired
+                  ? "bg-error text-white hover:bg-error/90"
+                  : isUrgent
+                  ? "border border-amber-600/40 text-amber-900 hover:bg-amber-500/10"
+                  : "bg-primary text-white hover:bg-primary/90"
+              }`}
+            >
+              <span>Seleccionar Plan</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </Link>
           <button
-            className={`py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
-              isExpired
-                ? "bg-error text-white hover:bg-error/90"
-                : isUrgent
-                ? "border border-amber-600/40 text-amber-900 hover:bg-amber-500/10"
-                : "bg-primary text-white hover:bg-primary/90"
-            }`}
+            onClick={() => setIsVisible(false)}
+            className="p-1 rounded-md opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Cerrar aviso"
           >
-            <span>Seleccionar Plan</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5" />
           </button>
-        </Link>
-        <button
-          onClick={() => setIsVisible(false)}
-          className="p-1 rounded-md opacity-60 hover:opacity-100 transition-opacity"
-          aria-label="Cerrar aviso"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
+        </div>
       </div>
     </div>
   );

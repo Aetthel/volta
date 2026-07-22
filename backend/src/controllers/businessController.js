@@ -29,7 +29,7 @@ export const getBusiness = async (req, res) => {
 
 export const updateBusiness = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address, logoUrl, coverUrl, description, ownerName, themeColor, fontSizeLevel, borderRadiusLevel } = req.body;
+  const { name, email, phone, address, logoUrl, coverUrl, description, themeColor, fontSizeLevel, borderRadiusLevel } = req.body;
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
@@ -44,7 +44,6 @@ export const updateBusiness = async (req, res) => {
     logoUrl,
     coverUrl,
     description,
-    ownerName,
     themeColor,
     fontSizeLevel,
     borderRadiusLevel

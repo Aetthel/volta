@@ -13,8 +13,13 @@ const inter = Inter({
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: 'Volta - Gestión de Salones',
-  description: 'Gestión clínica para salones de belleza de alto rendimiento.',
+  title: 'Volta - Plataforma Profesional de Gestión',
+  description: 'Gestión profesional para peluquerías, clínicas, centros de estética, gimnasios y negocios de servicios.',
+  icons: {
+    icon: '/face.svg',
+    shortcut: '/face.svg',
+    apple: '/face.svg',
+  },
 };
 
 export default async function RootLayout({
