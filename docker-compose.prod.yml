@@ -12,7 +12,7 @@ services:
       - BACKEND_JWT_SECRET=${BACKEND_JWT_SECRET}
       - LOPD_HMAC_SECRET=${LOPD_HMAC_SECRET}
       - NODE_ENV=production
-    command: sh -c "cd /app/backend && npx prisma migrate deploy && pnpm --filter backend start"
+    command: sh -c "cd /app/backend && (npx prisma migrate deploy || true) && pnpm --filter backend start"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
       interval: 10s
