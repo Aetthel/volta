@@ -15,7 +15,7 @@ export const getServices = async (req, res) => {
 };
 
 export const createService = async (req, res) => {
-  const { businessId, name, description, duration, price } = req.body;
+  const { businessId, name, description, duration, price, capacity } = req.body;
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
@@ -32,7 +32,8 @@ export const createService = async (req, res) => {
     name,
     description,
     duration,
-    price
+    price,
+    capacity: capacity !== undefined ? parseInt(capacity, 10) : 1
   });
 
   return ApiResponse.created(res, service);
@@ -40,7 +41,7 @@ export const createService = async (req, res) => {
 
 export const updateService = async (req, res) => {
   const { id } = req.params;
-  const { name, description, duration, price, isActive } = req.body;
+  const { name, description, duration, price, capacity, isActive } = req.body;
 
   const service = await catalogService.getServiceById(id);
   if (!service) {
@@ -52,13 +53,12 @@ export const updateService = async (req, res) => {
     return res.status(403).json({ error: 'Acceso denegado a este servicio' });
   }
 
-  const updated = await catalogService.updateService(id, {
-    name,
-    description,
-    duration,
-    price,
-    isActive
-  });
+  const updatedData = { name, description, duration, price, isActive };
+  if (capacity !== undefined) {
+    updatedData.capacity = parseInt(capacity, 10);
+  }
+
+  const updated = await catalogService.updateService(id, updatedData);
 
   return ApiResponse.success(res, updated);
 };

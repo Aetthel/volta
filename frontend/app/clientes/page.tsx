@@ -25,6 +25,7 @@ import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import TrialBanner from "@/components/TrialBanner";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
@@ -416,6 +417,7 @@ export default function ClientesPage() {
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         {/* Content Canvas */}
+        <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
           <PageHeader
             title="Gestión de Clientes"

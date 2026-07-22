@@ -13,7 +13,6 @@
     "dev": "nodemon src/index.js",
     "build": "pnpm prisma:generate",
     "start": "node src/index.js",
-    "seed": "node scripts/seed.js",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "lint": "echo 'No linting configured for backend'",

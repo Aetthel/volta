@@ -19,6 +19,7 @@ import adminRouter from './routes/admin.js';
 import usersRouter from './routes/users.js';
 import demoRouter from './routes/demo.js';
 import alertsRouter from './routes/alerts.js';
+import publicBookingRouter from './routes/publicBooking.js';
 
 // Global Error Handler Middleware
 import { errorHandler } from './middleware/index.js';
@@ -120,6 +121,7 @@ app.use('/api/services', globalLimiter, servicesRouter);
 app.use('/api/admin', globalLimiter, adminRouter);
 app.use('/api/users', globalLimiter, usersRouter);
 app.use('/api/alerts', globalLimiter, alertsRouter);
+app.use('/api/public/booking', publicLimiter, publicBookingRouter);
 
 app.use(errorHandler);
 

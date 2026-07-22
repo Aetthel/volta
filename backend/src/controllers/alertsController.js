@@ -15,8 +15,8 @@ export const getAlerts = async (req, res) => {
       include: { business: true }
     });
 
-    if (user?.business?.isDemo && user?.business?.demoExpiresAt) {
-      const expiresDate = new Date(user.business.demoExpiresAt);
+    if (user?.business?.subscriptionStatus === 'TRIALING' && user?.business?.trialExpiresAt) {
+      const expiresDate = new Date(user.business.trialExpiresAt);
       const diffMs = expiresDate.getTime() - Date.now();
       const daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 

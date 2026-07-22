@@ -17,12 +17,13 @@ interface ServiceToEdit {
   price: number;
   duration: number;
   description?: string;
+  capacity?: number;
 }
 
 interface AddServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (serviceData: { id?: string; name: string; price: number; duration: number; description?: string }) => void;
+  onSave: (serviceData: { id?: string; name: string; price: number; duration: number; description?: string; capacity?: number }) => void;
   serviceToEdit?: ServiceToEdit | null;
 }
 
@@ -30,6 +31,7 @@ const EMPTY_FORM = {
   name: "",
   price: "",
   duration: "45",
+  capacity: "1",
   description: "",
 };
 
@@ -49,6 +51,7 @@ export default function AddServiceModal({
         name: serviceToEdit.name ?? "",
         price: String(serviceToEdit.price) ?? "",
         duration: String(serviceToEdit.duration) ?? "45",
+        capacity: String(serviceToEdit.capacity ?? 1),
         description: serviceToEdit.description ?? "",
       });
     } else {
@@ -74,6 +77,7 @@ export default function AddServiceModal({
       name: formData.name,
       price: parseFloat(formData.price),
       duration: parseInt(formData.duration, 10),
+      capacity: parseInt(formData.capacity, 10) || 1,
       description: formData.description,
     });
     setFormData(EMPTY_FORM);
@@ -127,12 +131,12 @@ export default function AddServiceModal({
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               {/* Duration (minutes) */}
               <Field>
                 <FloatingInput
                   id="duration"
-                  label="Duración (minutos)"
+                  label="Duración (min)"
                   type="number"
                   min="1"
                   required
@@ -146,13 +150,27 @@ export default function AddServiceModal({
               <Field>
                 <FloatingInput
                   id="price"
-                  label="Precio"
+                  label="Precio (€)"
                   type="number"
                   step="0.01"
                   min="0"
                   required
                   icon={EuroIcon}
                   value={formData.price}
+                  onChange={handleChange}
+                />
+              </Field>
+
+              {/* Capacity */}
+              <Field>
+                <FloatingInput
+                  id="capacity"
+                  label="Aforo (Máx.)"
+                  type="number"
+                  min="1"
+                  required
+                  icon={Briefcase}
+                  value={formData.capacity}
                   onChange={handleChange}
                 />
               </Field>

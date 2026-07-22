@@ -3,7 +3,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import Header from "./Header";
-import TrialBanner from "./TrialBanner";
 
 export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -15,7 +14,6 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
   ({ title, description, actions, className, ...props }, ref) => {
     return (
       <div className="flex flex-col gap-4 w-full">
-        <TrialBanner />
         <section
           ref={ref}
           className={cn(

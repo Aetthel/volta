@@ -120,12 +120,12 @@ export default function RootPage() {
                 size="md"
                 className="text-primary hover:bg-primary/5 hover:text-primary"
               >
-                Login
+                Iniciar Sesión
               </Button>
             </Link>
             <Link href="/register">
               <Button variant="primary" size="md">
-                Get Started
+                Comenzar
               </Button>
             </Link>
           </div>
@@ -143,13 +143,13 @@ export default function RootPage() {
             <div className="flex flex-col items-start text-left z-10">
               <Badge variant="secondary" className="px-3 py-1 text-label-md font-semibold mb-6 border border-secondary/20 gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-primary" />
-                Estándar Clínico en Belleza
+                Gestión Profesional para tu Negocio
               </Badge>
               <h1 className="font-display text-display-lg md:text-[52px] lg:text-[56px] text-on-surface leading-tight font-bold mb-6">
-                Gestiona tu salón con <span className="text-primary italic font-medium">elegancia clínica</span>
+                Gestiona tu negocio con <span className="text-primary italic font-medium">precisión profesional</span>
               </h1>
               <p className="text-body-lg text-on-surface-variant max-w-lg mb-8 leading-relaxed">
-                La plataforma todo en uno para peluquerías y centros de estética que buscan profesionalidad, eficiencia y una experiencia de cliente superior.
+                La plataforma todo en uno para peluquerías, clínicas, centros de estética, gimnasios, consultorías y cualquier negocio de servicios que busca profesionalidad, eficiencia y una experiencia de cliente superior.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <Link href="/register" className="w-full sm:w-auto">
@@ -212,8 +212,8 @@ export default function RootPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">Aceptado</span>
-                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Coloración</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">Confirmada</span>
+                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Consulta</span>
                     </div>
                   </div>
 
@@ -227,8 +227,8 @@ export default function RootPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">Aceptado</span>
-                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Corte</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">Confirmada</span>
+                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Sesión</span>
                     </div>
                   </div>
 
@@ -243,7 +243,7 @@ export default function RootPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">Pendiente</span>
-                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Manicura</span>
+                      <span className="text-[10px] text-on-surface-variant hidden sm:inline">Revisión</span>
                     </div>
                   </div>
                 </div>
@@ -257,24 +257,24 @@ export default function RootPage() {
         <section className="py-12 bg-surface-container-low border-b border-outline-variant/20">
           <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24 xl:px-32 text-center">
             <p className="text-center text-label-md font-semibold text-on-surface-variant uppercase tracking-widest mb-8">
-              Con la confianza de salones de élite
+              Con la confianza de negocios de todos los sectores
             </p>
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 text-title-md font-bold text-on-surface-variant">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-primary/40"></span>
-                L'Elegance
-              </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-primary/40"></span>
                 Studio 54
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-primary/40"></span>
-                Nova Esthetics
+                Clínica Serena
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-primary/40"></span>
-                DermaClinic
+                FitPro Academy
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-primary/40"></span>
+                DentalCare Plus
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full bg-primary/40"></span>
@@ -312,7 +312,7 @@ export default function RootPage() {
                       {/* Appointment Card */}
                       <div className="absolute left-11 right-4 top-1 bottom-1 bg-primary/10 border-l-4 border-primary rounded-r p-2 flex flex-col justify-center">
                         <div className="text-[11px] font-bold text-primary leading-tight">Marco Polo</div>
-                        <div className="text-[9px] text-primary/80 mt-0.5">Corte Caballero • 09:00 - 09:45</div>
+                        <div className="text-[9px] text-primary/80 mt-0.5">Consulta inicial • 09:00 - 09:45</div>
                       </div>
                     </div>
 
@@ -323,7 +323,7 @@ export default function RootPage() {
                       {/* Appointment Card */}
                       <div className="absolute left-11 right-4 top-1 bottom-1 bg-secondary-container/20 border-l-4 border-secondary rounded-r p-2 flex flex-col justify-center z-10 shadow-sm">
                         <div className="text-[11px] font-bold text-secondary leading-tight">Ana García</div>
-                        <div className="text-[9px] text-secondary/80 mt-0.5">Coloración Premium • 10:00 - 11:30</div>
+                        <div className="text-[9px] text-secondary/80 mt-0.5">Sesión completa • 10:00 - 11:30</div>
                       </div>
                     </div>
 
@@ -334,7 +334,7 @@ export default function RootPage() {
                       {/* Appointment Card */}
                       <div className="absolute left-11 right-4 top-1 bottom-1 bg-amber-500/10 border-l-4 border-amber-500 rounded-r p-2 flex flex-col justify-center">
                         <div className="text-[11px] font-bold text-amber-700 leading-tight">Sofía Martín</div>
-                        <div className="text-[9px] text-amber-700/80 mt-0.5">Manicura Completa • 11:00 - 11:45</div>
+                        <div className="text-[9px] text-amber-700/80 mt-0.5">Revisión mensual • 11:00 - 11:45</div>
                       </div>
                     </div>
                   </div>
@@ -347,10 +347,10 @@ export default function RootPage() {
                   Precisión
                 </Badge>
                 <h2 className="font-display text-headline-lg md:text-[32px] text-on-surface font-bold mb-6">
-                  Agendamiento de Precisión Quirúrgica
+                  Agendamiento de Precisión Total
                 </h2>
                 <p className="text-body-lg text-on-surface-variant mb-8 leading-relaxed">
-                  Optimiza cada minuto de tu jornada. Nuestro motor de reservas inteligente previene solapamientos, gestiona tiempos de espera para coloración y envía recordatorios automáticos por WhatsApp con confirmación bidireccional.
+                  Optimiza cada minuto de tu jornada. Nuestro motor de reservas inteligente previene solapamientos, gestiona tiempos entre citas y envía recordatorios automáticos por WhatsApp con confirmación bidireccional.
                 </p>
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
@@ -382,13 +382,13 @@ export default function RootPage() {
               {/* Description */}
               <div>
                 <Badge variant="secondary" className="px-3 py-1 text-label-md font-semibold mb-6">
-                  Insights
+                  Analítica
                 </Badge>
                 <h2 className="font-display text-headline-lg md:text-[32px] text-on-surface font-bold mb-6">
-                  Analítica Clínica para tu Crecimiento
+                  Datos en Tiempo Real para Crecer
                 </h2>
                 <p className="text-body-lg text-on-surface-variant mb-8 leading-relaxed">
-                  Deja de adivinar. Obtén visibilidad total sobre la salud financiera de tu salón, retención de clientes, rendimiento del equipo y rentabilidad del inventario en tiempo real con dashboards precisos.
+                  Deja de adivinar. Obtén visibilidad total sobre la salud financiera de tu negocio, retención de clientes, rendimiento del equipo y rentabilidad en tiempo real con paneles de control precisos.
                 </p>
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
@@ -553,7 +553,7 @@ export default function RootPage() {
                     25€<span className="text-title-lg font-normal text-on-primary/80">/mes</span>
                   </h4>
                   <p className="text-body-md text-on-primary/95">
-                    Para salones que quieren crecer.
+                    Para negocios que quieren crecer.
                   </p>
                 </div>
 
@@ -588,7 +588,7 @@ export default function RootPage() {
                 </div>
 
                 <div className="mt-8 space-y-3">
-                  <Link href="/login">
+                  <Link href="/register">
                     <Button variant="secondary" size="lg" className="w-full bg-white text-primary hover:bg-surface-container-lowest">
                       Probar 14 días gratis
                     </Button>
@@ -607,7 +607,7 @@ export default function RootPage() {
                     A medida
                   </h4>
                   <p className="text-body-md text-on-surface-variant italic">
-                    Para múltiples sedes y franquicias.
+                    Para múltiples sedes, franquicias y cadenas.
                   </p>
                 </div>
 
@@ -667,7 +667,7 @@ export default function RootPage() {
                 {/* Testimonial Card 1 */}
                 <Card className="bg-white p-6 flex flex-col gap-6 border-outline-variant/30">
                   <p className="text-body-lg text-on-surface-variant italic leading-relaxed">
-                    "Volta ha transformado la forma en que gestiono mis citas. La elegancia de la interfaz proyecta la profesionalidad que mis clientes esperan."
+                    "Volta ha transformado la forma en que gestiono mi negocio. La interfaz proyecta la profesionalidad que mis clientes esperan y me ahorra horas cada semana."
                   </p>
                   <div className="flex items-center gap-4">
                     {/* Minimalist White Profile Placeholder */}
@@ -675,8 +675,8 @@ export default function RootPage() {
                       <User className="w-5 h-5 text-outline" />
                     </div>
                     <div>
-                      <h4 className="text-title-md font-bold text-on-surface">Maria García</h4>
-                      <p className="text-label-md text-primary font-semibold">Dueña de Volta &amp; Spa</p>
+                      <h4 className="text-title-md font-bold text-on-surface">María García</h4>
+                      <p className="text-label-md text-primary font-semibold">Directora de Centro de Fisioterapia</p>
                     </div>
                   </div>
                 </Card>
@@ -684,7 +684,7 @@ export default function RootPage() {
                 {/* Testimonial Card 2 */}
                 <Card className="bg-white p-6 flex flex-col gap-6 border-outline-variant/30 lg:ml-8">
                   <p className="text-body-lg text-on-surface-variant italic leading-relaxed">
-                    "La analítica avanzada me permitió reducir el stock parado en un 20% en solo tres meses. Es la herramienta definitiva."
+                    "La analítica avanzada me permitió optimizar mis recursos un 20% en solo tres meses. Es la herramienta definitiva para cualquier negocio de servicios."
                   </p>
                   <div className="flex items-center gap-4">
                     {/* Minimalist White Profile Placeholder */}
@@ -693,7 +693,7 @@ export default function RootPage() {
                     </div>
                     <div>
                       <h4 className="text-title-md font-bold text-on-surface">Javier Ruíz</h4>
-                      <p className="text-label-md text-primary font-semibold">Director de Estética Avanzada</p>
+                      <p className="text-label-md text-primary font-semibold">Director de Clínica Dental</p>
                     </div>
                   </div>
                 </Card>
@@ -714,7 +714,7 @@ export default function RootPage() {
                     Calificación de 4.9/5 Estrellas
                   </h3>
                   <p className="text-body-md text-on-surface-variant text-center max-w-sm">
-                    Reconocido como el software de gestión para centros de estética con mejor satisfacción de usuario de este año.
+                    Reconocido como el software de gestión de citas y negocios con mejor satisfacción de usuario de este año.
                   </p>
                 </div>
               </div>
@@ -748,7 +748,11 @@ export default function RootPage() {
                 },
                 {
                   q: "¿Los recordatorios por WhatsApp tienen coste adicional?",
-                  a: "Los planes Pro y Enterprise incluyen una cuota generosa de mensajes mensuales que cubren las necesidades de más del 95% de los salones. Si superas el límite, el coste por mensaje extra es marginal y transparente."
+                  a: "Los planes Pro y A Medida incluyen una cuota generosa de mensajes mensuales que cubren las necesidades de más del 95% de los negocios. Si superas el límite, el coste por mensaje extra es marginal y transparente."
+                },
+                {
+                  q: "¿Volta es solo para peluquerías o centros de estética?",
+                  a: "No, Volta está diseñado para cualquier negocio basado en citas y servicios: peluquerías, clínicas dentales, fisioterapeutas, entrenadores personales, consultoras y mucho más. La plataforma se adapta a tu sector."
                 }
               ].map((item, index) => {
                 const isOpen = activeFaq === index;
@@ -791,13 +795,13 @@ export default function RootPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
             
             <h2 className="font-display text-display-lg md:text-[44px] text-white mb-6 relative z-10 font-bold leading-tight">
-              ¿Listo para elevar tu estándar?
+              ¿Listo para profesionalizar tu negocio?
             </h2>
             <p className="text-body-lg text-white/90 mb-12 relative z-10 max-w-2xl mx-auto">
-              Únete a los más de 1,500 salones que ya han profesionalizado su gestión con Volta. Sin tarjeta de crédito requerida para empezar.
+              Únete a los más de 1.500 negocios que ya han profesionalizado su gestión con Volta. Sin tarjeta de crédito requerida para empezar.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
-              <Link href="/login">
+              <Link href="/register">
                 <Button variant="secondary" size="lg" className="w-full sm:w-auto bg-white text-primary hover:bg-surface-container-lowest">
                   Comenzar Prueba Gratuita
                 </Button>
@@ -835,7 +839,7 @@ export default function RootPage() {
                 Volta
               </span>
               <p className="text-body-md text-on-surface-variant mb-6 max-w-sm leading-relaxed">
-                El estándar clínico para la gestión integral de salones de belleza, peluquerías y centros de estética avanzados.
+                La plataforma profesional para la gestión integral de negocios de servicios: peluquerías, clínicas, gimnasios, consultorías y más.
               </p>
               <div className="flex gap-4">
                 <a href="#" className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-white transition-colors" aria-label="Social Link">

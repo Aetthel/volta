@@ -34,7 +34,7 @@ export default function LoginPage() {
         setError("Correo electrónico o contraseña incorrectos");
         setIsLoading(false);
       } else {
-        router.push(result?.url || "/inicio");
+        window.location.href = "/inicio";
       }
     } catch (err) {
       setError("Error de conexión al servidor de autenticación");

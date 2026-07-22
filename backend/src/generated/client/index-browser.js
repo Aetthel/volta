@@ -129,7 +129,6 @@ exports.Prisma.BusinessScalarFieldEnum = {
   logoUrl: 'logoUrl',
   coverUrl: 'coverUrl',
   description: 'description',
-  ownerName: 'ownerName',
   welcomeMessage: 'welcomeMessage',
   reminderMessage: 'reminderMessage',
   whatsappStatus: 'whatsappStatus',
@@ -137,10 +136,12 @@ exports.Prisma.BusinessScalarFieldEnum = {
   themeColor: 'themeColor',
   fontSizeLevel: 'fontSizeLevel',
   borderRadiusLevel: 'borderRadiusLevel',
-  isDemo: 'isDemo',
-  demoExpiresAt: 'demoExpiresAt',
   businessType: 'businessType',
-  subscriptionPlan: 'subscriptionPlan'
+  enablePublicBooking: 'enablePublicBooking',
+  subscriptionPlan: 'subscriptionPlan',
+  subscriptionStatus: 'subscriptionStatus',
+  trialExpiresAt: 'trialExpiresAt',
+  sandboxExpiresAt: 'sandboxExpiresAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -197,6 +198,7 @@ exports.Prisma.ServiceScalarFieldEnum = {
   description: 'description',
   duration: 'duration',
   price: 'price',
+  capacity: 'capacity',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -231,6 +233,20 @@ exports.WhatsAppStatus = exports.$Enums.WhatsAppStatus = {
   CONNECTED: 'CONNECTED',
   DISCONNECTED: 'DISCONNECTED',
   WAITING_QR: 'WAITING_QR'
+};
+
+exports.SubscriptionPlan = exports.$Enums.SubscriptionPlan = {
+  BASIC: 'BASIC',
+  PRO: 'PRO',
+  ENTERPRISE: 'ENTERPRISE'
+};
+
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  DEMO_SANDBOX: 'DEMO_SANDBOX',
+  TRIALING: 'TRIALING',
+  ACTIVE: 'ACTIVE',
+  EXPIRED: 'EXPIRED',
+  CANCELLED: 'CANCELLED'
 };
 
 exports.UserRole = exports.$Enums.UserRole = {

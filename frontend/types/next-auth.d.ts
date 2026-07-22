@@ -6,8 +6,9 @@ declare module "next-auth" {
       id?: string;
       role?: string;
       businessId?: string | null;
-      isDemo?: boolean;
-      demoExpiresAt?: string | null;
+      subscriptionStatus?: string;
+      trialExpiresAt?: string | null;
+      sandboxExpiresAt?: string | null;
       themeColor?: string;
       fontSizeLevel?: string;
       borderRadiusLevel?: string;
@@ -18,8 +19,9 @@ declare module "next-auth" {
     id?: string;
     role?: string;
     businessId?: string | null;
-    isDemo?: boolean;
-    demoExpiresAt?: string | null;
+    subscriptionStatus?: string;
+    trialExpiresAt?: string | null;
+    sandboxExpiresAt?: string | null;
     themeColor?: string;
     fontSizeLevel?: string;
     borderRadiusLevel?: string;
@@ -31,8 +33,9 @@ declare module "next-auth/jwt" {
     id?: string;
     role?: string;
     businessId?: string | null;
-    isDemo?: boolean;
-    demoExpiresAt?: string | null;
+    subscriptionStatus?: string;
+    trialExpiresAt?: string | null;
+    sandboxExpiresAt?: string | null;
     themeColor?: string;
     fontSizeLevel?: string;
     borderRadiusLevel?: string;

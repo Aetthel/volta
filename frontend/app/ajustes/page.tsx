@@ -9,6 +9,7 @@ import type { BusinessProfile, ToastState } from "@/types/settings";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import TrialBanner from "@/components/TrialBanner";
 import Toast from "@/components/settings/Toast";
 import ProfileSection from "@/components/settings/ProfileSection";
 import MessagesSection from "@/components/settings/MessagesSection";
@@ -64,24 +65,31 @@ export default function AjustesPage() {
       .then((data) => {
         if (data && !data.error) {
           const savedWorkerPhoto = typeof window !== "undefined" ? localStorage.getItem("stylist_worker_photo") || "" : "";
+          const localColor = typeof window !== "undefined" ? localStorage.getItem("volta_theme_color") : null;
+          const localFont = typeof window !== "undefined" ? localStorage.getItem("volta_font_size") : null;
+          const localRadius = typeof window !== "undefined" ? localStorage.getItem("volta_border_radius") : null;
+
+          const activeColor = getThemeColor(localColor || data.themeColor);
+          const activeFont = localFont || data.fontSizeLevel || "MEDIUM";
+          const activeRadius = localRadius || data.borderRadiusLevel || "MEDIUM";
+
           setProfile((prev) => ({
             ...prev,
             name: data.name, email: data.email, phone: data.phone,
             address: data.address || prev.address, logoUrl: data.logoUrl || prev.logoUrl,
             coverUrl: data.coverUrl || prev.coverUrl, description: data.description || prev.description,
-            ownerName: data.ownerName || prev.ownerName,
             workerPhoto: savedWorkerPhoto || prev.workerPhoto,
-            themeColor: getThemeColor(data.themeColor),
-            fontSizeLevel: data.fontSizeLevel || "MEDIUM",
-            borderRadiusLevel: data.borderRadiusLevel || "MEDIUM",
+            themeColor: activeColor,
+            fontSizeLevel: activeFont,
+            borderRadiusLevel: activeRadius,
           }));
 
           // Apply theme CSS variables
           const root = document.documentElement;
-          const palette = COLOR_PALETTES[getThemeColor(data.themeColor)] || COLOR_PALETTES.CLINICAL_ELEGANCE;
+          const palette = COLOR_PALETTES[activeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
           applyThemeColors(root, palette);
-          root.style.setProperty("--font-scale", FONT_SCALES[(data.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale);
-          root.style.setProperty("--radius-scale", RADIUS_SCALES[(data.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES]?.scale || RADIUS_SCALES.MEDIUM.scale);
+          root.style.setProperty("--font-scale", FONT_SCALES[activeFont as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale);
+          root.style.setProperty("--radius-scale", RADIUS_SCALES[activeRadius as keyof typeof RADIUS_SCALES]?.scale || RADIUS_SCALES.MEDIUM.scale);
         }
       })
       .catch(() => {});
@@ -118,6 +126,7 @@ export default function AjustesPage() {
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       <Sidebar onNewAppointmentClick={() => {}} />
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
+        <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           <Toast toast={toast} />
 
@@ -202,6 +211,7 @@ function AdminView({ toast, setToast }: { toast: ToastState; setToast: (t: Toast
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       <Sidebar onNewAppointmentClick={() => {}} />
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
+        <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
           <Toast toast={toast} />
           <PageHeader title="Ajustes de Administrador" description="Gestiona tus credenciales de acceso y perfil de administrador." />

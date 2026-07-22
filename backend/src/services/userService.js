@@ -26,8 +26,15 @@ export const getUserById = async (id) => {
 };
 
 export const getUserByEmail = async (email) => {
-  return prisma.user.findUnique({
-    where: { email }
+  if (!email) return null;
+  const cleanEmail = email.trim().toLowerCase();
+  return prisma.user.findFirst({
+    where: {
+      email: {
+        equals: cleanEmail,
+        mode: 'insensitive'
+      }
+    }
   });
 };
 

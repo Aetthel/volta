@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   Store, Clock, Briefcase, Camera, Save, Loader2, Plus, Pencil, X,
-  Users, UserPlus, Edit2, Trash2, User,
+  Users, UserPlus, Edit2, Trash2, User, Globe, CreditCard, Sparkles, Copy, Check, ExternalLink
 } from "lucide-react";
 import type { BusinessProfile, BusinessHours, Service, Worker, ToastState } from "@/types/settings";
 import AddServiceModal from "@/components/AddServiceModal";
@@ -295,10 +295,10 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
         </Card>
       )}
 
-      {/* Operating Hours Card */}
-      <Card className="col-span-1 sm:col-span-1 lg:col-span-4 flex flex-col justify-between">
+      {/* Operating Hours Card - Placed next to Business Info in Row 1 */}
+      <Card className="col-span-1 sm:col-span-2 lg:col-span-4 flex flex-col justify-between">
         <div>
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-4 flex flex-row items-center justify-between">
             <CardTitle className="text-primary flex items-center gap-2"><Clock /><span>Horario de Apertura</span></CardTitle>
           </CardHeader>
           <CardContent>
@@ -311,7 +311,7 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
                 ))}
               </div>
             ) : !isEditingHours ? (
-              <div className="flex flex-col gap-2.5 sm:gap-4 font-medium text-body-md text-on-surface-variant">
+              <div className="flex flex-col gap-2.5 sm:gap-3.5 font-medium text-body-md text-on-surface-variant">
                 {hours.map((h) => (
                   <div key={h.dayOfWeek} className="flex items-center justify-between py-1 border-b border-outline-variant/65">
                     <span>{DAY_NAMES[h.dayOfWeek]}</span>
@@ -362,11 +362,158 @@ export default function BusinessSection({ profile, setProfile, businessId, setTo
           </CardContent>
         </div>
         {!isEditingHours && !loadingHours && (
-          <CardFooter className="pt-0">
-            <Button variant="outline" size="md" onClick={() => setIsEditingHours(true)}
-              className="w-full py-2 shadow-none font-medium">Modificar Horarios</Button>
+          <CardFooter className="pt-4 border-t border-outline-variant/35">
+            <Button variant="outline" size="sm" onClick={() => setIsEditingHours(true)}
+              className="w-full py-2 text-xs font-semibold">Modificar Horarios</Button>
           </CardFooter>
         )}
+      </Card>
+
+      {/* Row 2: Public Online Booking Dedicated Card Container */}
+      <Card className="col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col justify-between">
+        <div>
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardTitle className="text-primary flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
+              <span>Reserva Online Pública</span>
+            </CardTitle>
+            <Button
+              variant={profile.enablePublicBooking !== false ? "primary" : "outline"}
+              size="sm"
+              onClick={() => {
+                const newValue = profile.enablePublicBooking === false ? true : false;
+                setProfile(prev => ({ ...prev, enablePublicBooking: newValue }));
+                fetch(`/api/backend/business/${businessId}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ enablePublicBooking: newValue })
+                });
+                setToast({ show: true, text: newValue ? "Reservas públicas activadas" : "Reservas públicas desactivadas" });
+                setTimeout(() => setToast({ show: false, text: "" }), 3000);
+              }}
+              className="font-semibold text-xs px-3 py-1.5 rounded-xl active:scale-[0.98]"
+            >
+              {profile.enablePublicBooking !== false ? "Activado" : "Desactivado"}
+            </Button>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-body-sm text-on-surface-variant leading-relaxed">
+              Permite a tus clientes agendar sus citas de forma autónoma desde un enlace web público personalizado, sin necesidad de crear cuenta o introducir contraseña.
+            </p>
+            {profile.enablePublicBooking !== false ? (
+              <div className="flex flex-col gap-2 p-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl">
+                <span className="font-semibold text-xs text-primary uppercase tracking-wider">Tu Enlace de Reserva:</span>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs bg-surface-container px-3 py-2 rounded-xl truncate flex-1 font-mono text-on-surface border border-outline-variant/40">
+                    {typeof window !== "undefined" ? `${window.location.origin}/booking/${businessId}` : `/booking/${businessId}`}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const url = `${window.location.origin}/booking/${businessId}`;
+                      navigator.clipboard.writeText(url);
+                      setToast({ show: true, text: "¡Enlace copiado al portapapeles!" });
+                      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+                    }}
+                    className="text-xs text-primary font-semibold hover:bg-primary/10 rounded-xl p-2.5 shadow-none shrink-0 active:scale-95"
+                    title="Copiar enlace"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 bg-surface-container-low border border-outline-variant/40 rounded-xl text-body-xs text-on-surface-variant">
+                Las reservas públicas están desactivadas. Los clientes no podrán acceder a tu portal web hasta que lo reactives.
+              </div>
+            )}
+          </CardContent>
+        </div>
+
+        <CardFooter className="pt-4 border-t border-outline-variant/35 flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={profile.enablePublicBooking === false}
+            onClick={() => {
+              const url = `${window.location.origin}/booking/${businessId}`;
+              window.open(url, "_blank");
+            }}
+            className="text-xs font-semibold rounded-xl flex items-center gap-1.5 active:scale-[0.98]"
+          >
+            <span>Ver Página Web</span>
+            <ExternalLink className="w-3.5 h-3.5 text-primary" />
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {/* Row 2: Subscriptions & Plan Dedicated Card Container */}
+      <Card className="col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col justify-between">
+        <div>
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <CardTitle className="text-primary flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-primary" />
+              <span>Suscripción y Plan</span>
+            </CardTitle>
+
+            <span className="px-2.5 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-semibold flex items-center gap-1 border border-outline-variant/40">
+              <Sparkles className="w-3.5 h-3.5 text-primary" /> Plan PRO
+            </span>
+          </CardHeader>
+
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex items-center justify-between p-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl">
+              <div>
+                <span className="font-semibold text-body-md text-on-surface block">Plan Pro Anual</span>
+                <span className="text-body-xs text-on-surface-variant">25,00 € / mes · Facturación anual</span>
+              </div>
+              <span className="px-2.5 py-1 bg-primary/10 text-primary text-body-xs font-bold rounded-lg border border-primary/20">
+                Activo
+              </span>
+            </div>
+
+            <div className="text-body-xs text-on-surface-variant space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>Gestión ilimitada de citas y servicios con aforo</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>Integración oficial de WhatsApp y Avisos LOPD</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>Soporte prioritario y portal público personalizado</span>
+              </div>
+            </div>
+          </CardContent>
+        </div>
+
+        <CardFooter className="pt-4 border-t border-outline-variant/35 flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setToast({ show: true, text: "Gestión de facturación disponible próximamente" });
+              setTimeout(() => setToast({ show: false, text: "" }), 3000);
+            }}
+            className="text-xs font-semibold rounded-xl active:scale-[0.98]"
+          >
+            Ver Facturas
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              setToast({ show: true, text: "Cambio de plan disponible próximamente" });
+              setTimeout(() => setToast({ show: false, text: "" }), 3000);
+            }}
+            className="text-xs font-semibold rounded-xl active:scale-[0.98]"
+          >
+            Cambiar Plan
+          </Button>
+        </CardFooter>
       </Card>
 
       {/* Services Card */}

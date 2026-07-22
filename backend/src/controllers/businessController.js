@@ -29,26 +29,26 @@ export const getBusiness = async (req, res) => {
 
 export const updateBusiness = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address, logoUrl, coverUrl, description, ownerName, themeColor, fontSizeLevel, borderRadiusLevel } = req.body;
+  const { name, email, phone, address, logoUrl, coverUrl, description, themeColor, fontSizeLevel, borderRadiusLevel } = req.body;
 
   // Verify tenant isolation
   if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
     return res.status(403).json({ error: 'Acceso denegado a este negocio' });
   }
 
-  const updated = await businessService.updateBusiness(id, {
-    name,
-    email,
-    phone,
-    address,
-    logoUrl,
-    coverUrl,
-    description,
-    ownerName,
-    themeColor,
-    fontSizeLevel,
-    borderRadiusLevel
-  });
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (email !== undefined) updateData.email = email;
+  if (phone !== undefined) updateData.phone = phone;
+  if (address !== undefined) updateData.address = address;
+  if (logoUrl !== undefined) updateData.logoUrl = logoUrl;
+  if (coverUrl !== undefined) updateData.coverUrl = coverUrl;
+  if (description !== undefined) updateData.description = description;
+  if (themeColor !== undefined) updateData.themeColor = themeColor;
+  if (fontSizeLevel !== undefined) updateData.fontSizeLevel = fontSizeLevel;
+  if (borderRadiusLevel !== undefined) updateData.borderRadiusLevel = borderRadiusLevel;
+
+  const updated = await businessService.updateBusiness(id, updateData);
 
   return ApiResponse.success(res, updated);
 };

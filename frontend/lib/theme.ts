@@ -254,10 +254,14 @@ export function applyThemeColors(
   root: HTMLElement,
   palette: typeof COLOR_PALETTES[keyof typeof COLOR_PALETTES]
 ) {
+  const body = typeof document !== "undefined" ? document.body : null;
   Object.entries(palette).forEach(([key, val]) => {
     if (key === "name") return;
     const cssVarName = `--color-${key.replace(/([A-Z])/g, "-$1").toLowerCase()}`;
     root.style.setProperty(cssVarName, val as string);
+    if (body) {
+      body.style.setProperty(cssVarName, val as string);
+    }
   });
 }
 

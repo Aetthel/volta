@@ -7,32 +7,47 @@ datasource db {
   provider = "postgresql"
 }
 
+enum SubscriptionPlan {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  DEMO_SANDBOX
+  TRIALING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
 model Business {
-  id                String          @id @default(uuid())
-  name              String
-  phone             String // Business phone for WhatsApp linkage
-  email             String? // Contact email
-  address           String? // Commercial address
-  logoUrl           String? // Profile photo URL
-  coverUrl          String? // Business photo URL
-  description       String? // About you description
-  ownerName         String? // Owner / Professional name
-  welcomeMessage    String? // Custom welcome message template
-  reminderMessage   String? // Custom reminder message template
-  whatsappStatus    WhatsAppStatus  @default(DISCONNECTED)
-  qrCode            String? // Current QR code for pairing
-  themeColor        String          @default("CLINICAL_ELEGANCE")
-  fontSizeLevel     String          @default("MEDIUM")
-  borderRadiusLevel String          @default("MEDIUM")
-  isDemo            Boolean         @default(false)
-  demoExpiresAt     DateTime?
-  businessType      String? // e.g. Peluquería / Barbería, Estética, etc.
-  subscriptionPlan  String          @default("PRO") // "BASE" (18€/mes) or "PRO" (25€/mes)
-  appointments      Appointment[]
-  clients           Client[]
-  hours             BusinessHours[]
-  services          Service[]
-  users             User[]
+  id                  String             @id @default(uuid())
+  name                String
+  phone               String // Business phone for WhatsApp linkage
+  email               String? // Contact email
+  address             String? // Commercial address
+  logoUrl             String? // Profile photo URL
+  coverUrl            String? // Business photo URL
+  description         String? // About you description
+  welcomeMessage      String? // Custom welcome message template
+  reminderMessage     String? // Custom reminder message template
+  whatsappStatus      WhatsAppStatus     @default(DISCONNECTED)
+  qrCode              String? // Current QR code for pairing
+  themeColor          String             @default("CLINICAL_ELEGANCE")
+  fontSizeLevel       String             @default("MEDIUM")
+  borderRadiusLevel   String             @default("MEDIUM")
+  businessType        String? // e.g. Peluquería / Barbería, Estética, etc.
+  enablePublicBooking Boolean            @default(true)
+  subscriptionPlan    SubscriptionPlan   @default(PRO)
+  subscriptionStatus  SubscriptionStatus @default(TRIALING)
+  trialExpiresAt      DateTime?
+  sandboxExpiresAt    DateTime?
+  appointments        Appointment[]
+  clients             Client[]
+  hours               BusinessHours[]
+  services            Service[]
+  users               User[]
 }
 
 enum UserRole {
@@ -127,6 +142,7 @@ model Service {
   description  String?
   duration     Int // Duration in minutes
   price        Float // Price in Euros
+  capacity     Int           @default(1) // Max participants per session
   isActive     Boolean       @default(true)
   appointments Appointment[]
   createdAt    DateTime      @default(now())
