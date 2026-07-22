@@ -10,6 +10,7 @@ export default function ThemeInitializer() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const root = document.documentElement;
+    const body = document.body;
 
     const localColor = localStorage.getItem("volta_theme_color");
     const localFont = localStorage.getItem("volta_font_size");
@@ -26,10 +27,12 @@ export default function ThemeInitializer() {
     // Apply font-size scale
     const fontScale = FONT_SCALES[fontSizeLevel]?.scale || FONT_SCALES.MEDIUM.scale;
     root.style.setProperty("--font-scale", fontScale);
+    if (body) body.style.setProperty("--font-scale", fontScale);
 
     // Apply border-radius scale
     const radiusScale = RADIUS_SCALES[borderRadiusLevel]?.scale || RADIUS_SCALES.MEDIUM.scale;
     root.style.setProperty("--radius-scale", radiusScale);
+    if (body) body.style.setProperty("--radius-scale", radiusScale);
   }, [session?.user?.themeColor, session?.user?.fontSizeLevel, session?.user?.borderRadiusLevel]);
 
   return null;

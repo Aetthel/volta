@@ -20,6 +20,7 @@ export default function PersonalizationSection({ profile, setProfile, businessId
     setProfile((prev) => ({ ...prev, [key]: value }));
 
     const root = document.documentElement;
+    const body = document.body;
     if (key === 'themeColor') {
       localStorage.setItem("volta_theme_color", value);
       const palette = COLOR_PALETTES[value as keyof typeof COLOR_PALETTES];
@@ -27,11 +28,17 @@ export default function PersonalizationSection({ profile, setProfile, businessId
     } else if (key === 'fontSizeLevel') {
       localStorage.setItem("volta_font_size", value);
       const scale = FONT_SCALES[value as keyof typeof FONT_SCALES]?.scale;
-      if (scale) root.style.setProperty("--font-scale", scale);
+      if (scale) {
+        root.style.setProperty("--font-scale", scale);
+        if (body) body.style.setProperty("--font-scale", scale);
+      }
     } else if (key === 'borderRadiusLevel') {
       localStorage.setItem("volta_border_radius", value);
       const scale = RADIUS_SCALES[value as keyof typeof RADIUS_SCALES]?.scale;
-      if (scale) root.style.setProperty("--radius-scale", scale);
+      if (scale) {
+        root.style.setProperty("--radius-scale", scale);
+        if (body) body.style.setProperty("--radius-scale", scale);
+      }
     }
 
     fetch(`/api/backend/business/${businessId}`, {
