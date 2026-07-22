@@ -103,3 +103,8 @@ export const createSandboxDemo = async (req, res) => {
     return res.status(500).json({ error: 'No se pudo generar la demo efímera.' });
   }
 };
+
+export const createDemo = createSandboxDemo;
+export const deleteDemo = async (req, res) => {
+  return res.status(200).json({ success: true, message: 'Demo finalizada' });
+};
