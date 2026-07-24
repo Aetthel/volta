@@ -20,26 +20,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             where: {
               email: {
                 equals: cleanEmail,
-                mode: "insensitive"
-              }
+                mode: "insensitive",
+              },
             },
-            include: { business: true }
+            include: { business: true },
           });
 
           if (!user) {
-            if (process.env.NODE_ENV !== 'production') {
+            if (process.env.NODE_ENV !== "production") {
               console.log("[NextAuth] User not found");
             }
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(
-            cleanPassword,
-            user.password
-          );
+          const isPasswordValid = await bcrypt.compare(cleanPassword, user.password);
 
           if (!isPasswordValid) {
-            if (process.env.NODE_ENV !== 'production') {
+            if (process.env.NODE_ENV !== "production") {
               console.log("[NextAuth] Invalid password");
             }
             return null;
@@ -52,8 +49,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: user.role,
             businessId: user.businessId,
             subscriptionStatus: user.business?.subscriptionStatus || "TRIALING",
-            trialExpiresAt: user.business?.trialExpiresAt ? user.business.trialExpiresAt.toISOString() : null,
-            sandboxExpiresAt: user.business?.sandboxExpiresAt ? user.business.sandboxExpiresAt.toISOString() : null,
+            trialExpiresAt: user.business?.trialExpiresAt
+              ? user.business.trialExpiresAt.toISOString()
+              : null,
+            sandboxExpiresAt: user.business?.sandboxExpiresAt
+              ? user.business.sandboxExpiresAt.toISOString()
+              : null,
             businessType: user.business?.businessType || null,
             subscriptionPlan: user.business?.subscriptionPlan || "PRO",
             themeColor: user.business?.themeColor || "TEAL",

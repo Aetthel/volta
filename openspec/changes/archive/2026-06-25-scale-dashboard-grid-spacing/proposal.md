@@ -11,7 +11,7 @@ Estandarizar el espaciado (gaps y márgenes) del dashboard utilizando los tokens
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

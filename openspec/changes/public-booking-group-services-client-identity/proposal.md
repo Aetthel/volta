@@ -13,10 +13,12 @@ Volta needs to support public online booking for clients without forcing passwor
 ## Capabilities
 
 ### New Capabilities
+
 - `public-booking`: Public booking page and API allowing unauthenticated clients to select services and book slots.
 - `group-appointments`: Capacity management for group classes and multi-participant appointments.
 
 ### Modified Capabilities
+
 - `business-subscription-and-demo-tiers`: Update feature limits for group classes and public booking toggles.
 
 ## Impact

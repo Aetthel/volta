@@ -14,7 +14,7 @@ El código QR en el dashboard (`/inicio`) aparece como una imagen rota porque se
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

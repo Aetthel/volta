@@ -44,7 +44,14 @@ interface NewAppointmentModalProps {
   }) => void;
   initialDate?: string;
   initialTime?: string;
-  triggerRect?: { left: number; top: number; right: number; bottom: number; width: number; height: number; } | null;
+  triggerRect?: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null;
 }
 
 const normalizeString = (str: string) => {
@@ -108,7 +115,12 @@ export default function NewAppointmentModal({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("input") || (e.target as HTMLElement).closest("select")) return;
+    if (
+      (e.target as HTMLElement).closest("button") ||
+      (e.target as HTMLElement).closest("input") ||
+      (e.target as HTMLElement).closest("select")
+    )
+      return;
 
     e.preventDefault();
     setIsDragging(true);
@@ -149,7 +161,7 @@ export default function NewAppointmentModal({
       if (triggerRect && window.innerWidth >= 768) {
         const modalWidth = 448;
         const modalHeight = 550;
-        
+
         let targetX = triggerRect.right + 12;
         if (targetX + modalWidth > window.innerWidth) {
           targetX = triggerRect.left - modalWidth - 12;
@@ -160,7 +172,7 @@ export default function NewAppointmentModal({
         if (targetY + modalHeight > window.innerHeight) {
           targetY = Math.max(12, window.innerHeight - modalHeight - 12);
         }
-        
+
         setPosition({ x: targetX, y: targetY });
       } else {
         // Center modal on screen
@@ -234,9 +246,7 @@ export default function NewAppointmentModal({
   if (!isOpen) return null;
   if (!mounted) return null;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
@@ -383,10 +393,7 @@ export default function NewAppointmentModal({
   return createPortal(
     <div className="fixed inset-0 z-[100]">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/5 transition-opacity"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/5 transition-opacity" onClick={onClose} />
 
       {/* Modal Content Card */}
       <div
@@ -396,7 +403,7 @@ export default function NewAppointmentModal({
           top: `${position.y}px`,
           width: "448px",
           maxWidth: "calc(100vw - 32px)",
-          transition: (isDragging || isFirstOpen.current) ? "none" : undefined,
+          transition: isDragging || isFirstOpen.current ? "none" : undefined,
           animation: isDragging ? "none" : undefined,
         }}
         className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200"
@@ -443,10 +450,7 @@ export default function NewAppointmentModal({
                       variant="borderless"
                       className="text-body-lg font-normal !py-2"
                       onFocus={() => {
-                        if (
-                          formData.clientName.trim().length > 1 &&
-                          suggestions.length > 0
-                        ) {
+                        if (formData.clientName.trim().length > 1 && suggestions.length > 0) {
                           setShowSuggestions(true);
                         }
                       }}
@@ -554,16 +558,12 @@ export default function NewAppointmentModal({
                         maxLength={2}
                         value={selectedHour}
                         onChange={(e) => {
-                          let val = e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 2);
+                          let val = e.target.value.replace(/\D/g, "").slice(0, 2);
                           if (val !== "") {
                             const num = parseInt(val, 10);
                             if (num > 23) val = "23";
                           }
-                          const [, currentMin] = (
-                            formData.time || "10:00"
-                          ).split(":");
+                          const [, currentMin] = (formData.time || "10:00").split(":");
                           setFormData((prev) => ({
                             ...prev,
                             time: `${val}:${currentMin || "00"}`,
@@ -580,25 +580,19 @@ export default function NewAppointmentModal({
                         className="w-10 bg-transparent text-body-lg text-on-surface border-0 rounded-none focus:ring-0 py-1 outline-none text-center hover:bg-on-surface/[0.04] focus:bg-on-surface/[0.06] rounded-md transition-all duration-200"
                         placeholder="10"
                       />
-                      <span className="text-on-surface-variant/50 font-medium">
-                        :
-                      </span>
+                      <span className="text-on-surface-variant/50 font-medium">:</span>
                       <input
                         type="text"
                         pattern="[0-9]*"
                         maxLength={2}
                         value={selectedMin}
                         onChange={(e) => {
-                          let val = e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 2);
+                          let val = e.target.value.replace(/\D/g, "").slice(0, 2);
                           if (val !== "") {
                             const num = parseInt(val, 10);
                             if (num > 59) val = "59";
                           }
-                          const [currentHour] = (
-                            formData.time || "10:00"
-                          ).split(":");
+                          const [currentHour] = (formData.time || "10:00").split(":");
                           setFormData((prev) => ({
                             ...prev,
                             time: `${currentHour || "10"}:${val}`,
@@ -640,17 +634,11 @@ export default function NewAppointmentModal({
           variant="info"
           className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
         >
-          <svg
-            className="w-6 h-6 text-secondary shrink-0"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-          >
+          <svg className="w-6 h-6 text-secondary shrink-0" viewBox="0 0 16 16" fill="currentColor">
             <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232" />
           </svg>
           <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-on-secondary-container text-body-md">
-              Cita Reservada
-            </p>
+            <p className="font-semibold text-on-secondary-container text-body-md">Cita Reservada</p>
             <p className="text-body-sm text-on-secondary-container/80">
               Enlace de consentimiento LOPD enviado a{" "}
               <span className="font-semibold">{toastPhone}</span> por WhatsApp.
@@ -659,6 +647,6 @@ export default function NewAppointmentModal({
         </Alert>
       )}
     </div>,
-    document.body,
+    document.body
   );
 }

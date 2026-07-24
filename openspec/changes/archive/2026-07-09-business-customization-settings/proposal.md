@@ -13,9 +13,11 @@ Currently, all business dashboards in Volta share a hardcoded Teal color palette
 ## Capabilities
 
 ### New Capabilities
+
 None.
 
 ### Modified Capabilities
+
 - `business-settings`: Handle customization configuration forms and persistence API.
 - `multitenant-core`: Expose customization options in the session context and propagate styling variables to the frontend.
 - `reusable-ui-components`: Update UI elements to dynamically scale padding, text sizes, and border-radius using CSS variables.

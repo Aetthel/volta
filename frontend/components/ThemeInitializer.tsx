@@ -2,7 +2,13 @@
 
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, applyThemeColors } from "@/lib/theme";
+import {
+  COLOR_PALETTES,
+  FONT_SCALES,
+  RADIUS_SCALES,
+  getThemeColor,
+  applyThemeColors,
+} from "@/lib/theme";
 
 function ThemeInitializerClient() {
   const { data: session } = useSession();
@@ -17,8 +23,12 @@ function ThemeInitializerClient() {
     const localRadius = localStorage.getItem("volta_border_radius");
 
     const themeColor = getThemeColor(localColor || session?.user?.themeColor);
-    const fontSizeLevel = (localFont || session?.user?.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES;
-    const borderRadiusLevel = (localRadius || session?.user?.borderRadiusLevel || "MEDIUM") as keyof typeof RADIUS_SCALES;
+    const fontSizeLevel = (localFont ||
+      session?.user?.fontSizeLevel ||
+      "MEDIUM") as keyof typeof FONT_SCALES;
+    const borderRadiusLevel = (localRadius ||
+      session?.user?.borderRadiusLevel ||
+      "MEDIUM") as keyof typeof RADIUS_SCALES;
 
     // Apply colors
     const palette = COLOR_PALETTES[themeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;

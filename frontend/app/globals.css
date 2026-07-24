@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-scale: 1.0;
-  --radius-scale: 1.0;
+  --font-scale: 1;
+  --radius-scale: 1;
 
   --color-primary: #006565;
   --color-primary-container: #008080;
@@ -190,7 +190,7 @@ input[type="number"] {
   :root {
     --sidebar-width: 240px;
   }
-  
+
   html.sidebar-collapsed {
     --sidebar-width: 80px;
   }
@@ -207,4 +207,3 @@ input[type="number"] {
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 }
-

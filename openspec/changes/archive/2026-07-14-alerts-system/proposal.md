@@ -5,17 +5,20 @@ The Volta platform needs a unified mechanism to notify users of critical busines
 ## What Changes
 
 We are introducing a three-tiered Alerts & Notifications system:
+
 1. **Emergentes (Popups):** Global onboarding or critical modal popups that show up upon dashboard load, presented in a clean pagination carousel card. They are also pinned to the top of the notification dropdown.
 2. **Avisos (Warnings):** Critical operational warnings (like WhatsApp link failures) styled with warning colors and icons in the dropdown.
 3. **Notificaciones (Notifications):** Informative messages (like booking receipts) styled with default colors.
-We will add database persistence using Prisma to track read/unread states per user, an API routing system on the backend, and interactive dropdown and modal components on the frontend.
+   We will add database persistence using Prisma to track read/unread states per user, an API routing system on the backend, and interactive dropdown and modal components on the frontend.
 
 ## Capabilities
 
 ### New Capabilities
+
 - `alerts-system`: Introduce the Alert data model, backend API routes for managing alerts, the frontend bell notification popover, and the dashboard welcome modal carousel.
 
 ### Modified Capabilities
+
 <!-- None -->
 
 ## Impact

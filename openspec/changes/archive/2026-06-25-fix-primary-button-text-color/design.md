@@ -5,6 +5,7 @@ Corrección del contraste de texto del botón primario que se muestra de color o
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Asegurar que el texto del botón principal sea blanco (`#ffffff`) utilizando el token semántico de contraste `text-on-primary`.
 
 ## Decisions

@@ -1,388 +1,531 @@
-<!DOCTYPE html><html class="light" lang="es"><head>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1.0" name="viewport">
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-<style>
-        body { font-family: 'Inter', sans-serif; }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #bdc9c8; border-radius: 10px; }
+<!doctype html>
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #bdc9c8;
+        border-radius: 10px;
+      }
     </style>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "on-tertiary-container": "#e3fffe",
-                      "on-error": "#ffffff",
-                      "on-tertiary-fixed": "#002020",
-                      "on-primary-fixed": "#002020",
-                      "surface-tint": "#006a6a",
-                      "secondary-container": "#b0eeed",
-                      "secondary-fixed": "#b0eeed",
-                      "primary": "#006565",
-                      "tertiary": "#196464",
-                      "tertiary-fixed": "#aaefee",
-                      "on-secondary": "#ffffff",
-                      "on-error-container": "#93000a",
-                      "inverse-on-surface": "#f0f1f2",
-                      "surface-variant": "#e1e3e4",
-                      "on-primary": "#ffffff",
-                      "on-secondary-fixed": "#002020",
-                      "on-primary-fixed-variant": "#004f4f",
-                      "error": "#ba1a1a",
-                      "surface-container": "#edeeef",
-                      "tertiary-fixed-dim": "#8fd2d2",
-                      "on-tertiary": "#ffffff",
-                      "on-tertiary-fixed-variant": "#004f50",
-                      "primary-fixed": "#93f2f2",
-                      "on-background": "#191c1d",
-                      "inverse-primary": "#76d6d5",
-                      "primary-fixed-dim": "#76d6d5",
-                      "surface-container-lowest": "#ffffff",
-                      "secondary-fixed-dim": "#94d1d1",
-                      "on-secondary-fixed-variant": "#044f4f",
-                      "secondary": "#296767",
-                      "error-container": "#ffdad6",
-                      "outline-variant": "#bdc9c8",
-                      "on-surface-variant": "#3e4949",
-                      "surface-container-high": "#e7e8e9",
-                      "surface-dim": "#d9dadb",
-                      "inverse-surface": "#2e3132",
-                      "primary-container": "#008080",
-                      "tertiary-container": "#387d7d",
-                      "on-secondary-container": "#306e6d",
-                      "surface-container-low": "#f3f4f5",
-                      "surface": "#f8f9fa",
-                      "on-primary-container": "#e3fffe",
-                      "surface-bright": "#f8f9fa",
-                      "outline": "#6e7979",
-                      "background": "#f8f9fa",
-                      "on-surface": "#191c1d",
-                      "surface-container-highest": "#e1e3e4"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.25rem",
-                      "lg": "0.5rem",
-                      "xl": "0.75rem",
-                      "full": "9999px"
-              },
-              "spacing": {
-                      "margin-mobile": "16px",
-                      "gutter": "24px",
-                      "xs": "4px",
-                      "md": "16px",
-                      "lg": "24px",
-                      "xl": "32px",
-                      "container-max": "1440px",
-                      "sm": "12px",
-                      "base": "8px"
-              },
-              "fontFamily": {
-                      "body-lg": ["Inter"],
-                      "headline-lg-mobile": ["Inter"],
-                      "headline-lg": ["Inter"],
-                      "body-md": ["Inter"],
-                      "title-md": ["Inter"],
-                      "label-lg": ["Inter"],
-                      "label-md": ["Inter"],
-                      "display-lg": ["Inter"],
-                      "title-lg": ["Inter"]
-              },
-              "fontSize": {
-                      "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.5px", "fontWeight": "400"}],
-                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
-                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
-                      "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.25px", "fontWeight": "400"}],
-                      "title-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0.15px", "fontWeight": "500"}],
-                      "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "500"}],
-                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
-                      "display-lg": ["57px", {"lineHeight": "64px", "letterSpacing": "-0.25px", "fontWeight": "700"}],
-                      "title-lg": ["22px", {"lineHeight": "28px", "fontWeight": "500"}]
-              }
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#e3fffe",
+              "on-error": "#ffffff",
+              "on-tertiary-fixed": "#002020",
+              "on-primary-fixed": "#002020",
+              "surface-tint": "#006a6a",
+              "secondary-container": "#b0eeed",
+              "secondary-fixed": "#b0eeed",
+              primary: "#006565",
+              tertiary: "#196464",
+              "tertiary-fixed": "#aaefee",
+              "on-secondary": "#ffffff",
+              "on-error-container": "#93000a",
+              "inverse-on-surface": "#f0f1f2",
+              "surface-variant": "#e1e3e4",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed": "#002020",
+              "on-primary-fixed-variant": "#004f4f",
+              error: "#ba1a1a",
+              "surface-container": "#edeeef",
+              "tertiary-fixed-dim": "#8fd2d2",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed-variant": "#004f50",
+              "primary-fixed": "#93f2f2",
+              "on-background": "#191c1d",
+              "inverse-primary": "#76d6d5",
+              "primary-fixed-dim": "#76d6d5",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed-dim": "#94d1d1",
+              "on-secondary-fixed-variant": "#044f4f",
+              secondary: "#296767",
+              "error-container": "#ffdad6",
+              "outline-variant": "#bdc9c8",
+              "on-surface-variant": "#3e4949",
+              "surface-container-high": "#e7e8e9",
+              "surface-dim": "#d9dadb",
+              "inverse-surface": "#2e3132",
+              "primary-container": "#008080",
+              "tertiary-container": "#387d7d",
+              "on-secondary-container": "#306e6d",
+              "surface-container-low": "#f3f4f5",
+              surface: "#f8f9fa",
+              "on-primary-container": "#e3fffe",
+              "surface-bright": "#f8f9fa",
+              outline: "#6e7979",
+              background: "#f8f9fa",
+              "on-surface": "#191c1d",
+              "surface-container-highest": "#e1e3e4",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              "margin-mobile": "16px",
+              gutter: "24px",
+              xs: "4px",
+              md: "16px",
+              lg: "24px",
+              xl: "32px",
+              "container-max": "1440px",
+              sm: "12px",
+              base: "8px",
+            },
+            fontFamily: {
+              "body-lg": ["Inter"],
+              "headline-lg-mobile": ["Inter"],
+              "headline-lg": ["Inter"],
+              "body-md": ["Inter"],
+              "title-md": ["Inter"],
+              "label-lg": ["Inter"],
+              "label-md": ["Inter"],
+              "display-lg": ["Inter"],
+              "title-lg": ["Inter"],
+            },
+            fontSize: {
+              "body-lg": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0.5px", fontWeight: "400" },
+              ],
+              "headline-lg-mobile": ["28px", { lineHeight: "36px", fontWeight: "600" }],
+              "headline-lg": ["32px", { lineHeight: "40px", fontWeight: "600" }],
+              "body-md": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.25px", fontWeight: "400" },
+              ],
+              "title-md": [
+                "16px",
+                { lineHeight: "24px", letterSpacing: "0.15px", fontWeight: "500" },
+              ],
+              "label-lg": [
+                "14px",
+                { lineHeight: "20px", letterSpacing: "0.1px", fontWeight: "500" },
+              ],
+              "label-md": [
+                "12px",
+                { lineHeight: "16px", letterSpacing: "0.5px", fontWeight: "500" },
+              ],
+              "display-lg": [
+                "57px",
+                { lineHeight: "64px", letterSpacing: "-0.25px", fontWeight: "700" },
+              ],
+              "title-lg": ["22px", { lineHeight: "28px", fontWeight: "500" }],
             },
           },
-        }
+        },
+      };
     </script>
-</head>
-<body class="bg-background text-on-surface">
-<!-- SideNavBar (Desktop) -->
-<aside class="h-full w-[240px] hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-lg">
-<div class="px-md mb-xl">
-<h1 class="font-title-lg text-title-lg font-bold text-primary">Glow Studio</h1>
-<p class="font-label-md text-label-md text-on-surface-variant">Admin Pro</p>
-</div>
-<nav class="flex-1 flex flex-col gap-base">
-<a class="flex items-center gap-md text-on-surface-variant px-md py-sm mx-sm hover:bg-surface-variant transition-colors rounded-lg" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-label-md text-label-md">Dashboard</span>
-</a>
+  </head>
+  <body class="bg-background text-on-surface">
+    <!-- SideNavBar (Desktop) -->
+    <aside
+      class="h-full w-[240px] hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-lg"
+    >
+      <div class="px-md mb-xl">
+        <h1 class="font-title-lg text-title-lg font-bold text-primary">Glow Studio</h1>
+        <p class="font-label-md text-label-md text-on-surface-variant">Admin Pro</p>
+      </div>
+      <nav class="flex-1 flex flex-col gap-base">
+        <a
+          class="flex items-center gap-md text-on-surface-variant px-md py-sm mx-sm hover:bg-surface-variant transition-colors rounded-lg"
+          href="#"
+        >
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="font-label-md text-label-md">Dashboard</span>
+        </a>
 
-<a class="flex items-center gap-md text-on-surface-variant px-md py-sm mx-sm hover:bg-surface-variant transition-colors rounded-lg" href="#">
-<span class="material-symbols-outlined">group</span>
-<span class="font-label-md text-label-md">Clientes</span>
-</a>
-<a class="flex items-center gap-md text-on-surface-variant px-md py-sm mx-sm hover:bg-surface-variant transition-colors rounded-lg" href="#">
-<span class="material-symbols-outlined">content_cut</span>
-<span class="font-label-md text-label-md">Servicios</span>
-</a>
-
-</nav>
-<div class="px-md mt-auto">
-<button class="w-full bg-primary text-on-primary font-label-lg text-label-lg py-sm rounded-lg active:scale-95 duration-200">
-                Nueva Cita
+        <a
+          class="flex items-center gap-md text-on-surface-variant px-md py-sm mx-sm hover:bg-surface-variant transition-colors rounded-lg"
+          href="#"
+        >
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Clientes</span>
+        </a>
+        <a
+          class="flex items-center gap-md text-on-surface-variant px-md py-sm mx-sm hover:bg-surface-variant transition-colors rounded-lg"
+          href="#"
+        >
+          <span class="material-symbols-outlined">content_cut</span>
+          <span class="font-label-md text-label-md">Servicios</span>
+        </a>
+      </nav>
+      <div class="px-md mt-auto">
+        <button
+          class="w-full bg-primary text-on-primary font-label-lg text-label-lg py-sm rounded-lg active:scale-95 duration-200"
+        >
+          Nueva Cita
+        </button>
+      </div>
+    </aside>
+    <!-- Main Content Area -->
+    <div class="md:pl-[240px] flex flex-col min-h-screen">
+      <!-- TopNavBar -->
+      <header
+        class="flex justify-between items-center px-gutter py-base w-full sticky top-0 z-40 bg-surface"
+      >
+        <div class="flex items-center gap-md">
+          <h1
+            class="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary"
+          >
+            Glow Studio
+          </h1>
+          <div
+            class="hidden md:flex items-center bg-surface-container rounded-full px-md py-xs gap-sm border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all"
+          >
+            <span class="material-symbols-outlined text-on-surface-variant">search</span>
+            <input
+              class="bg-transparent border-none focus:ring-0 font-body-md text-body-md w-64"
+              placeholder="Buscar ajustes..."
+              type="text"
+            />
+          </div>
+        </div>
+        <div class="flex items-center gap-md">
+          <button class="p-sm hover:bg-surface-variant rounded-full transition-colors relative">
+            <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+            <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+          </button>
+          <button class="p-sm hover:bg-surface-variant rounded-full transition-colors">
+            <span class="material-symbols-outlined text-on-surface-variant">help_outline</span>
+          </button>
+          <div
+            class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+          >
+            <img
+              alt="Avatar del Estilista"
+              data-alt="A professional studio portrait of a sophisticated hair stylist in a minimalist setting. She has a confident expression and a modern hairstyle. The lighting is soft and even, highlighting her expert appearance. The background is a clean, neutral gray that emphasizes professional reliability and elegance in the high-end beauty industry."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1b2-BTGQbBj7JTZdJvFpC1aJFEBkxZjTf9pNtQOjeMzvmLp59C7bwy9ZMSCmmJ_5yHlzPFr2m1fB3IR0yxqdAt2onn8OP6CYtDFH8qoLlwvvqD_ZnupIyO8zw7sE9EpzyFf9wQF0HMVN4ZCJgKExGrhM3ZmzCdzCKxZiJVuPlVZ4_dqVLq9-3MBPjrBhm3T7Wum1XzlUute_VUsAEmnThvZDi1YaFfNExreHHJ_4I4Eblq8zOWXnpEk8nePKm8Tbcsnma46dFZg"
+            />
+          </div>
+        </div>
+      </header>
+      <!-- Canvas -->
+      <main class="flex-1 p-gutter max-w-container-max mx-auto w-full pb-32">
+        <div class="mb-xl">
+          <h2 class="font-headline-lg text-headline-lg text-on-surface">Configuración General</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            Gestiona tu identidad de marca, horarios y servicios.
+          </p>
+        </div>
+        <!-- Bento Grid Layout for Settings -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
+          <!-- Business Profile Card -->
+          <div
+            class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant"
+          >
+            <div class="flex items-center justify-between mb-lg">
+              <h3 class="font-title-md text-title-md text-primary flex items-center gap-sm">
+                <span class="material-symbols-outlined">storefront</span>
+                Información del Negocio
+              </h3>
+              <button
+                class="text-primary font-label-lg text-label-lg hover:underline transition-all"
+              >
+                Editar perfil
+              </button>
+            </div>
+            <div class="flex flex-col md:flex-row gap-xl items-start">
+              <div class="relative group">
+                <div class="w-32 h-32 rounded-xl overflow-hidden bg-surface-container">
+                  <img
+                    alt="Logo de la Peluquería"
+                    data-alt="A luxurious minimalist hair salon logo displayed on a textured white wall. The logo features clean, modern typography and a subtle teal floral icon. The scene is illuminated by soft, bright natural light, creating a professional and hygienic aesthetic. The environment is orderly and reflects high-end corporate modernism in the beauty sector."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmGwl5sSkDjII2ExHnKM-5w4xy8w1SwV7jmU_AGtfMYMvJW92nfb7_P7sIs2RY5k0DpUodJhZQawwXknszPW1dRn4WZy17eaeYxtkOsozqAt9hGy18BfqOOeJaTKGSOUt6bBtJgWSIHUz2gL0oLZx73xl_FnxP-NJGfQycadSFiOb12mX-M3ABJyV8kHWcJlTwP8ZeRW5oyzCgynNR8DICpqxU4Zj22rfcnl257Yv9jclsPc_2_mUFmRbnRbF4azoHbXRqq-Fb5Q"
+                  />
+                </div>
+                <div
+                  class="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer"
+                >
+                  <span class="material-symbols-outlined text-white">photo_camera</span>
+                </div>
+              </div>
+              <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-md w-full">
+                <div class="space-y-xs">
+                  <label class="font-label-md text-label-md text-on-surface-variant"
+                    >Nombre Comercial</label
+                  >
+                  <p class="font-body-lg text-body-lg font-medium">Glow Studio &amp; Spa</p>
+                </div>
+                <div class="space-y-xs">
+                  <label class="font-label-md text-label-md text-on-surface-variant"
+                    >Correo Electrónico</label
+                  >
+                  <p class="font-body-lg text-body-lg font-medium">contacto@glowstudio.com</p>
+                </div>
+                <div class="space-y-xs">
+                  <label class="font-label-md text-label-md text-on-surface-variant"
+                    >Teléfono</label
+                  >
+                  <p class="font-body-lg text-body-lg font-medium">+34 912 345 678</p>
+                </div>
+                <div class="space-y-xs">
+                  <label class="font-label-md text-label-md text-on-surface-variant"
+                    >Dirección</label
+                  >
+                  <p class="font-body-lg text-body-lg font-medium">
+                    Calle de Velázquez, 45, Madrid
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Account Settings Small Card -->
+          <div
+            class="lg:col-span-4 bg-primary text-on-primary rounded-xl p-xl shadow-md flex flex-col justify-between"
+          >
+            <div>
+              <h3 class="font-title-md text-title-md mb-sm">Plan Admin Pro</h3>
+              <p class="font-body-md text-body-md opacity-90">
+                Tu suscripción está activa hasta el 12 de Octubre, 2024.
+              </p>
+            </div>
+            <div class="mt-lg">
+              <button
+                class="bg-on-primary text-primary font-label-lg text-label-lg w-full py-sm rounded-lg hover:bg-primary-fixed transition-colors"
+              >
+                Gestionar Facturación
+              </button>
+            </div>
+          </div>
+          <!-- Operating Hours Card -->
+          <div
+            class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant"
+          >
+            <h3 class="font-title-md text-title-md text-primary mb-lg flex items-center gap-sm">
+              <span class="material-symbols-outlined">schedule</span>
+              Horario de Apertura
+            </h3>
+            <div class="space-y-md">
+              <div class="flex items-center justify-between py-xs border-b border-outline-variant">
+                <span class="font-body-md text-body-md">Lunes - Viernes</span>
+                <span class="font-label-lg text-label-lg text-primary">09:00 - 20:00</span>
+              </div>
+              <div class="flex items-center justify-between py-xs border-b border-outline-variant">
+                <span class="font-body-md text-body-md">Sábados</span>
+                <span class="font-label-lg text-label-lg text-primary">10:00 - 18:00</span>
+              </div>
+              <div class="flex items-center justify-between py-xs border-b border-outline-variant">
+                <span class="font-body-md text-body-md">Domingos</span>
+                <span class="font-label-lg text-label-lg text-error">Cerrado</span>
+              </div>
+            </div>
+            <button
+              class="mt-xl w-full border border-primary text-primary font-label-lg text-label-lg py-sm rounded-lg hover:bg-secondary-container transition-all"
+            >
+              Modificar Horarios
             </button>
-</div>
-</aside>
-<!-- Main Content Area -->
-<div class="md:pl-[240px] flex flex-col min-h-screen">
-<!-- TopNavBar -->
-<header class="flex justify-between items-center px-gutter py-base w-full sticky top-0 z-40 bg-surface">
-<div class="flex items-center gap-md">
-<h1 class="md:hidden font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">Glow Studio</h1>
-<div class="hidden md:flex items-center bg-surface-container rounded-full px-md py-xs gap-sm border border-outline-variant focus-within:ring-2 focus-within:ring-primary transition-all">
-<span class="material-symbols-outlined text-on-surface-variant">search</span>
-<input class="bg-transparent border-none focus:ring-0 font-body-md text-body-md w-64" placeholder="Buscar ajustes..." type="text">
-</div>
-</div>
-<div class="flex items-center gap-md">
-<button class="p-sm hover:bg-surface-variant rounded-full transition-colors relative">
-<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
-<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
-</button>
-<button class="p-sm hover:bg-surface-variant rounded-full transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant">help_outline</span>
-</button>
-<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-<img alt="Avatar del Estilista" data-alt="A professional studio portrait of a sophisticated hair stylist in a minimalist setting. She has a confident expression and a modern hairstyle. The lighting is soft and even, highlighting her expert appearance. The background is a clean, neutral gray that emphasizes professional reliability and elegance in the high-end beauty industry." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1b2-BTGQbBj7JTZdJvFpC1aJFEBkxZjTf9pNtQOjeMzvmLp59C7bwy9ZMSCmmJ_5yHlzPFr2m1fB3IR0yxqdAt2onn8OP6CYtDFH8qoLlwvvqD_ZnupIyO8zw7sE9EpzyFf9wQF0HMVN4ZCJgKExGrhM3ZmzCdzCKxZiJVuPlVZ4_dqVLq9-3MBPjrBhm3T7Wum1XzlUute_VUsAEmnThvZDi1YaFfNExreHHJ_4I4Eblq8zOWXnpEk8nePKm8Tbcsnma46dFZg">
-</div>
-</div>
-</header>
-<!-- Canvas -->
-<main class="flex-1 p-gutter max-w-container-max mx-auto w-full pb-32">
-<div class="mb-xl">
-<h2 class="font-headline-lg text-headline-lg text-on-surface">Configuración General</h2>
-<p class="font-body-md text-body-md text-on-surface-variant">Gestiona tu identidad de marca, horarios y servicios.</p>
-</div>
-<!-- Bento Grid Layout for Settings -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-lg">
-<!-- Business Profile Card -->
-<div class="lg:col-span-8 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant">
-<div class="flex items-center justify-between mb-lg">
-<h3 class="font-title-md text-title-md text-primary flex items-center gap-sm">
-<span class="material-symbols-outlined">storefront</span>
-                            Información del Negocio
-                        </h3>
-<button class="text-primary font-label-lg text-label-lg hover:underline transition-all">Editar perfil</button>
-</div>
-<div class="flex flex-col md:flex-row gap-xl items-start">
-<div class="relative group">
-<div class="w-32 h-32 rounded-xl overflow-hidden bg-surface-container">
-<img alt="Logo de la Peluquería" data-alt="A luxurious minimalist hair salon logo displayed on a textured white wall. The logo features clean, modern typography and a subtle teal floral icon. The scene is illuminated by soft, bright natural light, creating a professional and hygienic aesthetic. The environment is orderly and reflects high-end corporate modernism in the beauty sector." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmGwl5sSkDjII2ExHnKM-5w4xy8w1SwV7jmU_AGtfMYMvJW92nfb7_P7sIs2RY5k0DpUodJhZQawwXknszPW1dRn4WZy17eaeYxtkOsozqAt9hGy18BfqOOeJaTKGSOUt6bBtJgWSIHUz2gL0oLZx73xl_FnxP-NJGfQycadSFiOb12mX-M3ABJyV8kHWcJlTwP8ZeRW5oyzCgynNR8DICpqxU4Zj22rfcnl257Yv9jclsPc_2_mUFmRbnRbF4azoHbXRqq-Fb5Q">
-</div>
-<div class="absolute inset-0 bg-primary/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl cursor-pointer">
-<span class="material-symbols-outlined text-white">photo_camera</span>
-</div>
-</div>
-<div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-md w-full">
-<div class="space-y-xs">
-<label class="font-label-md text-label-md text-on-surface-variant">Nombre Comercial</label>
-<p class="font-body-lg text-body-lg font-medium">Glow Studio &amp; Spa</p>
-</div>
-<div class="space-y-xs">
-<label class="font-label-md text-label-md text-on-surface-variant">Correo Electrónico</label>
-<p class="font-body-lg text-body-lg font-medium">contacto@glowstudio.com</p>
-</div>
-<div class="space-y-xs">
-<label class="font-label-md text-label-md text-on-surface-variant">Teléfono</label>
-<p class="font-body-lg text-body-lg font-medium">+34 912 345 678</p>
-</div>
-<div class="space-y-xs">
-<label class="font-label-md text-label-md text-on-surface-variant">Dirección</label>
-<p class="font-body-lg text-body-lg font-medium">Calle de Velázquez, 45, Madrid</p>
-</div>
-</div>
-</div>
-</div>
-<!-- Account Settings Small Card -->
-<div class="lg:col-span-4 bg-primary text-on-primary rounded-xl p-xl shadow-md flex flex-col justify-between">
-<div>
-<h3 class="font-title-md text-title-md mb-sm">Plan Admin Pro</h3>
-<p class="font-body-md text-body-md opacity-90">Tu suscripción está activa hasta el 12 de Octubre, 2024.</p>
-</div>
-<div class="mt-lg">
-<button class="bg-on-primary text-primary font-label-lg text-label-lg w-full py-sm rounded-lg hover:bg-primary-fixed transition-colors">
-                            Gestionar Facturación
-                        </button>
-</div>
-</div>
-<!-- Operating Hours Card -->
-<div class="lg:col-span-5 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant">
-<h3 class="font-title-md text-title-md text-primary mb-lg flex items-center gap-sm">
-<span class="material-symbols-outlined">schedule</span>
-                        Horario de Apertura
-                    </h3>
-<div class="space-y-md">
-<div class="flex items-center justify-between py-xs border-b border-outline-variant">
-<span class="font-body-md text-body-md">Lunes - Viernes</span>
-<span class="font-label-lg text-label-lg text-primary">09:00 - 20:00</span>
-</div>
-<div class="flex items-center justify-between py-xs border-b border-outline-variant">
-<span class="font-body-md text-body-md">Sábados</span>
-<span class="font-label-lg text-label-lg text-primary">10:00 - 18:00</span>
-</div>
-<div class="flex items-center justify-between py-xs border-b border-outline-variant">
-<span class="font-body-md text-body-md">Domingos</span>
-<span class="font-label-lg text-label-lg text-error">Cerrado</span>
-</div>
-</div>
-<button class="mt-xl w-full border border-primary text-primary font-label-lg text-label-lg py-sm rounded-lg hover:bg-secondary-container transition-all">
-                        Modificar Horarios
-                    </button>
-</div>
-<!-- Services List Card -->
-<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant">
-<div class="flex items-center justify-between mb-lg">
-<h3 class="font-title-md text-title-md text-primary flex items-center gap-sm">
-<span class="material-symbols-outlined">content_cut</span>
-                            Servicios Destacados
-                        </h3>
-<button class="text-primary font-label-lg text-label-lg">Ver todos</button>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
-<div class="p-md rounded-lg bg-surface-container flex items-center gap-md">
-<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
-<span class="material-symbols-outlined">brush</span>
-</div>
-<div>
-<p class="font-label-lg text-label-lg font-bold">Corte &amp; Estilo</p>
-<p class="font-label-md text-label-md text-on-surface-variant">45 min · 35€</p>
-</div>
-</div>
-<div class="p-md rounded-lg bg-surface-container flex items-center gap-md">
-<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container">
-<span class="material-symbols-outlined">palette</span>
-</div>
-<div>
-<p class="font-label-lg text-label-lg font-bold">Color Total</p>
-<p class="font-label-md text-label-md text-on-surface-variant">120 min · 85€</p>
-</div>
-</div>
-<div class="p-md rounded-lg bg-surface-container flex items-center gap-md">
-<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-<span class="material-symbols-outlined">spa</span>
-</div>
-<div>
-<p class="font-label-lg text-label-lg font-bold">Tratamiento Hidratante</p>
-<p class="font-label-md text-label-md text-on-surface-variant">60 min · 50€</p>
-</div>
-</div>
-<div class="p-md rounded-lg border-2 border-dashed border-outline-variant flex items-center justify-center gap-md cursor-pointer hover:bg-surface-variant transition-colors">
-<span class="material-symbols-outlined text-primary">add_circle</span>
-<span class="font-label-lg text-label-lg text-primary">Añadir Servicio</span>
-</div>
-</div>
-</div>
-<!-- Security & Privacy Card -->
-<div class="lg:col-span-12 bg-surface-container-low rounded-xl p-xl border border-outline-variant">
-<h3 class="font-title-md text-title-md text-on-surface mb-lg">Seguridad de la Cuenta</h3>
-<div class="flex flex-col md:flex-row gap-lg">
-<div class="flex-1 p-md bg-white rounded-lg shadow-sm flex items-center justify-between">
-<div class="flex items-center gap-md">
-<span class="material-symbols-outlined text-outline">lock</span>
-<div>
-<p class="font-label-lg text-label-lg">Contraseña</p>
-<p class="font-label-md text-label-md text-on-surface-variant">Actualizada hace 3 meses</p>
-</div>
-</div>
-<button class="text-primary font-label-md text-label-md hover:underline">Cambiar</button>
-</div>
-<div class="flex-1 p-md bg-white rounded-lg shadow-sm flex items-center justify-between">
-<div class="flex items-center gap-md">
-<span class="material-symbols-outlined text-outline">verified_user</span>
-<div>
-<p class="font-label-lg text-label-lg">Verificación en dos pasos</p>
-<p class="font-label-md text-label-md text-primary">Activada</p>
-</div>
-</div>
-<button class="text-error font-label-md text-label-md hover:underline">Desactivar</button>
-</div>
-</div>
-</div>
-</div>
-</main>
-<!-- BottomNavBar (Mobile) -->
-<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant shadow-lg flex justify-around items-center h-16 px-md pb-safe">
-<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
-<span class="material-symbols-outlined">home</span>
-<span class="font-label-md text-label-md">Inicio</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
-<span class="material-symbols-outlined">event</span>
-<span class="font-label-md text-label-md">Citas</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
-<span class="material-symbols-outlined">group</span>
-<span class="font-label-md text-label-md">Clientes</span>
-</a>
-<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-lg py-xs scale-110 duration-150" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
-<span class="font-label-md text-label-md">Perfil</span>
-</a>
-</nav>
-</div>
-<!-- Micro-interactions Script -->
-<script>
-        document.querySelectorAll('.hover\\:bg-surface-variant').forEach(el => {
-            el.addEventListener('click', function() {
-                this.classList.add('scale-95');
-                setTimeout(() => this.classList.remove('scale-95'), 150);
-            });
+          </div>
+          <!-- Services List Card -->
+          <div
+            class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-xl shadow-sm border border-outline-variant"
+          >
+            <div class="flex items-center justify-between mb-lg">
+              <h3 class="font-title-md text-title-md text-primary flex items-center gap-sm">
+                <span class="material-symbols-outlined">content_cut</span>
+                Servicios Destacados
+              </h3>
+              <button class="text-primary font-label-lg text-label-lg">Ver todos</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
+              <div class="p-md rounded-lg bg-surface-container flex items-center gap-md">
+                <div
+                  class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container"
+                >
+                  <span class="material-symbols-outlined">brush</span>
+                </div>
+                <div>
+                  <p class="font-label-lg text-label-lg font-bold">Corte &amp; Estilo</p>
+                  <p class="font-label-md text-label-md text-on-surface-variant">45 min · 35€</p>
+                </div>
+              </div>
+              <div class="p-md rounded-lg bg-surface-container flex items-center gap-md">
+                <div
+                  class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container"
+                >
+                  <span class="material-symbols-outlined">palette</span>
+                </div>
+                <div>
+                  <p class="font-label-lg text-label-lg font-bold">Color Total</p>
+                  <p class="font-label-md text-label-md text-on-surface-variant">120 min · 85€</p>
+                </div>
+              </div>
+              <div class="p-md rounded-lg bg-surface-container flex items-center gap-md">
+                <div
+                  class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container"
+                >
+                  <span class="material-symbols-outlined">spa</span>
+                </div>
+                <div>
+                  <p class="font-label-lg text-label-lg font-bold">Tratamiento Hidratante</p>
+                  <p class="font-label-md text-label-md text-on-surface-variant">60 min · 50€</p>
+                </div>
+              </div>
+              <div
+                class="p-md rounded-lg border-2 border-dashed border-outline-variant flex items-center justify-center gap-md cursor-pointer hover:bg-surface-variant transition-colors"
+              >
+                <span class="material-symbols-outlined text-primary">add_circle</span>
+                <span class="font-label-lg text-label-lg text-primary">Añadir Servicio</span>
+              </div>
+            </div>
+          </div>
+          <!-- Security & Privacy Card -->
+          <div
+            class="lg:col-span-12 bg-surface-container-low rounded-xl p-xl border border-outline-variant"
+          >
+            <h3 class="font-title-md text-title-md text-on-surface mb-lg">
+              Seguridad de la Cuenta
+            </h3>
+            <div class="flex flex-col md:flex-row gap-lg">
+              <div
+                class="flex-1 p-md bg-white rounded-lg shadow-sm flex items-center justify-between"
+              >
+                <div class="flex items-center gap-md">
+                  <span class="material-symbols-outlined text-outline">lock</span>
+                  <div>
+                    <p class="font-label-lg text-label-lg">Contraseña</p>
+                    <p class="font-label-md text-label-md text-on-surface-variant">
+                      Actualizada hace 3 meses
+                    </p>
+                  </div>
+                </div>
+                <button class="text-primary font-label-md text-label-md hover:underline">
+                  Cambiar
+                </button>
+              </div>
+              <div
+                class="flex-1 p-md bg-white rounded-lg shadow-sm flex items-center justify-between"
+              >
+                <div class="flex items-center gap-md">
+                  <span class="material-symbols-outlined text-outline">verified_user</span>
+                  <div>
+                    <p class="font-label-lg text-label-lg">Verificación en dos pasos</p>
+                    <p class="font-label-md text-label-md text-primary">Activada</p>
+                  </div>
+                </div>
+                <button class="text-error font-label-md text-label-md hover:underline">
+                  Desactivar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!-- BottomNavBar (Mobile) -->
+      <nav
+        class="md:hidden fixed bottom-0 w-full z-50 bg-surface border-t border-outline-variant shadow-lg flex justify-around items-center h-16 px-md pb-safe"
+      >
+        <a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+          <span class="material-symbols-outlined">home</span>
+          <span class="font-label-md text-label-md">Inicio</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+          <span class="material-symbols-outlined">event</span>
+          <span class="font-label-md text-label-md">Citas</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-on-surface-variant" href="#">
+          <span class="material-symbols-outlined">group</span>
+          <span class="font-label-md text-label-md">Clientes</span>
+        </a>
+        <a
+          class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-lg py-xs scale-110 duration-150"
+          href="#"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >person</span
+          >
+          <span class="font-label-md text-label-md">Perfil</span>
+        </a>
+      </nav>
+    </div>
+    <!-- Micro-interactions Script -->
+    <script>
+      document.querySelectorAll(".hover\\:bg-surface-variant").forEach((el) => {
+        el.addEventListener("click", function () {
+          this.classList.add("scale-95");
+          setTimeout(() => this.classList.remove("scale-95"), 150);
         });
+      });
 
-        // Floating Action Button logic if needed for mobile
-        // (Not requested but adds professional touch)
-        const rippleEffect = (e) => {
-            const btn = e.currentTarget;
-            const circle = document.createElement("span");
-            const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-            const radius = diameter / 2;
-            circle.style.width = circle.style.height = `${diameter}px`;
-            circle.style.left = `${e.clientX - btn.offsetLeft - radius}px`;
-            circle.style.top = `${e.clientY - btn.offsetTop - radius}px`;
-            circle.classList.add("ripple");
-            const ripple = btn.getElementsByClassName("ripple")[0];
-            if (ripple) { ripple.remove(); }
-            btn.appendChild(circle);
-        };
+      // Floating Action Button logic if needed for mobile
+      // (Not requested but adds professional touch)
+      const rippleEffect = (e) => {
+        const btn = e.currentTarget;
+        const circle = document.createElement("span");
+        const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+        const radius = diameter / 2;
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${e.clientX - btn.offsetLeft - radius}px`;
+        circle.style.top = `${e.clientY - btn.offsetTop - radius}px`;
+        circle.classList.add("ripple");
+        const ripple = btn.getElementsByClassName("ripple")[0];
+        if (ripple) {
+          ripple.remove();
+        }
+        btn.appendChild(circle);
+      };
 
-        document.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', rippleEffect);
-        });
+      document.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", rippleEffect);
+      });
     </script>
-<style>
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 600ms linear;
-            background-color: rgba(255, 255, 255, 0.3);
+    <style>
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 600ms linear;
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
         }
-        @keyframes ripple {
-            to { transform: scale(4); opacity: 0; }
-        }
+      }
     </style>
-
-
-</body></html>
+  </body>
+</html>

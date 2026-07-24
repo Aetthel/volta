@@ -13,9 +13,11 @@ To resolve critical security vulnerabilities, stability risks, and performance b
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `web-authentication`: Hardens the login rate limiting verification.
 - `whatsapp-integration`: Implements robust session state checking and prevents memory leaks/blocking issues.
 - `multitenant-core`: Optimizes database query load for client registration checks.

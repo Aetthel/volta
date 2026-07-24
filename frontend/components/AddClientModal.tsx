@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, User, Phone, Mail, Sparkles, Heart, Pencil, GripHorizontal, AlignLeft } from "lucide-react";
+import {
+  X,
+  User,
+  Phone,
+  Mail,
+  Sparkles,
+  Heart,
+  Pencil,
+  GripHorizontal,
+  AlignLeft,
+} from "lucide-react";
 import {
   FieldGroup,
   Field,
@@ -36,7 +46,14 @@ interface AddClientModalProps {
   }) => void;
   /** Pass a client object to activate edit mode */
   clientToEdit?: ClientToEdit | null;
-  triggerRect?: { left: number; top: number; right: number; bottom: number; width: number; height: number; } | null;
+  triggerRect?: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null;
 }
 
 const EMPTY_FORM = {
@@ -74,7 +91,12 @@ export default function AddClientModal({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("input") || (e.target as HTMLElement).closest("textarea")) return;
+    if (
+      (e.target as HTMLElement).closest("button") ||
+      (e.target as HTMLElement).closest("input") ||
+      (e.target as HTMLElement).closest("textarea")
+    )
+      return;
 
     e.preventDefault();
     setIsDragging(true);
@@ -119,7 +141,7 @@ export default function AddClientModal({
     if (triggerRect && window.innerWidth >= 768) {
       const modalWidth = 448;
       const modalHeight = 450;
-      
+
       let targetX = triggerRect.right + 12;
       if (targetX + modalWidth > window.innerWidth) {
         targetX = triggerRect.left - modalWidth - 12;
@@ -130,7 +152,7 @@ export default function AddClientModal({
       if (targetY + modalHeight > window.innerHeight) {
         targetY = Math.max(12, window.innerHeight - modalHeight - 12);
       }
-      
+
       setPosition({ x: targetX, y: targetY });
     } else {
       // Center modal on screen
@@ -156,9 +178,7 @@ export default function AddClientModal({
   if (!mounted) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -169,12 +189,12 @@ export default function AddClientModal({
     const parts = formData.name.trim().split(/\s+/);
     const parsedName = parts[0] || "";
     const parsedSurname = parts.slice(1).join(" ");
-    
+
     onSave({
       ...formData,
       name: parsedName,
       surname: parsedSurname,
-      id: clientToEdit?.id
+      id: clientToEdit?.id,
     });
     setFormData(EMPTY_FORM);
     onClose();
@@ -190,10 +210,7 @@ export default function AddClientModal({
   return createPortal(
     <div className="fixed inset-0 z-[100]">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/5 transition-opacity"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/5 transition-opacity" onClick={onClose} />
 
       <div
         style={{
@@ -202,7 +219,7 @@ export default function AddClientModal({
           top: `${position.y}px`,
           width: "448px",
           maxWidth: "calc(100vw - 32px)",
-          transition: (isDragging || isFirstOpen.current) ? "none" : undefined,
+          transition: isDragging || isFirstOpen.current ? "none" : undefined,
           animation: isDragging ? "none" : undefined,
         }}
         className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200"
@@ -230,10 +247,7 @@ export default function AddClientModal({
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="p-5 flex flex-col gap-5"
-        >
+        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
           <FieldGroup className="flex flex-col gap-5">
             {/* Title / Name */}
             <div className="flex items-start gap-4">
@@ -336,19 +350,10 @@ export default function AddClientModal({
 
           {/* Footer Actions */}
           <div className="flex justify-end gap-4 pt-4">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              size="lg"
-            >
+            <Button type="button" onClick={onClose} variant="outline" size="lg">
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-            >
+            <Button type="submit" variant="primary" size="lg">
               {isEditMode ? "Guardar cambios" : "Guardar Cliente"}
             </Button>
           </div>

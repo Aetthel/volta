@@ -28,7 +28,8 @@ export function verifyToken(token: string, secret: string): Record<string, unkno
       .update(`${header}.${body}`)
       .digest("base64url");
     if (Buffer.byteLength(signature) !== Buffer.byteLength(expectedSignature)) return null;
-    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))) return null;
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature)))
+      return null;
     const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
     if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) return null;
     return payload;
@@ -41,8 +42,5 @@ export function verifyToken(token: string, secret: string): Record<string, unkno
  * Computes a secure HMAC token of a data string.
  */
 export function computeHmac(data: string, secret: string): string {
-  return crypto
-    .createHmac("sha256", secret)
-    .update(data)
-    .digest("base64url");
+  return crypto.createHmac("sha256", secret).update(data).digest("base64url");
 }

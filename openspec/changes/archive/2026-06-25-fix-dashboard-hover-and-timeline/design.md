@@ -5,6 +5,7 @@ Ajuste final del timeline de citas y deshabilitación del hover de las MetricCar
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Centrar con exactitud milimétrica el nodo del timeline sobre la línea vertical utilizando una técnica de contenedor absoluto de ancho cero.
 - Eliminar los efectos de hover de escala, sombra y bordes en `MetricCard.tsx`.
 

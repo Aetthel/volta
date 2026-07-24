@@ -12,9 +12,11 @@ Many main pages (Inicio, Agenda, Ajustes) and the UI primitive `Alert` still con
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `stitch-design-migration`: Align all other screens and UI primitives with the existing DESIGN.md theme tokens.
 
 ## Impact

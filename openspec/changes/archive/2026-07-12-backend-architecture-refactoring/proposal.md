@@ -11,9 +11,11 @@ La lógica de negocio, las consultas de base de datos y la gestión HTTP están 
 ## Capabilities
 
 ### New Capabilities
+
 - Ninguna.
 
 ### Modified Capabilities
+
 - `project-modular-structure`: Migrar los módulos del backend de un diseño plano de enrutadores gordos a un diseño limpio Router-Controller-Service desacoplado.
 
 ## Impact

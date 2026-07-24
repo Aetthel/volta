@@ -16,7 +16,6 @@ The backend entrypoint (`backend/src/index.js`) currently mixes Express routing,
 
 ### Modified Capabilities
 
-
 ## Impact
 
 - `backend/src/index.js`: Simplified entry point code.

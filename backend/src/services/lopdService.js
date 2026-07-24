@@ -1,10 +1,10 @@
-import prisma from '../config/db.js';
-import { sendWelcomeMessage } from './botService.js';
+import prisma from "../config/db.js";
+import { sendWelcomeMessage } from "./botService.js";
 
 export const getClientConsent = async (id) => {
   return prisma.client.findUnique({
     where: { id },
-    include: { business: true }
+    include: { business: true },
   });
 };
 
@@ -12,7 +12,7 @@ export const acceptConsent = async (id) => {
   // Actualizar el estado LOPD del cliente
   const updatedClient = await prisma.client.update({
     where: { id },
-    data: { lopdStatus: 'Aceptado' }
+    data: { lopdStatus: "Aceptado" },
   });
 
   // Buscar citas futuras pendientes y enviar mensajes de bienvenida
@@ -20,8 +20,8 @@ export const acceptConsent = async (id) => {
     where: {
       clientId: id,
       appointmentDate: { gte: new Date() },
-      status: 'PENDING'
-    }
+      status: "PENDING",
+    },
   });
 
   for (const appt of futureAppointments) {

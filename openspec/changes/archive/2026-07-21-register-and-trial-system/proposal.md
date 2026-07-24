@@ -16,11 +16,13 @@ Además, para mantener informado al usuario sobre el estado de su cuenta y promo
 ## Capabilities
 
 ### New Capabilities
+
 - `user-registration-flow`: Formulario público de registro de nuevos negocios con selección de tipo de actividad y creación automática de usuario ADMIN.
 - `trial-period-management`: Gestión automática de la prueba de 10 días en Plan Pro (25€/mes), cálculo de días restantes y restricción al vencer.
 - `top-trial-banner`: Componente visual en la parte superior del dashboard que indica los días restantes de prueba e invita a seleccionar plan.
 
 ### Modified Capabilities
+
 - `business-settings`: Añadir soporte para guardar el tipo/categoría de negocio (`businessType`) y el plan de suscripción (`subscriptionPlan`).
 - `alerts-system`: Generar alertas automáticas de estado de cuenta/prueba vinculadas al banner y centro de notificaciones.
 

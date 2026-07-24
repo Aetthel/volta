@@ -48,9 +48,7 @@ function HeaderContent({
   const { alerts, markAsRead, markAllAsRead, hasUnread } = useAlerts();
 
   const safeAlerts = Array.isArray(alerts) ? alerts : [];
-  const emergenteAlerts = safeAlerts.filter(
-    (a) => a.type === "EMERGENTE" && !a.isRead,
-  );
+  const emergenteAlerts = safeAlerts.filter((a) => a.type === "EMERGENTE" && !a.isRead);
   const standardAlerts = safeAlerts.filter((a) => a.type !== "EMERGENTE");
   const totalEmergentes = emergenteAlerts.length;
   const currentEmergente = emergenteAlerts[emergenteIndex];
@@ -113,9 +111,7 @@ function HeaderContent({
   };
 
   const unreadCount = standardAlerts.filter((a) => !a.isRead).length;
-  const filteredAlerts = standardAlerts.filter(
-    (a) => activeTab === "all" || !a.isRead,
-  );
+  const filteredAlerts = standardAlerts.filter((a) => activeTab === "all" || !a.isRead);
 
   const groupKeys: string[] = [];
   const groupedAlerts: { [key: string]: typeof standardAlerts } = {};
@@ -149,19 +145,17 @@ function HeaderContent({
         {isNotificationsOpen && (
           <>
             {/* Backdrop overlay */}
-            <div
-              className="fixed inset-0 z-30"
-              onClick={() => setIsNotificationsOpen(false)}
-            />
+            <div className="fixed inset-0 z-30" onClick={() => setIsNotificationsOpen(false)} />
 
             {/* Notification Dropdown (redesigned matching the screenshot) */}
             <div className="absolute right-0 mt-2 w-[420px] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-40 flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
-              
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
-                <h2 className="font-display text-headline-sm font-bold text-on-surface">Notificaciones</h2>
-                <button 
-                  onClick={() => setIsNotificationsOpen(false)} 
+                <h2 className="font-display text-headline-sm font-bold text-on-surface">
+                  Notificaciones
+                </h2>
+                <button
+                  onClick={() => setIsNotificationsOpen(false)}
                   className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors"
                   aria-label="Cerrar"
                 >
@@ -173,9 +167,9 @@ function HeaderContent({
               <div className="px-6 py-3 border-b border-outline-variant/20">
                 <div className="flex bg-surface-container-low rounded-xl p-1 border border-outline-variant/40">
                   <button
-                    onClick={() => setActiveTab('all')}
+                    onClick={() => setActiveTab("all")}
                     className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                      activeTab === 'all'
+                      activeTab === "all"
                         ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/30"
                         : "text-on-surface-variant hover:text-on-surface"
                     }`}
@@ -183,9 +177,9 @@ function HeaderContent({
                     Todas
                   </button>
                   <button
-                    onClick={() => setActiveTab('unread')}
+                    onClick={() => setActiveTab("unread")}
                     className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                      activeTab === 'unread'
+                      activeTab === "unread"
                         ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/30"
                         : "text-on-surface-variant hover:text-on-surface"
                     }`}
@@ -246,13 +240,21 @@ function HeaderContent({
                         )}
                         <div className="flex items-center gap-0.5">
                           <button
-                            onClick={() => setEmergenteIndex((prev) => prev === 0 ? totalEmergentes - 1 : prev - 1)}
+                            onClick={() =>
+                              setEmergenteIndex((prev) =>
+                                prev === 0 ? totalEmergentes - 1 : prev - 1
+                              )
+                            }
                             className="p-1 rounded-md hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors"
                           >
                             <ChevronLeft className="w-3.5 h-3.5" />
                           </button>
                           <button
-                            onClick={() => setEmergenteIndex((prev) => prev === totalEmergentes - 1 ? 0 : prev + 1)}
+                            onClick={() =>
+                              setEmergenteIndex((prev) =>
+                                prev === totalEmergentes - 1 ? 0 : prev + 1
+                              )
+                            }
                             className="p-1 rounded-md hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors"
                           >
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -280,7 +282,11 @@ function HeaderContent({
                     <div key={groupKey} className="py-4 first:pt-0 last:pb-0">
                       {/* Group Title Header */}
                       <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-4 mt-1 first:mt-0">
-                        {groupKey === "Today" ? "Hoy" : groupKey === "Yesterday" ? "Ayer" : groupKey}
+                        {groupKey === "Today"
+                          ? "Hoy"
+                          : groupKey === "Yesterday"
+                            ? "Ayer"
+                            : groupKey}
                       </div>
 
                       {/* Group Items */}
@@ -288,7 +294,12 @@ function HeaderContent({
                         {groupedAlerts[groupKey].map((alert) => {
                           const isAviso = alert.type === "AVISO";
                           const timeText = getRelativeTime(alert.createdAt);
-                          const timestamp = groupKey === "Today" ? `Hoy • ${timeText}` : groupKey === "Yesterday" ? `Ayer • ${timeText}` : `${groupKey} • ${new Date(alert.createdAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
+                          const timestamp =
+                            groupKey === "Today"
+                              ? `Hoy • ${timeText}`
+                              : groupKey === "Yesterday"
+                                ? `Ayer • ${timeText}`
+                                : `${groupKey} • ${new Date(alert.createdAt).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
 
                           return (
                             <div
@@ -402,10 +413,7 @@ function HeaderContent({
         {isDropdownOpen && (
           <>
             {/* Backdrop overlay */}
-            <div
-              className="fixed inset-0 z-30"
-              onClick={() => setIsDropdownOpen(false)}
-            />
+            <div className="fixed inset-0 z-30" onClick={() => setIsDropdownOpen(false)} />
 
             <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-md shadow-lg py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
               <Link
@@ -413,24 +421,21 @@ function HeaderContent({
                 onClick={() => setIsDropdownOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 text-label-md font-label-md font-medium text-on-surface hover:bg-surface-variant hover:text-primary transition-colors cursor-pointer w-full text-left relative z-50"
               >
-                <Settings
-                  data-icon="settings"
-                  className="text-on-surface-variant w-4 h-4"
-                />
+                <Settings data-icon="settings" className="text-on-surface-variant w-4 h-4" />
                 <span>Ajustes</span>
               </Link>
 
               <button
                 onClick={async () => {
                   setIsDropdownOpen(false);
-                  if (session?.user?.businessId && session?.user?.subscriptionStatus === "DEMO_SANDBOX") {
+                  if (
+                    session?.user?.businessId &&
+                    session?.user?.subscriptionStatus === "DEMO_SANDBOX"
+                  ) {
                     try {
-                      await fetch(
-                        `/api/backend/demo?businessId=${session.user.businessId}`,
-                        {
-                          method: "DELETE",
-                        },
-                      );
+                      await fetch(`/api/backend/demo?businessId=${session.user.businessId}`, {
+                        method: "DELETE",
+                      });
                     } catch (e) {
                       // Best-effort cleanup
                     }

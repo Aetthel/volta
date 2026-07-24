@@ -6,4 +6,3 @@
 
 - [x] 2.1 Refactor the "Citas de Hoy" card header in `frontend/app/inicio/page.tsx` to remove the date/day subtitle and the total appointments badge.
 - [x] 2.2 Add `CalendarIcon` to the card title flex container in `frontend/app/inicio/page.tsx` to align it with adjacent cards.
-

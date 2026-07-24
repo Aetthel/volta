@@ -5,6 +5,7 @@ Ajuste del espaciado del dashboard para usar los tokens del sistema de diseño d
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Unificar la separación vertical (`margin-bottom`) y horizontal (`gap`) entre todos los bloques y tarjetas del dashboard a exactamente `1.5rem` (`24px`).
 - Usar el token semántico `gutter` en lugar de valores fijos de Tailwind (`gap-6`, `mb-8`, etc.) para permitir escalabilidad futura en caso de cambios en el sistema de diseño.
 

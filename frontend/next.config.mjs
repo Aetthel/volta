@@ -1,7 +1,7 @@
-import path from 'path';
+import path from "path";
 
 /** @type {import('next').NextConfig} */
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig = {
   output: "standalone",
@@ -13,12 +13,7 @@ const nextConfig = {
   },
   serverExternalPackages: ["backend", "whatsapp-web.js"],
   // Allow external origins to connect to the Next.js dev server HMR WebSocket.
-  allowedDevOrigins: [
-    "*.trycloudflare.com",
-    "192.168.*",
-    "10.*",
-    "172.*",
-  ],
+  allowedDevOrigins: ["*.trycloudflare.com", "192.168.*", "10.*", "172.*"],
   async headers() {
     return [
       {

@@ -1,13 +1,13 @@
-import * as catalogService from '../services/catalogService.js';
-import * as businessService from '../services/businessService.js';
-import { ApiResponse } from '../utils/index.js';
+import * as catalogService from "../services/catalogService.js";
+import * as businessService from "../services/businessService.js";
+import { ApiResponse } from "../utils/index.js";
 
 export const getServices = async (req, res) => {
   const { businessId } = req.query;
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
+  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const services = await catalogService.getServicesByBusiness(businessId, true);
@@ -18,13 +18,13 @@ export const createService = async (req, res) => {
   const { businessId, name, description, duration, price, capacity } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
+  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const business = await businessService.getBusinessById(businessId);
   if (!business) {
-    return res.status(404).json({ error: 'Negocio no encontrado' });
+    return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
   const service = await catalogService.createService({
@@ -33,7 +33,7 @@ export const createService = async (req, res) => {
     description,
     duration,
     price,
-    capacity: capacity !== undefined ? parseInt(capacity, 10) : 1
+    capacity: capacity !== undefined ? parseInt(capacity, 10) : 1,
   });
 
   return ApiResponse.created(res, service);
@@ -45,12 +45,12 @@ export const updateService = async (req, res) => {
 
   const service = await catalogService.getServiceById(id);
   if (!service) {
-    return res.status(404).json({ error: 'Servicio no encontrado' });
+    return res.status(404).json({ error: "Servicio no encontrado" });
   }
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && service.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este servicio' });
+  if (req.user.role !== "ADMIN" && service.businessId !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este servicio" });
   }
 
   const updatedData = { name, description, duration, price, isActive };
@@ -68,12 +68,12 @@ export const deleteService = async (req, res) => {
 
   const service = await catalogService.getServiceById(id);
   if (!service) {
-    return res.status(404).json({ error: 'Servicio no encontrado' });
+    return res.status(404).json({ error: "Servicio no encontrado" });
   }
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && service.businessId !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este servicio' });
+  if (req.user.role !== "ADMIN" && service.businessId !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este servicio" });
   }
 
   await catalogService.softDeleteService(id);

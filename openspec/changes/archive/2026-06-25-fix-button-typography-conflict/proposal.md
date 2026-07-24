@@ -10,7 +10,7 @@ Corregir el conflicto de fusión de clases de `tailwind-merge` en el componente 
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

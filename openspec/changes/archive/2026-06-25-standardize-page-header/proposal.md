@@ -17,7 +17,7 @@ Actualmente, las cabeceras de título y descripción de las páginas principales
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

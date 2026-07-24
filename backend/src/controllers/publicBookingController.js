@@ -1,5 +1,5 @@
-import prisma from '../config/db.js';
-import { ApiResponse } from '../utils/index.js';
+import prisma from "../config/db.js";
+import { ApiResponse } from "../utils/index.js";
 
 export const getPublicBusinessData = async (req, res) => {
   const { businessId } = req.params;
@@ -18,21 +18,23 @@ export const getPublicBusinessData = async (req, res) => {
       themeColor: true,
       enablePublicBooking: true,
       hours: {
-        orderBy: { dayOfWeek: 'asc' }
+        orderBy: { dayOfWeek: "asc" },
       },
       services: {
         where: { isActive: true },
-        orderBy: { name: 'asc' }
-      }
-    }
+        orderBy: { name: "asc" },
+      },
+    },
   });
 
   if (!business) {
-    return res.status(404).json({ error: 'Negocio no encontrado' });
+    return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
   if (business.enablePublicBooking === false) {
-    return res.status(403).json({ error: 'Las reservas públicas están desactivadas para este negocio.' });
+    return res
+      .status(403)
+      .json({ error: "Las reservas públicas están desactivadas para este negocio." });
   }
 
   return ApiResponse.success(res, business);
@@ -42,27 +44,29 @@ export const createPublicBooking = async (req, res) => {
   const { businessId, serviceId, appointmentDate, clientName, clientPhone, clientEmail } = req.body;
 
   if (!businessId || !serviceId || !appointmentDate || !clientName || !clientPhone) {
-    return res.status(400).json({ error: 'Todos los campos obligatorios deben ser completados.' });
+    return res.status(400).json({ error: "Todos los campos obligatorios deben ser completados." });
   }
 
   const business = await prisma.business.findUnique({
-    where: { id: businessId }
+    where: { id: businessId },
   });
 
   if (!business) {
-    return res.status(404).json({ error: 'Negocio no encontrado' });
+    return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
   if (business.enablePublicBooking === false) {
-    return res.status(403).json({ error: 'Las reservas públicas están desactivadas para este negocio.' });
+    return res
+      .status(403)
+      .json({ error: "Las reservas públicas están desactivadas para este negocio." });
   }
 
   const service = await prisma.service.findUnique({
-    where: { id: serviceId }
+    where: { id: serviceId },
   });
 
   if (!service || !service.isActive || service.businessId !== businessId) {
-    return res.status(404).json({ error: 'Servicio no disponible' });
+    return res.status(404).json({ error: "Servicio no disponible" });
   }
 
   const targetDate = new Date(appointmentDate);
@@ -74,12 +78,12 @@ export const createPublicBooking = async (req, res) => {
         businessId,
         serviceId,
         appointmentDate: targetDate,
-        status: { in: ['PENDING', 'SENT'] }
-      }
+        status: { in: ["PENDING", "SENT"] },
+      },
     });
 
     if (existingBookings >= service.capacity) {
-      return res.status(400).json({ error: 'Este horario ha alcanzado su aforo máximo.' });
+      return res.status(400).json({ error: "Este horario ha alcanzado su aforo máximo." });
     }
   }
 
@@ -88,20 +92,20 @@ export const createPublicBooking = async (req, res) => {
   let client = await prisma.client.findFirst({
     where: {
       businessId,
-      phone: cleanPhone
-    }
+      phone: cleanPhone,
+    },
   });
 
   if (!client) {
     client = await prisma.client.create({
       data: {
         name: clientName,
-        surname: '',
+        surname: "",
         phone: cleanPhone,
         email: clientEmail ? clientEmail.trim() : null,
         businessId,
-        frequentService: service.name
-      }
+        frequentService: service.name,
+      },
     });
   }
 
@@ -114,13 +118,13 @@ export const createPublicBooking = async (req, res) => {
       clientPhone: cleanPhone,
       serviceName: service.name,
       appointmentDate: targetDate,
-      status: 'PENDING'
-    }
+      status: "PENDING",
+    },
   });
 
   return ApiResponse.created(res, {
     appointment,
     client,
-    service
+    service,
   });
 };

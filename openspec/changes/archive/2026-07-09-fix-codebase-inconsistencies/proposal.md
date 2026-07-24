@@ -1,6 +1,7 @@
 ## Why
 
 Several inconsistencies and security gaps have been identified across the Volta codebase:
+
 1. Backend route handlers for appointments, services, and WhatsApp do not enforce tenant isolation locally, relying solely on the frontend proxy, which exposes endpoints if accessed directly.
 2. The frontend calendar view has a month naming bug that displays "Diciembre" or "undefined" for months in the second half of the year.
 3. The frontend lacks role-based UI route protection for administrative routes (`/admin` and `/sedes`), causing unauthorized users to see broken skeletons instead of an access denied page.
@@ -18,9 +19,11 @@ Several inconsistencies and security gaps have been identified across the Volta 
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `multitenant-core`: Enforce strict server-side tenant checks in all core backend endpoints.
 - `web-authentication`: Add role-based UI route protection for `/admin` and `/sedes` on the client side.
 - `whatsapp-integration`: Ensure Puppeteer readiness checks are consistently called before sending notifications.

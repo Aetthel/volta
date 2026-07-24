@@ -15,7 +15,7 @@ export default function UpgradeProModal({
   isOpen,
   onClose,
   title = "Desbloquea el Plan Pro",
-  description = "Para acceder a esta función (multisede, miembros ilimitados o recordatorios por WhatsApp), actualiza tu cuenta a Plan Pro (25€/mes)."
+  description = "Para acceder a esta función (multisede, miembros ilimitados o recordatorios por WhatsApp), actualiza tu cuenta a Plan Pro (25€/mes).",
 }: UpgradeProModalProps) {
   if (!isOpen) return null;
 
@@ -39,12 +39,8 @@ export default function UpgradeProModal({
           <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
             Ventaja Exclusiva Pro
           </span>
-          <h3 className="text-2xl font-bold text-on-surface tracking-tight">
-            {title}
-          </h3>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            {description}
-          </p>
+          <h3 className="text-2xl font-bold text-on-surface tracking-tight">{title}</h3>
+          <p className="text-sm text-on-surface-variant leading-relaxed">{description}</p>
         </div>
 
         {/* Feature List */}

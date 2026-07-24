@@ -5,7 +5,6 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-screen w-screen bg-surface flex flex-col justify-center items-center p-6 select-none">
       <div className="max-w-md w-full bg-surface-container-lowest border border-outline-variant p-8 rounded-2xl shadow-lg flex flex-col gap-6 items-center text-center animate-in fade-in zoom-in-95 duration-200">
-        
         {/* Help Icon */}
         <div className="size-16 rounded-full bg-secondary-container flex items-center justify-center text-secondary">
           <HelpCircle className="size-8" />

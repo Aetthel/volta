@@ -5,12 +5,14 @@ The left color stripe borders on calendar cards will be removed, corner rounding
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Remove left border stripe.
 - Set background to `app.colorClass`.
 - Apply `rounded-[4px]` and `rounded-[6px]`.
 - Use inheritance with opacity for text colors inside cards.
 
 **Non-Goals:**
+
 - Modifying backend models or REST APIs.
 
 ## Decisions

@@ -5,6 +5,7 @@ Corrección del conflicto de tailwind-merge en Button.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Resolver el descarte de la clase `text-on-primary` en el componente `Button` sin perder el tamaño tipográfico de la marca.
 
 ## Decisions

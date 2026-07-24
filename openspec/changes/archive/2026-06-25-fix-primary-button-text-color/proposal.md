@@ -10,7 +10,7 @@ Corregir el color de texto del botón principal (que actualmente se muestra oscu
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

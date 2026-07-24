@@ -20,12 +20,14 @@ Actualmente, el sistema de mensajería automática y recordatorios no está inte
 ## Capabilities
 
 ### New Capabilities
+
 - `whatsapp-gateway-management`: Control del ciclo de vida del cliente de WhatsApp (inicialización, desconexión y lectura del estado/QR de emparejamiento).
 - `automated-messaging-templates`: Administración y edición de plantillas de confirmación de reserva y recordatorios diarios de cita.
 - `lopd-consent-workflow`: Flujo de consentimiento LOPD (envío automatizado del enlace de aceptación, página pública del cliente y desbloqueo de notificaciones retenidas al firmar).
 
 ### Modified Capabilities
-*(Ninguna)*
+
+_(Ninguna)_
 
 ## Impact
 

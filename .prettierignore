@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+build
+dist
+.pnpm-store
+.wwebjs_auth
+.wwebjs_cache
+coverage
+src/generated
+backend/src/generated
+*.log
+pnpm-lock.yaml

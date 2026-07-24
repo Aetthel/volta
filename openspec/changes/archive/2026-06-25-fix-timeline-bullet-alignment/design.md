@@ -5,10 +5,12 @@ Corrección del desfase horizontal de los círculos del timeline.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Centrar exactamente el nodo circular del timeline sobre la línea vertical.
 - Evitar el uso de clases conflictivas de translate horizontal y vertical en Tailwind v4.
 
 **Non-Goals:**
+
 - Modificar otros aspectos visuales.
 
 ## Decisions

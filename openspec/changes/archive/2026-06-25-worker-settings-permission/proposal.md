@@ -12,7 +12,7 @@ Actualmente, los trabajadores con rol `EMPLEADO` no tienen acceso a la vista de 
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

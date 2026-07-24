@@ -53,15 +53,15 @@ export default function MetricCard({
   const TrendIcon = trendStyles.icon;
 
   return (
-    <Card
-      className={cn(
-        "p-4 sm:p-6 flex flex-col gap-2 sm:gap-3",
-        className,
-      )}
-    >
+    <Card className={cn("p-4 sm:p-6 flex flex-col gap-2 sm:gap-3", className)}>
       <div className="flex justify-between items-start">
         {/* Metric Icon Wrapper */}
-        <div className={cn("p-1 sm:p-1.5 bg-surface-container text-primary rounded-lg shrink-0 transition-colors", iconClassName)}>
+        <div
+          className={cn(
+            "p-1 sm:p-1.5 bg-surface-container text-primary rounded-lg shrink-0 transition-colors",
+            iconClassName
+          )}
+        >
           {icon}
         </div>
 
@@ -102,4 +102,3 @@ export default function MetricCard({
     </Card>
   );
 }
-

@@ -1,25 +1,31 @@
-import prisma from '../config/db.js';
-import { sendWelcomeMessage, sendConsentMessage } from './botService.js';
-import { normalizeString, normalizePhone } from '../utils/index.js';
-import { logger } from '../utils/logger.js';
+import prisma from "../config/db.js";
+import { sendWelcomeMessage, sendConsentMessage } from "./botService.js";
+import { normalizeString, normalizePhone } from "../utils/index.js";
+import { logger } from "../utils/logger.js";
 
 export const getAppointmentsByBusiness = async (businessId) => {
   return await prisma.appointment.findMany({
     where: { businessId },
     include: { client: true },
-    orderBy: { appointmentDate: 'asc' }
+    orderBy: { appointmentDate: "asc" },
   });
 };
 
 export const createAppointment = async (appointmentData) => {
-  const { clientName, clientPhone, appointmentDate, businessId, service: reqService } = appointmentData;
+  const {
+    clientName,
+    clientPhone,
+    appointmentDate,
+    businessId,
+    service: reqService,
+  } = appointmentData;
 
   const business = await prisma.business.findUnique({
-    where: { id: businessId }
+    where: { id: businessId },
   });
 
   if (!business) {
-    const error = new Error('Business not found');
+    const error = new Error("Business not found");
     error.statusCode = 404;
     throw error;
   }
@@ -30,8 +36,8 @@ export const createAppointment = async (appointmentData) => {
   let client = await prisma.client.findFirst({
     where: {
       businessId,
-      phone: inputPhone
-    }
+      phone: inputPhone,
+    },
   });
 
   // 2. Fall back to searching by name and surname if phone didn't match
@@ -43,9 +49,9 @@ export const createAppointment = async (appointmentData) => {
     client = await prisma.client.findFirst({
       where: {
         businessId,
-        name: { equals: firstName, mode: 'insensitive' },
-        surname: { equals: surname || "", mode: 'insensitive' }
-      }
+        name: { equals: firstName, mode: "insensitive" },
+        surname: { equals: surname || "", mode: "insensitive" },
+      },
     });
   }
 
@@ -63,8 +69,8 @@ export const createAppointment = async (appointmentData) => {
         lopdStatus: "Pendiente",
         businessId,
         frequentService: reqService || null,
-        lastVisit: "Hoy"
-      }
+        lastVisit: "Hoy",
+      },
     });
     logger.info(`[Service] Automatically registered new LOPD-pending client: ${client.id}`);
   }
@@ -78,8 +84,8 @@ export const createAppointment = async (appointmentData) => {
       where: {
         businessId,
         name: serviceName,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
     if (dbService) {
       serviceId = dbService.id;
@@ -96,17 +102,17 @@ export const createAppointment = async (appointmentData) => {
       clientId: client.id,
       serviceId,
       serviceName,
-      status: 'PENDING'
-    }
+      status: "PENDING",
+    },
   });
 
-  if (client.lopdStatus === 'Aceptado') {
+  if (client.lopdStatus === "Aceptado") {
     sendWelcomeMessage(appointment.id).catch((err) => {
-      logger.error('[Service] Error sending welcome message on appointment creation:', err);
+      logger.error("[Service] Error sending welcome message on appointment creation:", err);
     });
   } else {
     sendConsentMessage(businessId, client).catch((err) => {
-      logger.error('[Service] Error sending LOPD consent request:', err);
+      logger.error("[Service] Error sending LOPD consent request:", err);
     });
   }
 
@@ -127,8 +133,8 @@ export const updateAppointment = async (id, updateData, businessId) => {
         where: {
           businessId,
           name: updateData.serviceName,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
       if (dbService) {
         data.serviceId = dbService.id;
@@ -142,18 +148,18 @@ export const updateAppointment = async (id, updateData, businessId) => {
 
   return await prisma.appointment.update({
     where: { id },
-    data
+    data,
   });
 };
 
 export const deleteAppointment = async (id) => {
   return await prisma.appointment.delete({
-    where: { id }
+    where: { id },
   });
 };
 
 export const getAppointmentById = async (id) => {
   return await prisma.appointment.findUnique({
-    where: { id }
+    where: { id },
   });
 };

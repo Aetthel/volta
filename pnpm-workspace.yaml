@@ -2,7 +2,7 @@ packages:
   - "frontend"
   - "backend"
 allowBuilds:
-  '@prisma/engines': true
+  "@prisma/engines": true
   prisma: true
   puppeteer: true
   sharp: true

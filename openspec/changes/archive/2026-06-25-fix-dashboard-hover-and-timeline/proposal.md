@@ -11,7 +11,7 @@ Ajustar detalles visuales finales en el dashboard para mejorar la precisión del
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

@@ -40,7 +40,23 @@ import { WeeklyPerformanceChart } from "@/components/WeeklyPerformanceChart";
 import { FeaturedServicesList } from "@/components/FeaturedServicesList";
 import { UpcomingAppointmentsList } from "@/components/UpcomingAppointmentsList";
 import AddClientModal from "@/components/AddClientModal";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, Separator, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton } from "@/components/ui/volta-ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  Empty,
+  Separator,
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  PageHeader,
+  Skeleton,
+} from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 
 interface AppointmentItem {
@@ -60,7 +76,7 @@ const DEFAULT_SERVICES = [
   { name: "Coloración Premium", price: 85 },
   { name: "Tratamiento Keratina", price: 50 },
   { name: "Manicura", price: 20 },
-  { name: "Spa Facial", price: 40 }
+  { name: "Spa Facial", price: 40 },
 ];
 
 export default function DashboardPage() {
@@ -69,7 +85,9 @@ export default function DashboardPage() {
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-  const [appointmentModalTriggerRect, setAppointmentModalTriggerRect] = useState<DOMRect | null>(null);
+  const [appointmentModalTriggerRect, setAppointmentModalTriggerRect] = useState<DOMRect | null>(
+    null
+  );
   const [clientModalTriggerRect, setClientModalTriggerRect] = useState<DOMRect | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -161,7 +179,8 @@ export default function DashboardPage() {
   };
 
   const handleDeleteAppointment = (id: string) => {
-    if (!window.confirm("¿Seguro que deseas eliminar esta cita? Esta acción no se puede deshacer.")) return;
+    if (!window.confirm("¿Seguro que deseas eliminar esta cita? Esta acción no se puede deshacer."))
+      return;
     fetch(`/api/backend/appointments/${id}`, {
       method: "DELETE",
     })
@@ -206,14 +225,20 @@ export default function DashboardPage() {
   }).length;
 
   const dynamicPrices: Record<string, number> = {
-    ...DEFAULT_SERVICES.reduce((acc, s) => {
-      acc[s.name] = s.price;
-      return acc;
-    }, {} as Record<string, number>),
-    ...services.reduce((acc, s) => {
-      acc[s.name] = s.price;
-      return acc;
-    }, {} as Record<string, number>),
+    ...DEFAULT_SERVICES.reduce(
+      (acc, s) => {
+        acc[s.name] = s.price;
+        return acc;
+      },
+      {} as Record<string, number>
+    ),
+    ...services.reduce(
+      (acc, s) => {
+        acc[s.name] = s.price;
+        return acc;
+      },
+      {} as Record<string, number>
+    ),
   };
 
   const estimatedIncome = todayApps.reduce((acc, app) => {
@@ -229,14 +254,18 @@ export default function DashboardPage() {
       return `${d.getHours().toString().padStart(2, "0")}:00`;
     })
   ).size;
-  const occupancyPercentage = timeSlotsCount > 0 ? Math.round((bookedSlotsCount / timeSlotsCount) * 100) : 0;
+  const occupancyPercentage =
+    timeSlotsCount > 0 ? Math.round((bookedSlotsCount / timeSlotsCount) * 100) : 0;
 
   // 3. Most requested services ranking
-  const serviceCounts = appointments.reduce((acc, app) => {
-    const sName = app.serviceName || "Servicio General";
-    acc[sName] = (acc[sName] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const serviceCounts = appointments.reduce(
+    (acc, app) => {
+      const sName = app.serviceName || "Servicio General";
+      acc[sName] = (acc[sName] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   // 4. Bar chart weekly performance data (Monday to Sunday)
   const getStartOfWeek = () => {
@@ -276,15 +305,15 @@ export default function DashboardPage() {
   // 5. Featured services calculation (top 4 services, listing unused business/default services as 0%)
   const displayServiceShares = (() => {
     const totalAppointments = appointments.length;
-    
+
     // Create a map of all services initialized to 0
     const serviceMap: Record<string, { count: number; pct: number }> = {};
-    
+
     // Pre-populate with all business services
     services.forEach((s) => {
       if (s.name) serviceMap[s.name] = { count: 0, pct: 0 };
     });
-    
+
     // Pre-populate with default services if list is empty
     DEFAULT_SERVICES.forEach((s) => {
       if (!(s.name in serviceMap)) {
@@ -314,7 +343,7 @@ export default function DashboardPage() {
 
     // Sort: services with bookings first, then alphabetically or by ID
     list.sort((a, b) => b.count - a.count);
-    
+
     // Return top 4 with Scissors icon
     return list.slice(0, 4).map((s) => ({
       name: s.name,
@@ -338,7 +367,7 @@ export default function DashboardPage() {
     });
     let durationStr = "1h";
     if (app.duration) {
-      const mins = typeof app.duration === 'number' ? app.duration : parseInt(app.duration, 10);
+      const mins = typeof app.duration === "number" ? app.duration : parseInt(app.duration, 10);
       if (!isNaN(mins)) {
         if (mins >= 60) {
           const hrs = Math.floor(mins / 60);
@@ -349,7 +378,7 @@ export default function DashboardPage() {
         }
       }
     }
-    
+
     // Find the client in clients list to retrieve their real details from database
     const clientRecord = clients.find((c) => c.id === app.clientId || c.phone === app.clientPhone);
 
@@ -375,10 +404,12 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       {/* Sidebar navigation */}
-      <Sidebar onNewAppointmentClick={(e) => {
-        setAppointmentModalTriggerRect(e ? e.currentTarget.getBoundingClientRect() : null);
-        setIsAppointmentModalOpen(true);
-      }} />
+      <Sidebar
+        onNewAppointmentClick={(e) => {
+          setAppointmentModalTriggerRect(e ? e.currentTarget.getBoundingClientRect() : null);
+          setIsAppointmentModalOpen(true);
+        }}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
@@ -388,14 +419,25 @@ export default function DashboardPage() {
             title={greeting + (session?.user?.name ? ` ${session.user.name.split(" ")[0]}` : "")}
             description={
               <>
-                Tienes <strong className="text-on-surface">{todayApps.length}</strong> citas programadas.
+                Tienes <strong className="text-on-surface">{todayApps.length}</strong> citas
+                programadas.
                 {todayApps.length > 0 && (
                   <>
                     {" "}
-                    <strong className="text-primary">{todayApps.filter(a => a.status === "SENT").length}</strong> notificadas y{" "}
-                    <strong className={todayApps.filter(a => a.status === "ERROR").length > 0 ? "text-error" : "text-on-surface-variant"}>
-                      {todayApps.filter(a => a.status === "ERROR").length}
-                    </strong> con error.
+                    <strong className="text-primary">
+                      {todayApps.filter((a) => a.status === "SENT").length}
+                    </strong>{" "}
+                    notificadas y{" "}
+                    <strong
+                      className={
+                        todayApps.filter((a) => a.status === "ERROR").length > 0
+                          ? "text-error"
+                          : "text-on-surface-variant"
+                      }
+                    >
+                      {todayApps.filter((a) => a.status === "ERROR").length}
+                    </strong>{" "}
+                    con error.
                   </>
                 )}
               </>
@@ -406,7 +448,10 @@ export default function DashboardPage() {
           {isLoading ? (
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
               {[...Array(4)].map((_, i) => (
-                <Card key={i} className="p-5 h-[116px] flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <Card
+                  key={i}
+                  className="p-5 h-[116px] flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                >
                   <div className="flex justify-between items-center w-full">
                     <Skeleton className="w-24 h-4" />
                     <Skeleton className="w-8 h-8 rounded-full" />
@@ -472,7 +517,10 @@ export default function DashboardPage() {
                 <div className="flex-1 flex items-end gap-4 h-[200px] px-2 pb-4">
                   {[...Array(7)].map((_, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                      <Skeleton className="w-full rounded-t-sm" style={{ height: `${30 + (i % 3) * 40}px` }} />
+                      <Skeleton
+                        className="w-full rounded-t-sm"
+                        style={{ height: `${30 + (i % 3) * 40}px` }}
+                      />
                       <Skeleton className="w-8 h-4" />
                     </div>
                   ))}
@@ -499,27 +547,20 @@ export default function DashboardPage() {
               <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                 <div>
                   <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-medium text-xl text-on-surface">
-                      Rendimiento Semanal
-                    </h3>
+                    <h3 className="font-medium text-xl text-on-surface">Rendimiento Semanal</h3>
                     <div className="flex items-center text-body-sm font-semibold text-on-surface-variant border border-outline-variant rounded-lg px-3 py-1.5 bg-surface-container-low/50 cursor-pointer hover:bg-surface-container-high transition-colors">
                       <span>Esta Semana</span>
                       <ChevronDown className="w-4 h-4 ml-1.5 text-on-surface-variant" />
                     </div>
                   </div>
 
-                  <WeeklyPerformanceChart
-                    data={weeklyData}
-                    maxCount={maxWeeklyCount}
-                  />
+                  <WeeklyPerformanceChart data={weeklyData} maxCount={maxWeeklyCount} />
                 </div>
               </Card>
 
               {/* Featured Services */}
               <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                <h3 className="font-medium text-xl text-on-surface mb-6">
-                  Servicios Destacados
-                </h3>
+                <h3 className="font-medium text-xl text-on-surface mb-6">Servicios Destacados</h3>
                 <FeaturedServicesList services={displayServiceShares} />
               </Card>
             </section>
@@ -528,10 +569,11 @@ export default function DashboardPage() {
           {/* Upcoming Appointments section */}
           <section>
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-xl text-on-surface">
-                Próximas Citas
-              </h3>
-              <Link href="/agenda" className="text-body-sm font-bold text-primary hover:text-primary/80 hover:underline transition-colors">
+              <h3 className="font-medium text-xl text-on-surface">Próximas Citas</h3>
+              <Link
+                href="/agenda"
+                className="text-body-sm font-bold text-primary hover:text-primary/80 hover:underline transition-colors"
+              >
                 Ver todas
               </Link>
             </div>
@@ -539,7 +581,10 @@ export default function DashboardPage() {
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                 {[...Array(3)].map((_, i) => (
-                  <Card key={i} className="p-4 flex items-center justify-between bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] h-[84px]">
+                  <Card
+                    key={i}
+                    className="p-4 flex items-center justify-between bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.03)] h-[84px]"
+                  >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <Skeleton className="w-12 h-12 rounded-full shrink-0" />
                       <div className="flex flex-col gap-1.5">
@@ -671,12 +716,17 @@ function DashboardAlertsCarousel() {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={handleClose}>
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onClick={handleClose}
+    >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-md" />
       {/* Modal Card */}
-      <div className="relative bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-        
+      <div
+        className="relative bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
           <div className="flex items-center gap-3">

@@ -5,11 +5,13 @@ The dashboard (`/inicio`) consists of a top stats bar, today's appointments list
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Restructure layout grid to `md:grid-cols-10` with `md:col-span-6` for appointments and `md:col-span-4` for utilities.
 - Remove fixed height constraints and vertical scroll controls inside individual cards, adapting them to natural height flows.
 - Guarantee fully responsive design on mobile, tablet, and desktop screens.
 
 **Non-Goals:**
+
 - Modifying backend models or REST APIs.
 - Adding new external packages or styling libraries.
 

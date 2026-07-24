@@ -1,6 +1,7 @@
 ## Why
 
 The frontend codebase contains several inconsistencies and code smells that violate the styling standards defined in [GEMINI.md](file:///Users/kore/Documents/Code/Projects/volta/GEMINI.md):
+
 - **Utility and Custom Layout Duplication**: Raw `<button>` and `<input>` elements are used in screens like `clientes/page.tsx`, `login/page.tsx`, and `sedes/page.tsx` instead of reusing the unified UI components defined in `volta-ui.tsx`.
 - **Custom Notification Toast Duplication**: Inconsistent HTML structure and custom colors are used for alert overlays, instead of reusing the standard `<Alert>` component.
 - **Icon Sizing Classes**: Explicit sizing classes (e.g., `w-4 h-4`, `w-5 h-5`) are hardcoded on Lucide icons, overriding/redundantly duplicating the global stylesheet definition (`globals.css`) that styles icons automatically using `[data-icon]`.

@@ -12,7 +12,7 @@ Actualmente, las distintas vistas de Volta (/inicio, /agenda, /clientes, /ajuste
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

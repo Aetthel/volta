@@ -1,5 +1,5 @@
-import prisma from '../config/db.js';
-import bcrypt from 'bcryptjs';
+import prisma from "../config/db.js";
+import bcrypt from "bcryptjs";
 
 /**
  * Cascade-delete a business and all its related data within a transaction.
@@ -18,7 +18,7 @@ export const deleteBusinessCascade = async (businessId, tx) => {
 
 export const getAllBusinesses = async () => {
   return prisma.business.findMany({
-    orderBy: { name: 'asc' }
+    orderBy: { name: "asc" },
   });
 };
 
@@ -31,8 +31,8 @@ export const createBusiness = async ({ name, email, phone, address }, password) 
         name,
         email,
         phone,
-        address: address || '',
-      }
+        address: address || "",
+      },
     });
 
     await tx.user.create({
@@ -40,34 +40,70 @@ export const createBusiness = async ({ name, email, phone, address }, password) 
         name: `${name} Encargado`,
         email,
         password: hashedPass,
-        role: 'JEFE',
-        businessId: biz.id
-      }
+        role: "JEFE",
+        businessId: biz.id,
+      },
     });
 
     // Seed default services for this business
     await tx.service.createMany({
       data: [
-        { businessId: biz.id, name: 'Corte Caballero', duration: 30, price: 35.0 },
-        { businessId: biz.id, name: 'Corte Dama', duration: 45, price: 45.0 },
-        { businessId: biz.id, name: 'Coloración Premium', duration: 90, price: 85.0 },
-        { businessId: biz.id, name: 'Tratamiento Keratina', duration: 60, price: 50.0 },
-        { businessId: biz.id, name: 'Manicura', duration: 30, price: 20.0 },
-        { businessId: biz.id, name: 'Spa Facial', duration: 45, price: 40.0 }
-      ]
+        { businessId: biz.id, name: "Corte Caballero", duration: 30, price: 35.0 },
+        { businessId: biz.id, name: "Corte Dama", duration: 45, price: 45.0 },
+        { businessId: biz.id, name: "Coloración Premium", duration: 90, price: 85.0 },
+        { businessId: biz.id, name: "Tratamiento Keratina", duration: 60, price: 50.0 },
+        { businessId: biz.id, name: "Manicura", duration: 30, price: 20.0 },
+        { businessId: biz.id, name: "Spa Facial", duration: 45, price: 40.0 },
+      ],
     });
 
     // Seed default business hours
     await tx.businessHours.createMany({
       data: [
-        { businessId: biz.id, dayOfWeek: 1, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 2, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 3, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 4, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 5, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 6, openTime: '10:00', closeTime: '18:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 0, openTime: '09:00', closeTime: '20:00', isClosed: true }
-      ]
+        {
+          businessId: biz.id,
+          dayOfWeek: 1,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 2,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 3,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 4,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 5,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 6,
+          openTime: "10:00",
+          closeTime: "18:00",
+          isClosed: false,
+        },
+        { businessId: biz.id, dayOfWeek: 0, openTime: "09:00", closeTime: "20:00", isClosed: true },
+      ],
     });
 
     return biz;
@@ -86,7 +122,7 @@ export const getDashboardData = async () => {
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
   const businesses = await prisma.business.findMany({
-    select: { id: true, name: true }
+    select: { id: true, name: true },
   });
 
   const totalClients = await prisma.client.count();
@@ -96,7 +132,7 @@ export const getDashboardData = async () => {
     "Corte Dama": 45,
     "Coloración Premium": 85,
     "Tratamiento Keratina": 50,
-    "Manicura": 20,
+    Manicura: 20,
     "Spa Facial": 40,
   };
 
@@ -107,16 +143,16 @@ export const getDashboardData = async () => {
         appointmentDate: true,
         serviceName: true,
         service: { select: { price: true } },
-        client: { select: { frequentService: true } }
-      }
+        client: { select: { frequentService: true } },
+      },
     }),
     prisma.service.findMany({
-      select: { businessId: true, name: true, price: true }
+      select: { businessId: true, name: true, price: true },
     }),
     prisma.client.groupBy({
-      by: ['businessId'],
-      _count: { id: true }
-    })
+      by: ["businessId"],
+      _count: { id: true },
+    }),
   ]);
 
   // Index data by businessId
@@ -139,7 +175,7 @@ export const getDashboardData = async () => {
   }
 
   const clientCountMap = new Map(
-    clientCountsGrouped.map(item => [item.businessId, item._count.id])
+    clientCountsGrouped.map((item) => [item.businessId, item._count.id])
   );
 
   const rankings = [];
@@ -159,20 +195,20 @@ export const getDashboardData = async () => {
     for (const app of appointments) {
       let price = null;
 
-      if (app.service && typeof app.service.price === 'number') {
+      if (app.service && typeof app.service.price === "number") {
         price = app.service.price;
       }
 
       if (price === null && app.serviceName) {
-        const match = services.find(s => s.name === app.serviceName);
-        if (match && typeof match.price === 'number') {
+        const match = services.find((s) => s.name === app.serviceName);
+        if (match && typeof match.price === "number") {
           price = match.price;
         }
       }
 
       if (price === null && app.client && app.client.frequentService) {
-        const match = services.find(s => s.name === app.client.frequentService);
-        if (match && typeof match.price === 'number') {
+        const match = services.find((s) => s.name === app.client.frequentService);
+        if (match && typeof match.price === "number") {
           price = match.price;
         }
       }
@@ -192,9 +228,12 @@ export const getDashboardData = async () => {
     totalThisMonth += bizThisMonth;
     totalLastMonth += bizLastMonth;
 
-    const changePercent = bizLastMonth === 0
-      ? (bizThisMonth > 0 ? '+100%' : '0%')
-      : `${bizThisMonth >= bizLastMonth ? '+' : ''}${Math.round(((bizThisMonth - bizLastMonth) / bizLastMonth) * 100)}%`;
+    const changePercent =
+      bizLastMonth === 0
+        ? bizThisMonth > 0
+          ? "+100%"
+          : "0%"
+        : `${bizThisMonth >= bizLastMonth ? "+" : ""}${Math.round(((bizThisMonth - bizLastMonth) / bizLastMonth) * 100)}%`;
 
     rankings.push({
       name: biz.name,
@@ -216,9 +255,12 @@ export const getDashboardData = async () => {
   const totalAppointments = await prisma.appointment.count();
   const averageTicket = totalAppointments > 0 ? Math.round(totalRevenue / totalAppointments) : 35;
 
-  const globalGrowth = totalLastMonth === 0
-    ? (totalThisMonth > 0 ? '+100%' : '0%')
-    : `${totalThisMonth >= totalLastMonth ? '+' : ''}${Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100)}%`;
+  const globalGrowth =
+    totalLastMonth === 0
+      ? totalThisMonth > 0
+        ? "+100%"
+        : "0%"
+      : `${totalThisMonth >= totalLastMonth ? "+" : ""}${Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100)}%`;
 
   return {
     totalRevenue: `€${totalRevenue.toLocaleString()}`,

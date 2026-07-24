@@ -1,7 +1,9 @@
 ## Why
+
 Volta currently redirects the root route (`/`) immediately to the login screen, which doesn't allow prospective users or visitors to learn about the platform. We need a clean, SaaS-style landing/presentation page at `/` to showcase Volta's features, pricing, testimonials, and FAQs, projecting a high-end "clinical elegance" brand image.
 
 ## What Changes
+
 - **Change `/` Route Behavior**: Modify `frontend/app/page.tsx` to directly render the presentation landing page instead of redirecting immediately to `/login`.
 - **Implement SaaS Landing Page**: Design and code a responsive, clean SaaS presentation using:
   - Sticky header navigation with links to Features, Pricing, Testimonials, and buttons for Login/Get Started.
@@ -16,12 +18,15 @@ Volta currently redirects the root route (`/`) immediately to the login screen, 
 ## Capabilities
 
 ### New Capabilities
+
 - `landing-page`: Renders a clean, responsive SaaS presentation page at the root path (`/`) showcasing features, pricing, testimonials, FAQs, and legal terms under the Volta brand.
 
 ### Modified Capabilities
-*(None. The requirements for existing capabilities remain unchanged.)*
+
+_(None. The requirements for existing capabilities remain unchanged.)_
 
 ## Impact
+
 - **Routing**: `frontend/app/page.tsx` will no longer redirect to `/login` by default.
 - **Frontend Components**: Creation of a landing page layout and modular sub-sections in `frontend/app/` using primitives from `volta-ui.tsx` and utility functions.
 - **Design Tokens**: Standard CSS variables/classes defined in `globals.css` (Tailwind CSS 4) will be heavily utilized for spacing, colors, and typography.

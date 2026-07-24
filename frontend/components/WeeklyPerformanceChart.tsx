@@ -30,7 +30,10 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
           {data.map((d) => {
             const pct = (d.count / maxCount) * 100;
             return (
-              <div key={d.name} className="relative w-8 sm:w-12 flex justify-center items-end h-full group z-10">
+              <div
+                key={d.name}
+                className="relative w-8 sm:w-12 flex justify-center items-end h-full group z-10"
+              >
                 <div
                   className={cn(
                     "w-full rounded-t-[3px] transition-all duration-500 cursor-pointer shadow-sm",

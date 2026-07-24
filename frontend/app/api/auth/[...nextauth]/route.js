@@ -9,7 +9,9 @@ async function rateLimitedPost(request) {
 
   if (!allowed) {
     return new Response(
-      JSON.stringify({ error: `Demasiados intentos. Inténtalo de nuevo en ${retryAfter} segundos.` }),
+      JSON.stringify({
+        error: `Demasiados intentos. Inténtalo de nuevo en ${retryAfter} segundos.`,
+      }),
       {
         status: 429,
         headers: {
@@ -26,12 +28,17 @@ async function rateLimitedPost(request) {
 
   // Check if a new valid session cookie was actually assigned (ignore deletion/invalidation cookies)
   const setCookieHeader = response.headers.get("set-cookie") || "";
-  const setCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [setCookieHeader];
-  
-  const isValidSessionCreated = setCookies.some(cookie => {
+  const setCookies = response.headers.getSetCookie
+    ? response.headers.getSetCookie()
+    : [setCookieHeader];
+
+  const isValidSessionCreated = setCookies.some((cookie) => {
     const lower = cookie.toLowerCase();
     const isSession = lower.includes("session-token=");
-    const isCleared = lower.includes("max-age=0") || lower.includes("expires=thu, 01 jan 1970") || lower.includes("session-token=;");
+    const isCleared =
+      lower.includes("max-age=0") ||
+      lower.includes("expires=thu, 01 jan 1970") ||
+      lower.includes("session-token=;");
     return isSession && !isCleared;
   });
 

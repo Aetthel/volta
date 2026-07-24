@@ -13,9 +13,11 @@ Para lograr la excelencia total en la base de código del backend de Volta, requ
 ## Capabilities
 
 ### New Capabilities
+
 - Ninguna.
 
 ### Modified Capabilities
+
 - `project-modular-structure`: Refinar y robustecer la arquitectura física y lógica del backend de Volta.
 
 ## Impact

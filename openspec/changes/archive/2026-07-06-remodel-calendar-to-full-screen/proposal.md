@@ -20,9 +20,11 @@ To make the calendar view more useful, readable, and highly optimized for all sc
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `stitch-design-migration`: Redesign the calendar view to be full-bleed and introduce stylist dropdown filters.
 
 ## Impact

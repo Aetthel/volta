@@ -7,18 +7,21 @@ Para resolver esto, crearemos componentes unificados y reutilizables en `volta-u
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Implementar los componentes atómicos `<Select />`, `<Textarea />`, `<Skeleton />` y `<EmptyState />` en `volta-ui.tsx` bajo los estándares del proyecto (Clinical Elegance, base 18px).
 - Reemplazar todos los selectores y textareas nativos en los formularios modales (`AddClientModal`, `AddServiceModal`, `NewAppointmentModal`) con los nuevos componentes atómicos.
 - Refactorizar las secciones contenedoras manuales en `clientes/page.tsx`, `inicio/page.tsx`, `sedes/page.tsx` y `MetricCard.tsx` para que utilicen la composición unificada de `<Card />`.
 - Limpiar las clases tipográficas conflictivas redundantes en `ajustes/page.tsx`.
 
 **Non-Goals:**
+
 - No se migrarán a NextAuth otros mecanismos de autenticación ni se modificará el backend de la aplicación.
 - No se agregará una biblioteca externa de componentes (como Radix o Shadcn original) si las necesidades pueden resolverse con clases estándar y componentes nativos envueltos en `volta-ui.tsx`.
 
 ## Decisions
 
 ### 1. API y firma de los nuevos componentes de formulario en `volta-ui.tsx`
+
 - **Decisión**: Extender los tipos nativos de React (`React.SelectHTMLAttributes` y `React.TextareaHTMLAttributes`) para mantener compatibilidad total con react-hook-form y props estándar de React.
 - **Detalle de Select**:
   ```tsx
@@ -34,6 +37,7 @@ Para resolver esto, crearemos componentes unificados y reutilizables en `volta-u
   Unifica las clases de borde, color de fondo, padding y estados de foco.
 
 ### 2. Creación del componente de visualización de carga `Skeleton`
+
 - **Decisión**: Implementar un div animado básico utilizando la animación `animate-pulse` nativa de Tailwind:
   ```tsx
   export const Skeleton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -49,6 +53,7 @@ Para resolver esto, crearemos componentes unificados y reutilizables en `volta-u
 - **Razón**: Es extremadamente ligero, no requiere dependencias y se adapta a cualquier tamaño mediante clases de ancho/alto personalizadas.
 
 ### 3. Creación del componente `EmptyState`
+
 - **Decisión**: Unificar el visual cuando no hay registros en tablas, citas o búsquedas:
   ```tsx
   export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {

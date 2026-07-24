@@ -1,319 +1,413 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Glow Studio - Iniciar Sesión</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              "colors": {
-                      "surface-container-high": "#e7e8e9",
-                      "on-tertiary-fixed-variant": "#004f50",
-                      "on-error-container": "#93000a",
-                      "primary-fixed": "#93f2f2",
-                      "on-tertiary-fixed": "#002020",
-                      "on-error": "#ffffff",
-                      "surface-container-highest": "#e1e3e4",
-                      "primary-fixed-dim": "#76d6d5",
-                      "tertiary-container": "#387d7d",
-                      "inverse-on-surface": "#f0f1f2",
-                      "on-primary": "#ffffff",
-                      "surface-variant": "#e1e3e4",
-                      "on-secondary-container": "#306e6d",
-                      "on-secondary-fixed": "#002020",
-                      "surface-bright": "#f8f9fa",
-                      "surface": "#f8f9fa",
-                      "tertiary": "#196464",
-                      "surface-dim": "#d9dadb",
-                      "on-surface": "#191c1d",
-                      "primary-container": "#008080",
-                      "inverse-primary": "#76d6d5",
-                      "on-surface-variant": "#3e4949",
-                      "tertiary-fixed-dim": "#8fd2d2",
-                      "primary": "#006565",
-                      "on-primary-fixed-variant": "#004f4f",
-                      "on-tertiary": "#ffffff",
-                      "error-container": "#ffdad6",
-                      "outline-variant": "#bdc9c8",
-                      "error": "#ba1a1a",
-                      "tertiary-fixed": "#aaefee",
-                      "secondary-container": "#b0eeed",
-                      "on-primary-container": "#e3fffe",
-                      "secondary": "#296767",
-                      "on-secondary": "#ffffff",
-                      "surface-container": "#edeeef",
-                      "outline": "#6e7979",
-                      "on-background": "#191c1d",
-                      "surface-container-lowest": "#ffffff",
-                      "on-tertiary-container": "#e3fffe",
-                      "inverse-surface": "#2e3132",
-                      "surface-container-low": "#f3f4f5",
-                      "on-secondary-fixed-variant": "#044f4f",
-                      "secondary-fixed-dim": "#94d1d1",
-                      "surface-tint": "#006a6a",
-                      "secondary-fixed": "#b0eeed",
-                      "on-primary-fixed": "#002020",
-                      "background": "#f8f9fa"
-              },
-              "borderRadius": {
-                      "DEFAULT": "0.25rem",
-                      "lg": "0.5rem",
-                      "xl": "0.75rem",
-                      "full": "9999px"
-              },
-              "spacing": {
-                      "lg": "24px",
-                      "margin-mobile": "16px",
-                      "gutter": "24px",
-                      "base": "8px",
-                      "md": "16px",
-                      "xl": "32px",
-                      "xs": "4px",
-                      "sm": "12px",
-                      "container-max": "1440px"
-              },
-              "fontFamily": {
-                      "headline-lg-mobile": [
-                              "Inter"
-                      ],
-                      "label-md": [
-                              "Inter"
-                      ],
-                      "label-lg": [
-                              "Inter"
-                      ],
-                      "body-lg": [
-                              "Inter"
-                      ],
-                      "headline-lg": [
-                              "Inter"
-                      ],
-                      "title-md": [
-                              "Inter"
-                      ],
-                      "title-lg": [
-                              "Inter"
-                      ],
-                      "display-lg": [
-                              "Inter"
-                      ],
-                      "body-md": [
-                              "Inter"
-                      ]
-              },
-              "fontSize": {
-                      "headline-lg-mobile": [
-                              "28px",
-                              {
-                                      "lineHeight": "36px",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "label-md": [
-                              "12px",
-                              {
-                                      "lineHeight": "16px",
-                                      "letterSpacing": "0.5px",
-                                      "fontWeight": "500"
-                              }
-                      ],
-                      "label-lg": [
-                              "14px",
-                              {
-                                      "lineHeight": "20px",
-                                      "letterSpacing": "0.1px",
-                                      "fontWeight": "500"
-                              }
-                      ],
-                      "body-lg": [
-                              "16px",
-                              {
-                                      "lineHeight": "24px",
-                                      "letterSpacing": "0.5px",
-                                      "fontWeight": "400"
-                              }
-                      ],
-                      "headline-lg": [
-                              "32px",
-                              {
-                                      "lineHeight": "40px",
-                                      "fontWeight": "600"
-                              }
-                      ],
-                      "title-md": [
-                              "16px",
-                              {
-                                      "lineHeight": "24px",
-                                      "letterSpacing": "0.15px",
-                                      "fontWeight": "500"
-                              }
-                      ],
-                      "title-lg": [
-                              "22px",
-                              {
-                                      "lineHeight": "28px",
-                                      "fontWeight": "500"
-                              }
-                      ],
-                      "display-lg": [
-                              "57px",
-                              {
-                                      "lineHeight": "64px",
-                                      "letterSpacing": "-0.25px",
-                                      "fontWeight": "700"
-                              }
-                      ],
-                      "body-md": [
-                              "14px",
-                              {
-                                      "lineHeight": "20px",
-                                      "letterSpacing": "0.25px",
-                                      "fontWeight": "400"
-                              }
-                      ]
-              }
-      },
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Glow Studio - Iniciar Sesión</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-high": "#e7e8e9",
+              "on-tertiary-fixed-variant": "#004f50",
+              "on-error-container": "#93000a",
+              "primary-fixed": "#93f2f2",
+              "on-tertiary-fixed": "#002020",
+              "on-error": "#ffffff",
+              "surface-container-highest": "#e1e3e4",
+              "primary-fixed-dim": "#76d6d5",
+              "tertiary-container": "#387d7d",
+              "inverse-on-surface": "#f0f1f2",
+              "on-primary": "#ffffff",
+              "surface-variant": "#e1e3e4",
+              "on-secondary-container": "#306e6d",
+              "on-secondary-fixed": "#002020",
+              "surface-bright": "#f8f9fa",
+              surface: "#f8f9fa",
+              tertiary: "#196464",
+              "surface-dim": "#d9dadb",
+              "on-surface": "#191c1d",
+              "primary-container": "#008080",
+              "inverse-primary": "#76d6d5",
+              "on-surface-variant": "#3e4949",
+              "tertiary-fixed-dim": "#8fd2d2",
+              primary: "#006565",
+              "on-primary-fixed-variant": "#004f4f",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "outline-variant": "#bdc9c8",
+              error: "#ba1a1a",
+              "tertiary-fixed": "#aaefee",
+              "secondary-container": "#b0eeed",
+              "on-primary-container": "#e3fffe",
+              secondary: "#296767",
+              "on-secondary": "#ffffff",
+              "surface-container": "#edeeef",
+              outline: "#6e7979",
+              "on-background": "#191c1d",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#e3fffe",
+              "inverse-surface": "#2e3132",
+              "surface-container-low": "#f3f4f5",
+              "on-secondary-fixed-variant": "#044f4f",
+              "secondary-fixed-dim": "#94d1d1",
+              "surface-tint": "#006a6a",
+              "secondary-fixed": "#b0eeed",
+              "on-primary-fixed": "#002020",
+              background: "#f8f9fa",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            spacing: {
+              lg: "24px",
+              "margin-mobile": "16px",
+              gutter: "24px",
+              base: "8px",
+              md: "16px",
+              xl: "32px",
+              xs: "4px",
+              sm: "12px",
+              "container-max": "1440px",
+            },
+            fontFamily: {
+              "headline-lg-mobile": ["Inter"],
+              "label-md": ["Inter"],
+              "label-lg": ["Inter"],
+              "body-lg": ["Inter"],
+              "headline-lg": ["Inter"],
+              "title-md": ["Inter"],
+              "title-lg": ["Inter"],
+              "display-lg": ["Inter"],
+              "body-md": ["Inter"],
+            },
+            fontSize: {
+              "headline-lg-mobile": [
+                "28px",
+                {
+                  lineHeight: "36px",
+                  fontWeight: "600",
+                },
+              ],
+              "label-md": [
+                "12px",
+                {
+                  lineHeight: "16px",
+                  letterSpacing: "0.5px",
+                  fontWeight: "500",
+                },
+              ],
+              "label-lg": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.1px",
+                  fontWeight: "500",
+                },
+              ],
+              "body-lg": [
+                "16px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "0.5px",
+                  fontWeight: "400",
+                },
+              ],
+              "headline-lg": [
+                "32px",
+                {
+                  lineHeight: "40px",
+                  fontWeight: "600",
+                },
+              ],
+              "title-md": [
+                "16px",
+                {
+                  lineHeight: "24px",
+                  letterSpacing: "0.15px",
+                  fontWeight: "500",
+                },
+              ],
+              "title-lg": [
+                "22px",
+                {
+                  lineHeight: "28px",
+                  fontWeight: "500",
+                },
+              ],
+              "display-lg": [
+                "57px",
+                {
+                  lineHeight: "64px",
+                  letterSpacing: "-0.25px",
+                  fontWeight: "700",
+                },
+              ],
+              "body-md": [
+                "14px",
+                {
+                  lineHeight: "20px",
+                  letterSpacing: "0.25px",
+                  fontWeight: "400",
+                },
+              ],
+            },
           },
-        }
+        },
+      };
     </script>
-<style>
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .material-symbols-outlined {
-          font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 24
-        }
-        
-        .material-symbols-outlined[data-weight="fill"] {
-            font-variation-settings: 'FILL' 1;
-        }
+    <style>
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+
+      .material-symbols-outlined[data-weight="fill"] {
+        font-variation-settings: "FILL" 1;
+      }
     </style>
-</head>
-<body class="bg-surface text-on-surface min-h-screen flex items-center justify-center font-body-lg antialiased">
-<!-- Main Container - Split Layout -->
-<div class="w-full max-w-6xl h-[921px] md:h-[819px] min-h-[600px] flex rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-surface-container-lowest m-margin-mobile md:m-gutter">
-<!-- Left Side: Image / Branding -->
-<div class="hidden md:flex flex-col justify-between w-1/2 relative bg-surface-container-low overflow-hidden">
-<!-- Background Image -->
-<div class="absolute inset-0 bg-cover bg-center" data-alt="A sophisticated, high-end hair salon interior bathed in soft, natural daylight. The setting features pristine white styling stations with minimalist circular mirrors and elegant chrome accents. The color palette is dominated by sterile yet welcoming whites and subtle teal highlights, evoking a sense of clinical precision and modern beauty. The atmosphere is calm, professional, and meticulously organized." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDN_UjTdnl86NnMB78-EZVNiH8bnC_5V7qnNEu2uAxSYB6XpTdllew2pJyX1wW9bk-FYjDbJ7Dbu8cRK4_jV0X1iDf27a1v3vMLmkkzb3IZ4ry3O0Kdf4FfrDRrUSS3NMkmCEJqhCjX08qoxrCxrCvaXmWmDgJ6w8_K40G_X9wVCPf23IbfAuEgOsqyUK8-tsu9D1xHQrqelo6PzCG5Lm20DnorcN4CSEoSUQEozeXSLZSK-m1fIeSzN_l3r_8-mVmqyfnW92XVxA');">
-<!-- Overlay for better text readability -->
-<div class="absolute inset-0 bg-primary/20 backdrop-blur-[2px]"></div>
-<!-- Gradient to fade into the white form -->
-<div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-surface-container-lowest"></div>
-</div>
-<!-- Content overlay -->
-<div class="relative z-10 p-xl flex flex-col h-full justify-between">
-<div>
-<h1 class="font-display-lg text-display-lg text-surface-container-lowest mb-sm drop-shadow-md">Glow Studio</h1>
-<p class="font-title-lg text-title-lg text-surface-container-lowest/90 max-w-md drop-shadow-sm">Gestión clínica para salones de belleza de alto rendimiento.</p>
-</div>
-<div class="glass-panel p-md rounded-xl max-w-sm">
-<div class="flex items-center gap-sm mb-xs">
-<span class="material-symbols-outlined text-primary" data-weight="fill">verified</span>
-<span class="font-label-lg text-label-lg text-on-surface">Precisión y Estilo</span>
-</div>
-<p class="font-body-md text-body-md text-on-surface-variant">Optimiza tu agenda y eleva la experiencia de tus clientes con herramientas de nivel profesional.</p>
-</div>
-</div>
-</div>
-<!-- Right Side: Login Form -->
-<div class="w-full md:w-1/2 flex flex-col justify-center p-xl md:p-[64px] bg-surface-container-lowest relative z-20">
-<div class="max-w-md w-full mx-auto">
-<!-- Mobile Header (Visible only on small screens) -->
-<div class="md:hidden text-center mb-xl">
-<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-xs">Glow Studio</h1>
-<p class="font-body-md text-body-md text-on-surface-variant">Admin Pro</p>
-</div>
-<!-- Form Header -->
-<div class="mb-lg">
-<h2 class="font-headline-lg text-headline-lg md:font-headline-lg md:text-headline-lg text-on-surface font-semibold mb-xs">Iniciar Sesión</h2>
-<p class="font-body-md text-body-md text-on-surface-variant">Ingresa tus credenciales para acceder al panel de control.</p>
-</div>
-<!-- Login Form -->
-<form action="#" class="space-y-lg" method="POST">
-<!-- Email Input -->
-<div>
-<label class="block font-label-lg text-label-lg text-on-surface mb-xs" for="email">Correo Electrónico</label>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
-<span class="material-symbols-outlined text-outline">mail</span>
-</div>
-<input class="block w-full pl-[40px] pr-sm py-[12px] bg-surface font-body-lg text-body-lg text-on-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder-outline-variant shadow-sm" id="email" name="email" placeholder="tu@correo.com" required="" type="email"/>
-</div>
-</div>
-<!-- Password Input -->
-<div>
-<div class="flex justify-between items-center mb-xs">
-<label class="block font-label-lg text-label-lg text-on-surface" for="password">Contraseña</label>
-<a class="font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors" href="#">¿Olvidé mi contraseña?</a>
-</div>
-<div class="relative">
-<div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
-<span class="material-symbols-outlined text-outline">lock</span>
-</div>
-<input class="block w-full pl-[40px] pr-[40px] py-[12px] bg-surface font-body-lg text-body-lg text-on-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder-outline-variant shadow-sm" id="password" name="password" placeholder="••••••••" required="" type="password"/>
-<button class="absolute inset-y-0 right-0 pr-sm flex items-center text-outline hover:text-on-surface focus:outline-none" type="button">
-<span class="material-symbols-outlined">visibility_off</span>
-</button>
-</div>
-</div>
-<!-- Remember Me -->
-<div class="flex items-center">
-<input class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded bg-surface" id="remember-me" name="remember-me" type="checkbox"/>
-<label class="ml-sm block font-body-md text-body-md text-on-surface-variant" for="remember-me">
-                            Recordarme en este dispositivo
-                        </label>
-</div>
-<!-- Submit Button -->
-<button class="w-full flex justify-center py-[12px] px-md border border-transparent rounded-lg shadow-[0_4px_14px_0_rgba(0,128,128,0.2)] text-on-primary bg-primary hover:bg-surface-tint focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary font-label-lg text-label-lg transition-all active:scale-[0.98]" type="submit">
-                        Entrar al Panel
-                    </button>
-</form>
-<!-- Divider -->
-<div class="mt-lg mb-lg">
-<div class="relative">
-<div class="absolute inset-0 flex items-center">
-<div class="w-full border-t border-outline-variant"></div>
-</div>
-<div class="relative flex justify-center text-sm">
-<span class="px-sm bg-surface-container-lowest font-label-md text-label-md text-outline">O continuar con</span>
-</div>
-</div>
-</div>
-<!-- Social Login -->
-<div class="grid grid-cols-2 gap-md">
-<button class="flex justify-center items-center py-sm px-md border border-outline-variant rounded-lg shadow-sm bg-surface hover:bg-surface-variant font-label-md text-label-md text-on-surface transition-colors" type="button">
-<svg class="h-5 w-5 mr-sm" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"></path>
-<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-</svg>
-                        Google
-                    </button>
-<button class="flex justify-center items-center py-sm px-md border border-outline-variant rounded-lg shadow-sm bg-surface hover:bg-surface-variant font-label-md text-label-md text-on-surface transition-colors" type="button">
-<span class="material-symbols-outlined mr-sm" data-weight="fill">apps</span>
-                        Apple
-                    </button>
-</div>
-</div>
-</div>
-</div>
-</body></html>
+  </head>
+  <body
+    class="bg-surface text-on-surface min-h-screen flex items-center justify-center font-body-lg antialiased"
+  >
+    <!-- Main Container - Split Layout -->
+    <div
+      class="w-full max-w-6xl h-[921px] md:h-[819px] min-h-[600px] flex rounded-2xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-surface-container-lowest m-margin-mobile md:m-gutter"
+    >
+      <!-- Left Side: Image / Branding -->
+      <div
+        class="hidden md:flex flex-col justify-between w-1/2 relative bg-surface-container-low overflow-hidden"
+      >
+        <!-- Background Image -->
+        <div
+          class="absolute inset-0 bg-cover bg-center"
+          data-alt="A sophisticated, high-end hair salon interior bathed in soft, natural daylight. The setting features pristine white styling stations with minimalist circular mirrors and elegant chrome accents. The color palette is dominated by sterile yet welcoming whites and subtle teal highlights, evoking a sense of clinical precision and modern beauty. The atmosphere is calm, professional, and meticulously organized."
+          style="
+            background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDN_UjTdnl86NnMB78-EZVNiH8bnC_5V7qnNEu2uAxSYB6XpTdllew2pJyX1wW9bk-FYjDbJ7Dbu8cRK4_jV0X1iDf27a1v3vMLmkkzb3IZ4ry3O0Kdf4FfrDRrUSS3NMkmCEJqhCjX08qoxrCxrCvaXmWmDgJ6w8_K40G_X9wVCPf23IbfAuEgOsqyUK8-tsu9D1xHQrqelo6PzCG5Lm20DnorcN4CSEoSUQEozeXSLZSK-m1fIeSzN_l3r_8-mVmqyfnW92XVxA&quot;);
+          "
+        >
+          <!-- Overlay for better text readability -->
+          <div class="absolute inset-0 bg-primary/20 backdrop-blur-[2px]"></div>
+          <!-- Gradient to fade into the white form -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-surface-container-lowest"
+          ></div>
+        </div>
+        <!-- Content overlay -->
+        <div class="relative z-10 p-xl flex flex-col h-full justify-between">
+          <div>
+            <h1
+              class="font-display-lg text-display-lg text-surface-container-lowest mb-sm drop-shadow-md"
+            >
+              Glow Studio
+            </h1>
+            <p
+              class="font-title-lg text-title-lg text-surface-container-lowest/90 max-w-md drop-shadow-sm"
+            >
+              Gestión clínica para salones de belleza de alto rendimiento.
+            </p>
+          </div>
+          <div class="glass-panel p-md rounded-xl max-w-sm">
+            <div class="flex items-center gap-sm mb-xs">
+              <span class="material-symbols-outlined text-primary" data-weight="fill"
+                >verified</span
+              >
+              <span class="font-label-lg text-label-lg text-on-surface">Precisión y Estilo</span>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              Optimiza tu agenda y eleva la experiencia de tus clientes con herramientas de nivel
+              profesional.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Right Side: Login Form -->
+      <div
+        class="w-full md:w-1/2 flex flex-col justify-center p-xl md:p-[64px] bg-surface-container-lowest relative z-20"
+      >
+        <div class="max-w-md w-full mx-auto">
+          <!-- Mobile Header (Visible only on small screens) -->
+          <div class="md:hidden text-center mb-xl">
+            <h1
+              class="font-headline-lg-mobile text-headline-lg-mobile text-primary font-bold mb-xs"
+            >
+              Glow Studio
+            </h1>
+            <p class="font-body-md text-body-md text-on-surface-variant">Admin Pro</p>
+          </div>
+          <!-- Form Header -->
+          <div class="mb-lg">
+            <h2
+              class="font-headline-lg text-headline-lg md:font-headline-lg md:text-headline-lg text-on-surface font-semibold mb-xs"
+            >
+              Iniciar Sesión
+            </h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              Ingresa tus credenciales para acceder al panel de control.
+            </p>
+          </div>
+          <!-- Login Form -->
+          <form action="#" class="space-y-lg" method="POST">
+            <!-- Email Input -->
+            <div>
+              <label class="block font-label-lg text-label-lg text-on-surface mb-xs" for="email"
+                >Correo Electrónico</label
+              >
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
+                  <span class="material-symbols-outlined text-outline">mail</span>
+                </div>
+                <input
+                  class="block w-full pl-[40px] pr-sm py-[12px] bg-surface font-body-lg text-body-lg text-on-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder-outline-variant shadow-sm"
+                  id="email"
+                  name="email"
+                  placeholder="tu@correo.com"
+                  required=""
+                  type="email"
+                />
+              </div>
+            </div>
+            <!-- Password Input -->
+            <div>
+              <div class="flex justify-between items-center mb-xs">
+                <label class="block font-label-lg text-label-lg text-on-surface" for="password"
+                  >Contraseña</label
+                >
+                <a
+                  class="font-label-md text-label-md text-primary hover:text-primary-fixed-dim transition-colors"
+                  href="#"
+                  >¿Olvidé mi contraseña?</a
+                >
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
+                  <span class="material-symbols-outlined text-outline">lock</span>
+                </div>
+                <input
+                  class="block w-full pl-[40px] pr-[40px] py-[12px] bg-surface font-body-lg text-body-lg text-on-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder-outline-variant shadow-sm"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required=""
+                  type="password"
+                />
+                <button
+                  class="absolute inset-y-0 right-0 pr-sm flex items-center text-outline hover:text-on-surface focus:outline-none"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined">visibility_off</span>
+                </button>
+              </div>
+            </div>
+            <!-- Remember Me -->
+            <div class="flex items-center">
+              <input
+                class="h-4 w-4 text-primary focus:ring-primary border-outline-variant rounded bg-surface"
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+              />
+              <label
+                class="ml-sm block font-body-md text-body-md text-on-surface-variant"
+                for="remember-me"
+              >
+                Recordarme en este dispositivo
+              </label>
+            </div>
+            <!-- Submit Button -->
+            <button
+              class="w-full flex justify-center py-[12px] px-md border border-transparent rounded-lg shadow-[0_4px_14px_0_rgba(0,128,128,0.2)] text-on-primary bg-primary hover:bg-surface-tint focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary font-label-lg text-label-lg transition-all active:scale-[0.98]"
+              type="submit"
+            >
+              Entrar al Panel
+            </button>
+          </form>
+          <!-- Divider -->
+          <div class="mt-lg mb-lg">
+            <div class="relative">
+              <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-outline-variant"></div>
+              </div>
+              <div class="relative flex justify-center text-sm">
+                <span
+                  class="px-sm bg-surface-container-lowest font-label-md text-label-md text-outline"
+                  >O continuar con</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Social Login -->
+          <div class="grid grid-cols-2 gap-md">
+            <button
+              class="flex justify-center items-center py-sm px-md border border-outline-variant rounded-lg shadow-sm bg-surface hover:bg-surface-variant font-label-md text-label-md text-on-surface transition-colors"
+              type="button"
+            >
+              <svg
+                class="h-5 w-5 mr-sm"
+                fill="none"
+                viewbox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                ></path>
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                ></path>
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                ></path>
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                ></path>
+              </svg>
+              Google
+            </button>
+            <button
+              class="flex justify-center items-center py-sm px-md border border-outline-variant rounded-lg shadow-sm bg-surface hover:bg-surface-variant font-label-md text-label-md text-on-surface transition-colors"
+              type="button"
+            >
+              <span class="material-symbols-outlined mr-sm" data-weight="fill">apps</span>
+              Apple
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

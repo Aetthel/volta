@@ -5,20 +5,13 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { Search, ChevronDown, Check, Calendar } from "lucide-react";
 
-
 // FieldGroup
 export interface FieldGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export const FieldGroup = React.forwardRef<HTMLDivElement, FieldGroupProps>(
   ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn("flex flex-col gap-4 w-full", className)}
-        {...props}
-      />
-    );
-  },
+    return <div ref={ref} className={cn("flex flex-col gap-4 w-full", className)} {...props} />;
+  }
 );
 FieldGroup.displayName = "FieldGroup";
 
@@ -38,7 +31,7 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
       "data-disabled": disabled,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
       <div
@@ -50,12 +43,12 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
           orientation === "horizontal"
             ? "flex-row items-center justify-between gap-4"
             : "flex-col gap-1.5",
-          className,
+          className
         )}
         {...props}
       />
     );
-  },
+  }
 );
 Field.displayName = "Field";
 
@@ -71,35 +64,34 @@ export const FieldLabel = React.forwardRef<HTMLLabelElement, FieldLabelProps>(
           "font-label-lg text-label-lg text-on-surface select-none transition-colors duration-200",
           "group-data-[disabled]:text-on-surface/40",
           "group-data-[invalid]:text-error",
-          className,
+          className
         )}
         {...props}
       />
     );
-  },
+  }
 );
 FieldLabel.displayName = "FieldLabel";
 
 // FieldDescription
 export interface FieldDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 
-export const FieldDescription = React.forwardRef<
-  HTMLParagraphElement,
-  FieldDescriptionProps
->(({ className, ...props }, ref) => {
-  return (
-    <p
-      ref={ref}
-      className={cn(
-        "font-body-sm text-body-sm text-on-surface-variant/85",
-        "group-data-[disabled]:text-on-surface/30",
-        "group-data-[invalid]:text-error",
-        className,
-      )}
-      {...props}
-    />
-  );
-});
+export const FieldDescription = React.forwardRef<HTMLParagraphElement, FieldDescriptionProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <p
+        ref={ref}
+        className={cn(
+          "font-body-sm text-body-sm text-on-surface-variant/85",
+          "group-data-[disabled]:text-on-surface/30",
+          "group-data-[invalid]:text-error",
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
 FieldDescription.displayName = "FieldDescription";
 
 // InputGroup
@@ -108,46 +100,35 @@ export interface InputGroupProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const InputGroup = React.forwardRef<HTMLDivElement, InputGroupProps>(
   ({ className, ...props }, ref) => {
     return (
-      <div
-        ref={ref}
-        className={cn("relative flex items-center w-full", className)}
-        {...props}
-      />
+      <div ref={ref} className={cn("relative flex items-center w-full", className)} {...props} />
     );
-  },
+  }
 );
 InputGroup.displayName = "InputGroup";
 
 // Card
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "bg-surface-container-lowest border border-outline-variant rounded-default shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden",
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "bg-surface-container-lowest border border-outline-variant rounded-default shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden",
+        className
+      )}
+      {...props}
+    />
+  );
+});
 Card.displayName = "Card";
 
 // CardHeader
-export const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("p-6 flex flex-col gap-1.5", className)}
-    {...props}
-  />
-));
+export const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6 flex flex-col gap-1.5", className)} {...props} />
+  )
+);
 CardHeader.displayName = "CardHeader";
 
 // CardTitle
@@ -157,10 +138,7 @@ export const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn(
-      "font-title-lg text-title-lg text-on-surface font-semibold",
-      className,
-    )}
+    className={cn("font-title-lg text-title-lg text-on-surface font-semibold", className)}
     {...props}
   />
 ));
@@ -173,35 +151,30 @@ export const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn(
-      "font-body-md text-body-md text-on-surface-variant",
-      className,
-    )}
+    className={cn("font-body-md text-body-md text-on-surface-variant", className)}
     {...props}
   />
 ));
 CardDescription.displayName = "CardDescription";
 
 // CardContent
-export const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-));
+export const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  )
+);
 CardContent.displayName = "CardContent";
 
 // CardFooter
-export const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("p-6 pt-0 flex items-center justify-end gap-2", className)}
-    {...props}
-  />
-));
+export const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn("p-6 pt-0 flex items-center justify-end gap-2", className)}
+      {...props}
+    />
+  )
+);
 CardFooter.displayName = "CardFooter";
 
 // Alert
@@ -212,12 +185,11 @@ export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant = "default", ...props }, ref) => {
     const variantClasses = {
-      default:
-        "bg-surface-container border border-outline-variant text-on-surface",
-      error:
-        "bg-error-container border border-error-container/60 text-on-error-container",
+      default: "bg-surface-container border border-outline-variant text-on-surface",
+      error: "bg-error-container border border-error-container/60 text-on-error-container",
       info: "bg-secondary-container border border-secondary-container/60 text-on-secondary-container",
-      success: "bg-secondary-container border border-secondary-container/60 text-on-secondary-container",
+      success:
+        "bg-secondary-container border border-secondary-container/60 text-on-secondary-container",
       warning: "bg-surface-container border border-outline-variant text-on-surface-variant",
     };
 
@@ -228,12 +200,12 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         className={cn(
           "p-4 rounded-md text-body-md font-medium border flex gap-3 items-start",
           variantClasses[variant],
-          className,
+          className
         )}
         {...props}
       />
     );
-  },
+  }
 );
 Alert.displayName = "Alert";
 
@@ -257,12 +229,12 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
         className={cn(
           "inline-flex items-center rounded-full px-2.5 py-0.5 text-label-sm font-semibold transition-colors",
           variantClasses[variant],
-          className,
+          className
         )}
         {...props}
       />
     );
-  },
+  }
 );
 Badge.displayName = "Badge";
 
@@ -274,86 +246,93 @@ export interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputE
   variant?: "outlined" | "minimal" | "borderless";
 }
 
-export const FloatingInput = React.forwardRef<
-  HTMLInputElement,
-  FloatingInputProps
->((({ className, label, icon: Icon, endAction, id, type, variant = "outlined", ...props }, ref) => {
-  return (
-    <div
-      className={cn(
-        "relative w-full group/input transition-all duration-200",
-        variant === "minimal"
-          ? "border-b border-outline-variant focus-within:border-primary hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-t-md px-3"
-          : "",
-        variant === "borderless"
-          ? "border-b border-transparent focus-within:border-primary focus-within:border-b hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-md focus-within:rounded-b-none focus-within:rounded-t-md px-3"
-          : ""
-      )}
-    >
-      {/* Leading Icon */}
-      {Icon && (
-        <div
-          className={cn(
-            "absolute top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none z-10",
-            variant === "minimal" || variant === "borderless" ? "left-3" : "left-4"
-          )}
-        >
-          <Icon className="w-5 h-5" />
-        </div>
-      )}
-
-      {/* Input */}
-      <input
-        ref={ref}
-        id={id}
-        type={type}
-        placeholder=" "
+export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
+  ({ className, label, icon: Icon, endAction, id, type, variant = "outlined", ...props }, ref) => {
+    return (
+      <div
         className={cn(
-          "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all",
-          variant === "minimal" || variant === "borderless"
-            ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
-            : "border border-outline rounded-sm focus:border-primary focus:border-2 py-3.5 pr-4",
-          variant === "minimal" || variant === "borderless"
-            ? (Icon ? "pl-8" : "pl-0")
-            : (Icon ? "pl-12" : "pl-4"),
-          endAction ? "pr-12" : "pr-4",
-          className,
-        )}
-        {...props}
-      />
-
-      {/* Floating Label */}
-      <label
-        htmlFor={id}
-        className={cn(
-          "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
-          variant === "minimal" || variant === "borderless" ? "bg-transparent" : "bg-surface-container-lowest px-1.5",
-          (type === "date" || type === "time")
-            ? (variant === "minimal" || variant === "borderless"
-                ? "-top-2.5 scale-[0.82] text-primary"
-                : "top-0 scale-[0.82] text-primary"
-              )
-            : (variant === "minimal" || variant === "borderless"
-                ? "top-1/2 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
-                : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]"
-              ),
-          variant === "minimal" || variant === "borderless"
-            ? (Icon ? "left-11" : "left-3")
-            : (Icon ? "left-12" : "left-4"),
+          "relative w-full group/input transition-all duration-200",
+          variant === "minimal"
+            ? "border-b border-outline-variant focus-within:border-primary hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-t-md px-3"
+            : "",
+          variant === "borderless"
+            ? "border-b border-transparent focus-within:border-primary focus-within:border-b hover:bg-on-surface/[0.04] focus-within:bg-on-surface/[0.06] rounded-md focus-within:rounded-b-none focus-within:rounded-t-md px-3"
+            : ""
         )}
       >
-        {label}
-      </label>
+        {/* Leading Icon */}
+        {Icon && (
+          <div
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none z-10",
+              variant === "minimal" || variant === "borderless" ? "left-3" : "left-4"
+            )}
+          >
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
 
-      {/* End Action */}
-      {endAction && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer z-20 flex items-center justify-center">
-          {endAction}
-        </div>
-      )}
-    </div>
-  );
-}));
+        {/* Input */}
+        <input
+          ref={ref}
+          id={id}
+          type={type}
+          placeholder=" "
+          className={cn(
+            "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all",
+            variant === "minimal" || variant === "borderless"
+              ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
+              : "border border-outline rounded-sm focus:border-primary focus:border-2 py-3.5 pr-4",
+            variant === "minimal" || variant === "borderless"
+              ? Icon
+                ? "pl-8"
+                : "pl-0"
+              : Icon
+                ? "pl-12"
+                : "pl-4",
+            endAction ? "pr-12" : "pr-4",
+            className
+          )}
+          {...props}
+        />
+
+        {/* Floating Label */}
+        <label
+          htmlFor={id}
+          className={cn(
+            "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
+            variant === "minimal" || variant === "borderless"
+              ? "bg-transparent"
+              : "bg-surface-container-lowest px-1.5",
+            type === "date" || type === "time"
+              ? variant === "minimal" || variant === "borderless"
+                ? "-top-2.5 scale-[0.82] text-primary"
+                : "top-0 scale-[0.82] text-primary"
+              : variant === "minimal" || variant === "borderless"
+                ? "top-1/2 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
+                : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
+            variant === "minimal" || variant === "borderless"
+              ? Icon
+                ? "left-11"
+                : "left-3"
+              : Icon
+                ? "left-12"
+                : "left-4"
+          )}
+        >
+          {label}
+        </label>
+
+        {/* End Action */}
+        {endAction && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer z-20 flex items-center justify-center">
+            {endAction}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
 FloatingInput.displayName = "FloatingInput";
 
 // FloatingSelect
@@ -449,9 +428,9 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({
   const selectedOption = options.find((o) => o.value === value);
 
   const displayValue = selectedOption
-    ? (selectedOption.sublabel
-        ? `${selectedOption.label} — ${selectedOption.sublabel}`
-        : selectedOption.label)
+    ? selectedOption.sublabel
+      ? `${selectedOption.label} — ${selectedOption.sublabel}`
+      : selectedOption.label
     : "";
 
   React.useEffect(() => {
@@ -499,14 +478,13 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({
 
       {isOpen && (
         <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className={cn(
-            "absolute left-0 right-0 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1",
-            openUpward ? "bottom-full mb-1" : "top-full mt-1"
-          )}>
+            className={cn(
+              "absolute left-0 right-0 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1",
+              openUpward ? "bottom-full mb-1" : "top-full mt-1"
+            )}
+          >
             {options.map((opt) => (
               <button
                 key={opt.value}
@@ -618,8 +596,18 @@ export const CalendarSelect: React.FC<CalendarSelectProps> = ({
   }
 
   const monthNames = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
   ];
 
   return (
@@ -671,7 +659,13 @@ export const CalendarSelect: React.FC<CalendarSelectProps> = ({
 
             {/* Day labels */}
             <div className="grid grid-cols-7 gap-1 text-center text-body-xs font-semibold text-on-surface-variant/60">
-              <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span><span>Do</span>
+              <span>Lu</span>
+              <span>Ma</span>
+              <span>Mi</span>
+              <span>Ju</span>
+              <span>Vi</span>
+              <span>Sá</span>
+              <span>Do</span>
             </div>
 
             {/* Days grid */}
@@ -697,8 +691,8 @@ export const CalendarSelect: React.FC<CalendarSelectProps> = ({
                       isSelected
                         ? "bg-primary text-on-primary font-bold"
                         : isToday
-                        ? "border border-primary text-primary"
-                        : "text-on-surface hover:bg-on-surface/[0.06]"
+                          ? "border border-primary text-primary"
+                          : "text-on-surface hover:bg-on-surface/[0.06]"
                     )}
                   >
                     {day}
@@ -751,7 +745,9 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
           htmlFor={id}
           className={cn(
             "absolute z-10 origin-left text-on-surface-variant transition-all duration-200 pointer-events-none select-none",
-            variant === "minimal" || variant === "borderless" ? "bg-transparent left-3" : "bg-surface-container-lowest px-1.5 left-4",
+            variant === "minimal" || variant === "borderless"
+              ? "bg-transparent left-3"
+              : "bg-surface-container-lowest px-1.5 left-4",
             variant === "minimal" || variant === "borderless"
               ? "top-5 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
               : "top-6 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]"
@@ -764,7 +760,6 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
   }
 );
 FloatingTextarea.displayName = "FloatingTextarea";
-
 
 // Separator
 export interface SeparatorProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -779,18 +774,17 @@ export const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
         className={cn(
           "bg-outline-variant/50 shrink-0",
           orientation === "horizontal" ? "h-[1px] w-full" : "w-[1px] h-full",
-          className,
+          className
         )}
         {...props}
       />
     );
-  },
+  }
 );
 Separator.displayName = "Separator";
 
 // Button
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
 }
@@ -802,8 +796,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         "bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary shadow-sm",
       secondary:
         "bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80 shadow-sm",
-      outline:
-        "border border-outline text-primary hover:bg-surface-container shadow-sm",
+      outline: "border border-outline text-primary hover:bg-surface-container shadow-sm",
       ghost:
         "text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors",
     };
@@ -830,7 +823,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = "Button";
 
-
 // Select
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   icon?: React.ComponentType<any>;
@@ -852,7 +844,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           className={cn(
             "block w-full bg-surface bg-none text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3 shadow-sm appearance-none cursor-pointer pr-10",
             Icon ? "pl-12" : "pl-4",
-            className,
+            className
           )}
           {...props}
         >
@@ -868,12 +860,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
@@ -881,7 +868,6 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   }
 );
 Select.displayName = "Select";
-
 
 // Textarea
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
@@ -893,7 +879,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         ref={ref}
         className={cn(
           "block w-full px-4 py-3 bg-surface text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all shadow-sm resize-none custom-scrollbar",
-          className,
+          className
         )}
         {...props}
       />
@@ -901,7 +887,6 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   }
 );
 Textarea.displayName = "Textarea";
-
 
 // Skeleton
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -919,7 +904,6 @@ export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
 );
 Skeleton.displayName = "Skeleton";
 
-
 // Empty
 export interface EmptyProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -935,7 +919,7 @@ export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(
         ref={ref}
         className={cn(
           "flex flex-col items-center justify-center text-center p-8 border border-dashed border-outline-variant rounded-2xl bg-surface-container-lowest gap-4",
-          className,
+          className
         )}
         {...props}
       >
@@ -945,12 +929,8 @@ export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(
           </div>
         )}
         <div className="flex flex-col gap-1 max-w-sm">
-          <h3 className="font-title-md text-title-md text-on-surface font-semibold">
-            {title}
-          </h3>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            {description}
-          </p>
+          <h3 className="font-title-md text-title-md text-on-surface font-semibold">{title}</h3>
+          <p className="font-body-md text-body-md text-on-surface-variant">{description}</p>
         </div>
         {action && <div className="mt-2">{action}</div>}
       </div>
@@ -958,7 +938,6 @@ export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(
   }
 );
 Empty.displayName = "Empty";
-
 
 // AlertBanner
 export interface AlertBannerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -973,7 +952,8 @@ export const AlertBanner = React.forwardRef<HTMLDivElement, AlertBannerProps>(
       info: "bg-secondary-container/50 border-secondary-container/60 text-on-secondary-container",
       warning: "bg-primary/5 border-primary/20 text-on-surface",
       error: "bg-error-container/50 border-error-container/60 text-on-error-container",
-      success: "bg-secondary-container/50 border-secondary-container/60 text-on-secondary-container",
+      success:
+        "bg-secondary-container/50 border-secondary-container/60 text-on-secondary-container",
     };
     return (
       <div
@@ -982,7 +962,7 @@ export const AlertBanner = React.forwardRef<HTMLDivElement, AlertBannerProps>(
         className={cn(
           "flex items-center gap-3 px-4 py-3 rounded-xl border text-body-md font-medium transition-colors",
           variantClasses[variant],
-          className,
+          className
         )}
         {...props}
       >
@@ -991,10 +971,9 @@ export const AlertBanner = React.forwardRef<HTMLDivElement, AlertBannerProps>(
         {action && <span className="shrink-0">{action}</span>}
       </div>
     );
-  },
+  }
 );
 AlertBanner.displayName = "AlertBanner";
-
 
 // ProgressBar
 export interface ProgressBarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -1016,21 +995,25 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
         {showLabel && (
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-label-sm font-medium text-on-surface-variant">{label}</span>
-            <span className="text-label-sm font-mono font-semibold text-on-surface">{Math.round(value)}%</span>
+            <span className="text-label-sm font-mono font-semibold text-on-surface">
+              {Math.round(value)}%
+            </span>
           </div>
         )}
         <div className="h-1.5 w-full rounded-full bg-outline-variant/30 overflow-hidden">
           <div
-            className={cn("h-full rounded-full transition-all duration-500 ease-out", variantClasses[variant])}
+            className={cn(
+              "h-full rounded-full transition-all duration-500 ease-out",
+              variantClasses[variant]
+            )}
             style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
           />
         </div>
       </div>
     );
-  },
+  }
 );
 ProgressBar.displayName = "ProgressBar";
-
 
 // Global ContextMenu manager — ensures only one menu is open at a time
 let _activeContextMenuClose: (() => void) | null = null;
@@ -1053,7 +1036,11 @@ interface ContextMenuContextType {
   isOpen: boolean;
   x: number;
   y: number;
-  openMenu: (e: React.MouseEvent | TouchEvent | React.TouchEvent, clientX: number, clientY: number) => void;
+  openMenu: (
+    e: React.MouseEvent | TouchEvent | React.TouchEvent,
+    clientX: number,
+    clientY: number
+  ) => void;
   closeMenu: () => void;
 }
 
@@ -1071,11 +1058,14 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
     setIsOpen(false);
   }, []);
 
-  const openMenu = React.useCallback((e: React.MouseEvent | TouchEvent | React.TouchEvent, clientX: number, clientY: number) => {
-    registerContextMenu(closeMenu); // close any other open menu first
-    setCoords({ x: clientX, y: clientY });
-    setIsOpen(true);
-  }, [closeMenu]);
+  const openMenu = React.useCallback(
+    (e: React.MouseEvent | TouchEvent | React.TouchEvent, clientX: number, clientY: number) => {
+      registerContextMenu(closeMenu); // close any other open menu first
+      setCoords({ x: clientX, y: clientY });
+      setIsOpen(true);
+    },
+    [closeMenu]
+  );
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -1176,9 +1166,11 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContextMenuCo
   ({ children, className, ...props }, ref) => {
     const context = React.useContext(ContextMenuContext);
     if (!context) throw new Error("ContextMenuContent must be used within ContextMenu");
-    
+
     const [mounted, setMounted] = React.useState(false);
-    const [computedPos, setComputedPos] = React.useState<{ top: number; left: number } | null>(null);
+    const [computedPos, setComputedPos] = React.useState<{ top: number; left: number } | null>(
+      null
+    );
     const localRef = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
@@ -1188,7 +1180,7 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContextMenuCo
     // Screen boundary checks
     React.useEffect(() => {
       if (!context.isOpen || !mounted) return;
-      
+
       const updatePosition = () => {
         const menuEl = localRef.current;
         if (!menuEl) return;
@@ -1225,16 +1217,20 @@ export const ContextMenuContent = React.forwardRef<HTMLDivElement, ContextMenuCo
           if (typeof ref === "function") ref(el);
           else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
         }}
-        style={computedPos ? {
-          position: "absolute",
-          top: `${computedPos.top}px`,
-          left: `${computedPos.left}px`,
-        } : {
-          position: "absolute",
-          visibility: "hidden", // Hide initially while measuring
-          top: `${context.y + window.scrollY}px`,
-          left: `${context.x + window.scrollX}px`,
-        }}
+        style={
+          computedPos
+            ? {
+                position: "absolute",
+                top: `${computedPos.top}px`,
+                left: `${computedPos.left}px`,
+              }
+            : {
+                position: "absolute",
+                visibility: "hidden", // Hide initially while measuring
+                top: `${context.y + window.scrollY}px`,
+                left: `${context.x + window.scrollX}px`,
+              }
+        }
         className={cn(
           "w-48 bg-surface-container-lowest border border-outline-variant/60 rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in zoom-in-95 duration-100 origin-top-left flex flex-col gap-0.5",
           className
@@ -1294,15 +1290,10 @@ export const ContextMenuSeparator = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("my-1 border-t border-outline-variant/50", className)}
-    {...props}
-  />
+  <div ref={ref} className={cn("my-1 border-t border-outline-variant/50", className)} {...props} />
 ));
 ContextMenuSeparator.displayName = "ContextMenuSeparator";
 
 // PageHeader
 export { PageHeader } from "../PageHeader";
 export type { PageHeaderProps } from "../PageHeader";
-

@@ -5,8 +5,8 @@ export interface Business {
   email: string;
   address?: string | null;
   businessType?: string | null;
-  subscriptionPlan: 'BASIC' | 'PRO' | 'ENTERPRISE';
-  subscriptionStatus: 'TRIALING' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'DEMO_SANDBOX';
+  subscriptionPlan: "BASIC" | "PRO" | "ENTERPRISE";
+  subscriptionStatus: "TRIALING" | "ACTIVE" | "EXPIRED" | "CANCELLED" | "DEMO_SANDBOX";
   trialExpiresAt?: string | null;
   sandboxExpiresAt?: string | null;
   themeColor?: string;
@@ -21,7 +21,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'JEFE' | 'EMPLEADO';
+  role: "ADMIN" | "JEFE" | "EMPLEADO";
   businessId?: string | null;
 }
 
@@ -57,6 +57,6 @@ export interface Appointment {
   serviceId?: string | null;
   serviceName?: string | null;
   appointmentDate: string | Date;
-  status: 'PENDING' | 'SENT' | 'ERROR';
+  status: "PENDING" | "SENT" | "ERROR";
   duration?: number;
 }

@@ -1,5 +1,5 @@
 const normalizeString = (str) => {
-  if (!str) return '';
+  if (!str) return "";
   return str
     .toLowerCase()
     .normalize("NFD")
@@ -9,7 +9,7 @@ const normalizeString = (str) => {
 };
 
 const normalizePhone = (phone) => {
-  if (!phone) return '';
+  if (!phone) return "";
   const digits = phone.replace(/\D/g, "");
   if (digits.startsWith("34") && digits.length > 9) {
     return digits.slice(2);
@@ -17,7 +17,4 @@ const normalizePhone = (phone) => {
   return digits;
 };
 
-export {
-  normalizeString,
-  normalizePhone,
-};
+export { normalizeString, normalizePhone };

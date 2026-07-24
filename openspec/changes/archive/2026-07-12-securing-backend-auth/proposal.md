@@ -12,9 +12,11 @@ El backend actual confía de forma implícita en cabeceras HTTP suministradas di
 ## Capabilities
 
 ### New Capabilities
+
 - Ninguna. Este cambio se centra exclusivamente en corregir y robustecer la seguridad de capacidades existentes.
 
 ### Modified Capabilities
+
 - `web-authentication`: Robustecer la verificación de la identidad del usuario y los roles mediante la introducción de firmas criptográficas (JWT) en la comunicación proxy-backend y la validación estricta de roles en endpoints protegidos.
 - `multitenant-core`: Asegurar el aislamiento multi-inquilino en el backend extrayendo el `businessId` verificado a partir de un token firmado criptográficamente, en lugar de confiar en cabeceras HTTP del cliente no validadas.
 

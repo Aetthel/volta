@@ -5,6 +5,7 @@ Actualmente Volta no dispone de un flujo de autoservicio público para que nuevo
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Crear el flujo público de registro `/register` con selector de tipo de negocio.
 - Extender la base de datos (Prisma `schema.prisma`) para almacenar el tipo de negocio (`businessType`) y el plan de suscripción (`subscriptionPlan`: `BASE` vs `PRO`).
 - Asignar automáticamente `isDemo: true`, `demoExpiresAt: Date.now() + 10 días` y `subscriptionPlan: "PRO"`.
@@ -12,6 +13,7 @@ Actualmente Volta no dispone de un flujo de autoservicio público para que nuevo
 - Integrar avisos con el sistema de alertas (modelo `Alert`) al entrar en los últimos 3 días de prueba o al caducar.
 
 **Non-Goals:**
+
 - Procesamiento real de tarjetas con Stripe en esta fase (se deja listo el estado de la suscripción).
 
 ## Decisions
@@ -23,4 +25,4 @@ Actualmente Volta no dispone de un flujo de autoservicio público para que nuevo
 ## Risks / Trade-offs
 
 - **[Riesgo] Expiración sin bloquear funcionalidad principal:** Si la prueba caduca, la barra debe advertir que el bot de WhatsApp o ciertas funciones Pro quedarán pausadas.
-  - *Mitigación:* Comprobación de estado en backend al ejecutar automaciones.
+  - _Mitigación:_ Comprobación de estado en backend al ejecutar automaciones.

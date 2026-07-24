@@ -25,7 +25,24 @@ import {
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
-import { Alert, FieldGroup, Field, FieldLabel, Badge, Button, Card, CardHeader, CardTitle, CardContent, CardFooter, Empty, FloatingInput, Select, PageHeader, Skeleton } from "@/components/ui/volta-ui";
+import {
+  Alert,
+  FieldGroup,
+  Field,
+  FieldLabel,
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  Empty,
+  FloatingInput,
+  Select,
+  PageHeader,
+  Skeleton,
+} from "@/components/ui/volta-ui";
 
 interface BusinessItem {
   id: string;
@@ -234,15 +251,19 @@ export default function SedesPage() {
     e.preventDefault();
 
     const isEdit = !!editingBusiness;
-    const url = isEdit ? `/api/backend/business/${editingBusiness.id}` : "/api/backend/admin/businesses";
+    const url = isEdit
+      ? `/api/backend/business/${editingBusiness.id}`
+      : "/api/backend/admin/businesses";
     const method = isEdit ? "PUT" : "POST";
 
-    const payload = isEdit ? {
-      name: newBusiness.name,
-      email: newBusiness.email,
-      phone: newBusiness.phone,
-      address: newBusiness.address,
-    } : newBusiness;
+    const payload = isEdit
+      ? {
+          name: newBusiness.name,
+          email: newBusiness.email,
+          phone: newBusiness.phone,
+          address: newBusiness.address,
+        }
+      : newBusiness;
 
     fetch(url, {
       method,
@@ -270,7 +291,7 @@ export default function SedesPage() {
       .catch((err) => {
         console.error("Error saving business:", err);
         alert(
-          "Error al guardar el negocio. Asegúrate de que el email sea único y el teléfono tenga formato válido.",
+          "Error al guardar el negocio. Asegúrate de que el email sea único y el teléfono tenga formato válido."
         );
       });
   };
@@ -281,7 +302,7 @@ export default function SedesPage() {
       return;
     }
     const confirmDelete = window.confirm(
-      "¿Estás seguro de que deseas eliminar este local? Se borrarán de forma permanente todas sus citas y clientes de la base de datos.",
+      "¿Estás seguro de que deseas eliminar este local? Se borrarán de forma permanente todas sus citas y clientes de la base de datos."
     );
     if (!confirmDelete) return;
 
@@ -304,7 +325,7 @@ export default function SedesPage() {
     (b) =>
       b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.address.toLowerCase().includes(searchQuery.toLowerCase()),
+      b.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (status !== "loading" && session?.user?.role !== "ADMIN") {
@@ -315,7 +336,8 @@ export default function SedesPage() {
           <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col justify-center items-center">
             <div className="max-w-md w-full">
               <Alert variant="error" className="mb-4">
-                <span className="font-bold">Acceso Denegado:</span> Se requieren permisos de Administrador Global para ver esta sección.
+                <span className="font-bold">Acceso Denegado:</span> Se requieren permisos de
+                Administrador Global para ver esta sección.
               </Alert>
             </div>
           </main>
@@ -604,12 +626,7 @@ export default function SedesPage() {
                 >
                   Cancelar
                 </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="md"
-                  className="px-6 py-2 font-medium"
-                >
+                <Button type="submit" variant="primary" size="md" className="px-6 py-2 font-medium">
                   {editingBusiness ? "Guardar Cambios" : "Crear Local"}
                 </Button>
               </div>
@@ -660,17 +677,32 @@ export default function SedesPage() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-outline-variant bg-surface-container-low/35">
-                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold">Nombre</th>
-                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold">Email</th>
-                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold">Rol</th>
-                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold text-right">Acciones</th>
+                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold">
+                          Nombre
+                        </th>
+                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold">
+                          Email
+                        </th>
+                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold">
+                          Rol
+                        </th>
+                        <th className="p-3 font-label-md text-label-md text-on-surface-variant font-semibold text-right">
+                          Acciones
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {workers.map((worker) => (
-                        <tr key={worker.id} className="border-b border-outline-variant/30 last:border-0 hover:bg-surface-container-low/20">
-                          <td className="p-3 font-body-md text-on-surface font-semibold">{worker.name}</td>
-                          <td className="p-3 font-body-md text-on-surface-variant">{worker.email}</td>
+                        <tr
+                          key={worker.id}
+                          className="border-b border-outline-variant/30 last:border-0 hover:bg-surface-container-low/20"
+                        >
+                          <td className="p-3 font-body-md text-on-surface font-semibold">
+                            {worker.name}
+                          </td>
+                          <td className="p-3 font-body-md text-on-surface-variant">
+                            {worker.email}
+                          </td>
                           <td className="p-3">
                             <Badge variant={worker.role === "JEFE" ? "secondary" : "outline"}>
                               {worker.role === "JEFE" ? "Jefe" : "Empleado"}
@@ -727,11 +759,7 @@ export default function SedesPage() {
             </div>
 
             <form onSubmit={handleSaveWorker} className="p-6 flex flex-col gap-6 overflow-y-auto">
-              {workerErrorMsg && (
-                <Alert variant="error">
-                  {workerErrorMsg}
-                </Alert>
-              )}
+              {workerErrorMsg && <Alert variant="error">{workerErrorMsg}</Alert>}
 
               <FieldGroup>
                 <Field>
@@ -754,18 +782,28 @@ export default function SedesPage() {
                     required
                     placeholder="correo@tienda.com"
                     value={workerFormData.email}
-                    onChange={(e) => setWorkerFormData({ ...workerFormData, email: e.target.value })}
+                    onChange={(e) =>
+                      setWorkerFormData({ ...workerFormData, email: e.target.value })
+                    }
                   />
                 </Field>
 
                 <Field>
                   <FloatingInput
                     id="workerPassword"
-                    label={editingWorker ? "Nueva contraseña (opcional)" : "Contraseña (mínimo 6 caracteres)"}
+                    label={
+                      editingWorker
+                        ? "Nueva contraseña (opcional)"
+                        : "Contraseña (mínimo 6 caracteres)"
+                    }
                     type="password"
-                    placeholder={editingWorker ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"}
+                    placeholder={
+                      editingWorker ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"
+                    }
                     value={workerFormData.password}
-                    onChange={(e) => setWorkerFormData({ ...workerFormData, password: e.target.value })}
+                    onChange={(e) =>
+                      setWorkerFormData({ ...workerFormData, password: e.target.value })
+                    }
                     required={!editingWorker}
                   />
                 </Field>
@@ -775,7 +813,12 @@ export default function SedesPage() {
                   <Select
                     id="workerRole"
                     value={workerFormData.role}
-                    onChange={(e) => setWorkerFormData({ ...workerFormData, role: e.target.value as "JEFE" | "EMPLEADO" })}
+                    onChange={(e) =>
+                      setWorkerFormData({
+                        ...workerFormData,
+                        role: e.target.value as "JEFE" | "EMPLEADO",
+                      })
+                    }
                   >
                     <option value="EMPLEADO">Empleado (Staff)</option>
                     <option value="JEFE">Jefe / Encargado</option>

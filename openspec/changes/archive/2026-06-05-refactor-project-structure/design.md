@@ -5,12 +5,14 @@ The Volta project currently hosts all logic within a single root directory. This
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Clearly separate user interface code (Next.js) from backend/bot logic.
 - Implement an NPM Workspaces (Monorepo) architecture or clear directory boundaries (`/frontend`, `/backend`).
 - Update all tooling, linting, and Docker configurations to support the split structure.
 - Ensure the Prisma ORM client can be shared seamlessly between the frontend and backend without duplicating code.
 
 **Non-Goals:**
+
 - Completely rewriting existing business logic or components.
 - Changing the underlying technologies (still using Next.js, NextAuth, whatsapp-web.js, Prisma).
 - Splitting the Postgres database (the system remains a single shared database).
@@ -23,6 +25,6 @@ The Volta project currently hosts all logic within a single root directory. This
 
 ## Risks / Trade-offs
 
-- **Risk: Breaking imports** → Moving files will inevitably break hundreds of imports. *Mitigation:* Rely heavily on TypeScript/JS tooling and thorough search-and-replace using the IDE or script capabilities.
-- **Risk: Prisma Client Sharing** → Next.js edge/serverless environments sometimes struggle with hoisted Prisma clients. *Mitigation:* Ensure `next.config.mjs` has the correct `transpilePackages` or `outputFileTracing` settings if deploying outside Docker. In Docker, standard Node.js resolution will work.
-- **Risk: NextAuth paths** → NextAuth might depend on environment variables relative to the project root. *Mitigation:* Move the `.env` file to the workspace root and use tools like `dotenv-cli` or ensure Docker propagates the variables appropriately to both workspaces.
+- **Risk: Breaking imports** → Moving files will inevitably break hundreds of imports. _Mitigation:_ Rely heavily on TypeScript/JS tooling and thorough search-and-replace using the IDE or script capabilities.
+- **Risk: Prisma Client Sharing** → Next.js edge/serverless environments sometimes struggle with hoisted Prisma clients. _Mitigation:_ Ensure `next.config.mjs` has the correct `transpilePackages` or `outputFileTracing` settings if deploying outside Docker. In Docker, standard Node.js resolution will work.
+- **Risk: NextAuth paths** → NextAuth might depend on environment variables relative to the project root. _Mitigation:_ Move the `.env` file to the workspace root and use tools like `dotenv-cli` or ensure Docker propagates the variables appropriately to both workspaces.

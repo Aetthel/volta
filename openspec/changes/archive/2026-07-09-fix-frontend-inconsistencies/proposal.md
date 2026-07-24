@@ -1,6 +1,7 @@
 ## Why
 
 The current frontend layout exhibits several user experience (UX) and visual inconsistencies:
+
 1. Widespread lack of visual loading indicators during API fetch cycles in the main dashboard pages, leading to brief flashes of empty state indicators (e.g. showing "No hay clientes" when data is still loading) and layout shifts.
 2. Inconsistent naming of the principal administration navigation tab ("Control Global" in Sidebar vs. "Inicio" in BottomNav) for the ADMIN role.
 3. Inconsistent header hierarchy on the Calendar view `/agenda` compared to all other dashboard pages, lacking the standardized `<PageHeader>` component.
@@ -16,9 +17,11 @@ Fixing these issues will improve the perceived performance, visual cohesiveness,
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `reusable-ui-components`: Extend reusable component rules to mandate loading skeletons for any view fetching asynchronous data on mount.
 - `stitch-design-migration`: Ensure consistent section spacings, sidebar/bottom nav naming consistency, and header layout structures across all core pages.
 

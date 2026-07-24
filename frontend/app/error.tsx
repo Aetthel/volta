@@ -17,7 +17,6 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   return (
     <div className="min-h-screen w-screen bg-surface flex flex-col justify-center items-center p-6 select-none">
       <div className="max-w-md w-full bg-surface-container-lowest border border-outline-variant p-8 rounded-2xl shadow-lg flex flex-col gap-6 items-center text-center animate-in fade-in zoom-in-95 duration-200">
-        
         {/* Error Icon */}
         <div className="size-16 rounded-full bg-error-container flex items-center justify-center text-error">
           <AlertTriangle className="size-8" />
@@ -49,7 +48,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
             <RefreshCw className="w-4 h-4" />
             <span>Reintentar</span>
           </button>
-          
+
           <Link
             href="/"
             className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border border-outline-variant text-on-surface font-medium rounded-xl hover:bg-surface-variant transition-colors"

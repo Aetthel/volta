@@ -1,6 +1,7 @@
 ## Why
 
 There are spacing and mobile rendering inconsistencies related to the page headers and compact system actions:
+
 1. In `app/inicio/page.tsx`, the `<main>` tag's `gap-gutter` class combines with `PageHeader`'s default `mb-gutter` class, resulting in double spacing below the header, unlike other pages.
 2. In `app/agenda/page.tsx`, the calendar control header renders a redundant `<Header />` component (bell and avatar) on mobile, duplicating the avatar and notifications already visible in the `PageHeader` component.
 
@@ -12,9 +13,11 @@ There are spacing and mobile rendering inconsistencies related to the page heade
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `stitch-design-migration`: Standardize header layouts and remove redundant action headers in nextjs layouts.
 
 ## Impact

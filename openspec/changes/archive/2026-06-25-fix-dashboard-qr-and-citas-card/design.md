@@ -7,21 +7,25 @@ Además, la cabecera de la tarjeta "Citas de Hoy" en el dashboard incluye una fe
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Mostrar correctamente el código QR de sincronización en el dashboard principal cuando el estado sea `WAITING_QR`.
 - Unificar el diseño del encabezado de la tarjeta "Citas de Hoy" con el estilo de las tarjetas "WhatsApp Bot" y "Servicios Solicitados".
 
 **Non-Goals:**
+
 - Cambiar la base de datos o el backend para retornar formatos de imagen en lugar de texto para el QR.
 - Alterar el diseño de otras páginas o tarjetas de métricas en el grid superior.
 
 ## Decisions
 
 ### 1. Renderizado de código QR en Dashboard
+
 - **Decisión**: Usar la API de `api.qrserver.com` para generar la imagen del código QR a partir del texto `qrCode` directamente en el `src` del elemento `<img>` en `frontend/app/inicio/page.tsx`.
 - **Alternativa considerada**: Instalar una biblioteca de react-qr en el frontend. Se descarta para evitar pesos extra en el bundle y porque ya se usa `api.qrserver.com` en ajustes.
 - **Razón**: Consistencia total con el módulo de ajustes y facilidad de implementación.
 
 ### 2. Estandarización de cabecera de "Citas de Hoy"
+
 - **Decisión**: Reemplazar la cabecera flex actual que contiene un flex-col (título y subtítulo fecha) y un badge, por un layout simple que integre `CalendarIcon` junto con el título en un `flex items-center gap-2`.
 - **Razón**: Consistencia visual exacta con los headers de "WhatsApp Bot" y "Servicios Solicitados".
 

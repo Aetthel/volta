@@ -1,5 +1,5 @@
-import * as businessService from '../services/businessService.js';
-import { ApiResponse } from '../utils/index.js';
+import * as businessService from "../services/businessService.js";
+import { ApiResponse } from "../utils/index.js";
 
 const defaultHours = [
   { dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false },
@@ -8,20 +8,20 @@ const defaultHours = [
   { dayOfWeek: 4, openTime: "09:00", closeTime: "20:00", isClosed: false },
   { dayOfWeek: 5, openTime: "09:00", closeTime: "20:00", isClosed: false },
   { dayOfWeek: 6, openTime: "10:00", closeTime: "18:00", isClosed: false },
-  { dayOfWeek: 0, openTime: "09:00", closeTime: "20:00", isClosed: true }
+  { dayOfWeek: 0, openTime: "09:00", closeTime: "20:00", isClosed: true },
 ];
 
 export const getBusiness = async (req, res) => {
   const { id } = req.params;
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
+  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const business = await businessService.getBusinessById(id);
   if (!business) {
-    return res.status(404).json({ error: 'Negocio no encontrado' });
+    return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
   return ApiResponse.success(res, business);
@@ -29,11 +29,22 @@ export const getBusiness = async (req, res) => {
 
 export const updateBusiness = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address, logoUrl, coverUrl, description, themeColor, fontSizeLevel, borderRadiusLevel } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    address,
+    logoUrl,
+    coverUrl,
+    description,
+    themeColor,
+    fontSizeLevel,
+    borderRadiusLevel,
+  } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
+  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const updateData = {};
@@ -57,8 +68,8 @@ export const getHours = async (req, res) => {
   const { id } = req.params;
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
+  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const hours = await businessService.getBusinessHours(id);
@@ -74,17 +85,17 @@ export const updateHours = async (req, res) => {
   const hoursData = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== 'ADMIN' && id !== req.user.businessId) {
-    return res.status(403).json({ error: 'Acceso denegado a este negocio' });
+  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const business = await businessService.getBusinessById(id);
   if (!business) {
-    return res.status(404).json({ error: 'Negocio no encontrado' });
+    return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
   if (!Array.isArray(hoursData) || hoursData.length !== 7) {
-    return res.status(400).json({ error: 'Se deben proporcionar exactamente 7 días de horarios.' });
+    return res.status(400).json({ error: "Se deben proporcionar exactamente 7 días de horarios." });
   }
 
   await businessService.updateBusinessHours(id, hoursData);

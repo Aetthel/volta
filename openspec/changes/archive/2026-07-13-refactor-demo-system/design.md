@@ -7,20 +7,24 @@
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Eliminate hardcoded startup mock user and business seeding in the backend.
 - Resolve the NextAuth middleware role parsing mismatch to prevent redirect loops for demo and regular users.
 
 **Non-Goals:**
+
 - Removing the `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` auto-creation in production (this should remain intact).
 - Modifying the schema definition or database models.
 
 ## Decisions
 
 ### 1. Simplify `dbInit.js`
+
 - **Choice**: Remove all mock user seeding, mock business creation, and demo clients/appointments mock seeding from `backend/src/config/dbInit.js`.
 - **Rationale**: Keeps the local development database completely clean. The dynamic demo creation system is now the sole source of mock data generation for demonstration.
 
 ### 2. Read Role from Token Root in Middleware
+
 - **Choice**: Retrieve the user's role in the NextAuth middleware from `req.auth?.role || req.auth?.user?.role`.
 - **Rationale**: Since the `session` callback is bypassed during NextAuth middleware parsing, the custom properties inside the JWT token reside at the root of the session/token wrapper instead of the user sub-object. Checking both properties ensures compatibility in all next-auth execution phases.
 

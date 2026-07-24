@@ -12,9 +12,11 @@ La base de código del frontend de Volta contiene inconsistencias de diseño y d
 ## Capabilities
 
 ### New Capabilities
+
 - Ninguna.
 
 ### Modified Capabilities
+
 - `reusable-ui-components`: Estandarizar la interfaz de usuario de formularios, tarjetas de datos, layouts modales comunes y estados de carga o sin datos.
 
 ## Impact

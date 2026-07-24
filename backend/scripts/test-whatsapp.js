@@ -1,5 +1,5 @@
-const prisma = require('../src/db');
-const whatsappManager = require('../src/whatsapp');
+const prisma = require("../src/db");
+const whatsappManager = require("../src/whatsapp");
 
 /**
  * Test script to verify WhatsApp initialization for the seeded business
@@ -7,7 +7,7 @@ const whatsappManager = require('../src/whatsapp');
 async function test() {
   const business = await prisma.business.findFirst();
   if (!business) {
-    console.error('No business found in database. Run seed script first.');
+    console.error("No business found in database. Run seed script first.");
     return;
   }
 
@@ -15,7 +15,7 @@ async function test() {
   try {
     await whatsappManager.initClient(business.id);
   } catch (err) {
-    console.error('Test failed:', err);
+    console.error("Test failed:", err);
   }
 }
 

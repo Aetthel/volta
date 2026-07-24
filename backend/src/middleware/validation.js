@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import { logger } from '../utils/logger.js';
+import { z } from "zod";
+import { logger } from "../utils/logger.js";
 
 const isValidId = (id) => {
-  if (typeof id !== 'string') return false;
+  if (typeof id !== "string") return false;
   return /^[a-zA-Z0-9_-]+$/.test(id);
 };
 
@@ -19,19 +19,15 @@ const validateBody = (schema) => (req, res, next) => {
     schema.parse(req.body);
     next();
   } catch (error) {
-    logger.error('[Validation Error]', error);
+    logger.error("[Validation Error]", error);
     const details = error.errors
-      ? error.errors.map((e) => ({ field: e.path.join('.'), message: e.message }))
+      ? error.errors.map((e) => ({ field: e.path.join("."), message: e.message }))
       : error.message;
     return res.status(400).json({
-      error: 'Validation failed',
+      error: "Validation failed",
       details,
     });
   }
 };
 
-export {
-  isValidId,
-  validateId,
-  validateBody,
-};
+export { isValidId, validateId, validateBody };

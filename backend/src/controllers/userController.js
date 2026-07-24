@@ -1,28 +1,28 @@
-import * as userService from '../services/userService.js';
-import { ApiResponse } from '../utils/index.js';
-import prisma from '../config/db.js';
+import * as userService from "../services/userService.js";
+import { ApiResponse } from "../utils/index.js";
+import prisma from "../config/db.js";
 
 export const getUsers = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'No autorizado' });
+    return res.status(401).json({ error: "No autorizado" });
   }
 
   const { businessId } = req.query;
   const where = {};
 
-  if (businessId && businessId !== 'null' && businessId !== 'undefined') {
+  if (businessId && businessId !== "null" && businessId !== "undefined") {
     where.businessId = businessId;
   }
 
   // Force non-admins to only query their own business
-  if (req.user.role !== 'ADMIN') {
-    where.businessId = req.user.businessId || 'no_business';
+  if (req.user.role !== "ADMIN") {
+    where.businessId = req.user.businessId || "no_business";
   }
 
   const users = await userService.getUsers(where);
 
   // Map password out
-  const sanitizedUsers = users.map(u => {
+  const sanitizedUsers = users.map((u) => {
     const { password, ...rest } = u;
     return rest;
   });
@@ -32,25 +32,25 @@ export const getUsers = async (req, res) => {
 
 export const createUser = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'No autorizado' });
+    return res.status(401).json({ error: "No autorizado" });
   }
 
   const { name, email, password, role, businessId } = req.body;
 
   // Check tenant isolation
-  if (req.user.role !== 'ADMIN') {
+  if (req.user.role !== "ADMIN") {
     if (businessId && businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Acceso denegado a otro negocio' });
+      return res.status(403).json({ error: "Acceso denegado a otro negocio" });
     }
-    if (role === 'ADMIN' || role === 'JEFE') {
-      return res.status(403).json({ error: 'No se pueden crear usuarios ADMIN o JEFE' });
+    if (role === "ADMIN" || role === "JEFE") {
+      return res.status(403).json({ error: "No se pueden crear usuarios ADMIN o JEFE" });
     }
   }
 
   // Check if email already exists
   const existing = await userService.getUserByEmail(email);
   if (existing) {
-    return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+    return res.status(400).json({ error: "El correo electrónico ya está registrado." });
   }
 
   const user = await userService.createUser({
@@ -58,7 +58,7 @@ export const createUser = async (req, res) => {
     email,
     password,
     role,
-    businessId: (req.user.role !== 'ADMIN' ? req.user.businessId : businessId) || null
+    businessId: (req.user.role !== "ADMIN" ? req.user.businessId : businessId) || null,
   });
 
   const { password: _, ...sanitized } = user;
@@ -67,26 +67,26 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'No autorizado' });
+    return res.status(401).json({ error: "No autorizado" });
   }
 
   const { id } = req.params;
   const { name, email, password, role, businessId } = req.body;
 
   // If not admin, check target user ownership and request params
-  if (req.user.role !== 'ADMIN') {
+  if (req.user.role !== "ADMIN") {
     const targetUser = await userService.getUserById(id);
     if (!targetUser || targetUser.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Acceso denegado' });
+      return res.status(403).json({ error: "Acceso denegado" });
     }
     if (businessId !== undefined && businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'No se puede transferir usuario a otro negocio' });
+      return res.status(403).json({ error: "No se puede transferir usuario a otro negocio" });
     }
-    if (role === 'ADMIN') {
-      return res.status(403).json({ error: 'No se puede promover usuario a ADMIN' });
+    if (role === "ADMIN") {
+      return res.status(403).json({ error: "No se puede promover usuario a ADMIN" });
     }
-    if (role === 'JEFE') {
-      return res.status(403).json({ error: 'No se puede promover usuario a JEFE' });
+    if (role === "JEFE") {
+      return res.status(403).json({ error: "No se puede promover usuario a JEFE" });
     }
   }
 
@@ -97,7 +97,9 @@ export const updateUser = async (req, res) => {
     // Check if email taken by someone else
     const existing = await userService.getUserByEmail(cleanEmail);
     if (existing && existing.id !== id) {
-      return res.status(400).json({ error: 'El correo electrónico ya está registrado por otro usuario.' });
+      return res
+        .status(400)
+        .json({ error: "El correo electrónico ya está registrado por otro usuario." });
     }
     data.email = cleanEmail;
   }
@@ -117,16 +119,16 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'No autorizado' });
+    return res.status(401).json({ error: "No autorizado" });
   }
 
   const { id } = req.params;
 
   // If not admin, check target user ownership
-  if (req.user.role !== 'ADMIN') {
+  if (req.user.role !== "ADMIN") {
     const targetUser = await userService.getUserById(id);
     if (!targetUser || targetUser.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: 'Acceso denegado' });
+      return res.status(403).json({ error: "Acceso denegado" });
     }
   }
 
@@ -136,16 +138,16 @@ export const deleteUser = async (req, res) => {
 
 export const registerUser = async (req, res) => {
   const { name, email, password, businessName, phone, businessType } = req.body;
-  const cleanEmail = email ? email.trim().toLowerCase() : '';
+  const cleanEmail = email ? email.trim().toLowerCase() : "";
 
   if (!cleanEmail) {
-    return res.status(400).json({ error: 'El correo electrónico es requerido.' });
+    return res.status(400).json({ error: "El correo electrónico es requerido." });
   }
 
   // 1. Check if user email already exists (case-insensitive)
   const existingUser = await userService.getUserByEmail(cleanEmail);
   if (existingUser) {
-    return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+    return res.status(400).json({ error: "El correo electrónico ya está registrado." });
   }
 
   // 2. Create Business and JEFE User atomically in a transaction
@@ -158,11 +160,11 @@ export const registerUser = async (req, res) => {
         name: businessName,
         phone,
         email: cleanEmail,
-        businessType: businessType || 'Peluquería / Barbería',
-        subscriptionPlan: 'PRO',
-        subscriptionStatus: 'TRIALING',
-        trialExpiresAt
-      }
+        businessType: businessType || "Peluquería / Barbería",
+        subscriptionPlan: "PRO",
+        subscriptionStatus: "TRIALING",
+        trialExpiresAt,
+      },
     });
 
     const createdUser = await tx.user.create({
@@ -170,9 +172,9 @@ export const registerUser = async (req, res) => {
         name,
         email: cleanEmail,
         password: hashedPassword,
-        role: 'JEFE',
-        businessId: createdBusiness.id
-      }
+        role: "JEFE",
+        businessId: createdBusiness.id,
+      },
     });
 
     return { business: createdBusiness, user: createdUser };
@@ -188,7 +190,7 @@ export const registerUser = async (req, res) => {
       businessType: business.businessType,
       subscriptionPlan: business.subscriptionPlan,
       subscriptionStatus: business.subscriptionStatus,
-      trialExpiresAt: business.trialExpiresAt
-    }
+      trialExpiresAt: business.trialExpiresAt,
+    },
   });
 };

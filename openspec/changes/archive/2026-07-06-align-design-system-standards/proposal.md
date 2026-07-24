@@ -12,9 +12,11 @@ There are several visual and structural discrepancies between the implementation
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `reusable-ui-components`: Align border radius, input shapes, card classes, and alert styles with the design system.
 - `stitch-design-migration`: Harmonize core primary and primary-container color variables, and clean up hex colors in custom components.
 

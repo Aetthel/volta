@@ -1,6 +1,6 @@
-import config from '../config/index.js';
-import { verifyToken } from '../utils/crypto.js';
-import crypto from 'crypto';
+import config from "../config/index.js";
+import { verifyToken } from "../utils/crypto.js";
+import crypto from "crypto";
 
 const API_KEY = config.apiKey;
 const JWT_SECRET = config.backendJwtSecret;
@@ -14,20 +14,20 @@ function safeCompare(a, b) {
 }
 
 const authenticate = (req, res, next) => {
-  const apiKey = req.header('x-api-key');
+  const apiKey = req.header("x-api-key");
   if (!apiKey || !safeCompare(apiKey, API_KEY)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const authHeader = req.header('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Unauthorized: Missing token' });
+  const authHeader = req.header("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Unauthorized: Missing token" });
   }
 
   const token = authHeader.substring(7);
   const decoded = verifyToken(token, JWT_SECRET);
   if (!decoded) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid or expired token' });
+    return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
   }
 
   req.user = {
@@ -41,21 +41,17 @@ const authenticate = (req, res, next) => {
 
 const requireRole = (allowedRoles) => (req, res, next) => {
   if (!req.user || !req.user.role || !allowedRoles.includes(req.user.role)) {
-    return res.status(403).json({ error: 'Forbidden: Insufficient permissions' });
+    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
   }
   next();
 };
 
 const requireApiKey = (req, res, next) => {
-  const apiKey = req.header('x-api-key');
+  const apiKey = req.header("x-api-key");
   if (!apiKey || !safeCompare(apiKey, API_KEY)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: "Unauthorized" });
   }
   next();
 };
 
-export {
-  authenticate,
-  requireRole,
-  requireApiKey,
-};
+export { authenticate, requireRole, requireApiKey };

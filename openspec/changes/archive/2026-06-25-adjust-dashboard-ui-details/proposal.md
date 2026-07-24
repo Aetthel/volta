@@ -13,7 +13,7 @@ Ajustar detalles visuales del panel de control de citas diarias para mejorar la 
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

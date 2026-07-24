@@ -13,14 +13,17 @@ The current project structure mixes Next.js application files (frontend) with bo
 ## Capabilities
 
 ### New Capabilities
+
 - `project-modular-structure`: Defines the structural organization of the codebase, boundary rules between frontend and backend, and shared configuration patterns.
 
 ### Modified Capabilities
+
 - `multitenant-core`: Update deployment and configuration references due to the structural move of Prisma and backend logic.
 
 ## Impact
 
 This is a structural refactor affecting the entire repository. It impacts:
+
 - Docker configuration (`docker-compose.yml`, `Dockerfile`).
 - Project run scripts (e.g., `npm run dev`, `npm run bot`).
 - Import paths in all frontend components and backend services.

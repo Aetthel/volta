@@ -11,9 +11,11 @@ El backend del proyecto Volta utiliza CommonJS (`require`), mientras que el fron
 ## Capabilities
 
 ### New Capabilities
+
 - Ninguna.
 
 ### Modified Capabilities
+
 - `project-modular-structure`: Unificación sintáctica de los módulos de la aplicación, usando estándares modernos de ES Modules en el backend.
 
 ## Impact

@@ -1,6 +1,7 @@
 ## Context
 
 The user wants to allow each business to personalize the styling of their dashboard application, including:
+
 1. **Primary Color Palette**: Select from a set of predefined corporate color schemes (Teal, Indigo, Rose, Amber, Emerald).
 2. **Text Sizing**: Scale all text elements across the app in 3 levels (Pequeño, Mediano/Predeterminado, Grande).
 3. **Border Radius**: Customize border roundedness in 3 levels (Recto/Sin redondeado, Suave/Predeterminado, Muy Redondeado).
@@ -8,25 +9,31 @@ The user wants to allow each business to personalize the styling of their dashbo
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add `themeColor`, `fontSizeLevel`, and `borderRadiusLevel` fields to the database `Business` model.
 - Expose these styling options under a new "Personalización" section on the `/ajustes` page.
 - Load the styling choices from the logged-in user's business dynamically when mounting the workspace.
 - Propagate colors, text sizing, and border roundedness globally using Tailwind v4 CSS Custom Properties (CSS variables) dynamically updated on the document root.
 
 **Non-Goals:**
+
 - Allow custom arbitrary hex inputs (only select from a predefined list of high-quality palettes).
 - Change layout structure dynamically (only spacing/fonts/colors/borders change).
 
 ## Decisions
 
 ### 1. Database Schema Extensions
+
 We will add the following fields to the `Business` table in `schema.prisma`:
+
 - `themeColor`: `String` with default `"TEAL"`
 - `fontSizeLevel`: `String` with default `"MEDIUM"`
 - `borderRadiusLevel`: `String` with default `"MEDIUM"`
 
 ### 2. Predefined Theme Palettes
+
 We will define 4 distinct corporate palettes to choose from:
+
 - **Teal (Default)**:
   - `--color-primary`: `#006565`
   - `--color-primary-container`: `#008080`
@@ -49,7 +56,9 @@ We will define 4 distinct corporate palettes to choose from:
   - `--color-secondary-container`: `#fff8e1`
 
 ### 3. Dynamic Styling Propagation (Global CSS)
+
 We will update `globals.css` to redefine variables using multiplier coefficients:
+
 - **Font Scale factor (`--font-scale`)**:
   - `SMALL`: `0.9`
   - `MEDIUM` (Default): `1.0`
@@ -60,10 +69,11 @@ We will update `globals.css` to redefine variables using multiplier coefficients
   - `LARGE` (Muy Redondeado): `2.0`
 
 Redefinitions in `globals.css`:
+
 ```css
 :root {
-  --font-scale: 1.0;
-  --radius-scale: 1.0;
+  --font-scale: 1;
+  --radius-scale: 1;
 
   --text-body-lg: calc(1rem * var(--font-scale));
   --text-body-md: calc(0.875rem * var(--font-scale));

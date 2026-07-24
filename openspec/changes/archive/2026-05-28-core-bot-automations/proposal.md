@@ -14,12 +14,14 @@ Volta aims to be an invisible notification engine that automates appointment rem
 ## Capabilities
 
 ### New Capabilities
+
 - `multitenant-core`: Generic data structure to handle multiple businesses independently.
 - `whatsapp-integration`: Multi-instance management, session persistence, and QR code handling for business WhatsApp accounts.
 - `appointment-management`: CRUD logic and status tracking (PENDING, SENT, ERROR) for client appointments.
 - `notification-automation`: Cron job logic to filter, queue, and dispatch personalized WhatsApp reminders.
 
 ### Modified Capabilities
+
 - (None - Initial Phase 1 Implementation)
 
 ## Impact

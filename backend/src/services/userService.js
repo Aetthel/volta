@@ -1,5 +1,5 @@
-import prisma from '../config/db.js';
-import bcrypt from 'bcryptjs';
+import prisma from "../config/db.js";
+import bcrypt from "bcryptjs";
 
 export const hashPassword = async (password) => {
   return bcrypt.hash(password, 10);
@@ -11,17 +11,17 @@ export const getUsers = async (where = {}) => {
     include: {
       business: {
         select: {
-          name: true
-        }
-      }
+          name: true,
+        },
+      },
     },
-    orderBy: { name: 'asc' }
+    orderBy: { name: "asc" },
   });
 };
 
 export const getUserById = async (id) => {
   return prisma.user.findUnique({
-    where: { id }
+    where: { id },
   });
 };
 
@@ -32,9 +32,9 @@ export const getUserByEmail = async (email) => {
     where: {
       email: {
         equals: cleanEmail,
-        mode: 'insensitive'
-      }
-    }
+        mode: "insensitive",
+      },
+    },
   });
 };
 
@@ -53,12 +53,12 @@ export const updateUser = async (id, updateData) => {
   }
   return prisma.user.update({
     where: { id },
-    data
+    data,
   });
 };
 
 export const deleteUser = async (id) => {
   return prisma.user.delete({
-    where: { id }
+    where: { id },
   });
 };

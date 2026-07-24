@@ -49,7 +49,6 @@ export default function LoginPage() {
 
       {/* Centered Login Container */}
       <div className="w-full max-w-[440px] mx-auto p-6 sm:p-10 flex flex-col items-center">
-        
         {/* Brand Icon Logo */}
         <div className="flex items-center justify-center w-16 h-16 bg-primary/10 text-primary rounded-2xl mb-4">
           <FaceIcon className="w-10 h-10" />
@@ -105,12 +104,14 @@ export default function LoginPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-on-surface-variant hover:text-on-surface transition-colors shadow-none p-0 w-8 h-8 rounded-full justify-center"
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
-                  {showPassword ? <EyeOff data-icon="eye-off" className="w-5 h-5" /> : <Eye data-icon="eye" className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff data-icon="eye-off" className="w-5 h-5" />
+                  ) : (
+                    <Eye data-icon="eye" className="w-5 h-5" />
+                  )}
                 </Button>
               </InputGroup>
             </Field>
-
-
 
             {/* Submit Button */}
             <Button
@@ -149,7 +150,6 @@ export default function LoginPage() {
             </Button>
           </Link>
         </div>
-
       </div>
 
       {/* Spacer to push content up on desktop */}

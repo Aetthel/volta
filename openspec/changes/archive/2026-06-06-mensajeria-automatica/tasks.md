@@ -13,4 +13,3 @@
 - [x] 2.2 Implement the WhatsApp Pairing card (shows status, button to initialize, renders QR code, handles polling, and shows disconnect button)
 - [x] 2.3 Implement the template editor forms (with fields for welcomeMessage and reminderMessage, dynamic preview, and save action)
 - [x] 2.4 Create the public LOPD consent page at `frontend/app/lopd/[id]/page.tsx` with high-quality styling, explicit consent text, and acceptance action
-

@@ -68,8 +68,8 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                     isCompleted
                       ? "bg-primary text-white"
                       : isActive
-                      ? "bg-primary text-white ring-4 ring-primary/20"
-                      : "bg-surface-container-high text-on-surface-variant/60"
+                        ? "bg-primary text-white ring-4 ring-primary/20"
+                        : "bg-surface-container-high text-on-surface-variant/60"
                   }
                 `}
               >
@@ -119,8 +119,6 @@ export default function RegisterPage() {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-
 
   // Step validation check
   const validateStep = (step: number) => {
@@ -243,7 +241,8 @@ export default function RegisterPage() {
                 ¿A qué sector pertenece tu negocio?
               </h1>
               <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
-                Personalizaremos tu experiencia en Volta basándonos en tu tipo de establecimiento. Podrás cambiar esto más adelante en la configuración.
+                Personalizaremos tu experiencia en Volta basándonos en tu tipo de establecimiento.
+                Podrás cambiar esto más adelante en la configuración.
               </p>
             </div>
 
@@ -307,7 +306,8 @@ export default function RegisterPage() {
                 Detalles del Negocio
               </h1>
               <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
-                Ingresa la información pública de tu negocio para que los clientes puedan encontrarte.
+                Ingresa la información pública de tu negocio para que los clientes puedan
+                encontrarte.
               </p>
             </div>
 
@@ -321,7 +321,10 @@ export default function RegisterPage() {
             <div className="flex flex-col gap-6 sm:gap-8 mb-10">
               {/* Nombre del Negocio */}
               <div className="flex flex-col gap-2">
-                <label htmlFor="businessName" className="text-body-sm font-semibold text-on-surface">
+                <label
+                  htmlFor="businessName"
+                  className="text-body-sm font-semibold text-on-surface"
+                >
                   Nombre del Negocio <span className="text-primary">*</span>
                 </label>
                 <input
@@ -474,7 +477,10 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="confirmPassword" className="text-body-sm font-semibold text-on-surface">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-body-sm font-semibold text-on-surface"
+                  >
                     Confirmar Contraseña <span className="text-primary">*</span>
                   </label>
                   <input
@@ -504,7 +510,8 @@ export default function RegisterPage() {
                 ¡Todo listo!
               </h1>
               <p className="text-body-md text-on-surface-variant max-w-2xl leading-relaxed">
-                Tu negocio ha sido configurado correctamente. Ya puedes empezar a gestionar tus citas, clientes y servicios desde tu nuevo panel de control.
+                Tu negocio ha sido configurado correctamente. Ya puedes empezar a gestionar tus
+                citas, clientes y servicios desde tu nuevo panel de control.
               </p>
             </div>
 
@@ -614,4 +621,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

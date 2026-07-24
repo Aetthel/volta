@@ -14,9 +14,7 @@ export default function Toast({ toast, onDismiss }: ToastProps) {
       <div className="w-8 h-8 rounded-lg bg-secondary-container/50 flex items-center justify-center shrink-0">
         <CheckCircle className="w-4.5 h-4.5 text-primary" />
       </div>
-      <span className="flex-1 text-body-md font-medium text-on-surface">
-        {toast.text}
-      </span>
+      <span className="flex-1 text-body-md font-medium text-on-surface">{toast.text}</span>
       {onDismiss && (
         <button
           onClick={onDismiss}

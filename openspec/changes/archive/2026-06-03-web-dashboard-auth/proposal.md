@@ -12,12 +12,14 @@ Actualmente, la gestión de negocios y la configuración de sus bots de WhatsApp
 ## Capabilities
 
 ### New Capabilities
+
 - `web-authentication`: Sistema de inicio de sesión, cierre de sesión y protección de rutas basado en roles.
 - `admin-business-control`: Interfaz de super-administrador para crear, listar y gestionar cuentas de negocios.
 - `business-settings`: Interfaz para que cada negocio personalice sus plantillas de mensajes (Bienvenida y Recordatorio).
 - `appointment-management`: Agenda visual (calendario/lista) y formulario rápido para programar citas.
 
 ### Modified Capabilities
+
 - `multitenant-core`: El núcleo actual debe extenderse para soportar la autenticación de usuarios y la gestión de sesiones web.
 - `appointment-management-core`: Los requerimientos de creación de citas deben optimizarse para una UX rápida desde la web.
 

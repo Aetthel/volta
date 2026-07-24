@@ -16,9 +16,11 @@ Currently, the application relies on native browser `<select>` dropdowns for cri
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `reusable-ui-components`: Add the searchable `Combobox` component to the core UI library and replace native select elements.
 
 ## Impact

@@ -1,13 +1,13 @@
-import prisma from '../config/db.js';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import { logger } from '../utils/logger.js';
-import { deleteBusinessCascade } from './adminService.js';
+import prisma from "../config/db.js";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { logger } from "../utils/logger.js";
+import { deleteBusinessCascade } from "./adminService.js";
 
 const DEMO_DURATION_MINUTES = 30;
 
 function generateDemoPassword() {
-  return crypto.randomBytes(12).toString('base64url');
+  return crypto.randomBytes(12).toString("base64url");
 }
 
 function generateDemoId() {
@@ -27,100 +27,175 @@ export const createDemo = async () => {
       data: {
         name: businessName,
         email,
-        phone: `+34 600 ${String(demoId).padStart(4, '0')}`,
-        address: 'Calle de Gran Vía, 28, Madrid',
-        welcomeMessage: '¡Hola {{clientName}}! Tu cita en {{businessName}} está confirmada para el {{appointmentDate}} a las {{appointmentTime}}.',
-        reminderMessage: 'Hola {{clientName}}, te recordamos tu cita mañana a las {{appointmentTime}} en {{businessName}}.',
-        subscriptionPlan: 'PRO',
-        subscriptionStatus: 'DEMO_SANDBOX',
+        phone: `+34 600 ${String(demoId).padStart(4, "0")}`,
+        address: "Calle de Gran Vía, 28, Madrid",
+        welcomeMessage:
+          "¡Hola {{clientName}}! Tu cita en {{businessName}} está confirmada para el {{appointmentDate}} a las {{appointmentTime}}.",
+        reminderMessage:
+          "Hola {{clientName}}, te recordamos tu cita mañana a las {{appointmentTime}} en {{businessName}}.",
+        subscriptionPlan: "PRO",
+        subscriptionStatus: "DEMO_SANDBOX",
         sandboxExpiresAt: expiresAt,
-      }
+      },
     });
 
     const demoUser = await tx.user.create({
       data: {
-        name: 'Dueño Demo',
+        name: "Dueño Demo",
         email,
         password: hashedPass,
-        role: 'JEFE',
+        role: "JEFE",
         businessId: biz.id,
-      }
+      },
     });
 
     await tx.alert.createMany({
       data: [
         {
-          type: 'EMERGENTE',
-          title: '¡Bienvenido a tu Demo Sandbox!',
-          description: 'Esta demo tiene una duración de 20 minutos. Hemos preparado datos ficticios en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.',
+          type: "EMERGENTE",
+          title: "¡Bienvenido a tu Demo Sandbox!",
+          description:
+            "Esta demo tiene una duración de 20 minutos. Hemos preparado datos ficticios en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.",
           userId: demoUser.id,
-          isRead: false
+          isRead: false,
         },
         {
-          type: 'EMERGENTE',
-          title: 'Gestión Completa de Clientes',
-          description: 'Visita la sección de Clientes para consultar expedientes, enviar enlaces de firma LOPD y ver estadísticas de visitas recurrentes.',
+          type: "EMERGENTE",
+          title: "Gestión Completa de Clientes",
+          description:
+            "Visita la sección de Clientes para consultar expedientes, enviar enlaces de firma LOPD y ver estadísticas de visitas recurrentes.",
           userId: demoUser.id,
-          isRead: false
+          isRead: false,
         },
         {
-          type: 'EMERGENTE',
-          title: 'Automatización por WhatsApp',
-          description: 'El sistema permite automatizar recordatorios y confirmaciones. Puedes simularlo vinculando un número en la sección de Ajustes.',
+          type: "EMERGENTE",
+          title: "Automatización por WhatsApp",
+          description:
+            "El sistema permite automatizar recordatorios y confirmaciones. Puedes simularlo vinculando un número en la sección de Ajustes.",
           userId: demoUser.id,
-          isRead: false
+          isRead: false,
         },
         {
-          type: 'AVISO',
-          title: 'Conexión de WhatsApp pendiente',
-          description: 'Para enviar recordatorios automáticos de citas a tus clientes, recuerda vincular tu cuenta de WhatsApp desde la pantalla de Ajustes.',
+          type: "AVISO",
+          title: "Conexión de WhatsApp pendiente",
+          description:
+            "Para enviar recordatorios automáticos de citas a tus clientes, recuerda vincular tu cuenta de WhatsApp desde la pantalla de Ajustes.",
           userId: demoUser.id,
-          isRead: false
+          isRead: false,
         },
         {
-          type: 'NOTIFICACION',
-          title: 'Asistente Virtual Activado',
-          description: 'El bot de recordatorios diarios se ha iniciado correctamente para la sede Demo Volta.',
+          type: "NOTIFICACION",
+          title: "Asistente Virtual Activado",
+          description:
+            "El bot de recordatorios diarios se ha iniciado correctamente para la sede Demo Volta.",
           userId: demoUser.id,
-          isRead: false
-        }
-      ]
+          isRead: false,
+        },
+      ],
     });
 
     await tx.service.createMany({
       data: [
-        { businessId: biz.id, name: 'Corte Caballero', duration: 30, price: 35.0 },
-        { businessId: biz.id, name: 'Corte Dama', duration: 45, price: 45.0 },
-        { businessId: biz.id, name: 'Coloración Premium', duration: 90, price: 85.0 },
-        { businessId: biz.id, name: 'Tratamiento Keratina', duration: 60, price: 50.0 },
-        { businessId: biz.id, name: 'Manicura', duration: 30, price: 20.0 },
-        { businessId: biz.id, name: 'Spa Facial', duration: 45, price: 40.0 },
-      ]
+        { businessId: biz.id, name: "Corte Caballero", duration: 30, price: 35.0 },
+        { businessId: biz.id, name: "Corte Dama", duration: 45, price: 45.0 },
+        { businessId: biz.id, name: "Coloración Premium", duration: 90, price: 85.0 },
+        { businessId: biz.id, name: "Tratamiento Keratina", duration: 60, price: 50.0 },
+        { businessId: biz.id, name: "Manicura", duration: 30, price: 20.0 },
+        { businessId: biz.id, name: "Spa Facial", duration: 45, price: 40.0 },
+      ],
     });
 
     await tx.businessHours.createMany({
       data: [
-        { businessId: biz.id, dayOfWeek: 1, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 2, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 3, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 4, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 5, openTime: '09:00', closeTime: '20:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 6, openTime: '10:00', closeTime: '18:00', isClosed: false },
-        { businessId: biz.id, dayOfWeek: 0, openTime: '09:00', closeTime: '20:00', isClosed: true },
-      ]
+        {
+          businessId: biz.id,
+          dayOfWeek: 1,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 2,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 3,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 4,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 5,
+          openTime: "09:00",
+          closeTime: "20:00",
+          isClosed: false,
+        },
+        {
+          businessId: biz.id,
+          dayOfWeek: 6,
+          openTime: "10:00",
+          closeTime: "18:00",
+          isClosed: false,
+        },
+        { businessId: biz.id, dayOfWeek: 0, openTime: "09:00", closeTime: "20:00", isClosed: true },
+      ],
     });
 
     const clientsData = [
-      { name: 'Ana', surname: 'García', email: 'ana.garcia@email.com', phone: '+34 611 234 567', lopdStatus: 'Aceptado', frequentService: 'Coloración Premium', lastVisit: '15 Jun 2025' },
-      { name: 'Marco', surname: 'Polo', email: 'marco.polo@email.com', phone: '+34 622 345 678', lopdStatus: 'Aceptado', frequentService: 'Corte Caballero', lastVisit: '20 Jun 2025' },
-      { name: 'Sofía', surname: 'Martín', email: 'sofia.martin@email.com', phone: '+34 633 456 789', lopdStatus: 'Pendiente', frequentService: 'Manicura', lastVisit: '22 Jun 2025' },
-      { name: 'Juan', surname: 'Herrera', email: 'juan.herrera@email.com', phone: '+34 644 567 890', lopdStatus: 'Pendiente', frequentService: 'Tratamiento Keratina', lastVisit: '01 Jul 2025' },
+      {
+        name: "Ana",
+        surname: "García",
+        email: "ana.garcia@email.com",
+        phone: "+34 611 234 567",
+        lopdStatus: "Aceptado",
+        frequentService: "Coloración Premium",
+        lastVisit: "15 Jun 2025",
+      },
+      {
+        name: "Marco",
+        surname: "Polo",
+        email: "marco.polo@email.com",
+        phone: "+34 622 345 678",
+        lopdStatus: "Aceptado",
+        frequentService: "Corte Caballero",
+        lastVisit: "20 Jun 2025",
+      },
+      {
+        name: "Sofía",
+        surname: "Martín",
+        email: "sofia.martin@email.com",
+        phone: "+34 633 456 789",
+        lopdStatus: "Pendiente",
+        frequentService: "Manicura",
+        lastVisit: "22 Jun 2025",
+      },
+      {
+        name: "Juan",
+        surname: "Herrera",
+        email: "juan.herrera@email.com",
+        phone: "+34 644 567 890",
+        lopdStatus: "Pendiente",
+        frequentService: "Tratamiento Keratina",
+        lastVisit: "01 Jul 2025",
+      },
     ];
 
     const createdClients = [];
     for (const c of clientsData) {
       const client = await tx.client.create({
-        data: { ...c, businessId: biz.id }
+        data: { ...c, businessId: biz.id },
       });
       createdClients.push(client);
     }
@@ -157,8 +232,8 @@ export const createDemo = async () => {
           clientId: client.id,
           serviceId: service.id,
           serviceName: service.name,
-          status: 'PENDING',
-        }
+          status: "PENDING",
+        },
       });
     }
 
@@ -174,7 +249,7 @@ export const createDemo = async () => {
 
 export const deleteDemo = async (businessId) => {
   const biz = await prisma.business.findUnique({ where: { id: businessId } });
-  if (!biz || biz.subscriptionStatus !== 'DEMO_SANDBOX') {
+  if (!biz || biz.subscriptionStatus !== "DEMO_SANDBOX") {
     return false;
   }
 
@@ -188,7 +263,7 @@ export const cleanupExpiredDemos = async () => {
   const now = new Date();
   const expiredDemos = await prisma.business.findMany({
     where: {
-      subscriptionStatus: 'DEMO_SANDBOX',
+      subscriptionStatus: "DEMO_SANDBOX",
       sandboxExpiresAt: { lt: now },
     },
     select: { id: true },

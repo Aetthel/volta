@@ -6,9 +6,12 @@
     "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
     "build": "pnpm --filter frontend build && pnpm --filter backend build",
     "start": "concurrently \"pnpm --filter frontend start\" \"pnpm --filter backend start\"",
-    "lint": "pnpm --filter frontend lint && pnpm --filter backend lint"
+    "lint": "pnpm --filter frontend lint && pnpm --filter backend lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "prettier": "^3.9.6"
   }
 }

@@ -5,12 +5,14 @@ Volta currently supports 1-to-1 appointments and requires business staff authent
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Enable optional public booking per business (`enablePublicBooking` boolean flag).
 - Support group services with configurable participant capacity (`capacity: Int @default(1)`).
 - Allow multiple client bookings on a single group appointment slot.
 - Recognize existing clients by phone number during public booking without duplicating records.
 
 **Non-Goals:**
+
 - Creating mandatory password accounts for end-clients.
 - Payment gateway integration for public bookings (out of scope for this change).
 

@@ -37,15 +37,9 @@ export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-4 shrink-0 mt-2 lg:mt-0 justify-between lg:justify-end w-full lg:w-auto">
-            {actions ? (
-              <div className="flex items-center gap-2">
-                {actions}
-              </div>
-            ) : (
-              <div />
-            )}
+            {actions ? <div className="flex items-center gap-2">{actions}</div> : <div />}
             <div className="hidden lg:block">
               <Header />
             </div>

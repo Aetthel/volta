@@ -3,11 +3,13 @@ import { auth } from "@/auth";
 import { signToken } from "@/lib/crypto";
 import type { Session } from "next-auth";
 
-
 // Use db service name for backend inside Docker container, fallback to localhost for host development
 const BACKEND_URL = process.env.BACKEND_INTERNAL_URL || "http://localhost:3001";
 
-async function proxyRequest(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
+async function proxyRequest(
+  request: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
+) {
   const resolvedParams = await params;
   const pathParts = resolvedParams.path;
 
@@ -44,7 +46,10 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
   const jwtSecret = process.env.BACKEND_JWT_SECRET;
   if (!apiKey || !jwtSecret) {
     console.error("[Proxy] FATAL: API_KEY or BACKEND_JWT_SECRET environment variable is not set.");
-    return NextResponse.json({ error: "Proxy misconfiguration: Secret keys not set." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Proxy misconfiguration: Secret keys not set." },
+      { status: 503 }
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -77,7 +82,6 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-
   let body: string | undefined = undefined;
   if (method !== "GET" && method !== "HEAD") {
     try {
@@ -92,7 +96,10 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
     // 1. Check URL query params
     const queryBusinessId = searchParams.get("businessId");
     if (queryBusinessId && queryBusinessId !== session.user.businessId) {
-      return NextResponse.json({ error: "Forbidden: Tenant isolation mismatch (query)" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Forbidden: Tenant isolation mismatch (query)" },
+        { status: 403 }
+      );
     }
 
     // 2. Check JSON request body
@@ -100,7 +107,10 @@ async function proxyRequest(request: NextRequest, { params }: { params: Promise<
       try {
         const parsedBody = JSON.parse(body);
         if (parsedBody?.businessId && parsedBody.businessId !== session.user.businessId) {
-          return NextResponse.json({ error: "Forbidden: Tenant isolation mismatch (body)" }, { status: 403 });
+          return NextResponse.json(
+            { error: "Forbidden: Tenant isolation mismatch (body)" },
+            { status: 403 }
+          );
         }
       } catch (e) {
         // Not JSON or parsing failed, ignore
@@ -147,6 +157,9 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ pat
   return proxyRequest(request, context);
 }
 
-export async function DELETE(request: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ path: string[] }> }
+) {
   return proxyRequest(request, context);
 }

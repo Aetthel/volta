@@ -14,10 +14,12 @@ Actualmente Volta posee una lógica parcial e inconsistente de demos y planes (d
 ## Capabilities
 
 ### New Capabilities
+
 - `demo-sandbox`: Modo demo efímero de 20 minutos con limpieza automática y entorno aislado para visitantes.
 - `subscription-tier-management`: Motor de control de suscripciones, límites por plan (Base vs Pro) y manejo del ciclo de vida del Trial (14 días).
 
 ### Modified Capabilities
+
 <!-- No requirement changes to existing specs -->
 
 ## Impact

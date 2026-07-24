@@ -1,9 +1,9 @@
-import pkg from 'whatsapp-web.js';
-import path from 'path';
-import fs from 'fs';
-import prisma from '../config/db.js';
-import config from '../config/index.js';
-import { logger } from '../utils/logger.js';
+import pkg from "whatsapp-web.js";
+import path from "path";
+import fs from "fs";
+import prisma from "../config/db.js";
+import config from "../config/index.js";
+import { logger } from "../utils/logger.js";
 
 const { Client, LocalAuth } = pkg;
 
@@ -21,8 +21,8 @@ class WhatsAppManager {
         where: { id: businessId },
         data: {
           whatsappStatus: status,
-          qrCode: qr
-        }
+          qrCode: qr,
+        },
       });
       logger.info(`[WhatsApp] Status updated for ${businessId}: ${status}`);
     } catch (err) {
@@ -35,7 +35,7 @@ class WhatsAppManager {
       logger.error(`[WhatsApp] Invalid businessId for session deletion: ${businessId}`);
       return;
     }
-    const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
+    const sessionPath = path.join(process.cwd(), ".wwebjs_auth", `session-${businessId}`);
     if (fs.existsSync(sessionPath)) {
       logger.info(`[WhatsApp] Deleting session directory for business: ${businessId}`);
       try {
@@ -71,8 +71,8 @@ class WhatsAppManager {
   async _doInitClient(businessId) {
     logger.info(`[WhatsApp] Initializing client for business: ${businessId}`);
 
-    const sessionDir = path.join(process.cwd(), '.wwebjs_auth', `session-${businessId}`);
-    for (const lockFile of ['SingletonLock', 'SingletonSocket', 'SingletonCookie']) {
+    const sessionDir = path.join(process.cwd(), ".wwebjs_auth", `session-${businessId}`);
+    for (const lockFile of ["SingletonLock", "SingletonSocket", "SingletonCookie"]) {
       const lockPath = path.join(sessionDir, lockFile);
       if (fs.existsSync(lockPath)) {
         try {
@@ -87,59 +87,59 @@ class WhatsAppManager {
     const client = new Client({
       authStrategy: new LocalAuth({
         clientId: businessId,
-        dataPath: path.join(process.cwd(), '.wwebjs_auth')
+        dataPath: path.join(process.cwd(), ".wwebjs_auth"),
       }),
       puppeteer: {
         headless: true,
         args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--no-first-run",
+          "--no-zygote",
+          "--disable-gpu",
         ],
         executablePath: config.puppeteerExecutablePath,
-      }
+      },
     });
 
-    client.on('qr', (qr) => {
+    client.on("qr", (qr) => {
       logger.info(`[WhatsApp] QR Code received for business ${businessId}`);
-      this.updateStatus(businessId, 'WAITING_QR', qr);
+      this.updateStatus(businessId, "WAITING_QR", qr);
     });
 
-    client.on('ready', () => {
+    client.on("ready", () => {
       logger.info(`[WhatsApp] Client is ready for business: ${businessId}`);
       this.readyClients.add(businessId);
-      this.updateStatus(businessId, 'CONNECTED', null);
+      this.updateStatus(businessId, "CONNECTED", null);
     });
 
-    client.on('authenticated', () => {
+    client.on("authenticated", () => {
       logger.info(`[WhatsApp] Client authenticated for business: ${businessId}`);
     });
 
-    client.on('auth_failure', (msg) => {
+    client.on("auth_failure", (msg) => {
       logger.error(`[WhatsApp] Authentication failure for business ${businessId}:`, msg);
       this.readyClients.delete(businessId);
       this.clients.delete(businessId);
-      this.updateStatus(businessId, 'DISCONNECTED', null);
+      this.updateStatus(businessId, "DISCONNECTED", null);
       this.deleteSession(businessId);
     });
 
-    client.on('disconnected', (reason) => {
+    client.on("disconnected", (reason) => {
       logger.info(`[WhatsApp] Client disconnected for business ${businessId}:`, reason);
       this.readyClients.delete(businessId);
       this.clients.delete(businessId);
-      this.updateStatus(businessId, 'DISCONNECTED', null);
+      this.updateStatus(businessId, "DISCONNECTED", null);
     });
 
     this.clients.set(businessId, client);
-    await client.initialize().catch(err => {
+    await client.initialize().catch((err) => {
       logger.error(`[WhatsApp] Failed to initialize client for ${businessId}:`, err);
       this.clients.delete(businessId);
       this.readyClients.delete(businessId);
-      this.updateStatus(businessId, 'DISCONNECTED', null);
+      this.updateStatus(businessId, "DISCONNECTED", null);
       throw err;
     });
 
@@ -181,38 +181,48 @@ class WhatsAppManager {
       // the user needs to re-scan — no point waiting the full timeout.
       const onQr = () => {
         finish();
-        reject(new Error(`[WhatsApp] Session expired — QR re-scan required (business: ${businessId})`));
+        reject(
+          new Error(`[WhatsApp] Session expired — QR re-scan required (business: ${businessId})`)
+        );
       };
 
       const onAuthFailure = () => {
         finish();
-        reject(new Error(`[WhatsApp] Auth failure while waiting for ready (business: ${businessId})`));
+        reject(
+          new Error(`[WhatsApp] Auth failure while waiting for ready (business: ${businessId})`)
+        );
       };
 
       const onDisconnected = () => {
         finish();
-        reject(new Error(`[WhatsApp] Client disconnected while waiting for ready (business: ${businessId})`));
+        reject(
+          new Error(
+            `[WhatsApp] Client disconnected while waiting for ready (business: ${businessId})`
+          )
+        );
       };
 
       const timer = setTimeout(() => {
         finish();
-        reject(new Error(`[WhatsApp] Timeout waiting for client to be ready (business: ${businessId})`));
+        reject(
+          new Error(`[WhatsApp] Timeout waiting for client to be ready (business: ${businessId})`)
+        );
       }, timeoutMs);
 
       const finish = () => {
         if (resolved) return;
         resolved = true;
         clearTimeout(timer);
-        client.off('ready', onReady);
-        client.off('qr', onQr);
-        client.off('auth_failure', onAuthFailure);
-        client.off('disconnected', onDisconnected);
+        client.off("ready", onReady);
+        client.off("qr", onQr);
+        client.off("auth_failure", onAuthFailure);
+        client.off("disconnected", onDisconnected);
       };
 
-      client.once('ready', onReady);
-      client.once('qr', onQr);
-      client.once('auth_failure', onAuthFailure);
-      client.once('disconnected', onDisconnected);
+      client.once("ready", onReady);
+      client.once("qr", onQr);
+      client.once("auth_failure", onAuthFailure);
+      client.once("disconnected", onDisconnected);
     });
   }
 
@@ -220,7 +230,10 @@ class WhatsAppManager {
     if (!phone) return "";
     const digits = phone.replace(/\D/g, "");
     // If it's a 9-digit Spanish phone number, prepend the 34 country code
-    if (digits.length === 9 && (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))) {
+    if (
+      digits.length === 9 &&
+      (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))
+    ) {
       return `34${digits}`;
     }
     return digits;
@@ -240,7 +253,7 @@ class WhatsAppManager {
       logger.error(`[WhatsApp] Failed to send message to ${chatId}:`, err.message);
 
       // Only simulate in non-production environments to avoid masking real failures
-      if (process.env.NODE_ENV !== 'production') {
+      if (process.env.NODE_ENV !== "production") {
         logger.info(`[WhatsApp] [SIMULATION] Mock message sent to chat`);
         return { simulated: true, messageId: `mock-msg-${Date.now()}` };
       }

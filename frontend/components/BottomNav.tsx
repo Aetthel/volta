@@ -3,19 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { 
-  LayoutDashboard, 
-  Calendar,
-  Users, 
-  Store, 
-  Settings,
-  BarChart3
-} from "lucide-react";
+import { LayoutDashboard, Calendar, Users, Store, Settings, BarChart3 } from "lucide-react";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  
+
   const role = session?.user?.role || "EMPLEADO";
 
   const navItems = [];
@@ -23,21 +16,22 @@ export default function BottomNav() {
     navItems.push(
       { name: "Control Global", href: "/admin", icon: BarChart3 },
       { name: "Locales", href: "/sedes", icon: Store },
-      { name: "Ajustes", href: "/ajustes", icon: Settings },
+      { name: "Ajustes", href: "/ajustes", icon: Settings }
     );
   } else if (role === "JEFE") {
     navItems.push(
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
       { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
-      { name: "Ajustes", href: "/ajustes", icon: Settings },
+      { name: "Ajustes", href: "/ajustes", icon: Settings }
     );
-  } else { // EMPLEADO
+  } else {
+    // EMPLEADO
     navItems.push(
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
       { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
-      { name: "Ajustes", href: "/ajustes", icon: Settings },
+      { name: "Ajustes", href: "/ajustes", icon: Settings }
     );
   }
 
@@ -61,9 +55,7 @@ export default function BottomNav() {
               <span className="absolute top-0 w-12 h-1 bg-primary rounded-b-full"></span>
             )}
             <Icon data-icon="bottom-nav" />
-            <span className="text-[10px] tracking-wider uppercase font-semibold">
-              {item.name}
-            </span>
+            <span className="text-[10px] tracking-wider uppercase font-semibold">{item.name}</span>
           </Link>
         );
       })}

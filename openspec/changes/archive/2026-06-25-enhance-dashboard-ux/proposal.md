@@ -23,7 +23,7 @@ El panel de control actual (`/inicio`) presenta una estética demasiado plana, m
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

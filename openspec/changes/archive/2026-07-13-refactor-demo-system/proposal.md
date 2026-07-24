@@ -11,7 +11,7 @@ The database startup currently generates static mock development users and busin
 
 ### New Capabilities
 
-*(None)*
+_(None)_
 
 ### Modified Capabilities
 

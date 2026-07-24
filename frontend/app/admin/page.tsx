@@ -38,7 +38,9 @@ export default function AdminPage() {
     targetRole: "", // Empty string means "Todos"
   });
   const [isAlertSending, setIsAlertSending] = useState(false);
-  const [alertStatus, setAlertStatus] = useState<{ success?: boolean; error?: string } | null>(null);
+  const [alertStatus, setAlertStatus] = useState<{ success?: boolean; error?: string } | null>(
+    null
+  );
 
   const handleSendAlert = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +90,9 @@ export default function AdminPage() {
     averageTicket: "€0",
     growth: "+0%",
   });
-  const [rankings, setRankings] = useState<Array<{ rank: number; name: string; revenue: string; change: string }>>([]);
+  const [rankings, setRankings] = useState<
+    Array<{ rank: number; name: string; revenue: string; change: string }>
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchAdminData = () => {
@@ -132,7 +136,7 @@ export default function AdminPage() {
   ];
 
   const filteredRankings = rankings.filter((branch) =>
-    branch.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    branch.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (status !== "loading" && session?.user?.role !== "ADMIN") {
@@ -143,7 +147,8 @@ export default function AdminPage() {
           <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col justify-center items-center">
             <div className="max-w-md w-full">
               <Alert variant="error" className="mb-4">
-                <span className="font-bold">Acceso Denegado:</span> Se requieren permisos de Administrador Global para ver esta sección.
+                <span className="font-bold">Acceso Denegado:</span> Se requieren permisos de
+                Administrador Global para ver esta sección.
               </Alert>
             </div>
           </main>
@@ -183,7 +188,10 @@ export default function AdminPage() {
           {isLoading ? (
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-gutter">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-surface-container-lowest p-5 rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[116px] animate-pulse">
+                <div
+                  key={i}
+                  className="bg-surface-container-lowest p-5 rounded-md border border-outline-variant shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[116px] animate-pulse"
+                >
                   <div className="flex justify-between items-center w-full">
                     <Skeleton className="w-24 h-4" />
                     <Skeleton className="w-8 h-8 rounded-full" />
@@ -238,7 +246,10 @@ export default function AdminPage() {
                 <div className="flex-1 p-6 flex items-end gap-6 h-[240px] px-8 pb-10 select-none animate-pulse">
                   {[...Array(6)].map((_, idx) => (
                     <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                      <Skeleton className="w-full rounded-t-sm" style={{ height: `${50 + (idx % 3) * 60}px` }} />
+                      <Skeleton
+                        className="w-full rounded-t-sm"
+                        style={{ height: `${50 + (idx % 3) * 60}px` }}
+                      />
                       <Skeleton className="w-8 h-4" />
                     </div>
                   ))}
@@ -253,7 +264,10 @@ export default function AdminPage() {
                 </div>
                 <div className="p-6 flex flex-col gap-4 overflow-y-auto animate-pulse">
                   {[...Array(4)].map((_, idx) => (
-                    <div key={idx} className="flex items-center justify-between border-b border-outline-variant/35 pb-3">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between border-b border-outline-variant/35 pb-3"
+                    >
                       <div className="flex items-center gap-3">
                         <Skeleton className="w-6 h-6 rounded-full" />
                         <div className="flex flex-col gap-1">
@@ -306,9 +320,7 @@ export default function AdminPage() {
                           {/* Custom Tooltip */}
                           <div
                             className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface font-label-md px-2 py-[2px] rounded text-[11px] whitespace-nowrap transition-all duration-200 pointer-events-none shadow-md ${
-                              isHovered
-                                ? "opacity-100 translate-y-0"
-                                : "opacity-0 translate-y-2"
+                              isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
                             }`}
                           >
                             {data.month}: {data.label}
@@ -371,9 +383,7 @@ export default function AdminPage() {
                           </p>
                           <span
                             className={`text-label-md font-bold inline-flex items-center gap-1 ${
-                              branch.change.startsWith("+")
-                                ? "text-tertiary"
-                                : "text-error"
+                              branch.change.startsWith("+") ? "text-tertiary" : "text-error"
                             }`}
                           >
                             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -395,7 +405,8 @@ export default function AdminPage() {
                 Emitir Alerta del Sistema
               </h3>
               <p className="text-body-sm text-on-surface-variant mb-6">
-                Envía una notificación emergente, aviso crítico o mensaje informativo a los usuarios del sistema.
+                Envía una notificación emergente, aviso crítico o mensaje informativo a los usuarios
+                del sistema.
               </p>
 
               {alertStatus?.success && (
@@ -414,7 +425,10 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Title */}
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="alert-title" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                    <label
+                      htmlFor="alert-title"
+                      className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider"
+                    >
                       Título de la Alerta
                     </label>
                     <input
@@ -431,13 +445,18 @@ export default function AdminPage() {
                   {/* Type and Target */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label htmlFor="alert-type" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                      <label
+                        htmlFor="alert-type"
+                        className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider"
+                      >
                         Tipo
                       </label>
                       <select
                         id="alert-type"
                         value={alertForm.type}
-                        onChange={(e) => setAlertForm((prev) => ({ ...prev, type: e.target.value }))}
+                        onChange={(e) =>
+                          setAlertForm((prev) => ({ ...prev, type: e.target.value }))
+                        }
                         className="px-3 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md"
                       >
                         <option value="EMERGENTE">Emergente (Inicio)</option>
@@ -447,13 +466,18 @@ export default function AdminPage() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label htmlFor="alert-target" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                      <label
+                        htmlFor="alert-target"
+                        className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider"
+                      >
                         Destinatarios
                       </label>
                       <select
                         id="alert-target"
                         value={alertForm.targetRole}
-                        onChange={(e) => setAlertForm((prev) => ({ ...prev, targetRole: e.target.value }))}
+                        onChange={(e) =>
+                          setAlertForm((prev) => ({ ...prev, targetRole: e.target.value }))
+                        }
                         className="px-3 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md"
                       >
                         <option value="">Todos los Roles</option>
@@ -466,7 +490,10 @@ export default function AdminPage() {
 
                 {/* Description */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="alert-desc" className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+                  <label
+                    htmlFor="alert-desc"
+                    className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider"
+                  >
                     Contenido / Descripción
                   </label>
                   <textarea
@@ -475,7 +502,9 @@ export default function AdminPage() {
                     rows={3}
                     placeholder="Escribe el mensaje detallado aquí..."
                     value={alertForm.description}
-                    onChange={(e) => setAlertForm((prev) => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setAlertForm((prev) => ({ ...prev, description: e.target.value }))
+                    }
                     className="px-4 py-2.5 bg-surface border border-outline-variant rounded-xl text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 text-body-md resize-none"
                   />
                 </div>
@@ -485,7 +514,9 @@ export default function AdminPage() {
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={isAlertSending || !alertForm.title.trim() || !alertForm.description.trim()}
+                    disabled={
+                      isAlertSending || !alertForm.title.trim() || !alertForm.description.trim()
+                    }
                     className="py-2.5 px-6 font-bold shadow-md rounded-xl active:scale-[0.98] disabled:opacity-50"
                   >
                     {isAlertSending ? "Enviando..." : "Emitir Notificación"}

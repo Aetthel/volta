@@ -1,13 +1,13 @@
-import prisma from '../config/db.js';
-import { sendConsentMessage } from './botService.js';
-import whatsappManager from './whatsappService.js';
-import { maskPhone } from '../utils/logger.js';
-import { logger } from '../utils/logger.js';
+import prisma from "../config/db.js";
+import { sendConsentMessage } from "./botService.js";
+import whatsappManager from "./whatsappService.js";
+import { maskPhone } from "../utils/logger.js";
+import { logger } from "../utils/logger.js";
 
 export const getClientsByBusiness = async (businessId) => {
   return await prisma.client.findMany({
     where: { businessId },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
   });
 };
 
@@ -21,12 +21,12 @@ export const createClient = async (clientData) => {
       email,
       phone,
       lopdStatus: "Pendiente",
-      businessId
-    }
+      businessId,
+    },
   });
 
   sendConsentMessage(businessId, client).catch((err) => {
-    logger.error('[Clients Service] Error sending LOPD consent request:', err);
+    logger.error("[Clients Service] Error sending LOPD consent request:", err);
   });
 
   return client;
@@ -43,31 +43,31 @@ export const updateClient = async (id, clientData) => {
       email,
       phone,
       lastVisit,
-      frequentService
-    }
+      frequentService,
+    },
   });
 };
 
 export const deleteClient = async (id) => {
   await prisma.appointment.updateMany({
     where: { clientId: id },
-    data: { clientId: null }
+    data: { clientId: null },
   });
 
   return await prisma.client.delete({
-    where: { id }
+    where: { id },
   });
 };
 
 export const getClientById = async (id) => {
   return await prisma.client.findUnique({
-    where: { id }
+    where: { id },
   });
 };
 
 export const resendConsent = async (client) => {
   sendConsentMessage(client.businessId, client).catch((err) => {
-    logger.error('[Clients Service] Error resending LOPD consent request:', err);
+    logger.error("[Clients Service] Error resending LOPD consent request:", err);
   });
 };
 

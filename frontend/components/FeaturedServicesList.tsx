@@ -13,9 +13,7 @@ export interface FeaturedServicesListProps {
   services: ServiceShare[];
 }
 
-export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
-  services,
-}) => {
+export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({ services }) => {
   return (
     <div className="flex flex-col gap-6 justify-center flex-1">
       {services.map((s, idx) => {

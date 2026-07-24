@@ -12,9 +12,11 @@ El backend actual del proyecto Volta sigue un diseño plano ("Fat Routers") dond
 ## Capabilities
 
 ### New Capabilities
+
 - Ninguna. Se trata de una refactorización de código y organización interna.
 
 ### Modified Capabilities
+
 - `project-modular-structure`: Robustecer la organización física y el acoplamiento lógico del backend, estructurándolo bajo un diseño modular limpio de responsabilidades separadas.
 
 ## Impact

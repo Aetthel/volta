@@ -11,10 +11,12 @@ Currently, deployments on the server require manual intervention (pulling code a
 ## Capabilities
 
 ### New Capabilities
+
 - `deployment-automation`: Containers automatically pull new built images from GHCR and restart gracefully without manual commands.
 - `production-safe-seeding`: Seeding of mock clients and appointments is skipped when running in production (`NODE_ENV === 'production'`).
 
 ### Modified Capabilities
+
 None.
 
 ## Impact

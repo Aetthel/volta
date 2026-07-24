@@ -11,9 +11,11 @@ The current client management page uses hardcoded Tailwind CSS color classes (su
 ## Capabilities
 
 ### New Capabilities
+
 <!-- None -->
 
 ### Modified Capabilities
+
 - `stitch-design-migration`: Align LOPD status displays, toast alerts, and external brand icons with the existing Material Design 3 theme system.
 
 ## Impact

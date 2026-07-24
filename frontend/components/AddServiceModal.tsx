@@ -3,10 +3,20 @@
 import { useState, useEffect } from "react";
 import { X, Sparkles, Pencil, Briefcase, Clock, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FieldGroup, Field, FloatingInput, Button, FloatingSelect, FloatingTextarea } from "@/components/ui/volta-ui";
+import {
+  FieldGroup,
+  Field,
+  FloatingInput,
+  Button,
+  FloatingSelect,
+  FloatingTextarea,
+} from "@/components/ui/volta-ui";
 
 const EuroIcon = ({ className }: { className?: string }) => (
-  <span className={cn("font-semibold text-on-surface-variant/70 text-body-lg", className)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+  <span
+    className={cn("font-semibold text-on-surface-variant/70 text-body-lg", className)}
+    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+  >
     €
   </span>
 );
@@ -23,7 +33,14 @@ interface ServiceToEdit {
 interface AddServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (serviceData: { id?: string; name: string; price: number; duration: number; description?: string; capacity?: number }) => void;
+  onSave: (serviceData: {
+    id?: string;
+    name: string;
+    price: number;
+    duration: number;
+    description?: string;
+    capacity?: number;
+  }) => void;
   serviceToEdit?: ServiceToEdit | null;
 }
 
@@ -62,9 +79,7 @@ export default function AddServiceModal({
   if (!isOpen) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -102,9 +117,7 @@ export default function AddServiceModal({
             ) : (
               <Sparkles className="w-5 h-5 text-primary" />
             )}
-            <span>
-              {isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}
-            </span>
+            <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
           </h3>
           <Button
             variant="ghost"
@@ -198,11 +211,7 @@ export default function AddServiceModal({
               >
                 Cancelar
               </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-              >
+              <Button type="submit" variant="primary" size="lg">
                 {isEditMode ? "Guardar Cambios" : "Añadir Servicio"}
               </Button>
             </div>

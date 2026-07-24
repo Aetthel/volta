@@ -10,7 +10,7 @@ Corregir la alineación horizontal de los nodos circulares del timeline en el da
 
 ### New Capabilities
 
-*(Ninguna)*
+_(Ninguna)_
 
 ### Modified Capabilities
 

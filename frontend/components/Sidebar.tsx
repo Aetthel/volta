@@ -4,16 +4,16 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { 
-  LayoutDashboard, 
+import {
+  LayoutDashboard,
   Calendar,
-  Users, 
-  Store, 
-  Settings, 
-  BarChart3, 
+  Users,
+  Store,
+  Settings,
+  BarChart3,
   Plus,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
@@ -29,7 +29,7 @@ interface SidebarProps {
 export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  
+
   const role = session?.user?.role || "EMPLEADO";
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
@@ -132,50 +132,63 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     navigationItems.push(
       { name: "Control Global", href: "/admin", icon: BarChart3 },
       { name: "Locales", href: "/sedes", icon: Store },
-      { name: "Ajustes", href: "/ajustes", icon: Settings },
+      { name: "Ajustes", href: "/ajustes", icon: Settings }
     );
   } else if (role === "JEFE") {
     navigationItems.push(
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
       { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
-      { name: "Ajustes", href: "/ajustes", icon: Settings },
+      { name: "Ajustes", href: "/ajustes", icon: Settings }
     );
   } else {
     navigationItems.push(
       { name: "Inicio", href: "/inicio", icon: LayoutDashboard },
       { name: "Agenda", href: "/agenda", icon: Calendar },
       { name: "Clientes", href: "/clientes", icon: Users },
-      { name: "Ajustes", href: "/ajustes", icon: Settings },
+      { name: "Ajustes", href: "/ajustes", icon: Settings }
     );
   }
 
   const displayCollapsed = mounted ? isCollapsed : false;
 
   return (
-    <aside 
+    <aside
       style={{ width: "var(--sidebar-width)" }}
       className={`h-full hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant py-6 z-50 ${isResizing ? "transition-none" : "transition-all duration-300"}`}
     >
       {/* Brand logo & styling */}
-      <div className={`flex items-center mb-8 px-4 ${displayCollapsed ? 'flex-col gap-3 justify-center' : 'gap-3'}`}>
+      <div
+        className={`flex items-center mb-8 px-4 ${displayCollapsed ? "flex-col gap-3 justify-center" : "gap-3"}`}
+      >
         {!displayCollapsed && (
           <div className="min-w-0 flex-1">
-            <h1 className="font-title-sm text-title-sm font-bold text-primary tracking-tight truncate" title={session?.user?.name || "Volta"}>
+            <h1
+              className="font-title-sm text-title-sm font-bold text-primary tracking-tight truncate"
+              title={session?.user?.name || "Volta"}
+            >
               {session?.user?.name || "Volta"}
             </h1>
             <p className="text-label-sm font-label-sm text-on-surface-variant truncate">
-              {role === "ADMIN" ? "Administrador Global" : role === "JEFE" ? "Jefe de Tienda" : "Empleado"}
+              {role === "ADMIN"
+                ? "Administrador Global"
+                : role === "JEFE"
+                  ? "Jefe de Tienda"
+                  : "Empleado"}
             </p>
           </div>
         )}
-        <button 
+        <button
           onClick={handleToggle}
-          className={`p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors cursor-pointer border-none bg-transparent ${displayCollapsed ? 'mt-1' : 'ml-auto'}`}
+          className={`p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors cursor-pointer border-none bg-transparent ${displayCollapsed ? "mt-1" : "ml-auto"}`}
           aria-label={displayCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
           title={displayCollapsed ? "Expandir menú" : "Colapsar menú"}
         >
-          {displayCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {displayCollapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
         </button>
       </div>
 
@@ -189,7 +202,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center ${displayCollapsed ? 'justify-center py-3.5 mx-3' : 'gap-4 px-4 py-3 mx-3'} rounded-lg active:scale-95 transition-all duration-200 cursor-pointer ${
+              className={`flex items-center ${displayCollapsed ? "justify-center py-3.5 mx-3" : "gap-4 px-4 py-3 mx-3"} rounded-lg active:scale-95 transition-all duration-200 cursor-pointer ${
                 isActive
                   ? "bg-secondary-container text-on-secondary-container font-medium"
                   : "text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors"
@@ -197,7 +210,9 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
               title={displayCollapsed ? item.name : undefined}
             >
               <Icon data-icon="nav" />
-              {!displayCollapsed && <span className="font-label-md text-label-md">{item.name}</span>}
+              {!displayCollapsed && (
+                <span className="font-label-md text-label-md">{item.name}</span>
+              )}
             </Link>
           );
         })}
@@ -205,11 +220,15 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
 
       {/* Action CTA Button at the bottom */}
       {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
-        <div className={`px-4 mt-auto ${displayCollapsed ? 'flex justify-center' : ''}`}>
+        <div className={`px-4 mt-auto ${displayCollapsed ? "flex justify-center" : ""}`}>
           <Button
             onClick={onNewAppointmentClick}
             variant="primary"
-            className={displayCollapsed ? "!w-12 !h-12 !rounded-full !p-0 shadow-sm flex items-center justify-center shrink-0" : "w-full py-4 px-6 shadow-sm"}
+            className={
+              displayCollapsed
+                ? "!w-12 !h-12 !rounded-full !p-0 shadow-sm flex items-center justify-center shrink-0"
+                : "w-full py-4 px-6 shadow-sm"
+            }
             title={displayCollapsed ? "Nueva Cita" : undefined}
           >
             <Plus data-icon="plus" className={displayCollapsed ? "w-5 h-5" : ""} />

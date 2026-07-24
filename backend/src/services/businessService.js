@@ -1,4 +1,4 @@
-import prisma from '../config/db.js';
+import prisma from "../config/db.js";
 
 export const getBusinessById = async (id) => {
   return prisma.business.findUnique({
@@ -17,7 +17,7 @@ export const getBusinessById = async (id) => {
       themeColor: true,
       fontSizeLevel: true,
       borderRadiusLevel: true,
-    }
+    },
   });
 };
 
@@ -37,14 +37,14 @@ export const updateBusiness = async (id, updateData) => {
       themeColor: true,
       fontSizeLevel: true,
       borderRadiusLevel: true,
-    }
+    },
   });
 };
 
 export const getBusinessHours = async (businessId) => {
   return prisma.businessHours.findMany({
     where: { businessId },
-    orderBy: { dayOfWeek: 'asc' }
+    orderBy: { dayOfWeek: "asc" },
   });
 };
 
@@ -55,21 +55,21 @@ export const updateBusinessHours = async (businessId, hoursData) => {
         where: {
           businessId_dayOfWeek: {
             businessId,
-            dayOfWeek: h.dayOfWeek
-          }
+            dayOfWeek: h.dayOfWeek,
+          },
         },
         update: {
           openTime: h.openTime,
           closeTime: h.closeTime,
-          isClosed: h.isClosed
+          isClosed: h.isClosed,
         },
         create: {
           businessId,
           dayOfWeek: h.dayOfWeek,
           openTime: h.openTime,
           closeTime: h.closeTime,
-          isClosed: h.isClosed
-        }
+          isClosed: h.isClosed,
+        },
       });
     }
   });
@@ -83,7 +83,7 @@ export const getBusinessWhatsApp = async (businessId) => {
       qrCode: true,
       welcomeMessage: true,
       reminderMessage: true,
-    }
+    },
   });
 };
 
@@ -93,7 +93,7 @@ export const updateBusinessTemplates = async (businessId, data) => {
     data,
     select: {
       welcomeMessage: true,
-      reminderMessage: true
-    }
+      reminderMessage: true,
+    },
   });
 };

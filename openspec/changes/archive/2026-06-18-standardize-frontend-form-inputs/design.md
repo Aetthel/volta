@@ -5,11 +5,13 @@ Multiple modal dialog forms in `frontend/components/` (specifically `AddClientMo
 ## Goals / Non-Goals
 
 **Goals:**
+
 - **Standardize input controls**: Refactor form inputs to use `FloatingInput` from `@/components/ui/volta-ui` across all target modals.
 - **Enforce spacing and structural standards**: Replace raw spacing class combinations with Volta's structured layout components (`FieldGroup`, `Field`, `FieldLabel`) and consistent gap definitions.
 - **Fix icon alignments**: Centralize leading icon placement within inputs using Volta UI's native `icon` parameter.
 
 **Non-Goals:**
+
 - Creating new state hooks or editing save/submit callback logic in the modal triggers.
 - Re-architecting standard select drop-downs and textareas beyond mapping them to standard `Field` structures.
 - Altering any CSS file configurations or global design tokens.
@@ -17,7 +19,9 @@ Multiple modal dialog forms in `frontend/components/` (specifically `AddClientMo
 ## Decisions
 
 ### 1. Migrate input elements in modals to `FloatingInput`
+
 Text inputs in `AddClientModal`, `AddServiceModal`, and `NewAppointmentModal` will be replaced with:
+
 ```tsx
 import { FloatingInput } from "@/components/ui/volta-ui";
 // ...
@@ -28,12 +32,15 @@ import { FloatingInput } from "@/components/ui/volta-ui";
   required
   value={formData.name}
   onChange={handleChange}
-/>
+/>;
 ```
+
 This handles placeholder, focus-within, leading icon, and floating transition states dynamically.
 
 ### 2. Group controls using `FieldGroup` and `Field`
+
 Instead of using raw `div` tags with inconsistent spacing, form layouts will use:
+
 ```tsx
 <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
   <Field>
@@ -45,6 +52,6 @@ Instead of using raw `div` tags with inconsistent spacing, form layouts will use
 ## Risks / Trade-offs
 
 - **[Risk]**: Alignment issues with nested icons in `FloatingInput`.
-  - *Mitigation*: Leverage the native `icon` property exposed by `FloatingInput` which handles absolute positioning and focus-color changes.
+  - _Mitigation_: Leverage the native `icon` property exposed by `FloatingInput` which handles absolute positioning and focus-color changes.
 - **[Risk]**: Dropdown selections (`<select>`) not aligning visually with floating-label inputs.
-  - *Mitigation*: Place dropdown select elements within standard `<Field>` layout containers with a structured `<FieldLabel>` matching Volta UI tokens.
+  - _Mitigation_: Place dropdown select elements within standard `<Field>` layout containers with a structured `<FieldLabel>` matching Volta UI tokens.

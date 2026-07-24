@@ -2,11 +2,29 @@
 
 import { useState, useEffect, use } from "react";
 import {
-  Calendar, Clock, CheckCircle2, Store, Phone, Mail, User, Briefcase,
-  ChevronLeft, ArrowRight, ShieldCheck, AlertCircle
+  Calendar,
+  Clock,
+  CheckCircle2,
+  Store,
+  Phone,
+  Mail,
+  User,
+  Briefcase,
+  ChevronLeft,
+  ArrowRight,
+  ShieldCheck,
+  AlertCircle,
 } from "lucide-react";
 import { COLOR_PALETTES, getThemeColor, applyThemeColors } from "@/lib/theme";
-import { Button, Card, CardHeader, CardTitle, CardContent, InputGroup, Alert } from "@/components/ui/volta-ui";
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  InputGroup,
+  Alert,
+} from "@/components/ui/volta-ui";
 
 interface PublicBusinessData {
   id: string;
@@ -42,10 +60,10 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
   const [error, setError] = useState("");
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [selectedService, setSelectedService] = useState<PublicBusinessData['services'][0] | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+  const [selectedService, setSelectedService] = useState<PublicBusinessData["services"][0] | null>(
+    null
   );
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [selectedTime, setSelectedTime] = useState<string>("");
 
   const [clientName, setClientName] = useState("");
@@ -85,7 +103,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
       <div className="min-h-screen bg-surface flex items-center justify-center p-6">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-body-md text-on-surface-variant font-medium">Cargando reservas...</span>
+          <span className="text-body-md text-on-surface-variant font-medium">
+            Cargando reservas...
+          </span>
         </div>
       </div>
     );
@@ -96,8 +116,12 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
       <div className="min-h-screen bg-surface flex items-center justify-center p-6">
         <Card className="max-w-md w-full p-6 text-center">
           <AlertCircle className="w-12 h-12 text-error mx-auto mb-4" />
-          <h2 className="text-headline-sm font-bold text-on-surface mb-2">Reservas No Disponibles</h2>
-          <p className="text-body-md text-on-surface-variant mb-6">{error || "No se ha podido encontrar el negocio solicitado."}</p>
+          <h2 className="text-headline-sm font-bold text-on-surface mb-2">
+            Reservas No Disponibles
+          </h2>
+          <p className="text-body-md text-on-surface-variant mb-6">
+            {error || "No se ha podido encontrar el negocio solicitado."}
+          </p>
         </Card>
       </div>
     );
@@ -146,9 +170,24 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
 
   // Available time slots (09:00 - 20:00 every 30 mins)
   const timeSlots = [
-    "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-    "12:00", "12:30", "13:00", "13:30", "16:00", "16:30",
-    "17:00", "17:30", "18:00", "18:30", "19:00", "19:30"
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "16:00",
+    "16:30",
+    "17:00",
+    "17:30",
+    "18:00",
+    "18:30",
+    "19:00",
+    "19:30",
   ];
 
   return (
@@ -161,7 +200,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
               <Store className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="font-display text-headline-md font-bold text-on-surface">{business.name}</h1>
+              <h1 className="font-display text-headline-md font-bold text-on-surface">
+                {business.name}
+              </h1>
               {business.address && (
                 <p className="text-body-sm text-on-surface-variant flex items-center justify-center sm:justify-start gap-1 mt-0.5">
                   {business.address}
@@ -176,23 +217,33 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
 
         {/* Step Indicator */}
         <div className="flex items-center justify-between mb-8 px-2">
-          {["1. Servicio", "2. Fecha y Hora", "3. Mis Datos", "4. Confirmación"].map((label, idx) => {
-            const stepNum = idx + 1;
-            const isActive = step === stepNum;
-            const isDone = step > stepNum;
-            return (
-              <div key={label} className="flex items-center gap-2">
-                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                  isActive ? "bg-primary text-on-primary shadow-md" : isDone ? "bg-primary/20 text-primary" : "bg-surface-container-high text-on-surface-variant"
-                }`}>
-                  {stepNum}
-                </span>
-                <span className={`hidden md:inline text-body-xs font-semibold ${isActive ? "text-primary" : "text-on-surface-variant"}`}>
-                  {label}
-                </span>
-              </div>
-            );
-          })}
+          {["1. Servicio", "2. Fecha y Hora", "3. Mis Datos", "4. Confirmación"].map(
+            (label, idx) => {
+              const stepNum = idx + 1;
+              const isActive = step === stepNum;
+              const isDone = step > stepNum;
+              return (
+                <div key={label} className="flex items-center gap-2">
+                  <span
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                      isActive
+                        ? "bg-primary text-on-primary shadow-md"
+                        : isDone
+                          ? "bg-primary/20 text-primary"
+                          : "bg-surface-container-high text-on-surface-variant"
+                    }`}
+                  >
+                    {stepNum}
+                  </span>
+                  <span
+                    className={`hidden md:inline text-body-xs font-semibold ${isActive ? "text-primary" : "text-on-surface-variant"}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              );
+            }
+          )}
         </div>
 
         {error && (
@@ -204,8 +255,12 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
         {/* STEP 1: Select Service */}
         {step === 1 && (
           <div className="animate-in fade-in duration-200">
-            <h2 className="text-headline-sm font-bold text-on-surface mb-2">Selecciona un Servicio</h2>
-            <p className="text-body-sm text-on-surface-variant mb-6">Elige la actividad o servicio que deseas reservar.</p>
+            <h2 className="text-headline-sm font-bold text-on-surface mb-2">
+              Selecciona un Servicio
+            </h2>
+            <p className="text-body-sm text-on-surface-variant mb-6">
+              Elige la actividad o servicio que deseas reservar.
+            </p>
 
             <div className="grid grid-cols-1 gap-4">
               {business.services.map((srv) => (
@@ -234,11 +289,15 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                       <p className="text-body-sm text-on-surface-variant">{srv.description}</p>
                     )}
                     <div className="flex items-center gap-4 mt-2 text-body-xs text-on-surface-variant">
-                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {srv.duration} min</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" /> {srv.duration} min
+                      </span>
                     </div>
                   </div>
                   <div className="text-right shrink-0 ml-4">
-                    <span className="font-bold text-title-lg text-primary">{srv.price.toFixed(2)} €</span>
+                    <span className="font-bold text-title-lg text-primary">
+                      {srv.price.toFixed(2)} €
+                    </span>
                   </div>
                 </div>
               ))}
@@ -251,16 +310,27 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
           <div className="animate-in fade-in duration-200">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-headline-sm font-bold text-on-surface">Selecciona Fecha y Hora</h2>
-                <p className="text-body-sm text-on-surface-variant">Para {selectedService.name} ({selectedService.duration} min)</p>
+                <h2 className="text-headline-sm font-bold text-on-surface">
+                  Selecciona Fecha y Hora
+                </h2>
+                <p className="text-body-sm text-on-surface-variant">
+                  Para {selectedService.name} ({selectedService.duration} min)
+                </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="flex items-center gap-1 text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setStep(1)}
+                className="flex items-center gap-1 text-primary"
+              >
                 <ChevronLeft className="w-4 h-4" /> Cambiar servicio
               </Button>
             </div>
 
             <Card className="p-6 mb-6">
-              <label className="block text-body-sm font-semibold text-on-surface mb-2">Fecha de la Cita</label>
+              <label className="block text-body-sm font-semibold text-on-surface mb-2">
+                Fecha de la Cita
+              </label>
               <input
                 type="date"
                 min={new Date().toISOString().split("T")[0]}
@@ -272,7 +342,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                 className="w-full px-4 py-3 bg-surface-container-lowest text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
               />
 
-              <label className="block text-body-sm font-semibold text-on-surface mt-6 mb-3">Horarios Disponibles</label>
+              <label className="block text-body-sm font-semibold text-on-surface mt-6 mb-3">
+                Horarios Disponibles
+              </label>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
                 {timeSlots.map((time) => (
                   <button
@@ -309,10 +381,19 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
           <div className="animate-in fade-in duration-200">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-headline-sm font-bold text-on-surface">Tus Datos de Contacto</h2>
-                <p className="text-body-sm text-on-surface-variant">Necesarios para confirmar tu reserva por WhatsApp o Email.</p>
+                <h2 className="text-headline-sm font-bold text-on-surface">
+                  Tus Datos de Contacto
+                </h2>
+                <p className="text-body-sm text-on-surface-variant">
+                  Necesarios para confirmar tu reserva por WhatsApp o Email.
+                </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="flex items-center gap-1 text-primary">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setStep(2)}
+                className="flex items-center gap-1 text-primary"
+              >
                 <ChevronLeft className="w-4 h-4" /> Cambiar hora
               </Button>
             </div>
@@ -320,7 +401,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
             <Card className="p-6 mb-6">
               <form onSubmit={handleBookingSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-body-sm font-semibold text-on-surface mb-1">Nombre Completo *</label>
+                  <label className="block text-body-sm font-semibold text-on-surface mb-1">
+                    Nombre Completo *
+                  </label>
                   <input
                     type="text"
                     required
@@ -332,7 +415,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                 </div>
 
                 <div>
-                  <label className="block text-body-sm font-semibold text-on-surface mb-1">Teléfono Móvil (WhatsApp) *</label>
+                  <label className="block text-body-sm font-semibold text-on-surface mb-1">
+                    Teléfono Móvil (WhatsApp) *
+                  </label>
                   <input
                     type="tel"
                     required
@@ -344,7 +429,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                 </div>
 
                 <div>
-                  <label className="block text-body-sm font-semibold text-on-surface mb-1">Correo Electrónico (Opcional)</label>
+                  <label className="block text-body-sm font-semibold text-on-surface mb-1">
+                    Correo Electrónico (Opcional)
+                  </label>
                   <input
                     type="email"
                     value={clientEmail}
@@ -356,10 +443,17 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
 
                 {/* Summary Box */}
                 <div className="p-4 bg-surface-container-low border border-outline-variant/60 rounded-xl mt-6">
-                  <span className="font-semibold text-body-sm text-primary block mb-2">Resumen de tu Reserva:</span>
+                  <span className="font-semibold text-body-sm text-primary block mb-2">
+                    Resumen de tu Reserva:
+                  </span>
                   <div className="text-body-sm text-on-surface space-y-1">
-                    <p><strong>Servicio:</strong> {selectedService.name} ({selectedService.price.toFixed(2)} €)</p>
-                    <p><strong>Fecha y Hora:</strong> {selectedDate} a las {selectedTime} hs</p>
+                    <p>
+                      <strong>Servicio:</strong> {selectedService.name} (
+                      {selectedService.price.toFixed(2)} €)
+                    </p>
+                    <p>
+                      <strong>Fecha y Hora:</strong> {selectedDate} a las {selectedTime} hs
+                    </p>
                   </div>
                 </div>
 
@@ -383,20 +477,31 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
               <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-headline-md font-bold text-on-surface mb-2">¡Reserva Confirmada!</h2>
+              <h2 className="text-headline-md font-bold text-on-surface mb-2">
+                ¡Reserva Confirmada!
+              </h2>
               <p className="text-body-md text-on-surface-variant mb-6">
                 Hemos registrado tu cita correctamente en <strong>{business.name}</strong>.
               </p>
 
               <div className="bg-surface-container-low p-5 rounded-xl text-left border border-outline-variant/50 mb-6 space-y-2 text-body-sm text-on-surface">
-                <p><strong>Servicio:</strong> {selectedService?.name}</p>
-                <p><strong>Fecha y Hora:</strong> {selectedDate} a las {selectedTime} hs</p>
-                <p><strong>Nombre:</strong> {clientName}</p>
-                <p><strong>Teléfono:</strong> {clientPhone}</p>
+                <p>
+                  <strong>Servicio:</strong> {selectedService?.name}
+                </p>
+                <p>
+                  <strong>Fecha y Hora:</strong> {selectedDate} a las {selectedTime} hs
+                </p>
+                <p>
+                  <strong>Nombre:</strong> {clientName}
+                </p>
+                <p>
+                  <strong>Teléfono:</strong> {clientPhone}
+                </p>
               </div>
 
               <p className="text-body-xs text-on-surface-variant/80 mb-6">
-                Recibirás un recordatorio por WhatsApp antes de la cita. ¡Gracias por confiar en {business.name}!
+                Recibirás un recordatorio por WhatsApp antes de la cita. ¡Gracias por confiar en{" "}
+                {business.name}!
               </p>
 
               <Button

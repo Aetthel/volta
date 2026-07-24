@@ -5,21 +5,25 @@ Multiple files (Inicio dashboard, agenda list, adjustments tab, Alert primitives
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Clean up all raw hexes `#005d63` and `#b2f1e8` in `inicio/page.tsx` and map them to `primary` and `secondary-container` classes.
 - Clean up all raw hexes `#b0c4de` and slate background overrides in `ajustes/page.tsx` and map them to `secondary-container` and `surface-container-low`.
 - Standardize status colors in `agenda/page.tsx` and `ajustes/page.tsx` (e.g. active indicators, clock/check statuses) to `primary` and `error` or `on-surface-variant`.
 - Clean up `Alert` primitive variants (`success`, `warning`) to map directly to existing theme containers.
 
 **Non-Goals:**
+
 - Creating new theme tokens in `globals.css` or `DESIGN.md`.
 
 ## Decisions
 
 ### Alert Primitive Color Redefinition
+
 - **Decision:** Modify `success` variant inside `volta-ui.tsx` to use `bg-secondary-container border border-secondary-container/60 text-on-secondary-container`. Modify `warning` variant to use `bg-surface-container border border-outline-variant text-on-surface`.
 - **Rationale:** Ensures clean visual presentation of alert states without hardcoded values.
 
 ### Hex and Tailwind color classes replacement
+
 - Map `text-[#005d63]` to `text-primary` (corporate Teal).
 - Map `bg-[#b2f1e8]/30` to `bg-secondary-container/30` or similar container background.
 - Map `text-slate-800` to `text-on-surface` and `text-slate-400` / `text-slate-500` to `text-on-surface-variant`.
@@ -28,4 +32,4 @@ Multiple files (Inicio dashboard, agenda list, adjustments tab, Alert primitives
 ## Risks / Trade-offs
 
 - **Risk:** Minor visual changes in shade density.
-  - *Mitigation:* Ensure contrast is clean and complies with the Material Design 3 guidelines.
+  - _Mitigation:_ Ensure contrast is clean and complies with the Material Design 3 guidelines.

@@ -5,12 +5,14 @@ Currently, `calculateOverlaps` in `frontend/app/agenda/page.tsx` splits overlapp
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Enhance `calculateOverlaps` to compute a `colspan` for each event inside a cluster, expanding into rightmost columns when free.
 - Reposition overlapping cards horizontally with a slight offset overlap (e.g., 30% width expansion factor) and a neat border/shadow.
 - Style the card elements in `frontend/app/agenda/page.tsx` with left colored border stripes and inline short layouts (height <= 45px).
 - Enhance hover interaction on cards with scale and elevated z-index.
 
 **Non-Goals:**
+
 - Changing backend/database seed properties.
 - Rewriting visual layout structures outside of `agenda/page.tsx`.
 

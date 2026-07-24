@@ -1,19 +1,23 @@
-import prisma from '../config/db.js';
-import whatsappManager from './whatsappService.js';
-import config from '../config/index.js';
-import { computeHmac } from '../utils/crypto.js';
-import { maskPhone } from '../utils/logger.js';
-import { logger } from '../utils/logger.js';
+import prisma from "../config/db.js";
+import whatsappManager from "./whatsappService.js";
+import config from "../config/index.js";
+import { computeHmac } from "../utils/crypto.js";
+import { maskPhone } from "../utils/logger.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Formats a message template by replacing placeholders with actual data
  */
 function formatMessage(template, { clientName, appointmentDate, businessName }) {
   if (!template) return null;
-  
+
   const date = new Date(appointmentDate);
-  const dateStr = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-  const timeStr = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const timeStr = date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
 
   return template
     .replace(/{{clientName}}/g, clientName)
@@ -31,28 +35,29 @@ async function sendWelcomeMessage(appointmentId) {
       where: { id: appointmentId },
       include: {
         business: true,
-        client: true
-      }
+        client: true,
+      },
     });
 
     if (!appt || !appt.business.welcomeMessage) return;
 
-    if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
-      logger.info(`[Bot] Skipping welcome message to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
+    if (!appt.client || appt.client.lopdStatus !== "Aceptado") {
+      logger.info(
+        `[Bot] Skipping welcome message to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || "unknown"})`
+      );
       return;
     }
 
     const message = formatMessage(appt.business.welcomeMessage, {
       clientName: appt.clientName,
       appointmentDate: appt.appointmentDate,
-      businessName: appt.business.name
+      businessName: appt.business.name,
     });
 
     logger.info(`[Bot] Sending welcome to ${maskPhone(appt.clientPhone)}...`);
     await whatsappManager.initClient(appt.businessId); // Ensure client is init
     await whatsappManager.waitForReady(appt.businessId, 45000);
     await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
-
   } catch (err) {
     logger.error(`[Bot] Error sending welcome message:`, err);
   }
@@ -74,24 +79,26 @@ async function runSentinel() {
   try {
     const appointments = await prisma.appointment.findMany({
       where: {
-        status: 'PENDING',
+        status: "PENDING",
         appointmentDate: {
           gte: tomorrow,
-          lte: endOfTomorrow
-        }
+          lte: endOfTomorrow,
+        },
       },
       include: {
         business: true,
-        client: true
-      }
+        client: true,
+      },
     });
 
     logger.info(`[Sentinel] Found ${appointments.length} pending appointments for tomorrow.`);
 
     for (const appt of appointments) {
       try {
-        if (!appt.client || appt.client.lopdStatus !== 'Aceptado') {
-          logger.info(`[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || 'unknown'})`);
+        if (!appt.client || appt.client.lopdStatus !== "Aceptado") {
+          logger.info(
+            `[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || "unknown"})`
+          );
           continue;
         }
 
@@ -101,11 +108,16 @@ async function runSentinel() {
         }
 
         // Fail fast: skip immediately if the business WhatsApp link is not connected
-        if (appt.business.whatsappStatus === 'DISCONNECTED' || appt.business.whatsappStatus === 'WAITING_QR') {
-          logger.warn(`[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)}: Business ${appt.business.name} WhatsApp status is ${appt.business.whatsappStatus}`);
+        if (
+          appt.business.whatsappStatus === "DISCONNECTED" ||
+          appt.business.whatsappStatus === "WAITING_QR"
+        ) {
+          logger.warn(
+            `[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)}: Business ${appt.business.name} WhatsApp status is ${appt.business.whatsappStatus}`
+          );
           await prisma.appointment.update({
             where: { id: appt.id },
-            data: { status: 'ERROR' }
+            data: { status: "ERROR" },
           });
           continue;
         }
@@ -113,7 +125,7 @@ async function runSentinel() {
         const message = formatMessage(appt.business.reminderMessage, {
           clientName: appt.clientName,
           appointmentDate: appt.appointmentDate,
-          businessName: appt.business.name
+          businessName: appt.business.name,
         });
 
         await whatsappManager.initClient(appt.businessId);
@@ -122,17 +134,16 @@ async function runSentinel() {
 
         await prisma.appointment.update({
           where: { id: appt.id },
-          data: { status: 'SENT' }
+          data: { status: "SENT" },
         });
 
         const delay = Math.floor(Math.random() * (5000 - 2000 + 1) + 2000);
-        await new Promise(resolve => setTimeout(resolve, delay));
-
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } catch (err) {
         logger.error(`[Sentinel] Error processing appointment ${appt.id}:`, err);
         await prisma.appointment.update({
           where: { id: appt.id },
-          data: { status: 'ERROR' }
+          data: { status: "ERROR" },
         });
       }
     }
@@ -156,7 +167,6 @@ async function sendConsentMessage(businessId, client) {
   const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}&exp=${expiry}`;
   const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
 
-
   logger.info(`[Bot] Triggering LOPD consent for client ${client.id}`);
 
   try {
@@ -172,9 +182,10 @@ async function sendConsentMessage(businessId, client) {
     logger.info(`[WhatsApp] LOPD consent message sent to ${maskPhone(client.phone)}`);
   } catch (wsErr) {
     logger.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);
-    logger.error(`[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`);
+    logger.error(
+      `[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`
+    );
   }
 }
-
 
 export { runSentinel, sendWelcomeMessage, sendConsentMessage };

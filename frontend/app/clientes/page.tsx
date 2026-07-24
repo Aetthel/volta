@@ -29,7 +29,23 @@ import TrialBanner from "@/components/TrialBanner";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
-import { Alert, Badge, Button, Card, CardHeader, CardTitle, Empty, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, PageHeader, Skeleton, InlineSelect } from "@/components/ui/volta-ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  Empty,
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  PageHeader,
+  Skeleton,
+  InlineSelect,
+} from "@/components/ui/volta-ui";
 
 interface ClientItem {
   id: string;
@@ -276,10 +292,7 @@ export default function ClientesPage() {
   };
 
   const handleDeleteClient = (id: string, name: string) => {
-    if (
-      !window.confirm(`¿Eliminar a ${name}? Esta acción no se puede deshacer.`)
-    )
-      return;
+    if (!window.confirm(`¿Eliminar a ${name}? Esta acción no se puede deshacer.`)) return;
     fetch(`/api/backend/clients/${id}`, {
       method: "DELETE",
     })
@@ -324,7 +337,7 @@ export default function ClientesPage() {
 
   const handleSendCustomMessage = (client: ClientItem) => {
     const msg = window.prompt(
-      `Escribe el mensaje de WhatsApp para ${client.name} ${client.surname || ""}:`,
+      `Escribe el mensaje de WhatsApp para ${client.name} ${client.surname || ""}:`
     );
     if (!msg) return;
 
@@ -360,15 +373,10 @@ export default function ClientesPage() {
 
   const visitsThisMonthCount = appointments.filter((app) => {
     const appDate = new Date(app.appointmentDate);
-    return (
-      appDate.getMonth() === currentMonth &&
-      appDate.getFullYear() === currentYear
-    );
+    return appDate.getMonth() === currentMonth && appDate.getFullYear() === currentYear;
   }).length;
 
-  const pendingLopdCount = clients.filter(
-    (c) => c.lopdStatus === "Pendiente",
-  ).length;
+  const pendingLopdCount = clients.filter((c) => c.lopdStatus === "Pendiente").length;
 
   const uniqueServices = Array.from(
     new Set(clients.map((c) => c.frequentService).filter(Boolean))
@@ -394,7 +402,7 @@ export default function ClientesPage() {
         if (!c.lastVisit) return false;
         const d = new Date(c.lastVisit);
         if (isNaN(d.getTime())) return false;
-        return (Date.now() - d.getTime()) > 60 * 24 * 60 * 60 * 1000;
+        return Date.now() - d.getTime() > 60 * 24 * 60 * 60 * 1000;
       }
       return true;
     })();
@@ -476,7 +484,11 @@ export default function ClientesPage() {
                 </p>
               </div>
               <Button
-                onClick={() => { setLopdFilter("Pendiente"); setActivityFilter("all"); setCurrentPage(1); }}
+                onClick={() => {
+                  setLopdFilter("Pendiente");
+                  setActivityFilter("all");
+                  setCurrentPage(1);
+                }}
                 variant="primary"
                 className="!bg-white !text-[#1a3a3a] hover:!bg-white/90 !shadow-none px-6 py-1 rounded-full font-label-md text-label-md self-start font-semibold"
               >
@@ -501,7 +513,10 @@ export default function ClientesPage() {
                     type="text"
                     placeholder="Buscar cliente..."
                     value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
                     className="pl-9 pr-3 h-9 w-44 text-body-sm rounded-lg border border-outline-variant bg-surface-container-low focus:outline-none focus:ring-1 focus:ring-primary text-on-surface placeholder:text-on-surface-variant/50"
                   />
                 </div>
@@ -510,21 +525,29 @@ export default function ClientesPage() {
                   id="service-filter"
                   label="Servicios..."
                   value={serviceFilter}
-                  onChange={(val) => { setServiceFilter(val); setCurrentPage(1); }}
+                  onChange={(val) => {
+                    setServiceFilter(val);
+                    setCurrentPage(1);
+                  }}
                   options={serviceOptions}
                   size="sm"
                   className="w-44"
                 />
                 {/* Quick activity pills */}
                 <div className="flex items-center gap-1">
-                  {([
-                    { key: "all",      label: "Todos" },
-                    { key: "inactive", label: "Sin visita +60d" },
-                    { key: "new",      label: "Nuevos" },
-                  ] as const).map(({ key, label }) => (
+                  {(
+                    [
+                      { key: "all", label: "Todos" },
+                      { key: "inactive", label: "Sin visita +60d" },
+                      { key: "new", label: "Nuevos" },
+                    ] as const
+                  ).map(({ key, label }) => (
                     <button
                       key={key}
-                      onClick={() => { setActivityFilter(key); setCurrentPage(1); }}
+                      onClick={() => {
+                        setActivityFilter(key);
+                        setCurrentPage(1);
+                      }}
                       className={`h-8 px-3 text-label-sm font-medium rounded-md border transition-colors whitespace-nowrap ${
                         activityFilter === key
                           ? "bg-primary text-on-primary border-primary"
@@ -544,8 +567,20 @@ export default function ClientesPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-surface-container-low border-b border-outline-variant/60">
-                      {["Cliente","Teléfono","Última Visita","Servicio Frecuente","Estado LOPD","Acciones"].map((h) => (
-                        <th key={h} className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold whitespace-nowrap">{h}</th>
+                      {[
+                        "Cliente",
+                        "Teléfono",
+                        "Última Visita",
+                        "Servicio Frecuente",
+                        "Estado LOPD",
+                        "Acciones",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
                       ))}
                     </tr>
                   </thead>
@@ -561,11 +596,21 @@ export default function ClientesPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4"><Skeleton className="w-24 h-4" /></td>
-                        <td className="px-6 py-4"><Skeleton className="w-20 h-4" /></td>
-                        <td className="px-6 py-4"><Skeleton className="w-28 h-6 rounded-full" /></td>
-                        <td className="px-6 py-4"><Skeleton className="w-16 h-6 rounded-full" /></td>
-                        <td className="px-6 py-4"><Skeleton className="w-6 h-6 rounded-full" /></td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="w-24 h-4" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="w-20 h-4" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="w-28 h-6 rounded-full" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="w-16 h-6 rounded-full" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <Skeleton className="w-6 h-6 rounded-full" />
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -574,12 +619,24 @@ export default function ClientesPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-surface-container-low border-b border-outline-variant/60 select-none">
-                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Cliente</th>
-                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Teléfono</th>
-                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Última Visita</th>
-                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Servicio Frecuente</th>
-                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Estado LOPD</th>
-                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold text-right">Acciones</th>
+                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+                        Cliente
+                      </th>
+                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+                        Teléfono
+                      </th>
+                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+                        Última Visita
+                      </th>
+                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+                        Servicio Frecuente
+                      </th>
+                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">
+                        Estado LOPD
+                      </th>
+                      <th className="px-6 py-3 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold text-right">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/40">
@@ -594,23 +651,37 @@ export default function ClientesPage() {
                             <div className="flex items-center gap-3">
                               {client.avatarUrl ? (
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant shrink-0">
-                                  <img src={client.avatarUrl} alt={client.name} className="w-full h-full object-cover" />
+                                  <img
+                                    src={client.avatarUrl}
+                                    alt={client.name}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
                               ) : (
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-md shrink-0 select-none ${getAvatarColor(client.name)}`}>
+                                <div
+                                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-label-md shrink-0 select-none ${getAvatarColor(client.name)}`}
+                                >
                                   {getInitials(client.name, client.surname)}
                                 </div>
                               )}
                               <div>
-                                <p className="font-semibold text-body-md text-on-surface">{client.name} {client.surname}</p>
-                                <p className="text-body-sm text-on-surface-variant">{client.email}</p>
+                                <p className="font-semibold text-body-md text-on-surface">
+                                  {client.name} {client.surname}
+                                </p>
+                                <p className="text-body-sm text-on-surface-variant">
+                                  {client.email}
+                                </p>
                               </div>
                             </div>
                           </td>
                           {/* Phone */}
-                          <td className="px-6 py-4 text-body-md text-on-surface">{formatPhoneForDisplay(client.phone)}</td>
+                          <td className="px-6 py-4 text-body-md text-on-surface">
+                            {formatPhoneForDisplay(client.phone)}
+                          </td>
                           {/* Last visit */}
-                          <td className="px-6 py-4 text-body-md text-on-surface">{client.lastVisit}</td>
+                          <td className="px-6 py-4 text-body-md text-on-surface">
+                            {client.lastVisit}
+                          </td>
                           {/* Service badge */}
                           <td className="px-6 py-4">
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-label-sm font-medium bg-secondary-container text-on-secondary-container">
@@ -619,11 +690,13 @@ export default function ClientesPage() {
                           </td>
                           {/* LOPD status */}
                           <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-label-sm font-medium ${
-                              client.lopdStatus === "Aceptado"
-                                ? "bg-tertiary-container text-on-tertiary-container"
-                                : "bg-error-container text-on-error-container"
-                            }`}>
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-md text-label-sm font-medium ${
+                                client.lopdStatus === "Aceptado"
+                                  ? "bg-tertiary-container text-on-tertiary-container"
+                                  : "bg-error-container text-on-error-container"
+                              }`}
+                            >
                               {client.lopdStatus}
                             </span>
                           </td>
@@ -635,57 +708,130 @@ export default function ClientesPage() {
                             >
                               <MoreVertical className="w-4 h-4" />
                             </button>
-                            {mounted && activeDropdownClientId === client.id && dropdownCoords && createPortal(
-                              <div
-                                style={{ position: "absolute", top: `${dropdownCoords.top}px`, left: `${dropdownCoords.left}px` }}
-                                className="w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150"
-                              >
-                                {client.lopdStatus === "Aceptado" ? (
-                                  <button onClick={(e) => { e.stopPropagation(); setActiveDropdownClientId(null); handleSendCustomMessage(client); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container text-left">
-                                    <MessageCircle className="w-4 h-4 text-primary" /><span>Enviar WhatsApp</span>
+                            {mounted &&
+                              activeDropdownClientId === client.id &&
+                              dropdownCoords &&
+                              createPortal(
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: `${dropdownCoords.top}px`,
+                                    left: `${dropdownCoords.left}px`,
+                                  }}
+                                  className="w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150"
+                                >
+                                  {client.lopdStatus === "Aceptado" ? (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDropdownClientId(null);
+                                        handleSendCustomMessage(client);
+                                      }}
+                                      className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container text-left"
+                                    >
+                                      <MessageCircle className="w-4 h-4 text-primary" />
+                                      <span>Enviar WhatsApp</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDropdownClientId(null);
+                                        handleSendWhatsAppConsent(client);
+                                      }}
+                                      className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container text-left"
+                                    >
+                                      <ShieldCheck className="w-4 h-4 text-error" />
+                                      <span>Enviar LOPD</span>
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveDropdownClientId(null);
+                                      setEditingClient(client);
+                                      setIsClientModalOpen(true);
+                                    }}
+                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container text-left"
+                                  >
+                                    <Edit3 className="w-4 h-4 text-primary" />
+                                    <span>Editar cliente</span>
                                   </button>
-                                ) : (
-                                  <button onClick={(e) => { e.stopPropagation(); setActiveDropdownClientId(null); handleSendWhatsAppConsent(client); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container text-left">
-                                    <ShieldCheck className="w-4 h-4 text-error" /><span>Enviar LOPD</span>
+                                  <div className="my-1 border-t border-outline-variant/50" />
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveDropdownClientId(null);
+                                      handleDeleteClient(
+                                        client.id,
+                                        `${client.name} ${client.surname}`
+                                      );
+                                    }}
+                                    className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-error hover:bg-error-container/20 text-left"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span>Eliminar cliente</span>
                                   </button>
-                                )}
-                                <button onClick={(e) => { e.stopPropagation(); setActiveDropdownClientId(null); setEditingClient(client); setIsClientModalOpen(true); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-on-surface hover:bg-surface-container text-left">
-                                  <Edit3 className="w-4 h-4 text-primary" /><span>Editar cliente</span>
-                                </button>
-                                <div className="my-1 border-t border-outline-variant/50" />
-                                <button onClick={(e) => { e.stopPropagation(); setActiveDropdownClientId(null); handleDeleteClient(client.id, `${client.name} ${client.surname}`); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-label-md text-error hover:bg-error-container/20 text-left">
-                                  <Trash2 className="w-4 h-4" /><span>Eliminar cliente</span>
-                                </button>
-                              </div>,
-                              document.body
-                            )}
+                                </div>,
+                                document.body
+                              )}
                           </td>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
                           {client.lopdStatus === "Aceptado" ? (
                             <ContextMenuItem onClick={() => handleSendCustomMessage(client)}>
-                              <MessageCircle className="w-4 h-4 text-primary" /><span>Enviar WhatsApp</span>
+                              <MessageCircle className="w-4 h-4 text-primary" />
+                              <span>Enviar WhatsApp</span>
                             </ContextMenuItem>
                           ) : (
                             <ContextMenuItem onClick={() => handleSendWhatsAppConsent(client)}>
-                              <ShieldCheck className="w-4 h-4 text-error" /><span>Enviar LOPD</span>
+                              <ShieldCheck className="w-4 h-4 text-error" />
+                              <span>Enviar LOPD</span>
                             </ContextMenuItem>
                           )}
-                          <ContextMenuItem onClick={() => { setEditingClient(client); setIsClientModalOpen(true); }}>
-                            <Edit3 className="w-4 h-4 text-primary" /><span>Editar cliente</span>
+                          <ContextMenuItem
+                            onClick={() => {
+                              setEditingClient(client);
+                              setIsClientModalOpen(true);
+                            }}
+                          >
+                            <Edit3 className="w-4 h-4 text-primary" />
+                            <span>Editar cliente</span>
                           </ContextMenuItem>
                           <ContextMenuSeparator />
-                          <ContextMenuItem onClick={() => { navigator.clipboard.writeText(client.phone); setToastText("Teléfono copiado"); setShowGeneralToast(true); setTimeout(() => setShowGeneralToast(false), 3000); }}>
-                            <Copy className="w-4 h-4 text-outline" /><span>Copiar teléfono</span>
+                          <ContextMenuItem
+                            onClick={() => {
+                              navigator.clipboard.writeText(client.phone);
+                              setToastText("Teléfono copiado");
+                              setShowGeneralToast(true);
+                              setTimeout(() => setShowGeneralToast(false), 3000);
+                            }}
+                          >
+                            <Copy className="w-4 h-4 text-outline" />
+                            <span>Copiar teléfono</span>
                           </ContextMenuItem>
                           {client.email && (
-                            <ContextMenuItem onClick={() => { navigator.clipboard.writeText(client.email); setToastText("Email copiado"); setShowGeneralToast(true); setTimeout(() => setShowGeneralToast(false), 3000); }}>
-                              <Copy className="w-4 h-4 text-outline" /><span>Copiar email</span>
+                            <ContextMenuItem
+                              onClick={() => {
+                                navigator.clipboard.writeText(client.email);
+                                setToastText("Email copiado");
+                                setShowGeneralToast(true);
+                                setTimeout(() => setShowGeneralToast(false), 3000);
+                              }}
+                            >
+                              <Copy className="w-4 h-4 text-outline" />
+                              <span>Copiar email</span>
                             </ContextMenuItem>
                           )}
                           <ContextMenuSeparator />
-                          <ContextMenuItem variant="error" onClick={() => handleDeleteClient(client.id, `${client.name} ${client.surname}`)}>
-                            <Trash2 className="w-4 h-4 text-error" /><span>Eliminar cliente</span>
+                          <ContextMenuItem
+                            variant="error"
+                            onClick={() =>
+                              handleDeleteClient(client.id, `${client.name} ${client.surname}`)
+                            }
+                          >
+                            <Trash2 className="w-4 h-4 text-error" />
+                            <span>Eliminar cliente</span>
                           </ContextMenuItem>
                         </ContextMenuContent>
                       </ContextMenu>
@@ -697,7 +843,11 @@ export default function ClientesPage() {
                   title="No se encontraron clientes"
                   description="Prueba a ajustar tu búsqueda o añade un nuevo cliente."
                   icon={UsersIcon}
-                  action={<Button variant="primary" onClick={() => setIsClientModalOpen(true)}>Añadir Cliente</Button>}
+                  action={
+                    <Button variant="primary" onClick={() => setIsClientModalOpen(true)}>
+                      Añadir Cliente
+                    </Button>
+                  }
                   className="border-none bg-transparent py-12"
                 />
               )}
@@ -707,7 +857,8 @@ export default function ClientesPage() {
             {!isLoading && filteredClients.length > 0 && (
               <div className="flex items-center justify-between px-6 py-3 border-t border-outline-variant/40">
                 <span className="text-label-sm text-on-surface-variant">
-                  Mostrando {startItem}–{endItem} de {filteredClients.length} cliente{filteredClients.length !== 1 ? "s" : ""}
+                  Mostrando {startItem}–{endItem} de {filteredClients.length} cliente
+                  {filteredClients.length !== 1 ? "s" : ""}
                 </span>
                 <div className="flex items-center gap-1">
                   <button
@@ -776,8 +927,8 @@ export default function ClientesPage() {
               Consentimiento Reenviado
             </p>
             <p className="text-body-sm text-on-secondary-container/80">
-              Mensaje LOPD reenviado a{" "}
-              <span className="font-semibold">{toastPhone}</span> por WhatsApp.
+              Mensaje LOPD reenviado a <span className="font-semibold">{toastPhone}</span> por
+              WhatsApp.
             </p>
           </div>
         </Alert>

@@ -30,8 +30,8 @@ function TrialBannerContent() {
         isExpired
           ? "bg-error/10 text-error border-error/20"
           : isUrgent
-          ? "bg-amber-500/10 text-amber-800 border-amber-500/20"
-          : "bg-primary/10 text-primary border-primary/20"
+            ? "bg-amber-500/10 text-amber-800 border-amber-500/20"
+            : "bg-primary/10 text-primary border-primary/20"
       }`}
     >
       <div className="max-w-container-max mx-auto px-gutter w-full flex items-center justify-between gap-4">
@@ -48,17 +48,25 @@ function TrialBannerContent() {
           <div className="truncate">
             {isExpired ? (
               <span>
-                <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Básico 18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
+                <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Básico
+                18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
               </span>
             ) : isUrgent ? (
               <span>
                 <strong>¡Últimos días de prueba!</strong> Te quedan{" "}
-                <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong> de prueba gratuita en Plan Pro (25€/mes).
+                <strong>
+                  {daysLeft} día{daysLeft === 1 ? "" : "s"}
+                </strong>{" "}
+                de prueba gratuita en Plan Pro (25€/mes).
               </span>
             ) : (
               <span>
-                Estás disfrutando de <strong>14 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
-                <strong>{daysLeft} día{daysLeft === 1 ? "" : "s"}</strong>.
+                Estás disfrutando de{" "}
+                <strong>14 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
+                <strong>
+                  {daysLeft} día{daysLeft === 1 ? "" : "s"}
+                </strong>
+                .
               </span>
             )}
           </div>
@@ -72,8 +80,8 @@ function TrialBannerContent() {
                 isExpired
                   ? "bg-error text-white hover:bg-error/90"
                   : isUrgent
-                  ? "border border-amber-600/40 text-amber-900 hover:bg-amber-500/10"
-                  : "bg-primary text-white hover:bg-primary/90"
+                    ? "border border-amber-600/40 text-amber-900 hover:bg-amber-500/10"
+                    : "bg-primary text-white hover:bg-primary/90"
               }`}
             >
               <span>Seleccionar Plan</span>

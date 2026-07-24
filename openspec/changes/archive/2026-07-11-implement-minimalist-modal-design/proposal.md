@@ -14,9 +14,11 @@ Currently, our modal forms (e.g., `NewAppointmentModal` and `AddClientModal`) us
 ## Capabilities
 
 ### New Capabilities
+
 - None
 
 ### Modified Capabilities
+
 - `reusable-ui-components`: Refactor modal creation forms to use row-based layouts, and modify core UI inputs to support borderless styling and scalable border roundness.
 
 ## Impact

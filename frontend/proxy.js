@@ -16,7 +16,7 @@ export default auth((req) => {
   const empleadoRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda"];
   const allProtectedRoutes = ["/inicio", "/clientes", "/sedes", "/ajustes", "/admin", "/agenda"];
 
-  const isProtectedRoute = allProtectedRoutes.some(route => pathname.startsWith(route));
+  const isProtectedRoute = allProtectedRoutes.some((route) => pathname.startsWith(route));
 
   // 1. If not logged in and trying to access a protected route, redirect to /login
   if (!isLoggedIn && isProtectedRoute) {
@@ -38,17 +38,17 @@ export default auth((req) => {
     }
 
     if (role === "ADMIN") {
-      const isAllowed = adminRoutes.some(route => pathname.startsWith(route));
+      const isAllowed = adminRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
         return Response.redirect(new URL("/admin", nextUrl));
       }
     } else if (role === "JEFE") {
-      const isAllowed = jefeRoutes.some(route => pathname.startsWith(route));
+      const isAllowed = jefeRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
         return Response.redirect(new URL("/inicio", nextUrl));
       }
     } else if (role === "EMPLEADO") {
-      const isAllowed = empleadoRoutes.some(route => pathname.startsWith(route));
+      const isAllowed = empleadoRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
         return Response.redirect(new URL("/inicio", nextUrl));
       }
