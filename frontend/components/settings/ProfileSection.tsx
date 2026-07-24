@@ -183,6 +183,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   )}
                 >
                   {profile.workerPhoto && profile.workerPhoto !== DEFAULT_AVATAR ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={profile.workerPhoto}
                       alt="Foto de perfil"

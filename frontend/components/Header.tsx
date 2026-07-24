@@ -397,6 +397,7 @@ function HeaderContent({
           className="relative w-9 h-9 rounded-full overflow-hidden border border-outline-variant hover:ring-2 hover:ring-primary p-0 bg-surface-container shadow-none active:scale-95 flex items-center justify-center transition-all cursor-pointer"
         >
           {workerPhoto && workerPhoto !== DEFAULT_AVATAR ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={workerPhoto}
               alt="Avatar del Estilista"

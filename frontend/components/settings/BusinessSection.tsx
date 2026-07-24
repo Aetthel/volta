@@ -333,6 +333,7 @@ export default function BusinessSection({
                   <div className="relative group shrink-0">
                     <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
                       {profile.logoUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
                         <img
                           src={profile.logoUrl}
                           alt="Foto del Negocio"
@@ -355,7 +356,7 @@ export default function BusinessSection({
                       type="button"
                       variant="ghost"
                       onClick={() => businessLogoInputRef.current?.click()}
-                      className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md border border-primary/20 w-full h-full p-0 shadow-none hover:bg-primary/50 text-white rounded-none"
+                      className="absolute inset-0 bg-primary/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-md border border-primary/20 w-full h-full p-0 shadow-none hover:bg-primary/50 text-white"
                     >
                       <Camera className="text-white" />
                     </Button>
@@ -448,6 +449,7 @@ export default function BusinessSection({
                 <div className="shrink-0">
                   <div className="w-20 h-20 rounded-md overflow-hidden bg-surface-container border border-outline-variant shadow-sm">
                     {profile.logoUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={profile.logoUrl}
                         alt="Foto del Negocio"
