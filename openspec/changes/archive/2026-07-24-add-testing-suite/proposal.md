@@ -1,6 +1,7 @@
 ## Why
 
 The Volta codebase currently lacks comprehensive unit, integration, and E2E test coverage across both frontend and backend services:
+
 - Backend test coverage is limited to generic utility helpers and middleware, leaving critical controllers, services, database transactions, and API routes untested.
 - Frontend test coverage is 0% with no testing framework (Vitest/Testing Library/Playwright) configured in package.json.
 
@@ -22,9 +23,11 @@ Establishing a solid, multi-layered testing suite ensures code reliability, prev
 ## Capabilities
 
 ### New Capabilities
+
 - `automated-testing-suite`: Comprehensive test coverage across backend services, frontend components, and E2E workflows.
 
 ### Modified Capabilities
+
 - `web-authentication`: Requirements updated to mandate full test coverage for registration, rate limiting, and session verification.
 
 ## Impact

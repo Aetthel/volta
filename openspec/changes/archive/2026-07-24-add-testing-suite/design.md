@@ -6,12 +6,14 @@ While basic backend helper unit tests exist in `backend/src/tests/`, there are c
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Implement backend service unit tests and controller integration tests using Jest and Supertest.
 - Setup Vitest, `@testing-library/react`, and `@testing-library/jest-dom` in the frontend for component and page unit tests.
 - Setup Playwright in the frontend for end-to-end user journey validation.
 - Maintain fast execution speeds (< 10s for unit tests) with isolated mocks and clear test scripts.
 
 **Non-Goals:**
+
 - 100% mutation testing coverage on legacy unused helper code.
 - Performance load testing (JMeter/k6) under high throughput (handled in separate infra benchmarks).
 

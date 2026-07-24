@@ -240,8 +240,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface py-12 px-6 md:px-16 lg:px-24 max-w-4xl mx-auto flex flex-col justify-between">
-      <div>
+    <div className="relative min-h-screen bg-surface pt-16 pb-12 sm:py-12 px-4 sm:px-10 flex flex-col justify-between select-none overflow-y-auto">
+      {/* Top Left Back to Landing Button */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-10 inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-body-sm font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-high/60 transition-all duration-200 z-10"
+      >
+        <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <span>Volver al inicio</span>
+      </Link>
+
+      <div className="w-full max-w-4xl mx-auto">
         {/* Step Indicator Bar */}
         <StepIndicator currentStep={currentStep} />
 

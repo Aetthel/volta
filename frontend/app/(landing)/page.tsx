@@ -18,11 +18,15 @@ import {
   Mail,
   Share2,
   Loader2,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
+import FaceIcon from "@/components/FaceIcon";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isCreatingDemo, setIsCreatingDemo] = useState(false);
   const router = useRouter();
@@ -83,16 +87,26 @@ export default function RootPage() {
 
   return (
     <div className="min-h-screen bg-surface text-on-surface antialiased font-sans">
-      {/* 1. Header Navigation (Task 2.1) */}
+      {/* 1. Header Navigation */}
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
-          isScrolled
+          isScrolled || isMobileMenuOpen
             ? "bg-surface/95 backdrop-blur-md shadow-md border-outline-variant/30 py-3"
             : "bg-surface/80 backdrop-blur-md border-transparent py-4"
         }`}
       >
-        <div className="flex justify-between items-center px-6 md:px-16 lg:px-24 xl:px-32 max-w-container-max mx-auto">
-          {/* Navigation Links */}
+        <div className="flex justify-between items-center px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 max-w-container-max mx-auto">
+          {/* Brand Logo & Name */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+              <FaceIcon className="w-5 h-5" />
+            </div>
+            <span className="font-display font-bold text-title-md text-on-surface tracking-tight">
+              Volta
+            </span>
+          </Link>
+
+          {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
             <a
               href="#features"
@@ -114,24 +128,71 @@ export default function RootPage() {
             </a>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3">
-            <Link href="/login">
+          {/* Action Buttons & Mobile Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/login" className="hidden xs:block">
               <Button
                 variant="ghost"
                 size="md"
-                className="text-primary hover:bg-primary/5 hover:text-primary"
+                className="text-primary hover:bg-primary/5 hover:text-primary px-3 sm:px-4 text-xs sm:text-body-md"
               >
                 Iniciar Sesión
               </Button>
             </Link>
             <Link href="/register">
-              <Button variant="primary" size="md">
+              <Button
+                variant="primary"
+                size="md"
+                className="px-3.5 sm:px-4 text-xs sm:text-body-md"
+              >
                 Comenzar
               </Button>
             </Link>
+
+            {/* Mobile Menu Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+              aria-label="Abrir menú"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-outline-variant/20 bg-surface/95 backdrop-blur-lg px-6 py-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
+            <a
+              href="#features"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10"
+            >
+              Características
+            </a>
+            <a
+              href="#pricing"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10"
+            >
+              Precios
+            </a>
+            <a
+              href="#testimonials"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10"
+            >
+              Testimonios
+            </a>
+            <div className="flex flex-col gap-2 pt-2">
+              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full justify-center">
+                  Iniciar Sesión
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Main Content (Task 1.2 Layout Structure) */}

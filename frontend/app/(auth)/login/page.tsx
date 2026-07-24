@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Check } from "lucide-react";
+import { Eye, EyeOff, Check, ArrowLeft } from "lucide-react";
 import FaceIcon from "@/components/FaceIcon";
 import { signIn } from "next-auth/react";
 import { FieldGroup, Field, FieldLabel, Alert, Button, InputGroup } from "@/components/ui/volta-ui";
@@ -43,7 +43,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col justify-between p-6 sm:p-10 select-none overflow-y-auto">
+    <div className="relative min-h-screen bg-surface flex flex-col justify-between p-4 sm:p-10 pt-16 sm:pt-10 select-none overflow-y-auto">
+      {/* Top Left Back to Landing Button */}
+      <Link
+        href="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-10 inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-body-sm font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-high/60 transition-all duration-200 z-10"
+      >
+        <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <span>Volver al inicio</span>
+      </Link>
       {/* Spacer to push content down on desktop */}
       <div className="hidden sm:block flex-1"></div>
 
