@@ -58,9 +58,12 @@ export default function RootPage() {
       }
       const data = await res.json();
 
+      const userEmail = data.credentials?.email || data.email;
+      const userPassword = data.credentials?.password || data.password;
+
       const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
+        email: userEmail,
+        password: userPassword,
         redirect: false,
       });
 

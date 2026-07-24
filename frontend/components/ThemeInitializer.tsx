@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, getThemeColor, applyThemeColors } from "@/lib/theme";
 
-export default function ThemeInitializer() {
+function ThemeInitializerClient() {
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -36,4 +36,9 @@ export default function ThemeInitializer() {
   }, [session?.user?.themeColor, session?.user?.fontSizeLevel, session?.user?.borderRadiusLevel]);
 
   return null;
+}
+
+export default function ThemeInitializer() {
+  if (typeof window === "undefined") return null;
+  return <ThemeInitializerClient />;
 }
