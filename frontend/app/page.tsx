@@ -775,8 +775,8 @@ export default function RootPage() {
 
         {/* Testimonials Section */}
         <section id="testimonials" className="py-24 bg-primary/5">
-          <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24 xl:px-32">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-container-max mx-auto items-stretch">
               {/* Testimonials List */}
               <div className="flex flex-col gap-8">
                 <h2 className="font-display text-headline-lg md:text-[32px] text-on-surface font-bold mb-2">

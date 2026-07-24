@@ -8,7 +8,9 @@
     "start": "concurrently \"pnpm --filter frontend start\" \"pnpm --filter backend start\"",
     "lint": "pnpm --filter frontend lint && pnpm --filter backend lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test": "pnpm --filter backend test && pnpm --filter frontend test",
+    "test:e2e": "pnpm --filter frontend test:e2e"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
