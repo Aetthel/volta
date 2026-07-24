@@ -100,28 +100,57 @@ export const getDashboardData = async () => {
     "Spa Facial": 40,
   };
 
+  const [allAppointments, allServices, clientCountsGrouped] = await Promise.all([
+    prisma.appointment.findMany({
+      select: {
+        businessId: true,
+        appointmentDate: true,
+        serviceName: true,
+        service: { select: { price: true } },
+        client: { select: { frequentService: true } }
+      }
+    }),
+    prisma.service.findMany({
+      select: { businessId: true, name: true, price: true }
+    }),
+    prisma.client.groupBy({
+      by: ['businessId'],
+      _count: { id: true }
+    })
+  ]);
+
+  // Index data by businessId
+  const appointmentsByBiz = new Map();
+  for (const app of allAppointments) {
+    if (!app.businessId) continue;
+    if (!appointmentsByBiz.has(app.businessId)) {
+      appointmentsByBiz.set(app.businessId, []);
+    }
+    appointmentsByBiz.get(app.businessId).push(app);
+  }
+
+  const servicesByBiz = new Map();
+  for (const s of allServices) {
+    if (!s.businessId) continue;
+    if (!servicesByBiz.has(s.businessId)) {
+      servicesByBiz.set(s.businessId, []);
+    }
+    servicesByBiz.get(s.businessId).push(s);
+  }
+
+  const clientCountMap = new Map(
+    clientCountsGrouped.map(item => [item.businessId, item._count.id])
+  );
+
   const rankings = [];
   let totalRevenue = 0;
   let totalThisMonth = 0;
   let totalLastMonth = 0;
 
   for (const biz of businesses) {
-    const [appointments, services, clientsCount] = await Promise.all([
-      prisma.appointment.findMany({
-        where: { businessId: biz.id },
-        select: {
-          appointmentDate: true,
-          serviceName: true,
-          service: { select: { price: true } },
-          client: { select: { frequentService: true } }
-        }
-      }),
-      prisma.service.findMany({
-        where: { businessId: biz.id },
-        select: { name: true, price: true }
-      }),
-      prisma.client.count({ where: { businessId: biz.id } })
-    ]);
+    const appointments = appointmentsByBiz.get(biz.id) || [];
+    const services = servicesByBiz.get(biz.id) || [];
+    const clientsCount = clientCountMap.get(biz.id) || 0;
 
     let bizRevenue = 0;
     let bizThisMonth = 0;

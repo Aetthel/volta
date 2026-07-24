@@ -59,7 +59,7 @@ export const createAppointment = async (appointmentData) => {
         name: firstName,
         surname: surname || "",
         email: `${normalizeString(firstName)}${surname ? "." + normalizeString(surname).split(" ")[0] : ""}@email.com`,
-        phone: clientPhone,
+        phone: inputPhone,
         lopdStatus: "Pendiente",
         businessId,
         frequentService: reqService || null,
@@ -90,7 +90,7 @@ export const createAppointment = async (appointmentData) => {
   const appointment = await prisma.appointment.create({
     data: {
       clientName,
-      clientPhone,
+      clientPhone: inputPhone,
       appointmentDate: new Date(appointmentDate),
       businessId,
       clientId: client.id,

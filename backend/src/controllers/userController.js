@@ -91,19 +91,20 @@ export const updateUser = async (req, res) => {
   }
 
   const data = {};
-  if (name) data.name = name;
-  if (email) {
+  if (name !== undefined) data.name = name;
+  if (email !== undefined && email !== null) {
+    const cleanEmail = email.trim().toLowerCase();
     // Check if email taken by someone else
-    const existing = await userService.getUserByEmail(email);
+    const existing = await userService.getUserByEmail(cleanEmail);
     if (existing && existing.id !== id) {
       return res.status(400).json({ error: 'El correo electrónico ya está registrado por otro usuario.' });
     }
-    data.email = email;
+    data.email = cleanEmail;
   }
-  if (password) {
+  if (password !== undefined && password !== null && password !== "") {
     data.password = password;
   }
-  if (role) data.role = role;
+  if (role !== undefined) data.role = role;
   if (businessId !== undefined) {
     data.businessId = businessId;
   }
@@ -147,27 +148,34 @@ export const registerUser = async (req, res) => {
     return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
   }
 
-  // 2. Create Business with 14-day trial in Plan Pro
+  // 2. Create Business and JEFE User atomically in a transaction
   const trialExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-  const business = await prisma.business.create({
-    data: {
-      name: businessName,
-      phone,
-      email: cleanEmail,
-      businessType: businessType || 'Peluquería / Barbería',
-      subscriptionPlan: 'PRO',
-      subscriptionStatus: 'TRIALING',
-      trialExpiresAt
-    }
-  });
+  const hashedPassword = password ? await userService.hashPassword(password) : undefined;
 
-  // 3. Create JEFE User (Business Owner/Manager) for the new Business
-  const user = await userService.createUser({
-    name,
-    email: cleanEmail,
-    password,
-    role: 'JEFE',
-    businessId: business.id
+  const { business, user } = await prisma.$transaction(async (tx) => {
+    const createdBusiness = await tx.business.create({
+      data: {
+        name: businessName,
+        phone,
+        email: cleanEmail,
+        businessType: businessType || 'Peluquería / Barbería',
+        subscriptionPlan: 'PRO',
+        subscriptionStatus: 'TRIALING',
+        trialExpiresAt
+      }
+    });
+
+    const createdUser = await tx.user.create({
+      data: {
+        name,
+        email: cleanEmail,
+        password: hashedPassword,
+        role: 'JEFE',
+        businessId: createdBusiness.id
+      }
+    });
+
+    return { business: createdBusiness, user: createdUser };
   });
 
   const { password: _, ...sanitizedUser } = user;

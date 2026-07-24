@@ -141,7 +141,7 @@ model Service {
   name         String
   description  String?
   duration     Int // Duration in minutes
-  price        Float // Price in Euros
+  price        Decimal       @db.Decimal(10, 2) // Price in Euros
   capacity     Int           @default(1) // Max participants per session
   isActive     Boolean       @default(true)
   appointments Appointment[]

@@ -53,13 +53,13 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   ];
 
   return (
-    <div className="flex items-center justify-start gap-3 sm:gap-6 mb-10 text-body-sm">
+    <div className="flex items-center justify-center gap-1 sm:gap-3 mb-10 text-body-sm">
       {steps.map((step, idx) => {
         const isCompleted = currentStep > step.num;
         const isActive = currentStep === step.num;
 
         return (
-          <div key={step.num} className="flex items-center gap-3 sm:gap-6">
+          <div key={step.num} className="flex items-center gap-1 sm:gap-3 shrink-0">
             <div className="flex items-center gap-2">
               <div
                 className={`
@@ -76,7 +76,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                 {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.num}
               </div>
               <span
-                className={`font-medium transition-colors duration-200 ${
+                className={`hidden sm:block font-medium transition-colors duration-200 ${
                   isActive || isCompleted
                     ? "text-primary font-semibold"
                     : "text-on-surface-variant/60"
@@ -88,7 +88,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 
             {idx < steps.length - 1 && (
               <div
-                className={`h-[2px] w-8 sm:w-14 rounded-full transition-colors duration-300 ${
+                className={`h-[2px] w-2 sm:w-8 rounded-full transition-colors duration-300 shrink-0 ${
                   currentStep > step.num ? "bg-primary" : "bg-outline-variant/30"
                 }`}
               />
@@ -160,7 +160,7 @@ export default function RegisterPage() {
         setError("La contraseña debe tener al menos 6 caracteres.");
         return false;
       }
-      if (confirmPassword && password !== confirmPassword) {
+      if (password !== confirmPassword) {
         setError("Las contraseñas no coinciden.");
         return false;
       }
@@ -254,7 +254,7 @@ export default function RegisterPage() {
             )}
 
             {/* Grid of sector cards — NO icons as requested */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {SECTORS.map((item) => {
                 const isSelected = sector === item.id;
 

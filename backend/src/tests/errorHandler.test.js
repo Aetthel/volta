@@ -15,14 +15,14 @@ describe('errorHandler middleware', () => {
     jest.restoreAllMocks();
   });
 
-  it('should handle Prisma errors with 400', () => {
+  it('should handle Prisma P2002 errors with 409 Conflict', () => {
     const err = new Error('Unique constraint failed');
     err.name = 'PrismaClientKnownRequestError';
     err.code = 'P2002';
     errorHandler(err, req, res, next);
-    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.status).toHaveBeenCalledWith(409);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'Error en la base de datos' })
+      expect.objectContaining({ error: expect.stringContaining('unicidad') })
     );
   });
 
@@ -33,7 +33,7 @@ describe('errorHandler middleware', () => {
     errorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
-      error: 'Formato JSON no válido en el cuerpo de la petición',
+      error: 'Formato JSON no válido en el cuerpo de la petición.',
     });
   });
 
@@ -42,9 +42,9 @@ describe('errorHandler middleware', () => {
     err.statusCode = 404;
     errorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: 'Error en la petición' })
-    );
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Not found',
+    });
   });
 
   it('should handle generic errors with 500', () => {

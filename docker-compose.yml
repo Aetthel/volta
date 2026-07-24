@@ -28,7 +28,7 @@ services:
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
-      - DATABASE_URL=${DATABASE_URL:-postgresql://volta_user:volta_password@db:5432/volta_db?schema=public}
+      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - PORT=3001
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -40,7 +40,7 @@ services:
       - wwebjs-auth:/app/backend/.wwebjs_auth
     ports:
       - "3001:3001"
-    command: sh -c "pnpm install && cd /app/backend && npx prisma db push && npx prisma generate && cd /app && pnpm --filter backend dev"
+    command: sh -c "pnpm install && cd /app/backend && npx prisma db push --accept-data-loss && npx prisma generate && cd /app && pnpm --filter backend dev"
 
   frontend:
     build: .
@@ -54,7 +54,7 @@ services:
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
-      - DATABASE_URL=${DATABASE_URL:-postgresql://volta_user:volta_password@db:5432/volta_db?schema=public}
+      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001
       # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
       # header set by Cloudflare Tunnel / any reverse proxy, avoiding redirect loops.

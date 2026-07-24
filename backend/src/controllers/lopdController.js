@@ -19,8 +19,8 @@ const verifyToken = (id, token, exp) => {
 
 export const getConsent = async (req, res) => {
   const { id } = req.params;
-  const token = req.headers['x-lopd-token'];
-  const exp = req.headers['x-lopd-exp'];
+  const token = req.headers['x-lopd-token'] || req.query.token;
+  const exp = req.headers['x-lopd-exp'] || req.query.exp;
 
   if (!verifyToken(id, token, exp)) {
     return res.status(400).json({ error: 'Token de firma inválido, faltante o expirado.' });
@@ -40,8 +40,8 @@ export const getConsent = async (req, res) => {
 
 export const acceptConsent = async (req, res) => {
   const { id } = req.params;
-  const token = req.headers['x-lopd-token'];
-  const exp = req.headers['x-lopd-exp'];
+  const token = req.headers['x-lopd-token'] || req.query.token;
+  const exp = req.headers['x-lopd-exp'] || req.query.exp;
 
   if (!verifyToken(id, token, exp)) {
     return res.status(400).json({ error: 'Token de firma inválido, faltante o expirado.' });

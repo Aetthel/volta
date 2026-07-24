@@ -16,7 +16,7 @@ export const createBusiness = async (req, res) => {
     address
   }, password);
 
-  return ApiResponse.success(res, business);
+  return ApiResponse.created(res, business);
 };
 
 export const deleteBusiness = async (req, res) => {

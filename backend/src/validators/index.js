@@ -78,7 +78,6 @@ export const updateBusinessSchema = z.object({
   logoUrl: z.string().optional().nullable(),
   coverUrl: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  ownerName: z.string().optional().nullable(),
   themeColor: z.string().optional(),
   fontSizeLevel: z.string().optional(),
   borderRadiusLevel: z.string().optional()
@@ -124,4 +123,13 @@ export const registerSchema = z.object({
   businessName: z.string().min(2, "El nombre del negocio debe tener al menos 2 caracteres"),
   phone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido"),
   businessType: z.string().optional().nullable()
+});
+
+export const publicBookingSchema = z.object({
+  businessId: z.string().min(1, "El ID de negocio es requerido"),
+  serviceId: z.string().min(1, "El ID de servicio es requerido"),
+  clientName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  clientPhone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido"),
+  clientEmail: z.string().email("Formato de email no válido").optional().nullable().or(z.string().length(0)),
+  appointmentDate: z.string().datetime("Formato de fecha no válido (debe ser ISO 8601 UTC)")
 });

@@ -10,9 +10,13 @@ export const checkSubscriptionLimits = (action) => {
 
       const business = await prisma.business.findUnique({
         where: { id: businessId },
-        include: {
-          users: true,
-          appointments: true
+        select: {
+          id: true,
+          subscriptionStatus: true,
+          subscriptionPlan: true,
+          _count: {
+            select: { users: true }
+          }
         }
       });
 
@@ -48,7 +52,8 @@ export const checkSubscriptionLimits = (action) => {
         }
 
         if (action === 'INVITE_MEMBER') {
-          if (business.users.length >= 3) {
+          const userCount = business._count?.users || 0;
+          if (userCount >= 3) {
             return res.status(403).json({
               error: 'El Plan Básico permite hasta 3 miembros en el equipo. Actualiza a Plan Pro para miembros ilimitados.',
               requiresUpgrade: true,

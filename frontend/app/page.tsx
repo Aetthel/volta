@@ -256,7 +256,8 @@ export default function RootPage() {
           </div>
         </section>
 
-        {/* Trust Bar Section */}
+        {/* Trust Bar Section - commented out, to be restored later */}
+        {/*
         <section className="py-12 bg-surface-container-low border-b border-outline-variant/20">
           <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24 xl:px-32 text-center">
             <p className="text-center text-label-md font-semibold text-on-surface-variant uppercase tracking-widest mb-8">
@@ -286,6 +287,7 @@ export default function RootPage() {
             </div>
           </div>
         </section>
+        */}
 
         {/* Features Sections */}
         <section id="features" className="py-24 bg-surface relative overflow-hidden">
@@ -895,7 +897,7 @@ export default function RootPage() {
           {/* Legal Bar */}
           <div className="border-t border-outline-variant/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-label-md text-on-surface-variant">
-              © 2024 Volta Technologies. Todos los derechos reservados.
+              © {new Date().getFullYear()} Volta Technologies. Todos los derechos reservados.
             </p>
             <div className="flex gap-6 text-label-md text-on-surface-variant">
               <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a>

@@ -5,7 +5,7 @@ async function rateLimitedPost(request) {
   const forwarded = request.headers.get("x-forwarded-for");
   const ip = forwarded?.split(",")[0]?.trim() || "unknown";
 
-  const { allowed, remaining, retryAfter } = checkRateLimit(`login:${ip}`);
+  const { allowed, retryAfter } = checkRateLimit(`login:${ip}`);
 
   if (!allowed) {
     return new Response(
@@ -24,24 +24,18 @@ async function rateLimitedPost(request) {
 
   const response = await handlers.POST(request);
 
-  let loginSuccess = false;
-  const setCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [];
+  // Check if a new valid session cookie was actually assigned (ignore deletion/invalidation cookies)
   const setCookieHeader = response.headers.get("set-cookie") || "";
+  const setCookies = response.headers.getSetCookie ? response.headers.getSetCookie() : [setCookieHeader];
   
-  console.log(`[RateLimiter] POST callback response status: ${response.status}`);
-  console.log(`[RateLimiter] Set-Cookie header: "${setCookieHeader}"`);
-  console.log(`[RateLimiter] getSetCookie() array:`, setCookies);
+  const isValidSessionCreated = setCookies.some(cookie => {
+    const lower = cookie.toLowerCase();
+    const isSession = lower.includes("session-token=");
+    const isCleared = lower.includes("max-age=0") || lower.includes("expires=thu, 01 jan 1970") || lower.includes("session-token=;");
+    return isSession && !isCleared;
+  });
 
-  const hasSessionCookie = (setCookieHeader && setCookieHeader.includes("session-token")) || 
-                           setCookies.some(cookie => cookie.toLowerCase().includes("session-token"));
-  
-  console.log(`[RateLimiter] Detected session cookie: ${hasSessionCookie}`);
-
-  if (hasSessionCookie) {
-    loginSuccess = true;
-  }
-
-  if (loginSuccess) {
+  if ((response.status === 200 || response.status === 302) && isValidSessionCreated) {
     resetRateLimit(`login:${ip}`);
   }
 

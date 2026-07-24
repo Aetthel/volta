@@ -9,6 +9,8 @@ declare module "next-auth" {
       subscriptionStatus?: string;
       trialExpiresAt?: string | null;
       sandboxExpiresAt?: string | null;
+      businessType?: string | null;
+      subscriptionPlan?: string;
       themeColor?: string;
       fontSizeLevel?: string;
       borderRadiusLevel?: string;
@@ -22,6 +24,8 @@ declare module "next-auth" {
     subscriptionStatus?: string;
     trialExpiresAt?: string | null;
     sandboxExpiresAt?: string | null;
+    businessType?: string | null;
+    subscriptionPlan?: string;
     themeColor?: string;
     fontSizeLevel?: string;
     borderRadiusLevel?: string;
@@ -36,6 +40,8 @@ declare module "next-auth/jwt" {
     subscriptionStatus?: string;
     trialExpiresAt?: string | null;
     sandboxExpiresAt?: string | null;
+    businessType?: string | null;
+    subscriptionPlan?: string;
     themeColor?: string;
     fontSizeLevel?: string;
     borderRadiusLevel?: string;

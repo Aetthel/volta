@@ -27,7 +27,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
 
           if (!user) {
-            console.log(`[NextAuth] User not found for email: ${cleanEmail}`);
+            if (process.env.NODE_ENV !== 'production') {
+              console.log("[NextAuth] User not found");
+            }
             return null;
           }
 
@@ -37,7 +39,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
 
           if (!isPasswordValid) {
-            console.log(`[NextAuth] Invalid password for user: ${cleanEmail}`);
+            if (process.env.NODE_ENV !== 'production') {
+              console.log("[NextAuth] Invalid password");
+            }
             return null;
           }
 

@@ -1,6 +1,8 @@
 import path from 'path';
 
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production';
+
 const nextConfig = {
   output: "standalone",
   experimental: {
@@ -11,8 +13,6 @@ const nextConfig = {
   },
   serverExternalPackages: ["backend", "whatsapp-web.js"],
   // Allow external origins to connect to the Next.js dev server HMR WebSocket.
-  // Required when using Cloudflare Tunnel or accessing from a different device
-  // on the local network — otherwise Next.js rejects the WebSocket with "Unauthorized".
   allowedDevOrigins: [
     "*.trycloudflare.com",
     "192.168.*",
@@ -29,7 +29,9 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              isDev
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+                : "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",

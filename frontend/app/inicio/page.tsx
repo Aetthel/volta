@@ -338,13 +338,15 @@ export default function DashboardPage() {
     });
     let durationStr = "1h";
     if (app.duration) {
-      const mins = parseFloat(app.duration) * 60;
-      if (mins >= 60) {
-        const hrs = Math.floor(mins / 60);
-        const rMins = mins % 60;
-        durationStr = rMins > 0 ? `${hrs}h ${rMins}m` : `${hrs}h`;
-      } else {
-        durationStr = `${mins}m`;
+      const mins = typeof app.duration === 'number' ? app.duration : parseInt(app.duration, 10);
+      if (!isNaN(mins)) {
+        if (mins >= 60) {
+          const hrs = Math.floor(mins / 60);
+          const rMins = mins % 60;
+          durationStr = rMins > 0 ? `${hrs}h ${rMins}m` : `${hrs}h`;
+        } else {
+          durationStr = `${mins}m`;
+        }
       }
     }
     
@@ -362,12 +364,13 @@ export default function DashboardPage() {
     };
   });
 
-  const todayFormatter = new Intl.DateTimeFormat("en-US", {
+  const todayFormatter = new Intl.DateTimeFormat("es-ES", {
     weekday: "long",
     month: "short",
     day: "numeric",
   });
-  const dateString = "Today is " + todayFormatter.format(new Date());
+  const formattedDate = todayFormatter.format(new Date());
+  const dateString = "Hoy es " + formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">

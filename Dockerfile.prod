@@ -24,8 +24,9 @@ RUN pnpm install --frozen-lockfile
 # Copy source
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client & build backend
 RUN pnpm --filter backend prisma:generate
+RUN pnpm --filter backend build
 
 # Build Next.js for production
 RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" API_KEY="dummy" pnpm --filter frontend build
