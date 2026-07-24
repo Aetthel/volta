@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Calendar as CalendarIcon,
   UserPlus,
@@ -213,6 +213,12 @@ const getWeekDates = (anchorDate: Date) => {
   return days;
 };
 
+const COLOR_CLASSES = [
+  "bg-primary-container text-on-primary-container border-primary",
+  "bg-secondary-container text-on-secondary-container border-secondary",
+  "bg-tertiary-container text-on-tertiary-container border-tertiary",
+];
+
 export default function AgendaPage() {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "";
@@ -251,70 +257,67 @@ export default function AgendaPage() {
   const [workers, setWorkers] = useState<any[]>([]);
   const [selectedWorkerId, setSelectedWorkerId] = useState<string>("all");
 
-  const colorClasses = [
-    "bg-primary-container text-on-primary-container border-primary",
-    "bg-secondary-container text-on-secondary-container border-secondary",
-    "bg-tertiary-container text-on-tertiary-container border-tertiary",
-  ];
+  const mapDbAppointments = useCallback(
+    (dbApps: any[], currentWorkers: any[] = []) => {
+      const weekDates = getWeekDates(weekAnchorDate);
+      const startOfWeekStr = weekDates[0].dateString;
+      const endOfWeekStr = weekDates[6].dateString;
 
-  const mapDbAppointments = (dbApps: any[], currentWorkers: any[] = []) => {
-    const weekDates = getWeekDates(weekAnchorDate);
-    const startOfWeekStr = weekDates[0].dateString;
-    const endOfWeekStr = weekDates[6].dateString;
+      return dbApps
+        .filter((app) => {
+          const dateStr = app.appointmentDate.split("T")[0];
+          return dateStr >= startOfWeekStr && dateStr <= endOfWeekStr;
+        })
+        .map((app) => {
+          const dateObj = new Date(app.appointmentDate);
+          const day = (dateObj.getDay() + 6) % 7; // Convert Sun=0, Mon=1... to Mon=0, Tue=1... Sun=6
 
-    return dbApps
-      .filter((app) => {
-        const dateStr = app.appointmentDate.split("T")[0];
-        return dateStr >= startOfWeekStr && dateStr <= endOfWeekStr;
-      })
-      .map((app) => {
-        const dateObj = new Date(app.appointmentDate);
-        const day = (dateObj.getDay() + 6) % 7; // Convert Sun=0, Mon=1... to Mon=0, Tue=1... Sun=6
+          const hoursVal = dateObj.getHours();
+          const minsVal = dateObj.getMinutes();
+          const timeSlot = `${hoursVal.toString().padStart(2, "0")}:${minsVal.toString().padStart(2, "0")}`;
 
-        const hoursVal = dateObj.getHours();
-        const minsVal = dateObj.getMinutes();
-        const timeSlot = `${hoursVal.toString().padStart(2, "0")}:${minsVal.toString().padStart(2, "0")}`;
+          const service = app.serviceName || app.client?.frequentService || "Servicio General";
+          let hash = 0;
+          for (let i = 0; i < service.length; i++) {
+            hash = service.charCodeAt(i) + ((hash << 5) - hash);
+          }
+          const colorClass = COLOR_CLASSES[Math.abs(hash) % COLOR_CLASSES.length];
 
-        const service = app.serviceName || app.client?.frequentService || "Servicio General";
-        let hash = 0;
-        for (let i = 0; i < service.length; i++) {
-          hash = service.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const colorClass = colorClasses[Math.abs(hash) % colorClasses.length];
+          // Stylist assignment (falls back to static names for Luxe Salon)
+          let stylistName = "Todos";
+          let workerId = "all";
+          if (currentWorkers.length > 0) {
+            const w = currentWorkers[Math.abs(hash) % currentWorkers.length];
+            stylistName = w.name;
+            workerId = w.id;
+          } else {
+            const staticStylists = [
+              { name: "Ana García", id: "1" },
+              { name: "Marta Ruiz", id: "2" },
+            ];
+            const st = staticStylists[Math.abs(hash) % staticStylists.length];
+            stylistName = st.name;
+            workerId = st.id;
+          }
 
-        // Stylist assignment (falls back to static names for Luxe Salon)
-        let stylistName = "Todos";
-        let workerId = "all";
-        if (currentWorkers.length > 0) {
-          const w = currentWorkers[Math.abs(hash) % currentWorkers.length];
-          stylistName = w.name;
-          workerId = w.id;
-        } else {
-          const staticStylists = [
-            { name: "Ana García", id: "1" },
-            { name: "Marta Ruiz", id: "2" },
-          ];
-          const st = staticStylists[Math.abs(hash) % staticStylists.length];
-          stylistName = st.name;
-          workerId = st.id;
-        }
+          return {
+            id: app.id,
+            clientName: app.clientName,
+            serviceName: service,
+            dayIndex: day,
+            timeSlot: timeSlot,
+            duration: 1,
+            colorClass: colorClass,
+            dateObj: dateObj,
+            stylistName,
+            workerId,
+          };
+        });
+    },
+    [weekAnchorDate]
+  );
 
-        return {
-          id: app.id,
-          clientName: app.clientName,
-          serviceName: service,
-          dayIndex: day,
-          timeSlot: timeSlot,
-          duration: 1,
-          colorClass: colorClass,
-          dateObj: dateObj,
-          stylistName,
-          workerId,
-        };
-      });
-  };
-
-  const fetchDashboardData = () => {
+  const fetchDashboardData = useCallback(() => {
     if (!businessId) return;
     setIsLoading(true);
 
@@ -352,11 +355,11 @@ export default function AgendaPage() {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [businessId, mapDbAppointments]);
 
   useEffect(() => {
     fetchDashboardData();
-  }, [businessId, weekAnchorDate]);
+  }, [fetchDashboardData, weekAnchorDate]);
 
   useEffect(() => {
     if (session?.user?.name) {

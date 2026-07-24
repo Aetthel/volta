@@ -137,7 +137,7 @@ export default function AjustesPage() {
     if (visibleTabs.length > 0 && !visibleTabs.find((t) => t.id === activeTab)) {
       setActiveTab(visibleTabs[0].id);
     }
-  }, [role]);
+  }, [role, activeTab, visibleTabs]);
 
   // ADMIN keeps its own separate render (not touched per user request)
   if (role === "ADMIN") {

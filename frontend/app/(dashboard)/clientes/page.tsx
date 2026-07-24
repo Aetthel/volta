@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Users as UsersIcon,
   CalendarCheck,
@@ -148,7 +148,7 @@ export default function ClientesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     if (!businessId) return;
     setIsLoading(true);
 
@@ -179,11 +179,11 @@ export default function ClientesPage() {
     Promise.all([p1, p2]).finally(() => {
       setIsLoading(false);
     });
-  };
+  }, [businessId]);
 
   useEffect(() => {
     fetchData();
-  }, [businessId]);
+  }, [fetchData]);
 
   useEffect(() => {
     setMounted(true);
@@ -490,7 +490,7 @@ export default function ClientesPage() {
                   setCurrentPage(1);
                 }}
                 variant="primary"
-                className="!bg-white !text-[#1a3a3a] hover:!bg-white/90 !shadow-none px-6 py-1 rounded-full font-label-md text-label-md self-start font-semibold"
+                className="bg-white text-[#1a3a3a] hover:bg-white/90 shadow-none px-6 py-1 rounded-full font-label-md text-label-md self-start font-semibold"
               >
                 Revisar Pendientes
               </Button>
@@ -651,6 +651,7 @@ export default function ClientesPage() {
                             <div className="flex items-center gap-3">
                               {client.avatarUrl ? (
                                 <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant shrink-0">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
                                   <img
                                     src={client.avatarUrl}
                                     alt={client.name}

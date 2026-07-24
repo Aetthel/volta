@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
@@ -106,7 +106,7 @@ export default function DashboardPage() {
     else setGreeting("¡Buenas noches!");
   }, []);
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     if (!businessId) return;
     setIsLoading(true);
 
@@ -150,11 +150,11 @@ export default function DashboardPage() {
     Promise.all([p1, p2, p3, p4]).finally(() => {
       setIsLoading(false);
     });
-  };
+  }, [businessId]);
 
   useEffect(() => {
     fetchData();
-  }, [businessId]);
+  }, [fetchData]);
 
   useEffect(() => {
     if (session?.user?.name) {

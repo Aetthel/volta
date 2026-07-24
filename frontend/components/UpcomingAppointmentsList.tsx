@@ -55,6 +55,7 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
             >
               <div className="flex items-center gap-3.5 min-w-0">
                 {app.avatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={app.avatarUrl}
                     alt={app.clientName}
