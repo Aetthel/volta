@@ -215,6 +215,16 @@ exports.Prisma.AlertScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.LopdConsentLogScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  businessId: 'businessId',
+  acceptedAt: 'acceptedAt',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  policyVersion: 'policyVersion'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -274,7 +284,8 @@ exports.Prisma.ModelName = {
   Appointment: 'Appointment',
   BusinessHours: 'BusinessHours',
   Service: 'Service',
-  Alert: 'Alert'
+  Alert: 'Alert',
+  LopdConsentLog: 'LopdConsentLog'
 };
 
 /**

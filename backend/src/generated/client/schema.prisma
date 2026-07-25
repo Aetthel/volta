@@ -48,6 +48,7 @@ model Business {
   hours               BusinessHours[]
   services            Service[]
   users               User[]
+  lopdConsentLogs     LopdConsentLog[]
 }
 
 enum UserRole {
@@ -78,20 +79,21 @@ enum WhatsAppStatus {
 }
 
 model Client {
-  id              String        @id @default(uuid())
+  id              String           @id @default(uuid())
   name            String
   surname         String
   email           String?
   phone           String // International format
   lastVisit       String?
   frequentService String?
-  lopdStatus      String        @default("Pendiente") // "Aceptado" or "Pendiente"
+  lopdStatus      String           @default("Pendiente") // "Aceptado" or "Pendiente"
   avatarUrl       String?
   businessId      String
-  business        Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   appointments    Appointment[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  lopdConsentLogs LopdConsentLog[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([businessId])
 }
@@ -169,4 +171,19 @@ model Alert {
   updatedAt   DateTime  @updatedAt
 
   @@index([userId])
+}
+
+model LopdConsentLog {
+  id            String   @id @default(uuid())
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  acceptedAt    DateTime @default(now())
+  ipAddress     String
+  userAgent     String
+  policyVersion String   @default("1.0")
+
+  @@index([clientId])
+  @@index([businessId])
 }

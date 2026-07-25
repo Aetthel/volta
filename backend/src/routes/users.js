@@ -2,6 +2,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import {
   authenticate,
+  requireRole,
   validateId,
   validateBody,
   checkSubscriptionLimits,
@@ -38,6 +39,7 @@ router.get("/", authenticate, validateId("businessId"), asyncHandler(userControl
 router.post(
   "/",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   checkSubscriptionLimits("INVITE_MEMBER"),
   validateBody(createUserSchema),
   asyncHandler(userController.createUser)
@@ -47,12 +49,19 @@ router.post(
 router.put(
   "/:id",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateId("id"),
   validateBody(updateUserSchema),
   asyncHandler(userController.updateUser)
 );
 
 // DELETE /api/users/:id
-router.delete("/:id", authenticate, validateId("id"), asyncHandler(userController.deleteUser));
+router.delete(
+  "/:id",
+  authenticate,
+  requireRole(["ADMIN", "JEFE"]),
+  validateId("id"),
+  asyncHandler(userController.deleteUser)
+);
 
 export default router;

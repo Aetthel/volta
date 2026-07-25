@@ -96,6 +96,13 @@ describe("requireRole middleware", () => {
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
+  it("should return 403 when EMPLEADO attempts access to JEFE/ADMIN restricted route", () => {
+    req.user = { role: "EMPLEADO" };
+    requireRole(["ADMIN", "JEFE"])(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(next).not.toHaveBeenCalled();
+  });
+
   it("should call next if user role is allowed", () => {
     req.user = { role: "ADMIN" };
     requireRole(["ADMIN", "JEFE"])(req, res, next);

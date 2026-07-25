@@ -4,6 +4,7 @@ import config from "../config/index.js";
 import { computeHmac } from "../utils/crypto.js";
 import { maskPhone } from "../utils/logger.js";
 import { logger } from "../utils/logger.js";
+import { enqueueWhatsAppMessage } from "../queues/whatsappQueue.js";
 
 /**
  * Formats a message template by replacing placeholders with actual data
@@ -54,10 +55,21 @@ async function sendWelcomeMessage(appointmentId) {
       businessName: appt.business.name,
     });
 
-    logger.info(`[Bot] Sending welcome to ${maskPhone(appt.clientPhone)}...`);
-    await whatsappManager.initClient(appt.businessId); // Ensure client is init
-    await whatsappManager.waitForReady(appt.businessId, 45000);
-    await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
+    // Enqueue job in Redis / BullMQ
+    const job = await enqueueWhatsAppMessage("WELCOME_MESSAGE", {
+      appointmentId,
+      businessId: appt.businessId,
+      phone: appt.clientPhone,
+      message,
+    });
+
+    // Fallback if Redis Queue is not active
+    if (!job) {
+      logger.info(`[Bot] [Direct Fallback] Sending welcome to ${maskPhone(appt.clientPhone)}...`);
+      await whatsappManager.initClient(appt.businessId);
+      await whatsappManager.waitForReady(appt.businessId, 45000);
+      await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
+    }
   } catch (err) {
     logger.error(`[Bot] Error sending welcome message:`, err);
   }
@@ -128,17 +140,25 @@ async function runSentinel() {
           businessName: appt.business.name,
         });
 
-        await whatsappManager.initClient(appt.businessId);
-        await whatsappManager.waitForReady(appt.businessId, 45000);
-        await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
-
-        await prisma.appointment.update({
-          where: { id: appt.id },
-          data: { status: "SENT" },
+        // Enqueue job to BullMQ / Redis
+        const job = await enqueueWhatsAppMessage("SENTINEL_REMINDER", {
+          appointmentId: appt.id,
+          businessId: appt.businessId,
+          phone: appt.clientPhone,
+          message,
         });
 
-        const delay = Math.floor(Math.random() * (5000 - 2000 + 1) + 2000);
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        // Fallback for non-Redis local execution
+        if (!job) {
+          await whatsappManager.initClient(appt.businessId);
+          await whatsappManager.waitForReady(appt.businessId, 45000);
+          await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);
+
+          await prisma.appointment.update({
+            where: { id: appt.id },
+            data: { status: "SENT" },
+          });
+        }
       } catch (err) {
         logger.error(`[Sentinel] Error processing appointment ${appt.id}:`, err);
         await prisma.appointment.update({
@@ -154,10 +174,6 @@ async function runSentinel() {
 
 /**
  * Sends an automatic LOPD consent message to a client.
- *
- * Uses initClient() + waitForReady() so the message is sent only after Puppeteer
- * has fully initialized — previously the message was attempted before the client
- * was ready, causing an 'evaluate' error that silently fell back to simulation.
  */
 async function sendConsentMessage(businessId, client) {
   const FRONTEND_URL = config.frontendUrl;
@@ -170,21 +186,21 @@ async function sendConsentMessage(businessId, client) {
   logger.info(`[Bot] Triggering LOPD consent for client ${client.id}`);
 
   try {
-    // Ensure the client is initialised (restores session from disk after a restart)
-    await whatsappManager.initClient(businessId);
+    const job = await enqueueWhatsAppMessage("LOPD_CONSENT", {
+      clientId: client.id,
+      businessId,
+      phone: client.phone,
+      message,
+    });
 
-    // Wait until Puppeteer is fully ready before attempting to send.
-    // If the QR hasn't been scanned yet this will timeout and throw, which is the
-    // correct behaviour — we do NOT want to silently simulate the send.
-    await whatsappManager.waitForReady(businessId, 45000);
-
-    await whatsappManager.sendMessage(businessId, client.phone, message);
-    logger.info(`[WhatsApp] LOPD consent message sent to ${maskPhone(client.phone)}`);
+    if (!job) {
+      await whatsappManager.initClient(businessId);
+      await whatsappManager.waitForReady(businessId, 45000);
+      await whatsappManager.sendMessage(businessId, client.phone, message);
+      logger.info(`[WhatsApp] [Direct Fallback] LOPD consent message sent to ${maskPhone(client.phone)}`);
+    }
   } catch (wsErr) {
     logger.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);
-    logger.error(
-      `[WhatsApp] ⚠️  Asegúrate de que el QR de WhatsApp está vinculado en Ajustes → WhatsApp.`
-    );
   }
 }
 

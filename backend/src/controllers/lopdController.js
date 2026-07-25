@@ -57,7 +57,27 @@ export const acceptConsent = async (req, res) => {
     return ApiResponse.success(res, { success: true, client });
   }
 
-  const { updatedClient } = await lopdService.acceptConsent(id);
+  const rawIp = req.headers["x-forwarded-for"] || req.ip || req.socket?.remoteAddress || "127.0.0.1";
+  const ipAddress = typeof rawIp === "string" ? rawIp.split(",")[0].trim() : "127.0.0.1";
+  const userAgent = req.headers["user-agent"] || "Unknown";
 
-  return ApiResponse.success(res, { success: true, client: updatedClient });
+  const { updatedClient, consentLog } = await lopdService.acceptConsent(id, {
+    ipAddress,
+    userAgent,
+    policyVersion: "1.0",
+  });
+
+  return ApiResponse.success(res, { success: true, client: updatedClient, consentLog });
+};
+
+export const getConsentLogs = async (req, res) => {
+  const { id: clientId } = req.params;
+  const businessId = req.user?.businessId || req.query.businessId;
+
+  if (!businessId) {
+    return res.status(400).json({ error: "ID de negocio requerido." });
+  }
+
+  const logs = await lopdService.getConsentLogsByClient(clientId, businessId);
+  return ApiResponse.success(res, { logs });
 };

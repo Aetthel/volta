@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, validateId, validateBody } from "../middleware/index.js";
+import { authenticate, requireRole, validateId, validateBody } from "../middleware/index.js";
 import { updateBusinessSchema, updateHoursSchema } from "../validators/index.js";
 import * as businessController from "../controllers/businessController.js";
 import { asyncHandler } from "../utils/index.js";
@@ -13,6 +13,7 @@ router.get("/:id", authenticate, validateId("id"), asyncHandler(businessControll
 router.put(
   "/:id",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateId("id"),
   validateBody(updateBusinessSchema),
   asyncHandler(businessController.updateBusiness)
@@ -25,6 +26,7 @@ router.get("/:id/hours", authenticate, validateId("id"), asyncHandler(businessCo
 router.put(
   "/:id/hours",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateId("id"),
   validateBody(updateHoursSchema),
   asyncHandler(businessController.updateHours)

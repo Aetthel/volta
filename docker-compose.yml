@@ -17,12 +17,27 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: volta-redis
+    restart: no
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build: .
     container_name: volta-backend
     restart: no
     depends_on:
       - db
+      - redis
     env_file:
       - .env
     environment:
@@ -72,4 +87,5 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   wwebjs-auth:

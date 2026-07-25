@@ -26,4 +26,7 @@ router.post(
   asyncHandler(lopdController.acceptConsent)
 );
 
+// GET registros de auditoría LOPD de un cliente
+router.get("/:id/logs", validateId("id"), asyncHandler(lopdController.getConsentLogs));
+
 export default router;

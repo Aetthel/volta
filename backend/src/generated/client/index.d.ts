@@ -48,6 +48,11 @@ export type Service = $Result.DefaultSelection<Prisma.$ServicePayload>
  * 
  */
 export type Alert = $Result.DefaultSelection<Prisma.$AlertPayload>
+/**
+ * Model LopdConsentLog
+ * 
+ */
+export type LopdConsentLog = $Result.DefaultSelection<Prisma.$LopdConsentLogPayload>
 
 /**
  * Enums
@@ -324,6 +329,16 @@ export class PrismaClient<
     * ```
     */
   get alert(): Prisma.AlertDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.lopdConsentLog`: Exposes CRUD operations for the **LopdConsentLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more LopdConsentLogs
+    * const lopdConsentLogs = await prisma.lopdConsentLog.findMany()
+    * ```
+    */
+  get lopdConsentLog(): Prisma.LopdConsentLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -764,7 +779,8 @@ export namespace Prisma {
     Appointment: 'Appointment',
     BusinessHours: 'BusinessHours',
     Service: 'Service',
-    Alert: 'Alert'
+    Alert: 'Alert',
+    LopdConsentLog: 'LopdConsentLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -780,7 +796,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "business" | "user" | "client" | "appointment" | "businessHours" | "service" | "alert"
+      modelProps: "business" | "user" | "client" | "appointment" | "businessHours" | "service" | "alert" | "lopdConsentLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1302,6 +1318,80 @@ export namespace Prisma {
           }
         }
       }
+      LopdConsentLog: {
+        payload: Prisma.$LopdConsentLogPayload<ExtArgs>
+        fields: Prisma.LopdConsentLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.LopdConsentLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.LopdConsentLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>
+          }
+          findFirst: {
+            args: Prisma.LopdConsentLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.LopdConsentLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>
+          }
+          findMany: {
+            args: Prisma.LopdConsentLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>[]
+          }
+          create: {
+            args: Prisma.LopdConsentLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>
+          }
+          createMany: {
+            args: Prisma.LopdConsentLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.LopdConsentLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>[]
+          }
+          delete: {
+            args: Prisma.LopdConsentLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>
+          }
+          update: {
+            args: Prisma.LopdConsentLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.LopdConsentLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.LopdConsentLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LopdConsentLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.LopdConsentLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LopdConsentLogPayload>
+          }
+          aggregate: {
+            args: Prisma.LopdConsentLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateLopdConsentLog>
+          }
+          groupBy: {
+            args: Prisma.LopdConsentLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<LopdConsentLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.LopdConsentLogCountArgs<ExtArgs>
+            result: $Utils.Optional<LopdConsentLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1417,6 +1507,7 @@ export namespace Prisma {
     businessHours?: BusinessHoursOmit
     service?: ServiceOmit
     alert?: AlertOmit
+    lopdConsentLog?: LopdConsentLogOmit
   }
 
   /* Types for Logging */
@@ -1502,6 +1593,7 @@ export namespace Prisma {
     hours: number
     services: number
     users: number
+    lopdConsentLogs: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1510,6 +1602,7 @@ export namespace Prisma {
     hours?: boolean | BusinessCountOutputTypeCountHoursArgs
     services?: boolean | BusinessCountOutputTypeCountServicesArgs
     users?: boolean | BusinessCountOutputTypeCountUsersArgs
+    lopdConsentLogs?: boolean | BusinessCountOutputTypeCountLopdConsentLogsArgs
   }
 
   // Custom InputTypes
@@ -1558,6 +1651,13 @@ export namespace Prisma {
     where?: UserWhereInput
   }
 
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountLopdConsentLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LopdConsentLogWhereInput
+  }
+
 
   /**
    * Count Type UserCountOutputType
@@ -1596,10 +1696,12 @@ export namespace Prisma {
 
   export type ClientCountOutputType = {
     appointments: number
+    lopdConsentLogs: number
   }
 
   export type ClientCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | ClientCountOutputTypeCountAppointmentsArgs
+    lopdConsentLogs?: boolean | ClientCountOutputTypeCountLopdConsentLogsArgs
   }
 
   // Custom InputTypes
@@ -1618,6 +1720,13 @@ export namespace Prisma {
    */
   export type ClientCountOutputTypeCountAppointmentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AppointmentWhereInput
+  }
+
+  /**
+   * ClientCountOutputType without action
+   */
+  export type ClientCountOutputTypeCountLopdConsentLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LopdConsentLogWhereInput
   }
 
 
@@ -1953,6 +2062,7 @@ export namespace Prisma {
     hours?: boolean | Business$hoursArgs<ExtArgs>
     services?: boolean | Business$servicesArgs<ExtArgs>
     users?: boolean | Business$usersArgs<ExtArgs>
+    lopdConsentLogs?: boolean | Business$lopdConsentLogsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -2035,6 +2145,7 @@ export namespace Prisma {
     hours?: boolean | Business$hoursArgs<ExtArgs>
     services?: boolean | Business$servicesArgs<ExtArgs>
     users?: boolean | Business$usersArgs<ExtArgs>
+    lopdConsentLogs?: boolean | Business$lopdConsentLogsArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2048,6 +2159,7 @@ export namespace Prisma {
       hours: Prisma.$BusinessHoursPayload<ExtArgs>[]
       services: Prisma.$ServicePayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
+      lopdConsentLogs: Prisma.$LopdConsentLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2470,6 +2582,7 @@ export namespace Prisma {
     hours<T extends Business$hoursArgs<ExtArgs> = {}>(args?: Subset<T, Business$hoursArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BusinessHoursPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     services<T extends Business$servicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$servicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends Business$usersArgs<ExtArgs> = {}>(args?: Subset<T, Business$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    lopdConsentLogs<T extends Business$lopdConsentLogsArgs<ExtArgs> = {}>(args?: Subset<T, Business$lopdConsentLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3030,6 +3143,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * Business.lopdConsentLogs
+   */
+  export type Business$lopdConsentLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    where?: LopdConsentLogWhereInput
+    orderBy?: LopdConsentLogOrderByWithRelationInput | LopdConsentLogOrderByWithRelationInput[]
+    cursor?: LopdConsentLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LopdConsentLogScalarFieldEnum | LopdConsentLogScalarFieldEnum[]
   }
 
   /**
@@ -4424,6 +4561,7 @@ export namespace Prisma {
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     appointments?: boolean | Client$appointmentsArgs<ExtArgs>
+    lopdConsentLogs?: boolean | Client$lopdConsentLogsArgs<ExtArgs>
     _count?: boolean | ClientCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["client"]>
 
@@ -4478,6 +4616,7 @@ export namespace Prisma {
   export type ClientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     appointments?: boolean | Client$appointmentsArgs<ExtArgs>
+    lopdConsentLogs?: boolean | Client$lopdConsentLogsArgs<ExtArgs>
     _count?: boolean | ClientCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ClientIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4492,6 +4631,7 @@ export namespace Prisma {
     objects: {
       business: Prisma.$BusinessPayload<ExtArgs>
       appointments: Prisma.$AppointmentPayload<ExtArgs>[]
+      lopdConsentLogs: Prisma.$LopdConsentLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4902,6 +5042,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     appointments<T extends Client$appointmentsArgs<ExtArgs> = {}>(args?: Subset<T, Client$appointmentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AppointmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    lopdConsentLogs<T extends Client$lopdConsentLogsArgs<ExtArgs> = {}>(args?: Subset<T, Client$lopdConsentLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5365,6 +5506,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AppointmentScalarFieldEnum | AppointmentScalarFieldEnum[]
+  }
+
+  /**
+   * Client.lopdConsentLogs
+   */
+  export type Client$lopdConsentLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    where?: LopdConsentLogWhereInput
+    orderBy?: LopdConsentLogOrderByWithRelationInput | LopdConsentLogOrderByWithRelationInput[]
+    cursor?: LopdConsentLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LopdConsentLogScalarFieldEnum | LopdConsentLogScalarFieldEnum[]
   }
 
   /**
@@ -9968,6 +10133,1103 @@ export namespace Prisma {
 
 
   /**
+   * Model LopdConsentLog
+   */
+
+  export type AggregateLopdConsentLog = {
+    _count: LopdConsentLogCountAggregateOutputType | null
+    _min: LopdConsentLogMinAggregateOutputType | null
+    _max: LopdConsentLogMaxAggregateOutputType | null
+  }
+
+  export type LopdConsentLogMinAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    businessId: string | null
+    acceptedAt: Date | null
+    ipAddress: string | null
+    userAgent: string | null
+    policyVersion: string | null
+  }
+
+  export type LopdConsentLogMaxAggregateOutputType = {
+    id: string | null
+    clientId: string | null
+    businessId: string | null
+    acceptedAt: Date | null
+    ipAddress: string | null
+    userAgent: string | null
+    policyVersion: string | null
+  }
+
+  export type LopdConsentLogCountAggregateOutputType = {
+    id: number
+    clientId: number
+    businessId: number
+    acceptedAt: number
+    ipAddress: number
+    userAgent: number
+    policyVersion: number
+    _all: number
+  }
+
+
+  export type LopdConsentLogMinAggregateInputType = {
+    id?: true
+    clientId?: true
+    businessId?: true
+    acceptedAt?: true
+    ipAddress?: true
+    userAgent?: true
+    policyVersion?: true
+  }
+
+  export type LopdConsentLogMaxAggregateInputType = {
+    id?: true
+    clientId?: true
+    businessId?: true
+    acceptedAt?: true
+    ipAddress?: true
+    userAgent?: true
+    policyVersion?: true
+  }
+
+  export type LopdConsentLogCountAggregateInputType = {
+    id?: true
+    clientId?: true
+    businessId?: true
+    acceptedAt?: true
+    ipAddress?: true
+    userAgent?: true
+    policyVersion?: true
+    _all?: true
+  }
+
+  export type LopdConsentLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LopdConsentLog to aggregate.
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LopdConsentLogs to fetch.
+     */
+    orderBy?: LopdConsentLogOrderByWithRelationInput | LopdConsentLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: LopdConsentLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LopdConsentLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LopdConsentLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned LopdConsentLogs
+    **/
+    _count?: true | LopdConsentLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: LopdConsentLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: LopdConsentLogMaxAggregateInputType
+  }
+
+  export type GetLopdConsentLogAggregateType<T extends LopdConsentLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateLopdConsentLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateLopdConsentLog[P]>
+      : GetScalarType<T[P], AggregateLopdConsentLog[P]>
+  }
+
+
+
+
+  export type LopdConsentLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LopdConsentLogWhereInput
+    orderBy?: LopdConsentLogOrderByWithAggregationInput | LopdConsentLogOrderByWithAggregationInput[]
+    by: LopdConsentLogScalarFieldEnum[] | LopdConsentLogScalarFieldEnum
+    having?: LopdConsentLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: LopdConsentLogCountAggregateInputType | true
+    _min?: LopdConsentLogMinAggregateInputType
+    _max?: LopdConsentLogMaxAggregateInputType
+  }
+
+  export type LopdConsentLogGroupByOutputType = {
+    id: string
+    clientId: string
+    businessId: string
+    acceptedAt: Date
+    ipAddress: string
+    userAgent: string
+    policyVersion: string
+    _count: LopdConsentLogCountAggregateOutputType | null
+    _min: LopdConsentLogMinAggregateOutputType | null
+    _max: LopdConsentLogMaxAggregateOutputType | null
+  }
+
+  type GetLopdConsentLogGroupByPayload<T extends LopdConsentLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<LopdConsentLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof LopdConsentLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], LopdConsentLogGroupByOutputType[P]>
+            : GetScalarType<T[P], LopdConsentLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type LopdConsentLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    businessId?: boolean
+    acceptedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    policyVersion?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["lopdConsentLog"]>
+
+  export type LopdConsentLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    businessId?: boolean
+    acceptedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    policyVersion?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["lopdConsentLog"]>
+
+  export type LopdConsentLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    clientId?: boolean
+    businessId?: boolean
+    acceptedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    policyVersion?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["lopdConsentLog"]>
+
+  export type LopdConsentLogSelectScalar = {
+    id?: boolean
+    clientId?: boolean
+    businessId?: boolean
+    acceptedAt?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    policyVersion?: boolean
+  }
+
+  export type LopdConsentLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clientId" | "businessId" | "acceptedAt" | "ipAddress" | "userAgent" | "policyVersion", ExtArgs["result"]["lopdConsentLog"]>
+  export type LopdConsentLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type LopdConsentLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type LopdConsentLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $LopdConsentLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "LopdConsentLog"
+    objects: {
+      client: Prisma.$ClientPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      clientId: string
+      businessId: string
+      acceptedAt: Date
+      ipAddress: string
+      userAgent: string
+      policyVersion: string
+    }, ExtArgs["result"]["lopdConsentLog"]>
+    composites: {}
+  }
+
+  type LopdConsentLogGetPayload<S extends boolean | null | undefined | LopdConsentLogDefaultArgs> = $Result.GetResult<Prisma.$LopdConsentLogPayload, S>
+
+  type LopdConsentLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<LopdConsentLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: LopdConsentLogCountAggregateInputType | true
+    }
+
+  export interface LopdConsentLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LopdConsentLog'], meta: { name: 'LopdConsentLog' } }
+    /**
+     * Find zero or one LopdConsentLog that matches the filter.
+     * @param {LopdConsentLogFindUniqueArgs} args - Arguments to find a LopdConsentLog
+     * @example
+     * // Get one LopdConsentLog
+     * const lopdConsentLog = await prisma.lopdConsentLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends LopdConsentLogFindUniqueArgs>(args: SelectSubset<T, LopdConsentLogFindUniqueArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one LopdConsentLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {LopdConsentLogFindUniqueOrThrowArgs} args - Arguments to find a LopdConsentLog
+     * @example
+     * // Get one LopdConsentLog
+     * const lopdConsentLog = await prisma.lopdConsentLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends LopdConsentLogFindUniqueOrThrowArgs>(args: SelectSubset<T, LopdConsentLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LopdConsentLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogFindFirstArgs} args - Arguments to find a LopdConsentLog
+     * @example
+     * // Get one LopdConsentLog
+     * const lopdConsentLog = await prisma.lopdConsentLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends LopdConsentLogFindFirstArgs>(args?: SelectSubset<T, LopdConsentLogFindFirstArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first LopdConsentLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogFindFirstOrThrowArgs} args - Arguments to find a LopdConsentLog
+     * @example
+     * // Get one LopdConsentLog
+     * const lopdConsentLog = await prisma.lopdConsentLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends LopdConsentLogFindFirstOrThrowArgs>(args?: SelectSubset<T, LopdConsentLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more LopdConsentLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all LopdConsentLogs
+     * const lopdConsentLogs = await prisma.lopdConsentLog.findMany()
+     * 
+     * // Get first 10 LopdConsentLogs
+     * const lopdConsentLogs = await prisma.lopdConsentLog.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const lopdConsentLogWithIdOnly = await prisma.lopdConsentLog.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends LopdConsentLogFindManyArgs>(args?: SelectSubset<T, LopdConsentLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a LopdConsentLog.
+     * @param {LopdConsentLogCreateArgs} args - Arguments to create a LopdConsentLog.
+     * @example
+     * // Create one LopdConsentLog
+     * const LopdConsentLog = await prisma.lopdConsentLog.create({
+     *   data: {
+     *     // ... data to create a LopdConsentLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends LopdConsentLogCreateArgs>(args: SelectSubset<T, LopdConsentLogCreateArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many LopdConsentLogs.
+     * @param {LopdConsentLogCreateManyArgs} args - Arguments to create many LopdConsentLogs.
+     * @example
+     * // Create many LopdConsentLogs
+     * const lopdConsentLog = await prisma.lopdConsentLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends LopdConsentLogCreateManyArgs>(args?: SelectSubset<T, LopdConsentLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many LopdConsentLogs and returns the data saved in the database.
+     * @param {LopdConsentLogCreateManyAndReturnArgs} args - Arguments to create many LopdConsentLogs.
+     * @example
+     * // Create many LopdConsentLogs
+     * const lopdConsentLog = await prisma.lopdConsentLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many LopdConsentLogs and only return the `id`
+     * const lopdConsentLogWithIdOnly = await prisma.lopdConsentLog.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends LopdConsentLogCreateManyAndReturnArgs>(args?: SelectSubset<T, LopdConsentLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a LopdConsentLog.
+     * @param {LopdConsentLogDeleteArgs} args - Arguments to delete one LopdConsentLog.
+     * @example
+     * // Delete one LopdConsentLog
+     * const LopdConsentLog = await prisma.lopdConsentLog.delete({
+     *   where: {
+     *     // ... filter to delete one LopdConsentLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends LopdConsentLogDeleteArgs>(args: SelectSubset<T, LopdConsentLogDeleteArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one LopdConsentLog.
+     * @param {LopdConsentLogUpdateArgs} args - Arguments to update one LopdConsentLog.
+     * @example
+     * // Update one LopdConsentLog
+     * const lopdConsentLog = await prisma.lopdConsentLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends LopdConsentLogUpdateArgs>(args: SelectSubset<T, LopdConsentLogUpdateArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more LopdConsentLogs.
+     * @param {LopdConsentLogDeleteManyArgs} args - Arguments to filter LopdConsentLogs to delete.
+     * @example
+     * // Delete a few LopdConsentLogs
+     * const { count } = await prisma.lopdConsentLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends LopdConsentLogDeleteManyArgs>(args?: SelectSubset<T, LopdConsentLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LopdConsentLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many LopdConsentLogs
+     * const lopdConsentLog = await prisma.lopdConsentLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends LopdConsentLogUpdateManyArgs>(args: SelectSubset<T, LopdConsentLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more LopdConsentLogs and returns the data updated in the database.
+     * @param {LopdConsentLogUpdateManyAndReturnArgs} args - Arguments to update many LopdConsentLogs.
+     * @example
+     * // Update many LopdConsentLogs
+     * const lopdConsentLog = await prisma.lopdConsentLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more LopdConsentLogs and only return the `id`
+     * const lopdConsentLogWithIdOnly = await prisma.lopdConsentLog.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LopdConsentLogUpdateManyAndReturnArgs>(args: SelectSubset<T, LopdConsentLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one LopdConsentLog.
+     * @param {LopdConsentLogUpsertArgs} args - Arguments to update or create a LopdConsentLog.
+     * @example
+     * // Update or create a LopdConsentLog
+     * const lopdConsentLog = await prisma.lopdConsentLog.upsert({
+     *   create: {
+     *     // ... data to create a LopdConsentLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the LopdConsentLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends LopdConsentLogUpsertArgs>(args: SelectSubset<T, LopdConsentLogUpsertArgs<ExtArgs>>): Prisma__LopdConsentLogClient<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of LopdConsentLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogCountArgs} args - Arguments to filter LopdConsentLogs to count.
+     * @example
+     * // Count the number of LopdConsentLogs
+     * const count = await prisma.lopdConsentLog.count({
+     *   where: {
+     *     // ... the filter for the LopdConsentLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends LopdConsentLogCountArgs>(
+      args?: Subset<T, LopdConsentLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], LopdConsentLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a LopdConsentLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends LopdConsentLogAggregateArgs>(args: Subset<T, LopdConsentLogAggregateArgs>): Prisma.PrismaPromise<GetLopdConsentLogAggregateType<T>>
+
+    /**
+     * Group by LopdConsentLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {LopdConsentLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends LopdConsentLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: LopdConsentLogGroupByArgs['orderBy'] }
+        : { orderBy?: LopdConsentLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, LopdConsentLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLopdConsentLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the LopdConsentLog model
+   */
+  readonly fields: LopdConsentLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for LopdConsentLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__LopdConsentLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    client<T extends ClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClientDefaultArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the LopdConsentLog model
+   */
+  interface LopdConsentLogFieldRefs {
+    readonly id: FieldRef<"LopdConsentLog", 'String'>
+    readonly clientId: FieldRef<"LopdConsentLog", 'String'>
+    readonly businessId: FieldRef<"LopdConsentLog", 'String'>
+    readonly acceptedAt: FieldRef<"LopdConsentLog", 'DateTime'>
+    readonly ipAddress: FieldRef<"LopdConsentLog", 'String'>
+    readonly userAgent: FieldRef<"LopdConsentLog", 'String'>
+    readonly policyVersion: FieldRef<"LopdConsentLog", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * LopdConsentLog findUnique
+   */
+  export type LopdConsentLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * Filter, which LopdConsentLog to fetch.
+     */
+    where: LopdConsentLogWhereUniqueInput
+  }
+
+  /**
+   * LopdConsentLog findUniqueOrThrow
+   */
+  export type LopdConsentLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * Filter, which LopdConsentLog to fetch.
+     */
+    where: LopdConsentLogWhereUniqueInput
+  }
+
+  /**
+   * LopdConsentLog findFirst
+   */
+  export type LopdConsentLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * Filter, which LopdConsentLog to fetch.
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LopdConsentLogs to fetch.
+     */
+    orderBy?: LopdConsentLogOrderByWithRelationInput | LopdConsentLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LopdConsentLogs.
+     */
+    cursor?: LopdConsentLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LopdConsentLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LopdConsentLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LopdConsentLogs.
+     */
+    distinct?: LopdConsentLogScalarFieldEnum | LopdConsentLogScalarFieldEnum[]
+  }
+
+  /**
+   * LopdConsentLog findFirstOrThrow
+   */
+  export type LopdConsentLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * Filter, which LopdConsentLog to fetch.
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LopdConsentLogs to fetch.
+     */
+    orderBy?: LopdConsentLogOrderByWithRelationInput | LopdConsentLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for LopdConsentLogs.
+     */
+    cursor?: LopdConsentLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LopdConsentLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LopdConsentLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LopdConsentLogs.
+     */
+    distinct?: LopdConsentLogScalarFieldEnum | LopdConsentLogScalarFieldEnum[]
+  }
+
+  /**
+   * LopdConsentLog findMany
+   */
+  export type LopdConsentLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * Filter, which LopdConsentLogs to fetch.
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of LopdConsentLogs to fetch.
+     */
+    orderBy?: LopdConsentLogOrderByWithRelationInput | LopdConsentLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing LopdConsentLogs.
+     */
+    cursor?: LopdConsentLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` LopdConsentLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` LopdConsentLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of LopdConsentLogs.
+     */
+    distinct?: LopdConsentLogScalarFieldEnum | LopdConsentLogScalarFieldEnum[]
+  }
+
+  /**
+   * LopdConsentLog create
+   */
+  export type LopdConsentLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a LopdConsentLog.
+     */
+    data: XOR<LopdConsentLogCreateInput, LopdConsentLogUncheckedCreateInput>
+  }
+
+  /**
+   * LopdConsentLog createMany
+   */
+  export type LopdConsentLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many LopdConsentLogs.
+     */
+    data: LopdConsentLogCreateManyInput | LopdConsentLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * LopdConsentLog createManyAndReturn
+   */
+  export type LopdConsentLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many LopdConsentLogs.
+     */
+    data: LopdConsentLogCreateManyInput | LopdConsentLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LopdConsentLog update
+   */
+  export type LopdConsentLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a LopdConsentLog.
+     */
+    data: XOR<LopdConsentLogUpdateInput, LopdConsentLogUncheckedUpdateInput>
+    /**
+     * Choose, which LopdConsentLog to update.
+     */
+    where: LopdConsentLogWhereUniqueInput
+  }
+
+  /**
+   * LopdConsentLog updateMany
+   */
+  export type LopdConsentLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update LopdConsentLogs.
+     */
+    data: XOR<LopdConsentLogUpdateManyMutationInput, LopdConsentLogUncheckedUpdateManyInput>
+    /**
+     * Filter which LopdConsentLogs to update
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * Limit how many LopdConsentLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * LopdConsentLog updateManyAndReturn
+   */
+  export type LopdConsentLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * The data used to update LopdConsentLogs.
+     */
+    data: XOR<LopdConsentLogUpdateManyMutationInput, LopdConsentLogUncheckedUpdateManyInput>
+    /**
+     * Filter which LopdConsentLogs to update
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * Limit how many LopdConsentLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * LopdConsentLog upsert
+   */
+  export type LopdConsentLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the LopdConsentLog to update in case it exists.
+     */
+    where: LopdConsentLogWhereUniqueInput
+    /**
+     * In case the LopdConsentLog found by the `where` argument doesn't exist, create a new LopdConsentLog with this data.
+     */
+    create: XOR<LopdConsentLogCreateInput, LopdConsentLogUncheckedCreateInput>
+    /**
+     * In case the LopdConsentLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<LopdConsentLogUpdateInput, LopdConsentLogUncheckedUpdateInput>
+  }
+
+  /**
+   * LopdConsentLog delete
+   */
+  export type LopdConsentLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+    /**
+     * Filter which LopdConsentLog to delete.
+     */
+    where: LopdConsentLogWhereUniqueInput
+  }
+
+  /**
+   * LopdConsentLog deleteMany
+   */
+  export type LopdConsentLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which LopdConsentLogs to delete
+     */
+    where?: LopdConsentLogWhereInput
+    /**
+     * Limit how many LopdConsentLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * LopdConsentLog without action
+   */
+  export type LopdConsentLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LopdConsentLog
+     */
+    select?: LopdConsentLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LopdConsentLog
+     */
+    omit?: LopdConsentLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LopdConsentLogInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -10095,6 +11357,19 @@ export namespace Prisma {
   };
 
   export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
+
+
+  export const LopdConsentLogScalarFieldEnum: {
+    id: 'id',
+    clientId: 'clientId',
+    businessId: 'businessId',
+    acceptedAt: 'acceptedAt',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    policyVersion: 'policyVersion'
+  };
+
+  export type LopdConsentLogScalarFieldEnum = (typeof LopdConsentLogScalarFieldEnum)[keyof typeof LopdConsentLogScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -10320,6 +11595,7 @@ export namespace Prisma {
     hours?: BusinessHoursListRelationFilter
     services?: ServiceListRelationFilter
     users?: UserListRelationFilter
+    lopdConsentLogs?: LopdConsentLogListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -10349,6 +11625,7 @@ export namespace Prisma {
     hours?: BusinessHoursOrderByRelationAggregateInput
     services?: ServiceOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
+    lopdConsentLogs?: LopdConsentLogOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -10381,6 +11658,7 @@ export namespace Prisma {
     hours?: BusinessHoursListRelationFilter
     services?: ServiceListRelationFilter
     users?: UserListRelationFilter
+    lopdConsentLogs?: LopdConsentLogListRelationFilter
   }, "id">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -10528,6 +11806,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Client"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     appointments?: AppointmentListRelationFilter
+    lopdConsentLogs?: LopdConsentLogListRelationFilter
   }
 
   export type ClientOrderByWithRelationInput = {
@@ -10545,6 +11824,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     business?: BusinessOrderByWithRelationInput
     appointments?: AppointmentOrderByRelationAggregateInput
+    lopdConsentLogs?: LopdConsentLogOrderByRelationAggregateInput
   }
 
   export type ClientWhereUniqueInput = Prisma.AtLeast<{
@@ -10565,6 +11845,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Client"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     appointments?: AppointmentListRelationFilter
+    lopdConsentLogs?: LopdConsentLogListRelationFilter
   }, "id">
 
   export type ClientOrderByWithAggregationInput = {
@@ -10902,6 +12183,74 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Alert"> | Date | string
   }
 
+  export type LopdConsentLogWhereInput = {
+    AND?: LopdConsentLogWhereInput | LopdConsentLogWhereInput[]
+    OR?: LopdConsentLogWhereInput[]
+    NOT?: LopdConsentLogWhereInput | LopdConsentLogWhereInput[]
+    id?: StringFilter<"LopdConsentLog"> | string
+    clientId?: StringFilter<"LopdConsentLog"> | string
+    businessId?: StringFilter<"LopdConsentLog"> | string
+    acceptedAt?: DateTimeFilter<"LopdConsentLog"> | Date | string
+    ipAddress?: StringFilter<"LopdConsentLog"> | string
+    userAgent?: StringFilter<"LopdConsentLog"> | string
+    policyVersion?: StringFilter<"LopdConsentLog"> | string
+    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type LopdConsentLogOrderByWithRelationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    businessId?: SortOrder
+    acceptedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    policyVersion?: SortOrder
+    client?: ClientOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type LopdConsentLogWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: LopdConsentLogWhereInput | LopdConsentLogWhereInput[]
+    OR?: LopdConsentLogWhereInput[]
+    NOT?: LopdConsentLogWhereInput | LopdConsentLogWhereInput[]
+    clientId?: StringFilter<"LopdConsentLog"> | string
+    businessId?: StringFilter<"LopdConsentLog"> | string
+    acceptedAt?: DateTimeFilter<"LopdConsentLog"> | Date | string
+    ipAddress?: StringFilter<"LopdConsentLog"> | string
+    userAgent?: StringFilter<"LopdConsentLog"> | string
+    policyVersion?: StringFilter<"LopdConsentLog"> | string
+    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id">
+
+  export type LopdConsentLogOrderByWithAggregationInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    businessId?: SortOrder
+    acceptedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    policyVersion?: SortOrder
+    _count?: LopdConsentLogCountOrderByAggregateInput
+    _max?: LopdConsentLogMaxOrderByAggregateInput
+    _min?: LopdConsentLogMinOrderByAggregateInput
+  }
+
+  export type LopdConsentLogScalarWhereWithAggregatesInput = {
+    AND?: LopdConsentLogScalarWhereWithAggregatesInput | LopdConsentLogScalarWhereWithAggregatesInput[]
+    OR?: LopdConsentLogScalarWhereWithAggregatesInput[]
+    NOT?: LopdConsentLogScalarWhereWithAggregatesInput | LopdConsentLogScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"LopdConsentLog"> | string
+    clientId?: StringWithAggregatesFilter<"LopdConsentLog"> | string
+    businessId?: StringWithAggregatesFilter<"LopdConsentLog"> | string
+    acceptedAt?: DateTimeWithAggregatesFilter<"LopdConsentLog"> | Date | string
+    ipAddress?: StringWithAggregatesFilter<"LopdConsentLog"> | string
+    userAgent?: StringWithAggregatesFilter<"LopdConsentLog"> | string
+    policyVersion?: StringWithAggregatesFilter<"LopdConsentLog"> | string
+  }
+
   export type BusinessCreateInput = {
     id?: string
     name: string
@@ -10929,6 +12278,7 @@ export namespace Prisma {
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -10958,6 +12308,7 @@ export namespace Prisma {
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -10987,6 +12338,7 @@ export namespace Prisma {
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -11016,6 +12368,7 @@ export namespace Prisma {
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -11184,6 +12537,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutClientsInput
     appointments?: AppointmentCreateNestedManyWithoutClientInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutClientInput
   }
 
   export type ClientUncheckedCreateInput = {
@@ -11200,6 +12554,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutClientInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type ClientUpdateInput = {
@@ -11216,6 +12571,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutClientsNestedInput
     appointments?: AppointmentUpdateManyWithoutClientNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutClientNestedInput
   }
 
   export type ClientUncheckedUpdateInput = {
@@ -11232,6 +12588,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUncheckedUpdateManyWithoutClientNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type ClientCreateManyInput = {
@@ -11591,6 +12948,74 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type LopdConsentLogCreateInput = {
+    id?: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+    client: ClientCreateNestedOneWithoutLopdConsentLogsInput
+    business: BusinessCreateNestedOneWithoutLopdConsentLogsInput
+  }
+
+  export type LopdConsentLogUncheckedCreateInput = {
+    id?: string
+    clientId: string
+    businessId: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+  }
+
+  export type LopdConsentLogUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+    client?: ClientUpdateOneRequiredWithoutLopdConsentLogsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutLopdConsentLogsNestedInput
+  }
+
+  export type LopdConsentLogUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type LopdConsentLogCreateManyInput = {
+    id?: string
+    clientId: string
+    businessId: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+  }
+
+  export type LopdConsentLogUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type LopdConsentLogUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -11688,6 +13113,12 @@ export namespace Prisma {
     none?: UserWhereInput
   }
 
+  export type LopdConsentLogListRelationFilter = {
+    every?: LopdConsentLogWhereInput
+    some?: LopdConsentLogWhereInput
+    none?: LopdConsentLogWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -11710,6 +13141,10 @@ export namespace Prisma {
   }
 
   export type UserOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type LopdConsentLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -12276,6 +13711,41 @@ export namespace Prisma {
     _max?: NestedEnumAlertTypeFilter<$PrismaModel>
   }
 
+  export type ClientScalarRelationFilter = {
+    is?: ClientWhereInput
+    isNot?: ClientWhereInput
+  }
+
+  export type LopdConsentLogCountOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    businessId?: SortOrder
+    acceptedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    policyVersion?: SortOrder
+  }
+
+  export type LopdConsentLogMaxOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    businessId?: SortOrder
+    acceptedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    policyVersion?: SortOrder
+  }
+
+  export type LopdConsentLogMinOrderByAggregateInput = {
+    id?: SortOrder
+    clientId?: SortOrder
+    businessId?: SortOrder
+    acceptedAt?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    policyVersion?: SortOrder
+  }
+
   export type AppointmentCreateNestedManyWithoutBusinessInput = {
     create?: XOR<AppointmentCreateWithoutBusinessInput, AppointmentUncheckedCreateWithoutBusinessInput> | AppointmentCreateWithoutBusinessInput[] | AppointmentUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutBusinessInput | AppointmentCreateOrConnectWithoutBusinessInput[]
@@ -12311,6 +13781,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type LopdConsentLogCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<LopdConsentLogCreateWithoutBusinessInput, LopdConsentLogUncheckedCreateWithoutBusinessInput> | LopdConsentLogCreateWithoutBusinessInput[] | LopdConsentLogUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutBusinessInput | LopdConsentLogCreateOrConnectWithoutBusinessInput[]
+    createMany?: LopdConsentLogCreateManyBusinessInputEnvelope
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+  }
+
   export type AppointmentUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<AppointmentCreateWithoutBusinessInput, AppointmentUncheckedCreateWithoutBusinessInput> | AppointmentCreateWithoutBusinessInput[] | AppointmentUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutBusinessInput | AppointmentCreateOrConnectWithoutBusinessInput[]
@@ -12344,6 +13821,13 @@ export namespace Prisma {
     connectOrCreate?: UserCreateOrConnectWithoutBusinessInput | UserCreateOrConnectWithoutBusinessInput[]
     createMany?: UserCreateManyBusinessInputEnvelope
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<LopdConsentLogCreateWithoutBusinessInput, LopdConsentLogUncheckedCreateWithoutBusinessInput> | LopdConsentLogCreateWithoutBusinessInput[] | LopdConsentLogUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutBusinessInput | LopdConsentLogCreateOrConnectWithoutBusinessInput[]
+    createMany?: LopdConsentLogCreateManyBusinessInputEnvelope
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -12444,6 +13928,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type LopdConsentLogUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<LopdConsentLogCreateWithoutBusinessInput, LopdConsentLogUncheckedCreateWithoutBusinessInput> | LopdConsentLogCreateWithoutBusinessInput[] | LopdConsentLogUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutBusinessInput | LopdConsentLogCreateOrConnectWithoutBusinessInput[]
+    upsert?: LopdConsentLogUpsertWithWhereUniqueWithoutBusinessInput | LopdConsentLogUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: LopdConsentLogCreateManyBusinessInputEnvelope
+    set?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    disconnect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    delete?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    update?: LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput | LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: LopdConsentLogUpdateManyWithWhereWithoutBusinessInput | LopdConsentLogUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
+  }
+
   export type AppointmentUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<AppointmentCreateWithoutBusinessInput, AppointmentUncheckedCreateWithoutBusinessInput> | AppointmentCreateWithoutBusinessInput[] | AppointmentUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutBusinessInput | AppointmentCreateOrConnectWithoutBusinessInput[]
@@ -12512,6 +14010,20 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutBusinessInput | UserUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: UserUpdateManyWithWhereWithoutBusinessInput | UserUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<LopdConsentLogCreateWithoutBusinessInput, LopdConsentLogUncheckedCreateWithoutBusinessInput> | LopdConsentLogCreateWithoutBusinessInput[] | LopdConsentLogUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutBusinessInput | LopdConsentLogCreateOrConnectWithoutBusinessInput[]
+    upsert?: LopdConsentLogUpsertWithWhereUniqueWithoutBusinessInput | LopdConsentLogUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: LopdConsentLogCreateManyBusinessInputEnvelope
+    set?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    disconnect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    delete?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    update?: LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput | LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: LopdConsentLogUpdateManyWithWhereWithoutBusinessInput | LopdConsentLogUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutUsersInput = {
@@ -12593,11 +14105,25 @@ export namespace Prisma {
     connect?: AppointmentWhereUniqueInput | AppointmentWhereUniqueInput[]
   }
 
+  export type LopdConsentLogCreateNestedManyWithoutClientInput = {
+    create?: XOR<LopdConsentLogCreateWithoutClientInput, LopdConsentLogUncheckedCreateWithoutClientInput> | LopdConsentLogCreateWithoutClientInput[] | LopdConsentLogUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutClientInput | LopdConsentLogCreateOrConnectWithoutClientInput[]
+    createMany?: LopdConsentLogCreateManyClientInputEnvelope
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+  }
+
   export type AppointmentUncheckedCreateNestedManyWithoutClientInput = {
     create?: XOR<AppointmentCreateWithoutClientInput, AppointmentUncheckedCreateWithoutClientInput> | AppointmentCreateWithoutClientInput[] | AppointmentUncheckedCreateWithoutClientInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutClientInput | AppointmentCreateOrConnectWithoutClientInput[]
     createMany?: AppointmentCreateManyClientInputEnvelope
     connect?: AppointmentWhereUniqueInput | AppointmentWhereUniqueInput[]
+  }
+
+  export type LopdConsentLogUncheckedCreateNestedManyWithoutClientInput = {
+    create?: XOR<LopdConsentLogCreateWithoutClientInput, LopdConsentLogUncheckedCreateWithoutClientInput> | LopdConsentLogCreateWithoutClientInput[] | LopdConsentLogUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutClientInput | LopdConsentLogCreateOrConnectWithoutClientInput[]
+    createMany?: LopdConsentLogCreateManyClientInputEnvelope
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
   }
 
   export type BusinessUpdateOneRequiredWithoutClientsNestedInput = {
@@ -12622,6 +14148,20 @@ export namespace Prisma {
     deleteMany?: AppointmentScalarWhereInput | AppointmentScalarWhereInput[]
   }
 
+  export type LopdConsentLogUpdateManyWithoutClientNestedInput = {
+    create?: XOR<LopdConsentLogCreateWithoutClientInput, LopdConsentLogUncheckedCreateWithoutClientInput> | LopdConsentLogCreateWithoutClientInput[] | LopdConsentLogUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutClientInput | LopdConsentLogCreateOrConnectWithoutClientInput[]
+    upsert?: LopdConsentLogUpsertWithWhereUniqueWithoutClientInput | LopdConsentLogUpsertWithWhereUniqueWithoutClientInput[]
+    createMany?: LopdConsentLogCreateManyClientInputEnvelope
+    set?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    disconnect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    delete?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    update?: LopdConsentLogUpdateWithWhereUniqueWithoutClientInput | LopdConsentLogUpdateWithWhereUniqueWithoutClientInput[]
+    updateMany?: LopdConsentLogUpdateManyWithWhereWithoutClientInput | LopdConsentLogUpdateManyWithWhereWithoutClientInput[]
+    deleteMany?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
+  }
+
   export type AppointmentUncheckedUpdateManyWithoutClientNestedInput = {
     create?: XOR<AppointmentCreateWithoutClientInput, AppointmentUncheckedCreateWithoutClientInput> | AppointmentCreateWithoutClientInput[] | AppointmentUncheckedCreateWithoutClientInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutClientInput | AppointmentCreateOrConnectWithoutClientInput[]
@@ -12634,6 +14174,20 @@ export namespace Prisma {
     update?: AppointmentUpdateWithWhereUniqueWithoutClientInput | AppointmentUpdateWithWhereUniqueWithoutClientInput[]
     updateMany?: AppointmentUpdateManyWithWhereWithoutClientInput | AppointmentUpdateManyWithWhereWithoutClientInput[]
     deleteMany?: AppointmentScalarWhereInput | AppointmentScalarWhereInput[]
+  }
+
+  export type LopdConsentLogUncheckedUpdateManyWithoutClientNestedInput = {
+    create?: XOR<LopdConsentLogCreateWithoutClientInput, LopdConsentLogUncheckedCreateWithoutClientInput> | LopdConsentLogCreateWithoutClientInput[] | LopdConsentLogUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: LopdConsentLogCreateOrConnectWithoutClientInput | LopdConsentLogCreateOrConnectWithoutClientInput[]
+    upsert?: LopdConsentLogUpsertWithWhereUniqueWithoutClientInput | LopdConsentLogUpsertWithWhereUniqueWithoutClientInput[]
+    createMany?: LopdConsentLogCreateManyClientInputEnvelope
+    set?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    disconnect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    delete?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+    update?: LopdConsentLogUpdateWithWhereUniqueWithoutClientInput | LopdConsentLogUpdateWithWhereUniqueWithoutClientInput[]
+    updateMany?: LopdConsentLogUpdateManyWithWhereWithoutClientInput | LopdConsentLogUpdateManyWithWhereWithoutClientInput[]
+    deleteMany?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutAppointmentsInput = {
@@ -12788,6 +14342,34 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutAlertsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAlertsInput, UserUpdateWithoutAlertsInput>, UserUncheckedUpdateWithoutAlertsInput>
+  }
+
+  export type ClientCreateNestedOneWithoutLopdConsentLogsInput = {
+    create?: XOR<ClientCreateWithoutLopdConsentLogsInput, ClientUncheckedCreateWithoutLopdConsentLogsInput>
+    connectOrCreate?: ClientCreateOrConnectWithoutLopdConsentLogsInput
+    connect?: ClientWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutLopdConsentLogsInput = {
+    create?: XOR<BusinessCreateWithoutLopdConsentLogsInput, BusinessUncheckedCreateWithoutLopdConsentLogsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutLopdConsentLogsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type ClientUpdateOneRequiredWithoutLopdConsentLogsNestedInput = {
+    create?: XOR<ClientCreateWithoutLopdConsentLogsInput, ClientUncheckedCreateWithoutLopdConsentLogsInput>
+    connectOrCreate?: ClientCreateOrConnectWithoutLopdConsentLogsInput
+    upsert?: ClientUpsertWithoutLopdConsentLogsInput
+    connect?: ClientWhereUniqueInput
+    update?: XOR<XOR<ClientUpdateToOneWithWhereWithoutLopdConsentLogsInput, ClientUpdateWithoutLopdConsentLogsInput>, ClientUncheckedUpdateWithoutLopdConsentLogsInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutLopdConsentLogsNestedInput = {
+    create?: XOR<BusinessCreateWithoutLopdConsentLogsInput, BusinessUncheckedCreateWithoutLopdConsentLogsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutLopdConsentLogsInput
+    upsert?: BusinessUpsertWithoutLopdConsentLogsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutLopdConsentLogsInput, BusinessUpdateWithoutLopdConsentLogsInput>, BusinessUncheckedUpdateWithoutLopdConsentLogsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -13138,6 +14720,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentCreateNestedManyWithoutClientInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutClientInput
   }
 
   export type ClientUncheckedCreateWithoutBusinessInput = {
@@ -13153,6 +14736,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     appointments?: AppointmentUncheckedCreateNestedManyWithoutClientInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type ClientCreateOrConnectWithoutBusinessInput = {
@@ -13256,6 +14840,34 @@ export namespace Prisma {
 
   export type UserCreateManyBusinessInputEnvelope = {
     data: UserCreateManyBusinessInput | UserCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type LopdConsentLogCreateWithoutBusinessInput = {
+    id?: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+    client: ClientCreateNestedOneWithoutLopdConsentLogsInput
+  }
+
+  export type LopdConsentLogUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    clientId: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+  }
+
+  export type LopdConsentLogCreateOrConnectWithoutBusinessInput = {
+    where: LopdConsentLogWhereUniqueInput
+    create: XOR<LopdConsentLogCreateWithoutBusinessInput, LopdConsentLogUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type LopdConsentLogCreateManyBusinessInputEnvelope = {
+    data: LopdConsentLogCreateManyBusinessInput | LopdConsentLogCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -13414,6 +15026,35 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
   }
 
+  export type LopdConsentLogUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: LopdConsentLogWhereUniqueInput
+    update: XOR<LopdConsentLogUpdateWithoutBusinessInput, LopdConsentLogUncheckedUpdateWithoutBusinessInput>
+    create: XOR<LopdConsentLogCreateWithoutBusinessInput, LopdConsentLogUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: LopdConsentLogWhereUniqueInput
+    data: XOR<LopdConsentLogUpdateWithoutBusinessInput, LopdConsentLogUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type LopdConsentLogUpdateManyWithWhereWithoutBusinessInput = {
+    where: LopdConsentLogScalarWhereInput
+    data: XOR<LopdConsentLogUpdateManyMutationInput, LopdConsentLogUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type LopdConsentLogScalarWhereInput = {
+    AND?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
+    OR?: LopdConsentLogScalarWhereInput[]
+    NOT?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
+    id?: StringFilter<"LopdConsentLog"> | string
+    clientId?: StringFilter<"LopdConsentLog"> | string
+    businessId?: StringFilter<"LopdConsentLog"> | string
+    acceptedAt?: DateTimeFilter<"LopdConsentLog"> | Date | string
+    ipAddress?: StringFilter<"LopdConsentLog"> | string
+    userAgent?: StringFilter<"LopdConsentLog"> | string
+    policyVersion?: StringFilter<"LopdConsentLog"> | string
+  }
+
   export type BusinessCreateWithoutUsersInput = {
     id?: string
     name: string
@@ -13440,6 +15081,7 @@ export namespace Prisma {
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutUsersInput = {
@@ -13468,6 +15110,7 @@ export namespace Prisma {
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutUsersInput = {
@@ -13542,6 +15185,7 @@ export namespace Prisma {
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutUsersInput = {
@@ -13570,6 +15214,7 @@ export namespace Prisma {
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AlertUpsertWithWhereUniqueWithoutUserInput = {
@@ -13628,6 +15273,7 @@ export namespace Prisma {
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutClientsInput = {
@@ -13656,6 +15302,7 @@ export namespace Prisma {
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutClientsInput = {
@@ -13692,6 +15339,34 @@ export namespace Prisma {
 
   export type AppointmentCreateManyClientInputEnvelope = {
     data: AppointmentCreateManyClientInput | AppointmentCreateManyClientInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type LopdConsentLogCreateWithoutClientInput = {
+    id?: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+    business: BusinessCreateNestedOneWithoutLopdConsentLogsInput
+  }
+
+  export type LopdConsentLogUncheckedCreateWithoutClientInput = {
+    id?: string
+    businessId: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+  }
+
+  export type LopdConsentLogCreateOrConnectWithoutClientInput = {
+    where: LopdConsentLogWhereUniqueInput
+    create: XOR<LopdConsentLogCreateWithoutClientInput, LopdConsentLogUncheckedCreateWithoutClientInput>
+  }
+
+  export type LopdConsentLogCreateManyClientInputEnvelope = {
+    data: LopdConsentLogCreateManyClientInput | LopdConsentLogCreateManyClientInput[]
     skipDuplicates?: boolean
   }
 
@@ -13732,6 +15407,7 @@ export namespace Prisma {
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutClientsInput = {
@@ -13760,6 +15436,7 @@ export namespace Prisma {
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AppointmentUpsertWithWhereUniqueWithoutClientInput = {
@@ -13776,6 +15453,22 @@ export namespace Prisma {
   export type AppointmentUpdateManyWithWhereWithoutClientInput = {
     where: AppointmentScalarWhereInput
     data: XOR<AppointmentUpdateManyMutationInput, AppointmentUncheckedUpdateManyWithoutClientInput>
+  }
+
+  export type LopdConsentLogUpsertWithWhereUniqueWithoutClientInput = {
+    where: LopdConsentLogWhereUniqueInput
+    update: XOR<LopdConsentLogUpdateWithoutClientInput, LopdConsentLogUncheckedUpdateWithoutClientInput>
+    create: XOR<LopdConsentLogCreateWithoutClientInput, LopdConsentLogUncheckedCreateWithoutClientInput>
+  }
+
+  export type LopdConsentLogUpdateWithWhereUniqueWithoutClientInput = {
+    where: LopdConsentLogWhereUniqueInput
+    data: XOR<LopdConsentLogUpdateWithoutClientInput, LopdConsentLogUncheckedUpdateWithoutClientInput>
+  }
+
+  export type LopdConsentLogUpdateManyWithWhereWithoutClientInput = {
+    where: LopdConsentLogScalarWhereInput
+    data: XOR<LopdConsentLogUpdateManyMutationInput, LopdConsentLogUncheckedUpdateManyWithoutClientInput>
   }
 
   export type BusinessCreateWithoutAppointmentsInput = {
@@ -13804,6 +15497,7 @@ export namespace Prisma {
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutAppointmentsInput = {
@@ -13832,6 +15526,7 @@ export namespace Prisma {
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutAppointmentsInput = {
@@ -13852,6 +15547,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutClientsInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutClientInput
   }
 
   export type ClientUncheckedCreateWithoutAppointmentsInput = {
@@ -13867,6 +15563,7 @@ export namespace Prisma {
     businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type ClientCreateOrConnectWithoutAppointmentsInput = {
@@ -13942,6 +15639,7 @@ export namespace Prisma {
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutAppointmentsInput = {
@@ -13970,6 +15668,7 @@ export namespace Prisma {
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ClientUpsertWithoutAppointmentsInput = {
@@ -13996,6 +15695,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutClientsNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutClientNestedInput
   }
 
   export type ClientUncheckedUpdateWithoutAppointmentsInput = {
@@ -14011,6 +15711,7 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type ServiceUpsertWithoutAppointmentsInput = {
@@ -14076,6 +15777,7 @@ export namespace Prisma {
     clients?: ClientCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutHoursInput = {
@@ -14104,6 +15806,7 @@ export namespace Prisma {
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutHoursInput = {
@@ -14148,6 +15851,7 @@ export namespace Prisma {
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutHoursInput = {
@@ -14176,6 +15880,7 @@ export namespace Prisma {
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutServicesInput = {
@@ -14204,6 +15909,7 @@ export namespace Prisma {
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -14232,6 +15938,7 @@ export namespace Prisma {
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -14308,6 +16015,7 @@ export namespace Prisma {
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -14336,6 +16044,7 @@ export namespace Prisma {
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AppointmentUpsertWithWhereUniqueWithoutServiceInput = {
@@ -14414,6 +16123,218 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ClientCreateWithoutLopdConsentLogsInput = {
+    id?: string
+    name: string
+    surname: string
+    email?: string | null
+    phone: string
+    lastVisit?: string | null
+    frequentService?: string | null
+    lopdStatus?: string
+    avatarUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutClientsInput
+    appointments?: AppointmentCreateNestedManyWithoutClientInput
+  }
+
+  export type ClientUncheckedCreateWithoutLopdConsentLogsInput = {
+    id?: string
+    name: string
+    surname: string
+    email?: string | null
+    phone: string
+    lastVisit?: string | null
+    frequentService?: string | null
+    lopdStatus?: string
+    avatarUrl?: string | null
+    businessId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    appointments?: AppointmentUncheckedCreateNestedManyWithoutClientInput
+  }
+
+  export type ClientCreateOrConnectWithoutLopdConsentLogsInput = {
+    where: ClientWhereUniqueInput
+    create: XOR<ClientCreateWithoutLopdConsentLogsInput, ClientUncheckedCreateWithoutLopdConsentLogsInput>
+  }
+
+  export type BusinessCreateWithoutLopdConsentLogsInput = {
+    id?: string
+    name: string
+    phone: string
+    email?: string | null
+    address?: string | null
+    logoUrl?: string | null
+    coverUrl?: string | null
+    description?: string | null
+    welcomeMessage?: string | null
+    reminderMessage?: string | null
+    whatsappStatus?: $Enums.WhatsAppStatus
+    qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
+    businessType?: string | null
+    enablePublicBooking?: boolean
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
+    appointments?: AppointmentCreateNestedManyWithoutBusinessInput
+    clients?: ClientCreateNestedManyWithoutBusinessInput
+    hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    users?: UserCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutLopdConsentLogsInput = {
+    id?: string
+    name: string
+    phone: string
+    email?: string | null
+    address?: string | null
+    logoUrl?: string | null
+    coverUrl?: string | null
+    description?: string | null
+    welcomeMessage?: string | null
+    reminderMessage?: string | null
+    whatsappStatus?: $Enums.WhatsAppStatus
+    qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
+    businessType?: string | null
+    enablePublicBooking?: boolean
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
+    appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
+    clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
+    hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutLopdConsentLogsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutLopdConsentLogsInput, BusinessUncheckedCreateWithoutLopdConsentLogsInput>
+  }
+
+  export type ClientUpsertWithoutLopdConsentLogsInput = {
+    update: XOR<ClientUpdateWithoutLopdConsentLogsInput, ClientUncheckedUpdateWithoutLopdConsentLogsInput>
+    create: XOR<ClientCreateWithoutLopdConsentLogsInput, ClientUncheckedCreateWithoutLopdConsentLogsInput>
+    where?: ClientWhereInput
+  }
+
+  export type ClientUpdateToOneWithWhereWithoutLopdConsentLogsInput = {
+    where?: ClientWhereInput
+    data: XOR<ClientUpdateWithoutLopdConsentLogsInput, ClientUncheckedUpdateWithoutLopdConsentLogsInput>
+  }
+
+  export type ClientUpdateWithoutLopdConsentLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    surname?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    frequentService?: NullableStringFieldUpdateOperationsInput | string | null
+    lopdStatus?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutClientsNestedInput
+    appointments?: AppointmentUpdateManyWithoutClientNestedInput
+  }
+
+  export type ClientUncheckedUpdateWithoutLopdConsentLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    surname?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    frequentService?: NullableStringFieldUpdateOperationsInput | string | null
+    lopdStatus?: StringFieldUpdateOperationsInput | string
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    appointments?: AppointmentUncheckedUpdateManyWithoutClientNestedInput
+  }
+
+  export type BusinessUpsertWithoutLopdConsentLogsInput = {
+    update: XOR<BusinessUpdateWithoutLopdConsentLogsInput, BusinessUncheckedUpdateWithoutLopdConsentLogsInput>
+    create: XOR<BusinessCreateWithoutLopdConsentLogsInput, BusinessUncheckedCreateWithoutLopdConsentLogsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutLopdConsentLogsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutLopdConsentLogsInput, BusinessUncheckedUpdateWithoutLopdConsentLogsInput>
+  }
+
+  export type BusinessUpdateWithoutLopdConsentLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
+    clients?: ClientUpdateManyWithoutBusinessNestedInput
+    hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    users?: UserUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutLopdConsentLogsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
+    clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
+    hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
   export type AppointmentCreateManyBusinessInput = {
     id?: string
     clientName: string
@@ -14469,6 +16390,15 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type LopdConsentLogCreateManyBusinessInput = {
+    id?: string
+    clientId: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+  }
+
   export type AppointmentUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     clientName?: StringFieldUpdateOperationsInput | string
@@ -14515,6 +16445,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUpdateManyWithoutClientNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutClientNestedInput
   }
 
   export type ClientUncheckedUpdateWithoutBusinessInput = {
@@ -14530,6 +16461,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     appointments?: AppointmentUncheckedUpdateManyWithoutClientNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type ClientUncheckedUpdateManyWithoutBusinessInput = {
@@ -14640,6 +16572,33 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type LopdConsentLogUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+    client?: ClientUpdateOneRequiredWithoutLopdConsentLogsNestedInput
+  }
+
+  export type LopdConsentLogUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type LopdConsentLogUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clientId?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
   export type AlertCreateManyUserInput = {
     id?: string
     type: $Enums.AlertType
@@ -14691,6 +16650,15 @@ export namespace Prisma {
     serviceName?: string | null
   }
 
+  export type LopdConsentLogCreateManyClientInput = {
+    id?: string
+    businessId: string
+    acceptedAt?: Date | string
+    ipAddress: string
+    userAgent: string
+    policyVersion?: string
+  }
+
   export type AppointmentUpdateWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
     clientName?: StringFieldUpdateOperationsInput | string
@@ -14722,6 +16690,33 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type LopdConsentLogUpdateWithoutClientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutLopdConsentLogsNestedInput
+  }
+
+  export type LopdConsentLogUncheckedUpdateWithoutClientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type LopdConsentLogUncheckedUpdateManyWithoutClientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    acceptedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: StringFieldUpdateOperationsInput | string
+    userAgent?: StringFieldUpdateOperationsInput | string
+    policyVersion?: StringFieldUpdateOperationsInput | string
   }
 
   export type AppointmentCreateManyServiceInput = {
