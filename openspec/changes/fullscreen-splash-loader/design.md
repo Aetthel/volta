@@ -16,12 +16,13 @@ El componente `FullScreenSplash` renderiza una capa fija de 100vw x 100vh (`fixe
   - Fill: Gradiente lineal `from-primary to-inverse-primary` (`#006565` a `#76d6d5`).
 - **Estado Indeterminado / Determinado**:
   - Si se le pasa `progress` (0 a 100), la barra llena el porcentaje indicado con `transition-all duration-300`.
-  - Si no se pasa `progress`, la barra ejecuta una animación lineal infinita (*shimmer / indeterminate*).
-- **Texto explicativo**: Subtítulo opcional de estado (ej. *"Preparando tu entorno de demo..."*).
+  - Si no se pasa `progress`, la barra ejecuta una animación lineal infinita (_shimmer / indeterminate_).
+- **Texto explicativo**: Subtítulo opcional de estado (ej. _"Preparando tu entorno de demo..."_).
 
 ### 2. Integración en Landing Page (`handleVerDemo`)
 
 Al iniciar `handleVerDemo`:
+
 1. `setIsCreatingDemo(true)` monta `<FullScreenSplash message="Creando tu clínica de demostración..." />`.
 2. Se ejecuta `fetch('/api/backend/demo')`.
 3. Se realiza el `signIn('credentials')`.

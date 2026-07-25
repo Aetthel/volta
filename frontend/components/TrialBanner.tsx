@@ -19,7 +19,9 @@ function TrialBannerContent() {
   }
 
   if (isDemoSandbox) {
-    const expiresDate = sandboxExpiresAtStr ? new Date(sandboxExpiresAtStr) : new Date(Date.now() + 20 * 60 * 1000);
+    const expiresDate = sandboxExpiresAtStr
+      ? new Date(sandboxExpiresAtStr)
+      : new Date(Date.now() + 20 * 60 * 1000);
     const now = new Date();
     const diffMs = expiresDate.getTime() - now.getTime();
     const minsLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60)));
@@ -31,8 +33,8 @@ function TrialBannerContent() {
             <Sparkles className="w-4 h-4 text-primary shrink-0" />
             <div className="truncate">
               <span>
-                <strong>Modo Demo Sandbox:</strong> Te quedan{" "}
-                <strong>{minsLeft} min</strong> de sesión efímera. Configura tu plan para conservar tus datos.
+                <strong>Modo Demo Sandbox:</strong> Te quedan <strong>{minsLeft} min</strong> de
+                sesión efímera. Configura tu plan para conservar tus datos.
               </span>
             </div>
           </div>

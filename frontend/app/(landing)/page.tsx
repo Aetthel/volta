@@ -34,7 +34,6 @@ export default function RootPage() {
   const [demoProgress, setDemoProgress] = useState(15);
   const router = useRouter();
 
-
   // Monitor scroll for header styling (Task 2.2)
   useEffect(() => {
     const handleScroll = () => {
@@ -1196,9 +1195,7 @@ export default function RootPage() {
         </div>
       </footer>
 
-      {isCreatingDemo && (
-        <FullScreenSplash message={demoMessage} progress={demoProgress} />
-      )}
+      {isCreatingDemo && <FullScreenSplash message={demoMessage} progress={demoProgress} />}
     </div>
   );
 }

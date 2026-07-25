@@ -227,4 +227,3 @@ input[type="number"] {
 .animate-indeterminate-slide {
   animation: indeterminate-slide 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-
