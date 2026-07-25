@@ -66,6 +66,9 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [selectedTime, setSelectedTime] = useState<string>("");
 
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientEmail, setClientEmail] = useState("");
@@ -97,6 +100,27 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
         setLoading(false);
       });
   }, [businessId]);
+
+  useEffect(() => {
+    if (!businessId || !selectedService || !selectedDate) return;
+    setLoadingSlots(true);
+    fetch(
+      `/api/backend/public/booking/${businessId}/available-slots?serviceId=${selectedService.id}&date=${selectedDate}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          setAvailableSlots([]);
+        } else {
+          setAvailableSlots(data.availableSlots || []);
+        }
+        setLoadingSlots(false);
+      })
+      .catch(() => {
+        setAvailableSlots([]);
+        setLoadingSlots(false);
+      });
+  }, [businessId, selectedService, selectedDate]);
 
   if (loading) {
     return (
@@ -345,22 +369,33 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
               <label className="block text-body-sm font-semibold text-on-surface mt-6 mb-3">
                 Horarios Disponibles
               </label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
-                {timeSlots.map((time) => (
-                  <button
-                    key={time}
-                    type="button"
-                    onClick={() => setSelectedTime(time)}
-                    className={`py-2.5 px-3 rounded-lg border text-body-sm font-semibold transition-all cursor-pointer ${
-                      selectedTime === time
-                        ? "bg-primary text-on-primary border-primary shadow-sm"
-                        : "border-outline-variant hover:bg-surface-variant text-on-surface"
-                    }`}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
+              {loadingSlots ? (
+                <div className="py-8 flex items-center justify-center gap-2 text-on-surface-variant text-body-sm">
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  Buscando horarios disponibles...
+                </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/60 text-center text-on-surface-variant text-body-sm">
+                  No hay horarios disponibles para esta fecha. El negocio puede estar cerrado o tener su aforo completo.
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                  {availableSlots.map((time) => (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => setSelectedTime(time)}
+                      className={`py-2.5 px-3 rounded-lg border text-body-sm font-semibold transition-all cursor-pointer ${
+                        selectedTime === time
+                          ? "bg-primary text-on-primary border-primary shadow-sm"
+                          : "border-outline-variant hover:bg-surface-variant text-on-surface"
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
 
             <div className="flex justify-end">

@@ -22,6 +22,11 @@ router.get(
   validateId("businessId"),
   asyncHandler(publicBookingController.getPublicBusinessData)
 );
+router.get(
+  "/:businessId/available-slots",
+  validateId("businessId"),
+  asyncHandler(publicBookingController.getAvailableSlots)
+);
 router.post(
   "/reserve",
   publicBookingLimiter,
