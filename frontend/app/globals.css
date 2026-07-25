@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 @theme {
   --font-scale: 1;
   --radius-scale: 1;
@@ -207,3 +211,20 @@ input[type="number"] {
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   }
 }
+
+@keyframes indeterminate-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-indeterminate-slide {
+  animation: indeterminate-slide 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
