@@ -7,12 +7,21 @@ import { Sparkles, AlertTriangle, Clock, ArrowRight, X } from "lucide-react";
 
 function TrialBannerContent() {
   const [isVisible, setIsVisible] = useState(true);
+  const [sandboxExpiresDate, setSandboxExpiresDate] = useState(
+    () => new Date(),
+  );
   const { data: session } = useSession();
 
   const isTrialing = session?.user?.subscriptionStatus === "TRIALING";
   const isDemoSandbox = session?.user?.subscriptionStatus === "DEMO_SANDBOX";
   const trialExpiresAtStr = session?.user?.trialExpiresAt;
   const sandboxExpiresAtStr = session?.user?.sandboxExpiresAt;
+
+  useEffect(() => {
+    if (isDemoSandbox && !sandboxExpiresAtStr) {
+      setSandboxExpiresDate(new Date(Date.now() + 20 * 60 * 1000));
+    }
+  }, [isDemoSandbox, sandboxExpiresAtStr]);
 
   if ((!isTrialing && !isDemoSandbox) || !isVisible) {
     return null;
@@ -21,7 +30,7 @@ function TrialBannerContent() {
   if (isDemoSandbox) {
     const expiresDate = sandboxExpiresAtStr
       ? new Date(sandboxExpiresAtStr)
-      : new Date(Date.now() + 20 * 60 * 1000);
+      : sandboxExpiresDate;
     const now = new Date();
     const diffMs = expiresDate.getTime() - now.getTime();
     const minsLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60)));
