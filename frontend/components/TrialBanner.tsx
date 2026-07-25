@@ -10,11 +10,53 @@ function TrialBannerContent() {
   const { data: session } = useSession();
 
   const isTrialing = session?.user?.subscriptionStatus === "TRIALING";
+  const isDemoSandbox = session?.user?.subscriptionStatus === "DEMO_SANDBOX";
   const trialExpiresAtStr = session?.user?.trialExpiresAt;
+  const sandboxExpiresAtStr = session?.user?.sandboxExpiresAt;
 
-  if (!isTrialing || !trialExpiresAtStr || !isVisible) {
+  if ((!isTrialing && !isDemoSandbox) || !isVisible) {
     return null;
   }
+
+  if (isDemoSandbox) {
+    const expiresDate = sandboxExpiresAtStr ? new Date(sandboxExpiresAtStr) : new Date(Date.now() + 20 * 60 * 1000);
+    const now = new Date();
+    const diffMs = expiresDate.getTime() - now.getTime();
+    const minsLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60)));
+
+    return (
+      <div className="w-full py-2 text-body-sm font-medium border-b transition-colors z-20 shrink-0 select-none bg-primary/10 text-primary border-primary/20">
+        <div className="max-w-container-max mx-auto px-gutter w-full flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Sparkles className="w-4 h-4 text-primary shrink-0" />
+            <div className="truncate">
+              <span>
+                <strong>Modo Demo Sandbox:</strong> Te quedan{" "}
+                <strong>{minsLeft} min</strong> de sesión efímera. Configura tu plan para conservar tus datos.
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/ajustes">
+              <button className="py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer bg-primary text-white hover:bg-primary/90">
+                <span>Seleccionar Plan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </Link>
+            <button
+              onClick={() => setIsVisible(false)}
+              className="p-1 rounded-md opacity-60 hover:opacity-100 transition-opacity"
+              aria-label="Cerrar aviso"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!trialExpiresAtStr) return null;
 
   const expiresDate = new Date(trialExpiresAtStr);
   const now = new Date();

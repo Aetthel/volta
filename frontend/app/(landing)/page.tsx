@@ -23,13 +23,17 @@ import {
 } from "lucide-react";
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
+import FullScreenSplash from "@/components/FullScreenSplash";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isCreatingDemo, setIsCreatingDemo] = useState(false);
+  const [demoMessage, setDemoMessage] = useState("Preparando tu entorno de demo...");
+  const [demoProgress, setDemoProgress] = useState(15);
   const router = useRouter();
+
 
   // Monitor scroll for header styling (Task 2.2)
   useEffect(() => {
@@ -50,6 +54,18 @@ export default function RootPage() {
 
   const handleVerDemo = async () => {
     setIsCreatingDemo(true);
+    setDemoProgress(10);
+    setDemoMessage("Creando tu clínica de demostración...");
+
+    // Smooth continuous trickle interval while request is pending
+    const progressInterval = setInterval(() => {
+      setDemoProgress((prev) => {
+        if (prev >= 88) return prev;
+        const diff = Math.random() * 5 + 3;
+        return Math.min(88, prev + diff);
+      });
+    }, 150);
+
     try {
       const res = await fetch("/api/backend/demo", { method: "POST" });
       if (!res.ok) {
@@ -61,6 +77,7 @@ export default function RootPage() {
         throw new Error(errMsg);
       }
       const data = await res.json();
+      setDemoMessage("Generando citas y clientes de prueba...");
 
       const userEmail = data.credentials?.email || data.email;
       const userPassword = data.credentials?.password || data.password;
@@ -72,16 +89,33 @@ export default function RootPage() {
       });
 
       if (result?.error) {
+        clearInterval(progressInterval);
         console.error("Demo auto-login failed");
         alert("Error al iniciar sesión automáticamente en la demo.");
+        setIsCreatingDemo(false);
       } else {
-        router.push("/inicio");
+        clearInterval(progressInterval);
+        setDemoProgress(95);
+        setDemoMessage("¡Todo listo! Entrando al panel...");
+        setTimeout(() => {
+          setDemoProgress(100);
+          router.push("/inicio");
+        }, 250);
       }
     } catch (err: any) {
+      clearInterval(progressInterval);
       console.error("Demo creation failed:", err);
       alert(err.message || "Error al crear la demo. Inténtalo de nuevo.");
-    } finally {
       setIsCreatingDemo(false);
+    }
+  };
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -110,19 +144,22 @@ export default function RootPage() {
           <div className="hidden md:flex items-center gap-8">
             <a
               href="#features"
-              className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200"
+              onClick={(e) => handleNavClick(e, "features")}
+              className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
             >
               Características
             </a>
             <a
               href="#pricing"
-              className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200"
+              onClick={(e) => handleNavClick(e, "pricing")}
+              className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
             >
               Precios
             </a>
             <a
               href="#testimonials"
-              className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200"
+              onClick={(e) => handleNavClick(e, "testimonials")}
+              className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
             >
               Testimonios
             </a>
@@ -165,22 +202,22 @@ export default function RootPage() {
           <div className="md:hidden border-t border-outline-variant/20 bg-surface/95 backdrop-blur-lg px-6 py-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
             <a
               href="#features"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10"
+              onClick={(e) => handleNavClick(e, "features")}
+              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10 cursor-pointer"
             >
               Características
             </a>
             <a
               href="#pricing"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10"
+              onClick={(e) => handleNavClick(e, "pricing")}
+              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10 cursor-pointer"
             >
               Precios
             </a>
             <a
               href="#testimonials"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10"
+              onClick={(e) => handleNavClick(e, "testimonials")}
+              className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10 cursor-pointer"
             >
               Testimonios
             </a>
@@ -387,7 +424,7 @@ export default function RootPage() {
         */}
 
         {/* Features Sections */}
-        <section id="features" className="py-24 bg-surface relative overflow-hidden">
+        <section id="features" className="py-24 bg-surface relative overflow-hidden scroll-mt-24">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(55,126,127,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(55,126,127,0.03)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
           <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24 xl:px-32 relative z-10 flex flex-col gap-24">
@@ -647,7 +684,7 @@ export default function RootPage() {
         {/* Pricing Section */}
         <section
           id="pricing"
-          className="py-24 bg-surface-container-low border-y border-outline-variant/20"
+          className="py-24 bg-surface-container-low border-y border-outline-variant/20 scroll-mt-24"
         >
           <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24 xl:px-32">
             <div className="text-center mb-16">
@@ -835,7 +872,7 @@ export default function RootPage() {
         </section>
 
         {/* Testimonials Section */}
-        <section id="testimonials" className="py-24 bg-primary/5">
+        <section id="testimonials" className="py-24 bg-primary/5 scroll-mt-24">
           <div className="max-w-container-max mx-auto px-6 md:px-16 lg:px-24">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-container-max mx-auto items-stretch">
               {/* Testimonials List */}
@@ -1158,6 +1195,10 @@ export default function RootPage() {
           </div>
         </div>
       </footer>
+
+      {isCreatingDemo && (
+        <FullScreenSplash message={demoMessage} progress={demoProgress} />
+      )}
     </div>
   );
 }
