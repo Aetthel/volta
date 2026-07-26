@@ -214,9 +214,20 @@ const getWeekDates = (anchorDate: Date) => {
 };
 
 const COLOR_CLASSES = [
-  "bg-primary-container text-on-primary-container border-primary",
-  "bg-secondary-container text-on-secondary-container border-secondary",
-  "bg-tertiary-container text-on-tertiary-container border-tertiary",
+  // 0: Turquesa (Cortes / Estilo)
+  "bg-teal-500/15 text-teal-950 dark:bg-teal-950/50 dark:text-teal-100 font-semibold shadow-xs border border-teal-500/20",
+  // 1: Violeta (Coloración / Tintes)
+  "bg-purple-500/15 text-purple-950 dark:bg-purple-950/50 dark:text-purple-100 font-semibold shadow-xs border border-purple-500/20",
+  // 2: Rosa (Manicura / Spa / Belleza)
+  "bg-rose-500/15 text-rose-950 dark:bg-rose-950/50 dark:text-rose-100 font-semibold shadow-xs border border-rose-500/20",
+  // 3: Ámbar (Tratamientos / Keratina)
+  "bg-amber-500/15 text-amber-950 dark:bg-amber-950/50 dark:text-amber-100 font-semibold shadow-xs border border-amber-500/20",
+  // 4: Índigo (Barbería / General)
+  "bg-indigo-500/15 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-100 font-semibold shadow-xs border border-indigo-500/20",
+  // 5: Esmeralda (Facial / Masajes)
+  "bg-emerald-500/15 text-emerald-950 dark:bg-emerald-950/50 dark:text-emerald-100 font-semibold shadow-xs border border-emerald-500/20",
+  // 6: Azul Cielo (Depilación / Otros)
+  "bg-sky-500/15 text-sky-950 dark:bg-sky-950/50 dark:text-sky-100 font-semibold shadow-xs border border-sky-500/20",
 ];
 
 export default function AgendaPage() {
@@ -256,6 +267,14 @@ export default function AgendaPage() {
   const [services, setServices] = useState<any[]>([]);
   const [workers, setWorkers] = useState<any[]>([]);
   const [selectedWorkerId, setSelectedWorkerId] = useState<string>("all");
+
+  const [draggedAppt, setDraggedAppt] = useState<AppointmentItem | null>(null);
+  const [dragOverDayIndex, setDragOverDayIndex] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ show: boolean; text: string; type: "success" | "error" }>({
+    show: false,
+    text: "",
+    type: "success",
+  });
 
   const mapDbAppointments = useCallback(
     (dbApps: any[], currentWorkers: any[] = []) => {
@@ -512,6 +531,11 @@ export default function AgendaPage() {
 
     setPrefilledDate(dateString);
     setPrefilledTime(timeString);
+    setHoverGuide({
+      dayIndex: dayIdx,
+      timeString: timeString,
+      top: topPx,
+    });
     if (e) {
       setAppointmentModalTriggerRect({
         left: e.clientX,
@@ -586,6 +610,105 @@ export default function AgendaPage() {
         fetchDashboardData();
       })
       .catch((err) => console.error("Error updating status:", err));
+  };
+
+  const handleDropReschedule = (appointmentId: string, dayIdx: number, targetTimeStr: string) => {
+    const targetDay = weekDays[dayIdx];
+    if (!targetDay) return;
+
+    const [hours, minutes] = targetTimeStr.split(":").map(Number);
+    const newDate = new Date(targetDay.fullDate);
+    newDate.setHours(hours, minutes, 0, 0);
+
+    const isoDate = newDate.toISOString();
+
+    // Optimistic update locally
+    setAppointments((prev) =>
+      prev.map((app) =>
+        app.id === appointmentId
+          ? { ...app, dayIndex: dayIdx, timeSlot: targetTimeStr, dateObj: newDate }
+          : app
+      )
+    );
+
+    fetch(`/api/backend/appointments/${appointmentId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appointmentDate: isoDate }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((err) => {
+            throw new Error(err.error || "No se pudo mover la cita");
+          });
+        }
+        return res.json();
+      })
+      .then(() => {
+        setToast({
+          show: true,
+          text: `Cita reprogramada a ${targetDay.name} ${targetDay.num} a las ${targetTimeStr}`,
+          type: "success",
+        });
+        setTimeout(() => setToast({ show: false, text: "", type: "success" }), 4000);
+        fetchDashboardData();
+      })
+      .catch((err) => {
+        setToast({ show: true, text: err.message || "Error al mover la cita", type: "error" });
+        setTimeout(() => setToast({ show: false, text: "", type: "error" }), 4000);
+        fetchDashboardData(); // Revert local optimistic change on error
+      });
+  };
+
+  const handleDragStart = (e: React.DragEvent, app: AppointmentItem) => {
+    e.dataTransfer.setData("application/json", JSON.stringify(app));
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedAppt(app);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedAppt(null);
+    setDragOverDayIndex(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, dayIdx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverDayIndex !== dayIdx) {
+      setDragOverDayIndex(dayIdx);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, dayIdx: number) => {
+    e.preventDefault();
+    setDragOverDayIndex(null);
+
+    try {
+      const rawData = e.dataTransfer.getData("application/json");
+      const app = rawData ? JSON.parse(rawData) : draggedAppt;
+      setDraggedAppt(null); // Instantly restore normal card opacity upon drop
+      if (!app || !app.id) return;
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const totalMinutes = Math.round(y / 1.5);
+      let hour = 9 + Math.floor(totalMinutes / 60);
+      let minute = Math.round((totalMinutes % 60) / 15) * 15;
+
+      if (minute === 60) {
+        hour += 1;
+        minute = 0;
+      }
+
+      if (hour < 9) hour = 9;
+      if (hour > 20) hour = 20;
+
+      const timeStr = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+      handleDropReschedule(app.id, dayIdx, timeStr);
+    } catch (err) {
+      setDraggedAppt(null);
+      console.error("Drop error:", err);
+    }
   };
 
   // Dynamic stats calculation
@@ -722,6 +845,25 @@ export default function AgendaPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden md:ml-[240px]">
+        {/* Floating Toast Notification */}
+        {toast.show && (
+          <div className="fixed top-5 right-5 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div
+              className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 text-label-md font-medium ${
+                toast.type === "success"
+                  ? "bg-secondary-container text-on-secondary-container border border-secondary/30"
+                  : "bg-error-container text-on-error-container border border-error/30"
+              }`}
+            >
+              {toast.type === "success" ? (
+                <Check className="w-5 h-5 text-primary" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-error" />
+              )}
+              <span>{toast.text}</span>
+            </div>
+          </div>
+        )}
         <main className="flex-1 overflow-hidden flex flex-col min-h-0 w-full h-full bg-surface">
           {/* Calendar Header Controls — Luxe Salon style */}
           <div className="px-6 py-3 border-b border-outline-variant flex items-center justify-between gap-3 bg-surface">
@@ -972,6 +1114,8 @@ export default function AgendaPage() {
                   <div
                     className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
                     onMouseMove={(e) => {
+                      if (isAppointmentModalOpen) return; // Freeze guide line while modal is open
+
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = e.clientX - rect.left;
                       const y = e.clientY - rect.top;
@@ -1007,7 +1151,10 @@ export default function AgendaPage() {
                         setHoverGuide(null);
                       }
                     }}
-                    onMouseLeave={() => setHoverGuide(null)}
+                    onMouseLeave={() => {
+                      if (isAppointmentModalOpen) return;
+                      setHoverGuide(null);
+                    }}
                     onClick={(e) => {
                       if (hoverGuide) {
                         handleGridClick(hoverGuide.dayIndex, hoverGuide.top, e);
@@ -1038,9 +1185,16 @@ export default function AgendaPage() {
                       return (
                         <div
                           key={dayIndex}
-                          className="relative h-full border-r border-outline-variant/60 pointer-events-auto"
+                          onDragOver={(e) => handleDragOver(e, actualDayIndex)}
+                          onDragLeave={() => setDragOverDayIndex(null)}
+                          onDrop={(e) => handleDrop(e, actualDayIndex)}
+                          className={`relative h-full border-r border-outline-variant/60 pointer-events-auto transition-colors duration-150 ${
+                            dragOverDayIndex === actualDayIndex
+                              ? "bg-primary/10 border-primary ring-2 ring-primary/30"
+                              : ""
+                          }`}
                         >
-                          {/* Hover Guide Line */}
+                          {/* Hover & Locked Guide Line */}
                           {isColHovered && hoverGuide && (
                             <div
                               style={{ top: `${hoverGuide.top}px` }}
@@ -1055,6 +1209,7 @@ export default function AgendaPage() {
                           {positionedApps.map((app) => {
                             const isActive = app.id === activeAppId;
                             const isNext = app.id === nextAppId;
+                            const isBeingDragged = draggedAppt?.id === app.id;
 
                             const isShort = app.height <= 45;
                             const cardPadding = isShort ? "py-[2px] px-2" : "py-2 px-3";
@@ -1079,6 +1234,9 @@ export default function AgendaPage() {
                               <ContextMenu key={app.id}>
                                 <ContextMenuTrigger
                                   as="div"
+                                  draggable={true}
+                                  onDragStart={(e) => handleDragStart(e, app)}
+                                  onDragEnd={handleDragEnd}
                                   style={{
                                     position: "absolute",
                                     top: `${app.top}px`,
@@ -1089,7 +1247,9 @@ export default function AgendaPage() {
                                   onClick={(e) => {
                                     e.stopPropagation(); // Prevent creating a new appointment
                                   }}
-                                  className={`${cardRounded} ${cardPadding} ${app.colorClass} ${activeClasses} cursor-pointer hover:scale-[1.03] hover:z-30 hover:shadow-lg transition-all duration-200 flex flex-col ${justifyClass} pointer-events-auto overflow-hidden`}
+                                  className={`${cardRounded} ${cardPadding} ${app.colorClass} ${activeClasses} ${
+                                    isBeingDragged ? "opacity-30 border-dashed border-2 border-primary scale-95" : ""
+                                  } cursor-grab active:cursor-grabbing hover:scale-[1.03] hover:z-30 hover:shadow-lg transition-transform transition-shadow duration-150 flex flex-col ${justifyClass} pointer-events-auto overflow-hidden`}
                                 >
                                   {isShort ? (
                                     <div className="flex items-center gap-1.5 min-w-0 select-none">
@@ -1199,7 +1359,10 @@ export default function AgendaPage() {
       {/* Appointment booking Modal */}
       <NewAppointmentModal
         isOpen={isAppointmentModalOpen}
-        onClose={() => setIsAppointmentModalOpen(false)}
+        onClose={() => {
+          setIsAppointmentModalOpen(false);
+          setHoverGuide(null);
+        }}
         onSave={handleSaveAppointment}
         initialDate={prefilledDate}
         initialTime={prefilledTime}

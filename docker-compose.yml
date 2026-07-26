@@ -34,6 +34,7 @@ services:
   backend:
     build: .
     container_name: volta-backend
+    user: root
     restart: no
     depends_on:
       - db
@@ -44,6 +45,8 @@ services:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
       - PORT=3001
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -60,6 +63,7 @@ services:
   frontend:
     build: .
     container_name: volta-frontend
+    user: root
     restart: no
     depends_on:
       - db
@@ -81,6 +85,7 @@ services:
       - /app/node_modules
       - /app/frontend/node_modules
       - /app/backend/node_modules
+      - /app/frontend/.next
     ports:
       - "3000:3000"
     command: sh -c "mkdir -p /app/frontend/.next && chmod -R 777 /app/frontend/.next 2>/dev/null || true; pnpm install && pnpm --filter frontend dev"

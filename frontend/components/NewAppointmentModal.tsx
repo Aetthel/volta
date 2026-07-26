@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useDraggableModal } from "@/lib/useDraggableModal";
 import {
   X,
   Calendar,
@@ -100,50 +101,12 @@ export default function NewAppointmentModal({
     stylist: "Volta",
   });
 
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-
-  const lastIsOpen = useRef(isOpen);
-  const isFirstOpen = useRef(false);
-
-  if (isOpen && !lastIsOpen.current) {
-    isFirstOpen.current = true;
-    lastIsOpen.current = true;
-  } else if (!isOpen && lastIsOpen.current) {
-    lastIsOpen.current = false;
-  }
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    if (
-      (e.target as HTMLElement).closest("button") ||
-      (e.target as HTMLElement).closest("input") ||
-      (e.target as HTMLElement).closest("select")
-    )
-      return;
-
-    e.preventDefault();
-    setIsDragging(true);
-
-    const startX = e.clientX - position.x;
-    const startY = e.clientY - position.y;
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      setPosition({
-        x: moveEvent.clientX - startX,
-        y: moveEvent.clientY - startY,
-      });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-  };
+  const { position, handleMouseDown } = useDraggableModal({
+    isOpen,
+    triggerRect,
+    modalWidth: 448,
+    modalHeight: 550,
+  });
 
   // Prefill date and time when modal opens
   useEffect(() => {
@@ -156,39 +119,8 @@ export default function NewAppointmentModal({
         time: initialTime || "10:00",
         stylist: "Volta",
       });
-
-      // Calculate initial coordinates next to clicked trigger button/space
-      if (triggerRect && window.innerWidth >= 768) {
-        const modalWidth = 448;
-        const modalHeight = 550;
-
-        let targetX = triggerRect.right + 12;
-        if (targetX + modalWidth > window.innerWidth) {
-          targetX = triggerRect.left - modalWidth - 12;
-        }
-        targetX = Math.max(12, Math.min(targetX, window.innerWidth - modalWidth - 12));
-
-        let targetY = triggerRect.top;
-        if (targetY + modalHeight > window.innerHeight) {
-          targetY = Math.max(12, window.innerHeight - modalHeight - 12);
-        }
-
-        setPosition({ x: targetX, y: targetY });
-      } else {
-        // Center modal on screen
-        const modalWidth = Math.min(448, window.innerWidth - 32);
-        const modalHeight = Math.min(550, window.innerHeight - 32);
-        const targetX = (window.innerWidth - modalWidth) / 2;
-        const targetY = (window.innerHeight - modalHeight) / 2;
-        setPosition({ x: targetX, y: targetY });
-      }
-
-      const timer = setTimeout(() => {
-        isFirstOpen.current = false;
-      }, 50);
-      return () => clearTimeout(timer);
     }
-  }, [isOpen, initialDate, initialTime, triggerRect]);
+  }, [isOpen, initialDate, initialTime]);
 
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
@@ -391,9 +323,9 @@ export default function NewAppointmentModal({
   }));
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/5 transition-opacity" onClick={onClose} />
+    <div className="fixed inset-0 z-[100] pointer-events-none">
+      {/* Backdrop — transparent without dimming */}
+      <div className="absolute inset-0 bg-transparent pointer-events-auto" onClick={onClose} />
 
       {/* Modal Content Card */}
       <div
@@ -403,10 +335,9 @@ export default function NewAppointmentModal({
           top: `${position.y}px`,
           width: "448px",
           maxWidth: "calc(100vw - 32px)",
-          transition: isDragging || isFirstOpen.current ? "none" : undefined,
-          animation: isDragging ? "none" : undefined,
+          transition: "none",
         }}
-        className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200"
+        className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant overflow-visible z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150"
       >
         {/* Header */}
         <div

@@ -1,9 +1,23 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: volta-redis
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     image: ghcr.io/kore29/volta:latest
     pull_policy: always
     container_name: volta-backend
     restart: always
+    depends_on:
+      - redis
     volumes:
       - wwebjs-auth:/app/backend/.wwebjs_auth
     environment:
@@ -11,6 +25,8 @@ services:
       - API_KEY=${API_KEY}
       - BACKEND_JWT_SECRET=${BACKEND_JWT_SECRET}
       - LOPD_HMAC_SECRET=${LOPD_HMAC_SECRET}
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
       - NODE_ENV=production
     command: sh -c "cd /app/backend && (npx prisma migrate deploy || true) && pnpm --filter backend start"
     healthcheck:
@@ -66,4 +82,5 @@ services:
       - "host.docker.internal:host-gateway"
 
 volumes:
+  redis_data:
   wwebjs-auth:

@@ -6,8 +6,8 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const runInDocker = fs.existsSync("/.dockerenv");
 
-// Always attempt to load env variables from the root .env file
-dotenv.config({ path: path.resolve(__dirname, "../../../.env"), override: !runInDocker });
+// Always attempt to load env variables from the root .env file without overriding Docker env vars
+dotenv.config({ path: path.resolve(__dirname, "../../../.env"), override: false });
 
 // Startup environment variables verification
 const REQUIRED_ENV_VARS = ["DATABASE_URL", "API_KEY", "BACKEND_JWT_SECRET", "LOPD_HMAC_SECRET"];
