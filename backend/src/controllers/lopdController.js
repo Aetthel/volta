@@ -57,7 +57,8 @@ export const acceptConsent = async (req, res) => {
     return ApiResponse.success(res, { success: true, client });
   }
 
-  const rawIp = req.headers["x-forwarded-for"] || req.ip || req.socket?.remoteAddress || "127.0.0.1";
+  const rawIp =
+    req.headers["x-forwarded-for"] || req.ip || req.socket?.remoteAddress || "127.0.0.1";
   const ipAddress = typeof rawIp === "string" ? rawIp.split(",")[0].trim() : "127.0.0.1";
   const userAgent = req.headers["user-agent"] || "Unknown";
 

@@ -17,14 +17,18 @@ export function createWhatsAppWorker() {
         const { businessId, phone, clientPhone, message, appointmentId } = data;
         const targetPhone = phone || clientPhone;
 
-        logger.info(`[WhatsAppWorker] Processing job #${job.id} (${name}) for business ${businessId}`);
+        logger.info(
+          `[WhatsAppWorker] Processing job #${job.id} (${name}) for business ${businessId}`
+        );
 
         try {
           await whatsappManager.initClient(businessId);
           await whatsappManager.waitForReady(businessId, 45000);
 
           await whatsappManager.sendMessage(businessId, targetPhone, message);
-          logger.info(`[WhatsAppWorker] Job #${job.id} message delivered to ${maskPhone(targetPhone)}`);
+          logger.info(
+            `[WhatsAppWorker] Job #${job.id} message delivered to ${maskPhone(targetPhone)}`
+          );
 
           if (appointmentId && name === "SENTINEL_REMINDER") {
             await prisma.appointment.update({
@@ -35,11 +39,17 @@ export function createWhatsAppWorker() {
         } catch (err) {
           logger.error(`[WhatsAppWorker] Job #${job.id} failed:`, err.message);
 
-          if (appointmentId && name === "SENTINEL_REMINDER" && job.attemptsMade >= (job.opts.attempts || 3)) {
-            await prisma.appointment.update({
-              where: { id: appointmentId },
-              data: { status: "ERROR" },
-            }).catch(() => {});
+          if (
+            appointmentId &&
+            name === "SENTINEL_REMINDER" &&
+            job.attemptsMade >= (job.opts.attempts || 3)
+          ) {
+            await prisma.appointment
+              .update({
+                where: { id: appointmentId },
+                data: { status: "ERROR" },
+              })
+              .catch(() => {});
           }
 
           throw err;

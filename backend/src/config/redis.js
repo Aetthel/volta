@@ -16,16 +16,39 @@ const baseOptions = {
 };
 
 const getRedisConnectionOptions = () => {
+  const options = { ...baseOptions };
+
   if (process.env.REDIS_TLS === "true") {
-    baseOptions.tls = { rejectUnauthorized: false };
+    options.tls = { rejectUnauthorized: false };
   }
-  if (!process.env.REDIS_URL) {
-    baseOptions.host = process.env.REDIS_HOST || (isDocker ? "redis" : "localhost");
-    baseOptions.port = parseInt(process.env.REDIS_PORT || "6379", 10);
-    if (process.env.REDIS_PASSWORD) baseOptions.password = process.env.REDIS_PASSWORD;
-    if (process.env.REDIS_USERNAME) baseOptions.username = process.env.REDIS_USERNAME;
+
+  if (process.env.REDIS_URL) {
+    try {
+      const parsedUrl = new URL(process.env.REDIS_URL);
+      options.host = parsedUrl.hostname;
+      options.port = parsedUrl.port ? parseInt(parsedUrl.port, 10) : 6379;
+      if (parsedUrl.username) options.username = decodeURIComponent(parsedUrl.username);
+      if (parsedUrl.password) options.password = decodeURIComponent(parsedUrl.password);
+      if (parsedUrl.protocol === "rediss:") {
+        options.tls = options.tls || { rejectUnauthorized: false };
+      }
+      if (parsedUrl.pathname && parsedUrl.pathname.length > 1) {
+        const dbIndex = parseInt(parsedUrl.pathname.substring(1), 10);
+        if (!isNaN(dbIndex)) options.db = dbIndex;
+      }
+    } catch (err) {
+      logger.warn(
+        `[Redis] Could not parse REDIS_URL (${err.message}), falling back to direct options.`
+      );
+    }
+  } else {
+    options.host = process.env.REDIS_HOST || (isDocker ? "redis" : "localhost");
+    options.port = parseInt(process.env.REDIS_PORT || "6379", 10);
+    if (process.env.REDIS_PASSWORD) options.password = process.env.REDIS_PASSWORD;
+    if (process.env.REDIS_USERNAME) options.username = process.env.REDIS_USERNAME;
   }
-  return baseOptions;
+
+  return options;
 };
 
 export const redisConnectionOptions = getRedisConnectionOptions();
@@ -34,15 +57,9 @@ let redisClient = null;
 
 if (!IS_TEST) {
   try {
-    if (process.env.REDIS_URL) {
-      redisClient = new Redis(process.env.REDIS_URL, redisConnectionOptions);
-    } else {
-      redisClient = new Redis(redisConnectionOptions);
-    }
+    redisClient = new Redis(redisConnectionOptions);
 
-    const hostLog = process.env.REDIS_URL
-      ? process.env.REDIS_URL.replace(/:[^:@]+@/, ":***@")
-      : `${redisConnectionOptions.host}:${redisConnectionOptions.port}`;
+    const hostLog = `${redisConnectionOptions.host}:${redisConnectionOptions.port}`;
 
     redisClient.on("connect", () => {
       logger.info(`[Redis] Connected to Redis server at ${hostLog}`);

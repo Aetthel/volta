@@ -20,9 +20,11 @@ Volta currently assumes all bookings are 1-on-1 private appointments (1 client p
 ## Capabilities
 
 ### New Capabilities
+
 - `dual-mode-services-group-classes`: Enables 1-on-1 appointments and 1-to-many group sessions with max capacity tracking, custom 7-color service themes, and dual-mode enrollment (self-service vs manual staff registration).
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact

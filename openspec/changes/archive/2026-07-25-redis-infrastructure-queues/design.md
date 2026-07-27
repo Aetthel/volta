@@ -42,27 +42,34 @@
 ## Redis Connection (`backend/src/config/redis.js`)
 
 Uses `ioredis`:
+
 ```js
 const REDIS_HOST = process.env.REDIS_HOST || "localhost";
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || "6379", 10);
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD || undefined;
 ```
+
 Fallback gracefully if Redis is unavailable in local dev (falls back to direct send or logs warning).
 
 ## Worker Implementation (`backend/src/workers/whatsappWorker.js`)
 
 Listens on `whatsappQueue`:
+
 ```js
-const worker = new Worker("whatsappQueue", async (job) => {
-  const { businessId, clientPhone, message, appointmentId } = job.data;
-  await whatsappManager.initClient(businessId);
-  await whatsappManager.waitForReady(businessId, 45000);
-  await whatsappManager.sendMessage(businessId, clientPhone, message);
-  if (appointmentId) {
-    await prisma.appointment.update({
-      where: { id: appointmentId },
-      data: { status: "SENT" },
-    });
-  }
-}, { connection: redisConfig });
+const worker = new Worker(
+  "whatsappQueue",
+  async (job) => {
+    const { businessId, clientPhone, message, appointmentId } = job.data;
+    await whatsappManager.initClient(businessId);
+    await whatsappManager.waitForReady(businessId, 45000);
+    await whatsappManager.sendMessage(businessId, clientPhone, message);
+    if (appointmentId) {
+      await prisma.appointment.update({
+        where: { id: appointmentId },
+        data: { status: "SENT" },
+      });
+    }
+  },
+  { connection: redisConfig }
+);
 ```

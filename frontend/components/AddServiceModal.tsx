@@ -154,14 +154,17 @@ export default function AddServiceModal({
           <FieldGroup className="gap-5">
             {/* Service Type Toggle (Individual vs Group) */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-on-surface-variant">Tipo de Servicio</label>
+              <label className="text-xs font-semibold text-on-surface-variant">
+                Tipo de Servicio
+              </label>
               <SegmentedControl
                 value={formData.type}
                 onChange={(val) =>
                   setFormData((prev) => ({
                     ...prev,
                     type: val as "INDIVIDUAL" | "GROUP",
-                    capacity: val === "INDIVIDUAL" ? "1" : prev.capacity === "1" ? "12" : prev.capacity,
+                    capacity:
+                      val === "INDIVIDUAL" ? "1" : prev.capacity === "1" ? "12" : prev.capacity,
                   }))
                 }
                 options={[
@@ -186,7 +189,9 @@ export default function AddServiceModal({
 
             {/* Color Palette Selector */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-on-surface-variant">Color de Tarjeta en Agenda</label>
+              <label className="text-xs font-semibold text-on-surface-variant">
+                Color de Tarjeta en Agenda
+              </label>
               <div className="flex items-center gap-2.5">
                 {COLOR_OPTIONS.map((c) => (
                   <button
@@ -200,7 +205,9 @@ export default function AddServiceModal({
                         : "opacity-80 hover:opacity-100 hover:scale-105"
                     }`}
                   >
-                    {formData.color === c.id && <span className="w-2 h-2 rounded-full bg-white shadow-sm" />}
+                    {formData.color === c.id && (
+                      <span className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                    )}
                   </button>
                 ))}
               </div>

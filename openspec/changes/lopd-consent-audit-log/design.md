@@ -25,6 +25,7 @@ model LopdConsentLog {
 ## Controller Flow (`backend/src/controllers/lopdController.js` / `lopdService.js`)
 
 When client accepts consent:
+
 1. Validate HMAC token and expiration.
 2. Update `Client.lopdStatus = "Aceptado"`.
 3. Create immutable `LopdConsentLog`:
@@ -34,6 +35,7 @@ When client accepts consent:
    - `acceptedAt`: `new Date()`
 
 ## Dashboard Audit UI (`frontend`)
+
 - Provide legal audit view under Client detail modal showing:
   - Consent Status: Aceptado
   - Fecha y Hora de Aceptación

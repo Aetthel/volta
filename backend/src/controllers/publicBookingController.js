@@ -168,7 +168,9 @@ export const createPublicBooking = async (req, res) => {
   }).length;
 
   if (overlappingCount >= capacity) {
-    return res.status(409).json({ error: "El horario seleccionado ya está ocupado o no tiene capacidad disponible." });
+    return res
+      .status(409)
+      .json({ error: "El horario seleccionado ya está ocupado o no tiene capacidad disponible." });
   }
 
   // Client recognition by phone number

@@ -376,7 +376,8 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                 </div>
               ) : availableSlots.length === 0 ? (
                 <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/60 text-center text-on-surface-variant text-body-sm">
-                  No hay horarios disponibles para esta fecha. El negocio puede estar cerrado o tener su aforo completo.
+                  No hay horarios disponibles para esta fecha. El negocio puede estar cerrado o
+                  tener su aforo completo.
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">

@@ -197,7 +197,9 @@ async function sendConsentMessage(businessId, client) {
       await whatsappManager.initClient(businessId);
       await whatsappManager.waitForReady(businessId, 45000);
       await whatsappManager.sendMessage(businessId, client.phone, message);
-      logger.info(`[WhatsApp] [Direct Fallback] LOPD consent message sent to ${maskPhone(client.phone)}`);
+      logger.info(
+        `[WhatsApp] [Direct Fallback] LOPD consent message sent to ${maskPhone(client.phone)}`
+      );
     }
   } catch (wsErr) {
     logger.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);

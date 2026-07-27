@@ -5,6 +5,7 @@ Volta currently manages appointments as 1-on-1 private client bookings. To serve
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add `type` (`INDIVIDUAL` vs `GROUP`), `maxCapacity`, and `color` fields to the `Service` model in Prisma schema.
 - Support a 7-color palette picker (`TEAL`, `PURPLE`, `ROSE`, `AMBER`, `INDIGO`, `EMERALD`, `SKY`) in `/ajustes` -> Services tab.
 - Display unified group class cards in `/agenda` with real-time occupancy indicators (`X/Y enrolled`).
@@ -13,6 +14,7 @@ Volta currently manages appointments as 1-on-1 private client bookings. To serve
 - Allow public self-enrollment via `/booking/:businessId` with real-time open slot counters.
 
 **Non-Goals:**
+
 - Recurring automated class generation (handled manually or via week copy in future releases).
 - Payment gateway integration for per-class credit packages (out of scope for this change).
 
@@ -25,7 +27,7 @@ Volta currently manages appointments as 1-on-1 private client bookings. To serve
 
 2. **Capacity Validation in `appointmentsService.js`**:
    - For `GROUP` services, multiple appointments can share the exact same `appointmentDate` and `serviceId` up to `service.maxCapacity`.
-   - Prevent creation of a new appointment for a group session if `currentAppointmentsCount >= service.maxCapacity` (HTTP 409 Conflict: *"Capacidad máxima de la clase alcanzada"*).
+   - Prevent creation of a new appointment for a group session if `currentAppointmentsCount >= service.maxCapacity` (HTTP 409 Conflict: _"Capacidad máxima de la clase alcanzada"_).
 
 3. **7-Color Custom Palette Design**:
    - Offer 7 curated Google Calendar-style pastel themes with 4px left accent borders (`border-l-4`):
@@ -45,6 +47,6 @@ Volta currently manages appointments as 1-on-1 private client bookings. To serve
 ## Risks / Trade-offs
 
 - **[Risk]** Overlapping 1-on-1 and Group slots for the same stylist/worker.
-  - *Mitigation*: Workers assigned to a group class cannot take 1-on-1 appointments during that exact time window.
+  - _Mitigation_: Workers assigned to a group class cannot take 1-on-1 appointments during that exact time window.
 - **[Risk]** Race conditions during simultaneous public online registrations when 1 spot remains.
-  - *Mitigation*: Wrap appointment creation in a Prisma transaction (`prisma.$transaction`) with count check before insertion.
+  - _Mitigation_: Wrap appointment creation in a Prisma transaction (`prisma.$transaction`) with count check before insertion.

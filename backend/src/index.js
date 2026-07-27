@@ -121,7 +121,8 @@ app.get("/health", async (req, res) => {
     redisStatus = "disabled";
   }
 
-  const isHealthy = dbStatus === "connected" && (redisStatus === "connected" || redisStatus === "disabled");
+  const isHealthy =
+    dbStatus === "connected" && (redisStatus === "connected" || redisStatus === "disabled");
   const statusCode = isHealthy ? 200 : 503;
 
   res.status(statusCode).json({

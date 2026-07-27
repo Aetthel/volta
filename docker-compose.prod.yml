@@ -1,22 +1,4 @@
 services:
-  # (Opcional) Contenedor de Redis local. Si usas un Redis externo, no se utiliza.
-  redis:
-    image: redis:7-alpine
-    container_name: volta-redis
-    restart: always
-    command: ["sh", "-c", "exec redis-server /usr/local/etc/redis/redis.conf ${REDIS_PASSWORD:+--requirepass \"$REDIS_PASSWORD\"}"]
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-    volumes:
-      - redis_data:/data
-      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ${REDIS_PASSWORD:+-a \"$REDIS_PASSWORD\"} ping | grep PONG"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   backend:
     image: ghcr.io/kore29/volta:latest
     pull_policy: always
@@ -30,7 +12,7 @@ services:
       - BACKEND_JWT_SECRET=${BACKEND_JWT_SECRET}
       - LOPD_HMAC_SECRET=${LOPD_HMAC_SECRET}
       - REDIS_URL=${REDIS_URL:-}
-      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_HOST=${REDIS_HOST:-}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - REDIS_USERNAME=${REDIS_USERNAME:-}
@@ -90,5 +72,4 @@ services:
       - "host.docker.internal:host-gateway"
 
 volumes:
-  redis_data:
   wwebjs-auth:

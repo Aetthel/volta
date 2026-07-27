@@ -371,7 +371,9 @@ export default function NewAppointmentModal({
         {/* Title & Mode Switcher */}
         <div className="px-5 pb-2">
           <h2 className="text-2xl font-medium text-on-surface mb-3">
-            {bookingType === "INDIVIDUAL" ? "Reservar Cita Individual" : "Crear Sesión de Grupo / Clase"}
+            {bookingType === "INDIVIDUAL"
+              ? "Reservar Cita Individual"
+              : "Crear Sesión de Grupo / Clase"}
           </h2>
 
           <SegmentedControl
@@ -397,7 +399,11 @@ export default function NewAppointmentModal({
                 <Field>
                   <InlineSelect
                     id="service"
-                    label={bookingType === "GROUP" ? "Seleccionar Clase de Grupo" : "Seleccionar Servicio"}
+                    label={
+                      bookingType === "GROUP"
+                        ? "Seleccionar Clase de Grupo"
+                        : "Seleccionar Servicio"
+                    }
                     value={formData.service}
                     onChange={(val) => setFormData((prev) => ({ ...prev, service: val }))}
                     options={serviceOptions}
@@ -417,7 +423,11 @@ export default function NewAppointmentModal({
                   <div className="relative w-full">
                     <FloatingInput
                       id="clientName"
-                      label={bookingType === "GROUP" ? "Nombre del Alumno (opcional)" : "Nombre del Cliente"}
+                      label={
+                        bookingType === "GROUP"
+                          ? "Nombre del Alumno (opcional)"
+                          : "Nombre del Cliente"
+                      }
                       type="text"
                       required={bookingType === "INDIVIDUAL"}
                       value={formData.clientName}

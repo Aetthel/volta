@@ -102,7 +102,9 @@ export const createAppointment = async (appointmentData) => {
   }).length;
 
   if (overlappingCount >= capacity) {
-    const error = new Error("El horario seleccionado ya está ocupado o no tiene capacidad disponible.");
+    const error = new Error(
+      "El horario seleccionado ya está ocupado o no tiene capacidad disponible."
+    );
     error.statusCode = 409;
     throw error;
   }

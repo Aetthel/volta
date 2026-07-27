@@ -2,7 +2,7 @@
 
 ## Why
 
-Under Spanish LOPD/RGPD regulations (AEPD enforcement), storing a simple string field `lopdStatus: "Aceptado"` is legally insufficient in an audit. Data controllers must maintain an immutable, verifiable log proving *when*, *how*, and *under what terms* consent was granted, including the client's IP address, timestamp, User-Agent, and terms version.
+Under Spanish LOPD/RGPD regulations (AEPD enforcement), storing a simple string field `lopdStatus: "Aceptado"` is legally insufficient in an audit. Data controllers must maintain an immutable, verifiable log proving _when_, _how_, and _under what terms_ consent was granted, including the client's IP address, timestamp, User-Agent, and terms version.
 
 ## What Changes
 

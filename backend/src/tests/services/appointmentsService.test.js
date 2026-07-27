@@ -40,9 +40,7 @@ describe("appointmentsService", () => {
       jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
         id: "biz-1",
         name: "Test Biz",
-        hours: [
-          { dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false },
-        ],
+        hours: [{ dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false }],
       });
 
       // 08:00 AM on Monday (2026-07-27) - before 09:00 AM
@@ -60,9 +58,7 @@ describe("appointmentsService", () => {
       jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
         id: "biz-1",
         name: "Test Biz",
-        hours: [
-          { dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false },
-        ],
+        hours: [{ dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false }],
       });
 
       jest.spyOn(prisma.service, "findFirst").mockResolvedValue({

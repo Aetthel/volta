@@ -1248,7 +1248,9 @@ export default function AgendaPage() {
                                     e.stopPropagation(); // Prevent creating a new appointment
                                   }}
                                   className={`${cardRounded} ${cardPadding} ${app.colorClass} ${activeClasses} ${
-                                    isBeingDragged ? "opacity-30 border-dashed border-2 border-primary scale-95" : ""
+                                    isBeingDragged
+                                      ? "opacity-30 border-dashed border-2 border-primary scale-95"
+                                      : ""
                                   } cursor-grab active:cursor-grabbing hover:scale-[1.03] hover:z-30 hover:shadow-lg transition-transform transition-shadow duration-150 flex flex-col ${justifyClass} pointer-events-auto overflow-hidden`}
                                 >
                                   {isShort ? (
