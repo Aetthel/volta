@@ -1,0 +1,10 @@
+-- CreateEnum
+DO $$ BEGIN
+    CREATE TYPE "ServiceType" AS ENUM ('INDIVIDUAL', 'GROUP');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- AlterTable
+ALTER TABLE "Service" ADD COLUMN IF NOT EXISTS "type" "ServiceType" NOT NULL DEFAULT 'INDIVIDUAL',
+ADD COLUMN IF NOT EXISTS "color" TEXT NOT NULL DEFAULT 'TEAL';
