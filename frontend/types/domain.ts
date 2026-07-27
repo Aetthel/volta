@@ -43,7 +43,9 @@ export interface Service {
   description?: string | null;
   duration: number; // in minutes
   price: number;
+  type?: "INDIVIDUAL" | "GROUP";
   capacity?: number;
+  color?: string;
   isActive: boolean;
   businessId: string;
 }

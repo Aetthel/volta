@@ -47,7 +47,9 @@ export interface Service {
   price: number;
   duration: number;
   description?: string;
+  type?: "INDIVIDUAL" | "GROUP";
   capacity?: number;
+  color?: string;
 }
 
 export interface MessageTemplates {

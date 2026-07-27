@@ -2,6 +2,8 @@ import config from "./config/index.js";
 import * as dbInit from "./config/dbInit.js";
 import express from "express";
 import prisma from "./config/db.js";
+import redisClient from "./config/redis.js";
+import { createWhatsAppWorker } from "./workers/whatsappWorker.js";
 import cron from "node-cron";
 import { runSentinel } from "./services/botService.js";
 import helmet from "helmet";
@@ -93,10 +95,42 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ limit: "1mb", extended: true }));
 
 /**
- * Health check endpoint
+ * Health check endpoint verifying DB & Redis status
  */
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
+app.get("/health", async (req, res) => {
+  let dbStatus = "disconnected";
+  let redisStatus = "disconnected";
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    dbStatus = "connected";
+  } catch (err) {
+    dbStatus = `error: ${err.message}`;
+  }
+
+  if (redisClient) {
+    try {
+      const pingRes = await redisClient.ping();
+      if (pingRes === "PONG") {
+        redisStatus = "connected";
+      }
+    } catch (err) {
+      redisStatus = `error: ${err.message}`;
+    }
+  } else {
+    redisStatus = "disabled";
+  }
+
+  const isHealthy = dbStatus === "connected" && (redisStatus === "connected" || redisStatus === "disabled");
+  const statusCode = isHealthy ? 200 : 503;
+
+  res.status(statusCode).json({
+    status: isHealthy ? "ok" : "degraded",
+    services: {
+      database: dbStatus,
+      redis: redisStatus,
+    },
+  });
 });
 
 // Rate limiting for public LOPD routes
@@ -165,6 +199,11 @@ if (isMain) {
       app.listen(PORT, () => {
         console.log(`[API] Server running on port ${PORT}`);
         initActiveWhatsappClients();
+        try {
+          createWhatsAppWorker();
+        } catch (err) {
+          console.error("[API] Failed to initialize WhatsApp BullMQ worker:", err);
+        }
       });
     })
     .catch((err) => {

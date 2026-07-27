@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Sparkles, Pencil, Briefcase, Clock, DollarSign } from "lucide-react";
+import { X, Sparkles, Pencil, Briefcase, Clock, DollarSign, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   FieldGroup,
@@ -10,6 +10,7 @@ import {
   Button,
   FloatingSelect,
   FloatingTextarea,
+  SegmentedControl,
 } from "@/components/ui/volta-ui";
 
 const EuroIcon = ({ className }: { className?: string }) => (
@@ -28,6 +29,8 @@ interface ServiceToEdit {
   duration: number;
   description?: string;
   capacity?: number;
+  type?: "INDIVIDUAL" | "GROUP";
+  color?: string;
 }
 
 interface AddServiceModalProps {
@@ -40,15 +43,29 @@ interface AddServiceModalProps {
     duration: number;
     description?: string;
     capacity?: number;
+    type?: "INDIVIDUAL" | "GROUP";
+    color?: string;
   }) => void;
   serviceToEdit?: ServiceToEdit | null;
 }
+
+const COLOR_OPTIONS = [
+  { id: "TEAL", bg: "bg-[#377E7F]", label: "Teal Volta" },
+  { id: "PURPLE", bg: "bg-purple-600", label: "Púrpura" },
+  { id: "ROSE", bg: "bg-rose-500", label: "Rosa" },
+  { id: "AMBER", bg: "bg-amber-500", label: "Ámbar" },
+  { id: "INDIGO", bg: "bg-indigo-600", label: "Índigo" },
+  { id: "EMERALD", bg: "bg-emerald-500", label: "Esmeralda" },
+  { id: "SKY", bg: "bg-sky-500", label: "Azul Cielo" },
+];
 
 const EMPTY_FORM = {
   name: "",
   price: "",
   duration: "45",
   capacity: "1",
+  type: "INDIVIDUAL" as "INDIVIDUAL" | "GROUP",
+  color: "TEAL",
   description: "",
 };
 
@@ -69,6 +86,8 @@ export default function AddServiceModal({
         price: String(serviceToEdit.price) ?? "",
         duration: String(serviceToEdit.duration) ?? "45",
         capacity: String(serviceToEdit.capacity ?? 1),
+        type: serviceToEdit.type ?? "INDIVIDUAL",
+        color: serviceToEdit.color ?? "TEAL",
         description: serviceToEdit.description ?? "",
       });
     } else {
@@ -92,7 +111,9 @@ export default function AddServiceModal({
       name: formData.name,
       price: parseFloat(formData.price),
       duration: parseInt(formData.duration, 10),
-      capacity: parseInt(formData.capacity, 10) || 1,
+      capacity: formData.type === "INDIVIDUAL" ? 1 : parseInt(formData.capacity, 10) || 12,
+      type: formData.type,
+      color: formData.color,
       description: formData.description,
     });
     setFormData(EMPTY_FORM);
@@ -131,6 +152,25 @@ export default function AddServiceModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6">
           <FieldGroup className="gap-5">
+            {/* Service Type Toggle (Individual vs Group) */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-on-surface-variant">Tipo de Servicio</label>
+              <SegmentedControl
+                value={formData.type}
+                onChange={(val) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    type: val as "INDIVIDUAL" | "GROUP",
+                    capacity: val === "INDIVIDUAL" ? "1" : prev.capacity === "1" ? "12" : prev.capacity,
+                  }))
+                }
+                options={[
+                  { value: "INDIVIDUAL", label: "Cita Individual (1 a 1)", icon: User },
+                  { value: "GROUP", label: "Clase de Grupo (Yoga / Gym)", icon: Users },
+                ]}
+              />
+            </div>
+
             {/* Service Name */}
             <Field>
               <FloatingInput
@@ -143,6 +183,28 @@ export default function AddServiceModal({
                 onChange={handleChange}
               />
             </Field>
+
+            {/* Color Palette Selector */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-on-surface-variant">Color de Tarjeta en Agenda</label>
+              <div className="flex items-center gap-2.5">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    title={c.label}
+                    onClick={() => setFormData((prev) => ({ ...prev, color: c.id }))}
+                    className={`w-7 h-7 rounded-full ${c.bg} transition-all duration-150 flex items-center justify-center ${
+                      formData.color === c.id
+                        ? "ring-2 ring-offset-2 ring-primary scale-110 shadow-md"
+                        : "opacity-80 hover:opacity-100 hover:scale-105"
+                    }`}
+                  >
+                    {formData.color === c.id && <span className="w-2 h-2 rounded-full bg-white shadow-sm" />}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="grid grid-cols-3 gap-3">
               {/* Duration (minutes) */}
@@ -178,11 +240,12 @@ export default function AddServiceModal({
               <Field>
                 <FloatingInput
                   id="capacity"
-                  label="Aforo (Máx.)"
+                  label={formData.type === "GROUP" ? "Aforo Alumnos" : "Aforo Máx."}
                   type="number"
                   min="1"
                   required
-                  icon={Briefcase}
+                  disabled={formData.type === "INDIVIDUAL"}
+                  icon={formData.type === "GROUP" ? Users : Briefcase}
                   value={formData.capacity}
                   onChange={handleChange}
                 />

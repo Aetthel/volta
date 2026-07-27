@@ -82,6 +82,9 @@ export const createServiceSchema = z.object({
   description: z.string().optional().nullable(),
   duration: z.number().int().min(1, "La duración debe ser al menos de 1 minuto"),
   price: z.number().min(0, "El precio debe ser un número positivo"),
+  type: z.enum(["INDIVIDUAL", "GROUP"]).optional(),
+  capacity: z.number().int().min(1).optional(),
+  color: z.string().optional(),
 });
 
 export const updateServiceSchema = z.object({
@@ -89,6 +92,9 @@ export const updateServiceSchema = z.object({
   description: z.string().optional().nullable(),
   duration: z.number().int().min(1, "La duración debe ser al menos de 1 minuto").optional(),
   price: z.number().min(0, "El precio debe ser un número positivo").optional(),
+  type: z.enum(["INDIVIDUAL", "GROUP"]).optional(),
+  capacity: z.number().int().min(1).optional(),
+  color: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 

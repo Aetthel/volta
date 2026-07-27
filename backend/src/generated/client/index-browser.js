@@ -176,6 +176,7 @@ exports.Prisma.AppointmentScalarFieldEnum = {
   clientPhone: 'clientPhone',
   appointmentDate: 'appointmentDate',
   status: 'status',
+  attended: 'attended',
   businessId: 'businessId',
   clientId: 'clientId',
   serviceId: 'serviceId',
@@ -198,7 +199,9 @@ exports.Prisma.ServiceScalarFieldEnum = {
   description: 'description',
   duration: 'duration',
   price: 'price',
+  type: 'type',
   capacity: 'capacity',
+  color: 'color',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -269,6 +272,11 @@ exports.AppointmentStatus = exports.$Enums.AppointmentStatus = {
   PENDING: 'PENDING',
   SENT: 'SENT',
   ERROR: 'ERROR'
+};
+
+exports.ServiceType = exports.$Enums.ServiceType = {
+  INDIVIDUAL: 'INDIVIDUAL',
+  GROUP: 'GROUP'
 };
 
 exports.AlertType = exports.$Enums.AlertType = {

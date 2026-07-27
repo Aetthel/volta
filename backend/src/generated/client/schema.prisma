@@ -98,12 +98,18 @@ model Client {
   @@index([businessId])
 }
 
+enum ServiceType {
+  INDIVIDUAL
+  GROUP
+}
+
 model Appointment {
   id              String            @id @default(uuid())
   clientName      String
   clientPhone     String // International format (e.g., 34600000000)
   appointmentDate DateTime
   status          AppointmentStatus @default(PENDING)
+  attended        Boolean           @default(true)
   businessId      String
   business        Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
   clientId        String?
@@ -144,7 +150,9 @@ model Service {
   description  String?
   duration     Int // Duration in minutes
   price        Decimal       @db.Decimal(10, 2) // Price in Euros
+  type         ServiceType   @default(INDIVIDUAL)
   capacity     Int           @default(1) // Max participants per session
+  color        String        @default("TEAL")
   isActive     Boolean       @default(true)
   appointments Appointment[]
   createdAt    DateTime      @default(now())

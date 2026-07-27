@@ -8,6 +8,7 @@ import {
   Calendar,
   Clock,
   User,
+  Users,
   Phone,
   Sparkles,
   GripHorizontal,
@@ -23,6 +24,7 @@ import {
   Alert,
   InlineSelect,
   CalendarSelect,
+  SegmentedControl,
 } from "@/components/ui/volta-ui";
 
 interface NewAppointmentModalProps {
@@ -91,6 +93,8 @@ export default function NewAppointmentModal({
 }: NewAppointmentModalProps) {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "mock-business-id";
+
+  const [bookingType, setBookingType] = useState<"INDIVIDUAL" | "GROUP">("INDIVIDUAL");
 
   const [formData, setFormData] = useState({
     clientName: "",
@@ -316,10 +320,20 @@ export default function NewAppointmentModal({
     const [currentHour] = (formData.time || "10:00").split(":");
     setFormData((prev) => ({ ...prev, time: `${currentHour || "10"}:${m}` }));
   };
-  const serviceOptions = services.map((srv) => ({
+  const filteredServices = services.filter((srv) => {
+    if (bookingType === "GROUP") {
+      return srv.type === "GROUP" || (srv.capacity && srv.capacity > 1);
+    }
+    return srv.type === "INDIVIDUAL" || !srv.type || srv.capacity === 1;
+  });
+
+  const serviceOptions = filteredServices.map((srv) => ({
     value: srv.name,
     label: srv.name,
-    sublabel: srv.price !== undefined ? `€${srv.price}` : undefined,
+    sublabel:
+      srv.price !== undefined
+        ? `€${srv.price}${srv.capacity && srv.capacity > 1 ? ` · Máx. ${srv.capacity} alumnos` : ""}`
+        : undefined,
   }));
 
   return createPortal(
@@ -354,16 +368,46 @@ export default function NewAppointmentModal({
           </Button>
         </div>
 
-        {/* Title */}
-        <div className="px-5 pb-1">
-          <h2 className="text-2xl font-medium text-on-surface">Reservar Cita</h2>
+        {/* Title & Mode Switcher */}
+        <div className="px-5 pb-2">
+          <h2 className="text-2xl font-medium text-on-surface mb-3">
+            {bookingType === "INDIVIDUAL" ? "Reservar Cita Individual" : "Crear Sesión de Grupo / Clase"}
+          </h2>
+
+          <SegmentedControl
+            value={bookingType}
+            onChange={(val) => setBookingType(val as "INDIVIDUAL" | "GROUP")}
+            options={[
+              { value: "INDIVIDUAL", label: "Cita Individual", icon: User },
+              { value: "GROUP", label: "Clase de Grupo", icon: Users },
+            ]}
+          />
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
-          {/* Client Details */}
+          {/* Client & Service Details */}
           <FieldGroup className="flex flex-col gap-5">
-            {/* Title / Client Name */}
+            {/* Service Selection */}
+            <div className="flex items-start gap-4">
+              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <Field>
+                  <InlineSelect
+                    id="service"
+                    label={bookingType === "GROUP" ? "Seleccionar Clase de Grupo" : "Seleccionar Servicio"}
+                    value={formData.service}
+                    onChange={(val) => setFormData((prev) => ({ ...prev, service: val }))}
+                    options={serviceOptions}
+                    variant="borderless"
+                  />
+                </Field>
+              </div>
+            </div>
+
+            {/* Client / Student Name */}
             <div className="flex items-start gap-4">
               <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
                 <User className="w-5 h-5" />
@@ -373,9 +417,9 @@ export default function NewAppointmentModal({
                   <div className="relative w-full">
                     <FloatingInput
                       id="clientName"
-                      label="Nombre del Cliente"
+                      label={bookingType === "GROUP" ? "Nombre del Alumno (opcional)" : "Nombre del Cliente"}
                       type="text"
-                      required
+                      required={bookingType === "INDIVIDUAL"}
                       value={formData.clientName}
                       onChange={handleNameChange}
                       variant="borderless"
@@ -433,31 +477,12 @@ export default function NewAppointmentModal({
                 <Field>
                   <FloatingInput
                     id="clientPhone"
-                    label="Teléfono"
+                    label={bookingType === "GROUP" ? "Teléfono del Alumno (opcional)" : "Teléfono"}
                     type="tel"
-                    required
+                    required={bookingType === "INDIVIDUAL"}
                     variant="borderless"
                     value={formData.clientPhone}
                     onChange={handleChange}
-                  />
-                </Field>
-              </div>
-            </div>
-
-            {/* Service */}
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <Field>
-                  <InlineSelect
-                    id="service"
-                    label="Seleccionar servicio"
-                    value={formData.service}
-                    onChange={(val) => setFormData((prev) => ({ ...prev, service: val }))}
-                    options={serviceOptions}
-                    variant="borderless"
                   />
                 </Field>
               </div>

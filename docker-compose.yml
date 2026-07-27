@@ -45,8 +45,9 @@ services:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - PORT=3001
     extra_hosts:
       - "host.docker.internal:host-gateway"

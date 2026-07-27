@@ -96,6 +96,14 @@ export const WhatsAppStatus: {
 export type WhatsAppStatus = (typeof WhatsAppStatus)[keyof typeof WhatsAppStatus]
 
 
+export const ServiceType: {
+  INDIVIDUAL: 'INDIVIDUAL',
+  GROUP: 'GROUP'
+};
+
+export type ServiceType = (typeof ServiceType)[keyof typeof ServiceType]
+
+
 export const AppointmentStatus: {
   PENDING: 'PENDING',
   SENT: 'SENT',
@@ -130,6 +138,10 @@ export const UserRole: typeof $Enums.UserRole
 export type WhatsAppStatus = $Enums.WhatsAppStatus
 
 export const WhatsAppStatus: typeof $Enums.WhatsAppStatus
+
+export type ServiceType = $Enums.ServiceType
+
+export const ServiceType: typeof $Enums.ServiceType
 
 export type AppointmentStatus = $Enums.AppointmentStatus
 
@@ -5567,6 +5579,7 @@ export namespace Prisma {
     clientPhone: string | null
     appointmentDate: Date | null
     status: $Enums.AppointmentStatus | null
+    attended: boolean | null
     businessId: string | null
     clientId: string | null
     serviceId: string | null
@@ -5579,6 +5592,7 @@ export namespace Prisma {
     clientPhone: string | null
     appointmentDate: Date | null
     status: $Enums.AppointmentStatus | null
+    attended: boolean | null
     businessId: string | null
     clientId: string | null
     serviceId: string | null
@@ -5591,6 +5605,7 @@ export namespace Prisma {
     clientPhone: number
     appointmentDate: number
     status: number
+    attended: number
     businessId: number
     clientId: number
     serviceId: number
@@ -5605,6 +5620,7 @@ export namespace Prisma {
     clientPhone?: true
     appointmentDate?: true
     status?: true
+    attended?: true
     businessId?: true
     clientId?: true
     serviceId?: true
@@ -5617,6 +5633,7 @@ export namespace Prisma {
     clientPhone?: true
     appointmentDate?: true
     status?: true
+    attended?: true
     businessId?: true
     clientId?: true
     serviceId?: true
@@ -5629,6 +5646,7 @@ export namespace Prisma {
     clientPhone?: true
     appointmentDate?: true
     status?: true
+    attended?: true
     businessId?: true
     clientId?: true
     serviceId?: true
@@ -5714,6 +5732,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date
     status: $Enums.AppointmentStatus
+    attended: boolean
     businessId: string
     clientId: string | null
     serviceId: string | null
@@ -5743,6 +5762,7 @@ export namespace Prisma {
     clientPhone?: boolean
     appointmentDate?: boolean
     status?: boolean
+    attended?: boolean
     businessId?: boolean
     clientId?: boolean
     serviceId?: boolean
@@ -5758,6 +5778,7 @@ export namespace Prisma {
     clientPhone?: boolean
     appointmentDate?: boolean
     status?: boolean
+    attended?: boolean
     businessId?: boolean
     clientId?: boolean
     serviceId?: boolean
@@ -5773,6 +5794,7 @@ export namespace Prisma {
     clientPhone?: boolean
     appointmentDate?: boolean
     status?: boolean
+    attended?: boolean
     businessId?: boolean
     clientId?: boolean
     serviceId?: boolean
@@ -5788,13 +5810,14 @@ export namespace Prisma {
     clientPhone?: boolean
     appointmentDate?: boolean
     status?: boolean
+    attended?: boolean
     businessId?: boolean
     clientId?: boolean
     serviceId?: boolean
     serviceName?: boolean
   }
 
-  export type AppointmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clientName" | "clientPhone" | "appointmentDate" | "status" | "businessId" | "clientId" | "serviceId" | "serviceName", ExtArgs["result"]["appointment"]>
+  export type AppointmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clientName" | "clientPhone" | "appointmentDate" | "status" | "attended" | "businessId" | "clientId" | "serviceId" | "serviceName", ExtArgs["result"]["appointment"]>
   export type AppointmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     client?: boolean | Appointment$clientArgs<ExtArgs>
@@ -5824,6 +5847,7 @@ export namespace Prisma {
       clientPhone: string
       appointmentDate: Date
       status: $Enums.AppointmentStatus
+      attended: boolean
       businessId: string
       clientId: string | null
       serviceId: string | null
@@ -6259,6 +6283,7 @@ export namespace Prisma {
     readonly clientPhone: FieldRef<"Appointment", 'String'>
     readonly appointmentDate: FieldRef<"Appointment", 'DateTime'>
     readonly status: FieldRef<"Appointment", 'AppointmentStatus'>
+    readonly attended: FieldRef<"Appointment", 'Boolean'>
     readonly businessId: FieldRef<"Appointment", 'String'>
     readonly clientId: FieldRef<"Appointment", 'String'>
     readonly serviceId: FieldRef<"Appointment", 'String'>
@@ -7861,7 +7886,9 @@ export namespace Prisma {
     description: string | null
     duration: number | null
     price: Decimal | null
+    type: $Enums.ServiceType | null
     capacity: number | null
+    color: string | null
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7874,7 +7901,9 @@ export namespace Prisma {
     description: string | null
     duration: number | null
     price: Decimal | null
+    type: $Enums.ServiceType | null
     capacity: number | null
+    color: string | null
     isActive: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7887,7 +7916,9 @@ export namespace Prisma {
     description: number
     duration: number
     price: number
+    type: number
     capacity: number
+    color: number
     isActive: number
     createdAt: number
     updatedAt: number
@@ -7914,7 +7945,9 @@ export namespace Prisma {
     description?: true
     duration?: true
     price?: true
+    type?: true
     capacity?: true
+    color?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -7927,7 +7960,9 @@ export namespace Prisma {
     description?: true
     duration?: true
     price?: true
+    type?: true
     capacity?: true
+    color?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -7940,7 +7975,9 @@ export namespace Prisma {
     description?: true
     duration?: true
     price?: true
+    type?: true
     capacity?: true
+    color?: true
     isActive?: true
     createdAt?: true
     updatedAt?: true
@@ -8040,7 +8077,9 @@ export namespace Prisma {
     description: string | null
     duration: number
     price: Decimal
+    type: $Enums.ServiceType
     capacity: number
+    color: string
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -8072,7 +8111,9 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    type?: boolean
     capacity?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -8088,7 +8129,9 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    type?: boolean
     capacity?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -8102,7 +8145,9 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    type?: boolean
     capacity?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -8116,13 +8161,15 @@ export namespace Prisma {
     description?: boolean
     duration?: boolean
     price?: boolean
+    type?: boolean
     capacity?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "name" | "description" | "duration" | "price" | "capacity" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["service"]>
+  export type ServiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "name" | "description" | "duration" | "price" | "type" | "capacity" | "color" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["service"]>
   export type ServiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     appointments?: boolean | Service$appointmentsArgs<ExtArgs>
@@ -8148,7 +8195,9 @@ export namespace Prisma {
       description: string | null
       duration: number
       price: Prisma.Decimal
+      type: $Enums.ServiceType
       capacity: number
+      color: string
       isActive: boolean
       createdAt: Date
       updatedAt: Date
@@ -8583,7 +8632,9 @@ export namespace Prisma {
     readonly description: FieldRef<"Service", 'String'>
     readonly duration: FieldRef<"Service", 'Int'>
     readonly price: FieldRef<"Service", 'Decimal'>
+    readonly type: FieldRef<"Service", 'ServiceType'>
     readonly capacity: FieldRef<"Service", 'Int'>
+    readonly color: FieldRef<"Service", 'String'>
     readonly isActive: FieldRef<"Service", 'Boolean'>
     readonly createdAt: FieldRef<"Service", 'DateTime'>
     readonly updatedAt: FieldRef<"Service", 'DateTime'>
@@ -11308,6 +11359,7 @@ export namespace Prisma {
     clientPhone: 'clientPhone',
     appointmentDate: 'appointmentDate',
     status: 'status',
+    attended: 'attended',
     businessId: 'businessId',
     clientId: 'clientId',
     serviceId: 'serviceId',
@@ -11336,7 +11388,9 @@ export namespace Prisma {
     description: 'description',
     duration: 'duration',
     price: 'price',
+    type: 'type',
     capacity: 'capacity',
+    color: 'color',
     isActive: 'isActive',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -11531,6 +11585,20 @@ export namespace Prisma {
    * Reference to a field of type 'Decimal[]'
    */
   export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ServiceType'
+   */
+  export type EnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType'>
+    
+
+
+  /**
+   * Reference to a field of type 'ServiceType[]'
+   */
+  export type ListEnumServiceTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ServiceType[]'>
     
 
 
@@ -11893,6 +11961,7 @@ export namespace Prisma {
     clientPhone?: StringFilter<"Appointment"> | string
     appointmentDate?: DateTimeFilter<"Appointment"> | Date | string
     status?: EnumAppointmentStatusFilter<"Appointment"> | $Enums.AppointmentStatus
+    attended?: BoolFilter<"Appointment"> | boolean
     businessId?: StringFilter<"Appointment"> | string
     clientId?: StringNullableFilter<"Appointment"> | string | null
     serviceId?: StringNullableFilter<"Appointment"> | string | null
@@ -11908,6 +11977,7 @@ export namespace Prisma {
     clientPhone?: SortOrder
     appointmentDate?: SortOrder
     status?: SortOrder
+    attended?: SortOrder
     businessId?: SortOrder
     clientId?: SortOrderInput | SortOrder
     serviceId?: SortOrderInput | SortOrder
@@ -11926,6 +11996,7 @@ export namespace Prisma {
     clientPhone?: StringFilter<"Appointment"> | string
     appointmentDate?: DateTimeFilter<"Appointment"> | Date | string
     status?: EnumAppointmentStatusFilter<"Appointment"> | $Enums.AppointmentStatus
+    attended?: BoolFilter<"Appointment"> | boolean
     businessId?: StringFilter<"Appointment"> | string
     clientId?: StringNullableFilter<"Appointment"> | string | null
     serviceId?: StringNullableFilter<"Appointment"> | string | null
@@ -11941,6 +12012,7 @@ export namespace Prisma {
     clientPhone?: SortOrder
     appointmentDate?: SortOrder
     status?: SortOrder
+    attended?: SortOrder
     businessId?: SortOrder
     clientId?: SortOrderInput | SortOrder
     serviceId?: SortOrderInput | SortOrder
@@ -11959,6 +12031,7 @@ export namespace Prisma {
     clientPhone?: StringWithAggregatesFilter<"Appointment"> | string
     appointmentDate?: DateTimeWithAggregatesFilter<"Appointment"> | Date | string
     status?: EnumAppointmentStatusWithAggregatesFilter<"Appointment"> | $Enums.AppointmentStatus
+    attended?: BoolWithAggregatesFilter<"Appointment"> | boolean
     businessId?: StringWithAggregatesFilter<"Appointment"> | string
     clientId?: StringNullableWithAggregatesFilter<"Appointment"> | string | null
     serviceId?: StringNullableWithAggregatesFilter<"Appointment"> | string | null
@@ -12038,7 +12111,9 @@ export namespace Prisma {
     description?: StringNullableFilter<"Service"> | string | null
     duration?: IntFilter<"Service"> | number
     price?: DecimalFilter<"Service"> | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFilter<"Service"> | $Enums.ServiceType
     capacity?: IntFilter<"Service"> | number
+    color?: StringFilter<"Service"> | string
     isActive?: BoolFilter<"Service"> | boolean
     createdAt?: DateTimeFilter<"Service"> | Date | string
     updatedAt?: DateTimeFilter<"Service"> | Date | string
@@ -12053,7 +12128,9 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     duration?: SortOrder
     price?: SortOrder
+    type?: SortOrder
     capacity?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12071,7 +12148,9 @@ export namespace Prisma {
     description?: StringNullableFilter<"Service"> | string | null
     duration?: IntFilter<"Service"> | number
     price?: DecimalFilter<"Service"> | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFilter<"Service"> | $Enums.ServiceType
     capacity?: IntFilter<"Service"> | number
+    color?: StringFilter<"Service"> | string
     isActive?: BoolFilter<"Service"> | boolean
     createdAt?: DateTimeFilter<"Service"> | Date | string
     updatedAt?: DateTimeFilter<"Service"> | Date | string
@@ -12086,7 +12165,9 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     duration?: SortOrder
     price?: SortOrder
+    type?: SortOrder
     capacity?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -12107,7 +12188,9 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"Service"> | string | null
     duration?: IntWithAggregatesFilter<"Service"> | number
     price?: DecimalWithAggregatesFilter<"Service"> | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeWithAggregatesFilter<"Service"> | $Enums.ServiceType
     capacity?: IntWithAggregatesFilter<"Service"> | number
+    color?: StringWithAggregatesFilter<"Service"> | string
     isActive?: BoolWithAggregatesFilter<"Service"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Service"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Service"> | Date | string
@@ -12641,6 +12724,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     serviceName?: string | null
     business: BusinessCreateNestedOneWithoutAppointmentsInput
     client?: ClientCreateNestedOneWithoutAppointmentsInput
@@ -12653,6 +12737,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     businessId: string
     clientId?: string | null
     serviceId?: string | null
@@ -12665,6 +12750,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutAppointmentsNestedInput
     client?: ClientUpdateOneWithoutAppointmentsNestedInput
@@ -12677,6 +12763,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12689,6 +12776,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     businessId: string
     clientId?: string | null
     serviceId?: string | null
@@ -12701,6 +12789,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -12710,6 +12799,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12784,7 +12874,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12799,7 +12891,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12812,7 +12906,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12827,7 +12923,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12841,7 +12939,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12853,7 +12953,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12866,7 +12968,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13471,6 +13575,7 @@ export namespace Prisma {
     clientPhone?: SortOrder
     appointmentDate?: SortOrder
     status?: SortOrder
+    attended?: SortOrder
     businessId?: SortOrder
     clientId?: SortOrder
     serviceId?: SortOrder
@@ -13483,6 +13588,7 @@ export namespace Prisma {
     clientPhone?: SortOrder
     appointmentDate?: SortOrder
     status?: SortOrder
+    attended?: SortOrder
     businessId?: SortOrder
     clientId?: SortOrder
     serviceId?: SortOrder
@@ -13495,6 +13601,7 @@ export namespace Prisma {
     clientPhone?: SortOrder
     appointmentDate?: SortOrder
     status?: SortOrder
+    attended?: SortOrder
     businessId?: SortOrder
     clientId?: SortOrder
     serviceId?: SortOrder
@@ -13589,6 +13696,13 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
+  export type EnumServiceTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceTypeFilter<$PrismaModel> | $Enums.ServiceType
+  }
+
   export type ServiceCountOrderByAggregateInput = {
     id?: SortOrder
     businessId?: SortOrder
@@ -13596,7 +13710,9 @@ export namespace Prisma {
     description?: SortOrder
     duration?: SortOrder
     price?: SortOrder
+    type?: SortOrder
     capacity?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13615,7 +13731,9 @@ export namespace Prisma {
     description?: SortOrder
     duration?: SortOrder
     price?: SortOrder
+    type?: SortOrder
     capacity?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13628,7 +13746,9 @@ export namespace Prisma {
     description?: SortOrder
     duration?: SortOrder
     price?: SortOrder
+    type?: SortOrder
     capacity?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -13654,6 +13774,16 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type EnumServiceTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceTypeWithAggregatesFilter<$PrismaModel> | $Enums.ServiceType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceTypeFilter<$PrismaModel>
+    _max?: NestedEnumServiceTypeFilter<$PrismaModel>
   }
 
   export type EnumAlertTypeFilter<$PrismaModel = never> = {
@@ -14290,6 +14420,10 @@ export namespace Prisma {
     divide?: Decimal | DecimalJsLike | number | string
   }
 
+  export type EnumServiceTypeFieldUpdateOperationsInput = {
+    set?: $Enums.ServiceType
+  }
+
   export type BusinessUpdateOneRequiredWithoutServicesNestedInput = {
     create?: XOR<BusinessCreateWithoutServicesInput, BusinessUncheckedCreateWithoutServicesInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutServicesInput
@@ -14642,6 +14776,13 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
+  export type NestedEnumServiceTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceTypeFilter<$PrismaModel> | $Enums.ServiceType
+  }
+
   export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -14656,6 +14797,16 @@ export namespace Prisma {
     _sum?: NestedDecimalFilter<$PrismaModel>
     _min?: NestedDecimalFilter<$PrismaModel>
     _max?: NestedDecimalFilter<$PrismaModel>
+  }
+
+  export type NestedEnumServiceTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ServiceType | EnumServiceTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ServiceType[] | ListEnumServiceTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumServiceTypeWithAggregatesFilter<$PrismaModel> | $Enums.ServiceType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumServiceTypeFilter<$PrismaModel>
+    _max?: NestedEnumServiceTypeFilter<$PrismaModel>
   }
 
   export type NestedEnumAlertTypeFilter<$PrismaModel = never> = {
@@ -14681,6 +14832,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     serviceName?: string | null
     client?: ClientCreateNestedOneWithoutAppointmentsInput
     service?: ServiceCreateNestedOneWithoutAppointmentsInput
@@ -14692,6 +14844,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     clientId?: string | null
     serviceId?: string | null
     serviceName?: string | null
@@ -14781,7 +14934,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14794,7 +14949,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -14896,6 +15053,7 @@ export namespace Prisma {
     clientPhone?: StringFilter<"Appointment"> | string
     appointmentDate?: DateTimeFilter<"Appointment"> | Date | string
     status?: EnumAppointmentStatusFilter<"Appointment"> | $Enums.AppointmentStatus
+    attended?: BoolFilter<"Appointment"> | boolean
     businessId?: StringFilter<"Appointment"> | string
     clientId?: StringNullableFilter<"Appointment"> | string | null
     serviceId?: StringNullableFilter<"Appointment"> | string | null
@@ -14990,7 +15148,9 @@ export namespace Prisma {
     description?: StringNullableFilter<"Service"> | string | null
     duration?: IntFilter<"Service"> | number
     price?: DecimalFilter<"Service"> | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFilter<"Service"> | $Enums.ServiceType
     capacity?: IntFilter<"Service"> | number
+    color?: StringFilter<"Service"> | string
     isActive?: BoolFilter<"Service"> | boolean
     createdAt?: DateTimeFilter<"Service"> | Date | string
     updatedAt?: DateTimeFilter<"Service"> | Date | string
@@ -15316,6 +15476,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     serviceName?: string | null
     business: BusinessCreateNestedOneWithoutAppointmentsInput
     service?: ServiceCreateNestedOneWithoutAppointmentsInput
@@ -15327,6 +15488,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     businessId: string
     serviceId?: string | null
     serviceName?: string | null
@@ -15577,7 +15739,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15591,7 +15755,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -15731,7 +15897,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15745,7 +15913,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15952,6 +16122,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     serviceName?: string | null
     business: BusinessCreateNestedOneWithoutAppointmentsInput
     client?: ClientCreateNestedOneWithoutAppointmentsInput
@@ -15963,6 +16134,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     businessId: string
     clientId?: string | null
     serviceName?: string | null
@@ -16341,6 +16513,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     clientId?: string | null
     serviceId?: string | null
     serviceName?: string | null
@@ -16374,7 +16547,9 @@ export namespace Prisma {
     description?: string | null
     duration: number
     price: Decimal | DecimalJsLike | number | string
+    type?: $Enums.ServiceType
     capacity?: number
+    color?: string
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -16405,6 +16580,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
     client?: ClientUpdateOneWithoutAppointmentsNestedInput
     service?: ServiceUpdateOneWithoutAppointmentsNestedInput
@@ -16416,6 +16592,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16427,6 +16604,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16508,7 +16686,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16521,7 +16701,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16534,7 +16716,9 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     duration?: IntFieldUpdateOperationsInput | number
     price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumServiceTypeFieldUpdateOperationsInput | $Enums.ServiceType
     capacity?: IntFieldUpdateOperationsInput | number
+    color?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16645,6 +16829,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     businessId: string
     serviceId?: string | null
     serviceName?: string | null
@@ -16665,6 +16850,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutAppointmentsNestedInput
     service?: ServiceUpdateOneWithoutAppointmentsNestedInput
@@ -16676,6 +16862,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16687,6 +16874,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
     serviceId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16725,6 +16913,7 @@ export namespace Prisma {
     clientPhone: string
     appointmentDate: Date | string
     status?: $Enums.AppointmentStatus
+    attended?: boolean
     businessId: string
     clientId?: string | null
     serviceName?: string | null
@@ -16736,6 +16925,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutAppointmentsNestedInput
     client?: ClientUpdateOneWithoutAppointmentsNestedInput
@@ -16747,6 +16937,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16758,6 +16949,7 @@ export namespace Prisma {
     clientPhone?: StringFieldUpdateOperationsInput | string
     appointmentDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumAppointmentStatusFieldUpdateOperationsInput | $Enums.AppointmentStatus
+    attended?: BoolFieldUpdateOperationsInput | boolean
     businessId?: StringFieldUpdateOperationsInput | string
     clientId?: NullableStringFieldUpdateOperationsInput | string | null
     serviceName?: NullableStringFieldUpdateOperationsInput | string | null
