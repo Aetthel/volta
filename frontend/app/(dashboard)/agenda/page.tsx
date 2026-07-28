@@ -785,8 +785,10 @@ export default function AgendaPage() {
       : weekDays[selectedDayIndex]?.dateString === todayStr;
 
   const gridColsClass =
-    viewMode === "week" ? "grid-cols-[80px_repeat(7,_1fr)]" : "grid-cols-[80px_1fr]";
-  const minWidthClass = viewMode === "week" ? "min-w-[800px]" : "min-w-0 w-full";
+    viewMode === "week"
+      ? "grid-cols-[56px_repeat(7,_1fr)] sm:grid-cols-[80px_repeat(7,_1fr)]"
+      : "grid-cols-[56px_1fr] sm:grid-cols-[80px_1fr]";
+  const minWidthClass = viewMode === "week" ? "min-w-[640px] sm:min-w-[800px]" : "min-w-0 w-full";
 
   // Calculate active and next appointments for today to assign colors
   const now = nowDate || new Date();
@@ -865,10 +867,10 @@ export default function AgendaPage() {
           </div>
         )}
         <main className="flex-1 overflow-hidden flex flex-col min-h-0 w-full h-full bg-surface">
-          {/* Calendar Header Controls — Luxe Salon style */}
-          <div className="px-6 py-3 border-b border-outline-variant flex items-center justify-between gap-3 bg-surface">
+          {/* Calendar Header Controls — Responsive Luxe Salon style */}
+          <div className="px-4 sm:px-6 py-3 border-b border-outline-variant flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 bg-surface">
             {/* Left: Month + week navigation */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
               <span className="text-on-surface-variant text-label-lg font-medium whitespace-nowrap">
                 {currentMonthYear}
               </span>
@@ -914,7 +916,7 @@ export default function AgendaPage() {
             </div>
 
             {/* Right: Stylist dropdown + view switcher + actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
               {/* Stylist selector */}
               <InlineSelect
                 id="stylist-selector"
@@ -923,7 +925,7 @@ export default function AgendaPage() {
                 onChange={(val) => setSelectedWorkerId(val)}
                 options={workerOptions}
                 size="sm"
-                className="w-44"
+                className="w-36 sm:w-44"
               />
 
               {/* Week / Day toggle */}
@@ -955,7 +957,7 @@ export default function AgendaPage() {
               </div>
             </div>
           </div>
-          {/* Calendar Calendar Content */}
+          {/* Calendar Content with Horizontal Scroll Support */}
           <div className="overflow-x-auto custom-scrollbar flex-1 flex flex-col min-h-0 relative">
             {isLoading && (
               <div className="absolute inset-0 bg-surface/70 backdrop-blur-[1px] z-30 flex items-center justify-center select-none pointer-events-auto">
@@ -1112,7 +1114,7 @@ export default function AgendaPage() {
 
                   {/* Appointments Overlay Container */}
                   <div
-                    className={`absolute inset-y-0 left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
+                    className={`absolute inset-y-0 left-[56px] sm:left-[80px] right-0 grid ${viewMode === "week" ? "grid-cols-7" : "grid-cols-1"}`}
                     onMouseMove={(e) => {
                       if (isAppointmentModalOpen) return; // Freeze guide line while modal is open
 

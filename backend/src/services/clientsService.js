@@ -35,6 +35,18 @@ export const createClient = async (clientData) => {
 export const updateClient = async (id, clientData) => {
   const { name, surname, email, phone, lastVisit, frequentService } = clientData;
 
+  let parsedLastVisit = undefined;
+  if (lastVisit !== undefined) {
+    if (!lastVisit) {
+      parsedLastVisit = null;
+    } else if (lastVisit instanceof Date) {
+      parsedLastVisit = lastVisit;
+    } else {
+      const d = new Date(lastVisit);
+      parsedLastVisit = isNaN(d.getTime()) ? null : d;
+    }
+  }
+
   return await prisma.client.update({
     where: { id },
     data: {
@@ -42,7 +54,7 @@ export const updateClient = async (id, clientData) => {
       surname,
       email,
       phone,
-      lastVisit,
+      ...(parsedLastVisit !== undefined && { lastVisit: parsedLastVisit }),
       frequentService,
     },
   });

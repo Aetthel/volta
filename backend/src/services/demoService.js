@@ -161,7 +161,7 @@ export const createDemo = async () => {
         phone: "+34 611 234 567",
         lopdStatus: "Aceptado",
         frequentService: "Coloración Premium",
-        lastVisit: "15 Jun 2025",
+        lastVisit: new Date("2025-06-15T10:00:00Z"),
       },
       {
         name: "Marco",
@@ -170,7 +170,7 @@ export const createDemo = async () => {
         phone: "+34 622 345 678",
         lopdStatus: "Aceptado",
         frequentService: "Corte Caballero",
-        lastVisit: "20 Jun 2025",
+        lastVisit: new Date("2025-06-20T10:00:00Z"),
       },
       {
         name: "Sofía",
@@ -179,7 +179,7 @@ export const createDemo = async () => {
         phone: "+34 633 456 789",
         lopdStatus: "Pendiente",
         frequentService: "Manicura",
-        lastVisit: "22 Jun 2025",
+        lastVisit: new Date("2025-06-22T10:00:00Z"),
       },
       {
         name: "Juan",
@@ -188,7 +188,7 @@ export const createDemo = async () => {
         phone: "+34 644 567 890",
         lopdStatus: "Pendiente",
         frequentService: "Tratamiento Keratina",
-        lastVisit: "01 Jul 2025",
+        lastVisit: new Date("2025-07-01T10:00:00Z"),
       },
     ];
 

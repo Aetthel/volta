@@ -16,18 +16,18 @@ function safeCompare(a, b) {
 const authenticate = (req, res, next) => {
   const apiKey = req.header("x-api-key");
   if (!apiKey || !safeCompare(apiKey, API_KEY)) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "Acceso no autorizado: API Key inválida o ausente" });
   }
 
   const authHeader = req.header("Authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Unauthorized: Missing token" });
+    return res.status(401).json({ error: "Acceso no autorizado: Token no proporcionado" });
   }
 
   const token = authHeader.substring(7);
   const decoded = verifyToken(token, JWT_SECRET);
   if (!decoded) {
-    return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
+    return res.status(401).json({ error: "Acceso no autorizado: Token inválido o expirado" });
   }
 
   req.user = {

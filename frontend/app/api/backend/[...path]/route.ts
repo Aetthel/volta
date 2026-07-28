@@ -125,8 +125,8 @@ async function proxyRequest(
       body,
     });
 
-    const contentType = backendResponse.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
+    const contentType = backendResponse.headers.get("content-type") || "application/json";
+    if (contentType.includes("application/json")) {
       const responseData: Record<string, unknown> = await backendResponse.json();
       return NextResponse.json(responseData, { status: backendResponse.status });
     } else {
@@ -134,14 +134,14 @@ async function proxyRequest(
       return new Response(responseData, {
         status: backendResponse.status,
         headers: {
-          "Content-Type": contentType || "text/plain",
+          "Content-Type": "text/plain; charset=utf-8",
           "X-Content-Type-Options": "nosniff",
         },
       });
     }
   } catch (error) {
-    console.error(`[Proxy Error] Failed to proxy ${method} to ${destinationUrl}:`, error);
-    return NextResponse.json({ error: "Internal Server Error in Frontend Proxy" }, { status: 500 });
+    console.error(`[Proxy Error] Error al conectar con ${destinationUrl}:`, error);
+    return NextResponse.json({ error: "Error interno en el servidor proxy." }, { status: 500 });
   }
 }
 

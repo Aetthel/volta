@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
+import { NextResponse } from "next/server";
 
 const { auth } = NextAuth(authConfig);
 
@@ -10,7 +11,7 @@ export default auth((req) => {
 
   const isLoginRoute = pathname === "/login";
 
-  // Defined routes per role
+  // Definición de permisos de rutas por Rol
   const adminRoutes = ["/admin", "/sedes", "/ajustes", "/agenda"];
   const jefeRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda"];
   const empleadoRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda"];
@@ -18,46 +19,46 @@ export default auth((req) => {
 
   const isProtectedRoute = allProtectedRoutes.some((route) => pathname.startsWith(route));
 
-  // 1. If not logged in and trying to access a protected route, redirect to /login
+  // 1. Redirección si usuario no autenticado intenta acceder a ruta protegida
   if (!isLoggedIn && isProtectedRoute) {
-    return Response.redirect(new URL("/login", nextUrl));
+    return NextResponse.redirect(new URL("/login", nextUrl));
   }
 
   const user = req.auth?.user;
-  const role = req.auth?.role || user?.role;
+  const role = (req.auth as any)?.role || user?.role;
 
-  // 2. If logged in and on the login page, redirect to their home page
+  // 2. Redirección si usuario ya autenticado intenta acceder al Login
   if (isLoggedIn && user && isLoginRoute) {
-    return Response.redirect(new URL(role === "ADMIN" ? "/admin" : "/inicio", nextUrl));
+    return NextResponse.redirect(new URL(role === "ADMIN" ? "/admin" : "/inicio", nextUrl));
   }
 
-  // 3. If logged in, enforce role restrictions on protected routes
+  // 3. Control de Acceso Basado en Roles (RBAC)
   if (isLoggedIn && isProtectedRoute) {
     if (!user || !role) {
-      return Response.redirect(new URL("/login", nextUrl));
+      return NextResponse.redirect(new URL("/login", nextUrl));
     }
 
     if (role === "ADMIN") {
       const isAllowed = adminRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
-        return Response.redirect(new URL("/admin", nextUrl));
+        return NextResponse.redirect(new URL("/admin", nextUrl));
       }
     } else if (role === "JEFE") {
       const isAllowed = jefeRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
-        return Response.redirect(new URL("/inicio", nextUrl));
+        return NextResponse.redirect(new URL("/inicio", nextUrl));
       }
     } else if (role === "EMPLEADO") {
       const isAllowed = empleadoRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
-        return Response.redirect(new URL("/inicio", nextUrl));
+        return NextResponse.redirect(new URL("/inicio", nextUrl));
       }
     } else {
-      return Response.redirect(new URL("/login", nextUrl));
+      return NextResponse.redirect(new URL("/login", nextUrl));
     }
   }
 
-  return null;
+  return NextResponse.next();
 });
 
 export const config = {

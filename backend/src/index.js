@@ -6,6 +6,7 @@ import redisClient from "./config/redis.js";
 import { createWhatsAppWorker } from "./workers/whatsappWorker.js";
 import cron from "node-cron";
 import { runSentinel } from "./services/botService.js";
+import { cleanupExpiredDemos } from "./services/demoService.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { fileURLToPath } from "url";
@@ -29,6 +30,7 @@ import { errorHandler } from "./middleware/index.js";
 const app = express();
 const PORT = config.port;
 
+app.disable("x-powered-by");
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
 app.use(
   helmet({
@@ -59,9 +61,8 @@ cron.schedule("0 20 * * *", async () => {
 // Clean up expired demos every 5 minutes
 cron.schedule("*/5 * * * *", async () => {
   try {
-    const { cleanupExpiredDemos } = await import("./services/demoService.js");
     const result = await cleanupExpiredDemos();
-    if (result.deletedCount > 0) {
+    if (result && result.deletedCount > 0) {
       console.log(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
     }
   } catch (err) {

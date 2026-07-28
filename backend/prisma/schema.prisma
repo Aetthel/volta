@@ -24,20 +24,20 @@ enum SubscriptionStatus {
 model Business {
   id                 String             @id @default(uuid())
   name               String
-  phone              String             // Business phone for WhatsApp linkage
-  email              String?            // Contact email
-  address            String?            // Commercial address
-  logoUrl            String?            // Profile photo URL
-  coverUrl           String?            // Business photo URL
-  description        String?            // About you description
-  welcomeMessage     String?            // Custom welcome message template
-  reminderMessage    String?            // Custom reminder message template
+  phone              String             // Teléfono comercial para vincular WhatsApp
+  email              String?            // Email de contacto
+  address            String?            // Dirección comercial
+  logoUrl            String?            // URL del logo
+  coverUrl           String?            // URL de foto del negocio
+  description        String?            // Descripción
+  welcomeMessage     String?            // Plantilla de mensaje de bienvenida
+  reminderMessage    String?            // Plantilla de mensaje de recordatorio
   whatsappStatus     WhatsAppStatus     @default(DISCONNECTED)
-  qrCode             String?            // Current QR code for pairing
+  qrCode             String?            // Código QR para vinculación
   themeColor         String             @default("CLINICAL_ELEGANCE")
   fontSizeLevel      String             @default("MEDIUM")
   borderRadiusLevel  String             @default("MEDIUM")
-  businessType       String?            // e.g. Peluquería / Barbería, Estética, etc.
+  businessType       String?            // p.ej. Peluquería, Estética, Veterinaria
   enablePublicBooking Boolean            @default(true)
   subscriptionPlan   SubscriptionPlan   @default(PRO)
   subscriptionStatus SubscriptionStatus @default(TRIALING)
@@ -83,10 +83,10 @@ model Client {
   name            String
   surname         String
   email           String?
-  phone           String           // International format
-  lastVisit       String?
+  phone           String           // Formato internacional
+  lastVisit       DateTime?        // Cambiado a DateTime nativo
   frequentService String?
-  lopdStatus      String           @default("Pendiente") // "Aceptado" or "Pendiente"
+  lopdStatus      String           @default("Pendiente")
   avatarUrl       String?
   businessId      String
   business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -95,6 +95,7 @@ model Client {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
+  @@index([businessId, phone])
   @@index([businessId])
 }
 
@@ -106,19 +107,20 @@ enum ServiceType {
 model Appointment {
   id              String           @id @default(uuid())
   clientName      String
-  clientPhone     String           // International format (e.g., 34600000000)
+  clientPhone     String
   appointmentDate DateTime
   status          AppointmentStatus @default(PENDING)
   attended        Boolean          @default(true)
   businessId      String
   business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   clientId        String?
-  client          Client?          @relation(fields: [clientId], references: [id])
+  client          Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
   serviceId       String?
-  service         Service?         @relation(fields: [serviceId], references: [id])
+  service         Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   serviceName     String?
 
-  @@index([businessId])
+  @@index([businessId, appointmentDate])
+  @@index([businessId, status])
   @@index([clientId])
   @@index([serviceId])
 }
@@ -148,10 +150,10 @@ model Service {
   business    Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   name        String
   description String?
-  duration    Int           // Duration in minutes
-  price       Decimal       @db.Decimal(10, 2) // Price in Euros
+  duration    Int           // Duración en minutos
+  price       Decimal       @db.Decimal(10, 2)
   type        ServiceType   @default(INDIVIDUAL)
-  capacity    Int           @default(1) // Max participants per session
+  capacity    Int           @default(1)
   color       String        @default("TEAL")
   isActive    Boolean       @default(true)
   appointments Appointment[]

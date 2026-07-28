@@ -1,8 +1,8 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: volta-db
-    restart: no
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-volta_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-volta_password}
@@ -16,11 +16,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
 
   redis:
     image: redis:7-alpine
     container_name: volta-redis
-    restart: no
+    restart: unless-stopped
     ports:
       - "127.0.0.1:6379:6379"
     volumes:
@@ -30,21 +35,27 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
 
   backend:
     build: .
     container_name: volta-backend
-    user: root
-    restart: no
+    restart: unless-stopped
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
-      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
@@ -59,25 +70,27 @@ services:
       - wwebjs-auth:/app/backend/.wwebjs_auth
     ports:
       - "3001:3001"
-    command: sh -c "pnpm install && cd /app/backend && npx prisma db push --accept-data-loss && npx prisma generate && cd /app && pnpm --filter backend dev"
+    command: sh -c "cd /app/backend && pnpm prisma:push && cd /app && pnpm --filter backend dev"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
 
   frontend:
     build: .
     container_name: volta-frontend
-    user: root
-    restart: no
+    restart: unless-stopped
     depends_on:
-      - db
-      - backend
+      backend:
+        condition: service_started
     env_file:
       - .env
     environment:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
-      - DATABASE_URL=postgresql://volta_user:volta_password@db:5432/volta_db?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001
-      # AUTH_TRUST_HOST tells NextAuth (Auth.js v5) to trust the X-Forwarded-Host
-      # header set by Cloudflare Tunnel / any reverse proxy, avoiding redirect loops.
       - AUTH_TRUST_HOST=true
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -89,7 +102,12 @@ services:
       - /app/frontend/.next
     ports:
       - "3000:3000"
-    command: sh -c "mkdir -p /app/frontend/.next && chmod -R 777 /app/frontend/.next 2>/dev/null || true; pnpm install && pnpm --filter frontend dev"
+    command: sh -c "pnpm --filter frontend dev"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1024M
 
 volumes:
   postgres_data:

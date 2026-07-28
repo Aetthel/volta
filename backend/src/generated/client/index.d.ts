@@ -4367,7 +4367,7 @@ export namespace Prisma {
     surname: string | null
     email: string | null
     phone: string | null
-    lastVisit: string | null
+    lastVisit: Date | null
     frequentService: string | null
     lopdStatus: string | null
     avatarUrl: string | null
@@ -4382,7 +4382,7 @@ export namespace Prisma {
     surname: string | null
     email: string | null
     phone: string | null
-    lastVisit: string | null
+    lastVisit: Date | null
     frequentService: string | null
     lopdStatus: string | null
     avatarUrl: string | null
@@ -4532,7 +4532,7 @@ export namespace Prisma {
     surname: string
     email: string | null
     phone: string
-    lastVisit: string | null
+    lastVisit: Date | null
     frequentService: string | null
     lopdStatus: string
     avatarUrl: string | null
@@ -4651,7 +4651,7 @@ export namespace Prisma {
       surname: string
       email: string | null
       phone: string
-      lastVisit: string | null
+      lastVisit: Date | null
       frequentService: string | null
       lopdStatus: string
       avatarUrl: string | null
@@ -5089,7 +5089,7 @@ export namespace Prisma {
     readonly surname: FieldRef<"Client", 'String'>
     readonly email: FieldRef<"Client", 'String'>
     readonly phone: FieldRef<"Client", 'String'>
-    readonly lastVisit: FieldRef<"Client", 'String'>
+    readonly lastVisit: FieldRef<"Client", 'DateTime'>
     readonly frequentService: FieldRef<"Client", 'String'>
     readonly lopdStatus: FieldRef<"Client", 'String'>
     readonly avatarUrl: FieldRef<"Client", 'String'>
@@ -11865,7 +11865,7 @@ export namespace Prisma {
     surname?: StringFilter<"Client"> | string
     email?: StringNullableFilter<"Client"> | string | null
     phone?: StringFilter<"Client"> | string
-    lastVisit?: StringNullableFilter<"Client"> | string | null
+    lastVisit?: DateTimeNullableFilter<"Client"> | Date | string | null
     frequentService?: StringNullableFilter<"Client"> | string | null
     lopdStatus?: StringFilter<"Client"> | string
     avatarUrl?: StringNullableFilter<"Client"> | string | null
@@ -11904,7 +11904,7 @@ export namespace Prisma {
     surname?: StringFilter<"Client"> | string
     email?: StringNullableFilter<"Client"> | string | null
     phone?: StringFilter<"Client"> | string
-    lastVisit?: StringNullableFilter<"Client"> | string | null
+    lastVisit?: DateTimeNullableFilter<"Client"> | Date | string | null
     frequentService?: StringNullableFilter<"Client"> | string | null
     lopdStatus?: StringFilter<"Client"> | string
     avatarUrl?: StringNullableFilter<"Client"> | string | null
@@ -11943,7 +11943,7 @@ export namespace Prisma {
     surname?: StringWithAggregatesFilter<"Client"> | string
     email?: StringNullableWithAggregatesFilter<"Client"> | string | null
     phone?: StringWithAggregatesFilter<"Client"> | string
-    lastVisit?: StringNullableWithAggregatesFilter<"Client"> | string | null
+    lastVisit?: DateTimeNullableWithAggregatesFilter<"Client"> | Date | string | null
     frequentService?: StringNullableWithAggregatesFilter<"Client"> | string | null
     lopdStatus?: StringWithAggregatesFilter<"Client"> | string
     avatarUrl?: StringNullableWithAggregatesFilter<"Client"> | string | null
@@ -12612,7 +12612,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -12629,7 +12629,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -12646,7 +12646,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12663,7 +12663,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12680,7 +12680,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -12695,7 +12695,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12709,7 +12709,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14866,7 +14866,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -14882,7 +14882,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -15085,7 +15085,7 @@ export namespace Prisma {
     surname?: StringFilter<"Client"> | string
     email?: StringNullableFilter<"Client"> | string | null
     phone?: StringFilter<"Client"> | string
-    lastVisit?: StringNullableFilter<"Client"> | string | null
+    lastVisit?: DateTimeNullableFilter<"Client"> | Date | string | null
     frequentService?: StringNullableFilter<"Client"> | string | null
     lopdStatus?: StringFilter<"Client"> | string
     avatarUrl?: StringNullableFilter<"Client"> | string | null
@@ -15702,7 +15702,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -15718,7 +15718,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -15854,7 +15854,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15870,7 +15870,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16301,7 +16301,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -16317,7 +16317,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -16412,7 +16412,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16428,7 +16428,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16525,7 +16525,7 @@ export namespace Prisma {
     surname: string
     email?: string | null
     phone: string
-    lastVisit?: string | null
+    lastVisit?: Date | string | null
     frequentService?: string | null
     lopdStatus?: string
     avatarUrl?: string | null
@@ -16616,7 +16616,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16632,7 +16632,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16648,7 +16648,7 @@ export namespace Prisma {
     surname?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: StringFieldUpdateOperationsInput | string
-    lastVisit?: NullableStringFieldUpdateOperationsInput | string | null
+    lastVisit?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     frequentService?: NullableStringFieldUpdateOperationsInput | string | null
     lopdStatus?: StringFieldUpdateOperationsInput | string
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null

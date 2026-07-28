@@ -18,7 +18,7 @@ services:
       - REDIS_USERNAME=${REDIS_USERNAME:-}
       - REDIS_TLS=${REDIS_TLS:-}
       - NODE_ENV=production
-    command: sh -c "cd /app/backend && (npx prisma migrate deploy || true) && pnpm --filter backend start"
+    command: sh -c "cd /app/backend && npx prisma migrate deploy && pnpm --filter backend start"
     healthcheck:
       test:
         [
@@ -31,6 +31,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 45s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+        reservations:
+          memory: 512M
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -40,7 +47,8 @@ services:
     container_name: volta-frontend
     restart: always
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - API_KEY=${API_KEY}
@@ -68,6 +76,13 @@ services:
       start_period: 45s
     ports:
       - "${PORT_HOST:-3001}:${PORT:-3000}"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1024M
+        reservations:
+          memory: 256M
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

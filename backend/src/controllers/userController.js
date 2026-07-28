@@ -73,6 +73,11 @@ export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { name, email, password, role, businessId } = req.body;
 
+  // Only ADMIN users can modify roles or reassign business IDs
+  if (role !== undefined && req.user.role !== "ADMIN") {
+    return res.status(403).json({ error: "No se puede modificar el rol del usuario." });
+  }
+
   // If not admin, check target user ownership and request params
   if (req.user.role !== "ADMIN") {
     const targetUser = await userService.getUserById(id);
@@ -81,12 +86,6 @@ export const updateUser = async (req, res) => {
     }
     if (businessId !== undefined && businessId !== req.user.businessId) {
       return res.status(403).json({ error: "No se puede transferir usuario a otro negocio" });
-    }
-    if (role === "ADMIN") {
-      return res.status(403).json({ error: "No se puede promover usuario a ADMIN" });
-    }
-    if (role === "JEFE") {
-      return res.status(403).json({ error: "No se puede promover usuario a JEFE" });
     }
   }
 
@@ -106,8 +105,10 @@ export const updateUser = async (req, res) => {
   if (password !== undefined && password !== null && password !== "") {
     data.password = password;
   }
-  if (role !== undefined) data.role = role;
-  if (businessId !== undefined) {
+  if (role !== undefined && req.user.role === "ADMIN") {
+    data.role = role;
+  }
+  if (businessId !== undefined && req.user.role === "ADMIN") {
     data.businessId = businessId;
   }
 
