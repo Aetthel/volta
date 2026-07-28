@@ -66,13 +66,30 @@ export default function RootPage() {
     }, 150);
 
     try {
-      const res = await fetch("/api/backend/demo", { method: "POST" });
-      if (!res.ok) {
-        let errMsg = "Error creating demo";
+      let res: Response | null = null;
+      let retries = 2;
+
+      while (retries >= 0) {
         try {
-          const errData = await res.json();
-          if (errData?.error) errMsg = errData.error;
+          res = await fetch("/api/backend/demo", { method: "POST" });
+          if (res.ok) break;
         } catch (_) {}
+
+        retries--;
+        if (retries >= 0) {
+          setDemoMessage("Iniciando servidor de demostración...");
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+        }
+      }
+
+      if (!res || !res.ok) {
+        let errMsg = "Error al crear la demo";
+        if (res) {
+          try {
+            const errData = await res.json();
+            if (errData?.error) errMsg = errData.error;
+          } catch (_) {}
+        }
         throw new Error(errMsg);
       }
       const data = await res.json();

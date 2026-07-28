@@ -118,13 +118,45 @@ async function proxyRequest(
     }
   }
 
-  try {
-    const backendResponse = await fetch(destinationUrl, {
-      method,
-      headers,
-      body,
-    });
+  let backendResponse: Response | null = null;
+  let lastError: unknown = null;
+  const maxRetries = 3;
 
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      backendResponse = await fetch(destinationUrl, {
+        method,
+        headers,
+        body,
+      });
+
+      // If backend returns 502, 503, or 504 (typical cold-start or gateway initialization), retry
+      if (
+        backendResponse.status === 502 ||
+        backendResponse.status === 503 ||
+        backendResponse.status === 504
+      ) {
+        if (attempt < maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 600));
+          continue;
+        }
+      }
+
+      break;
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 600));
+      }
+    }
+  }
+
+  if (!backendResponse) {
+    console.error(`[Proxy Error] Error al conectar con ${destinationUrl} tras ${maxRetries} intentos:`, lastError);
+    return NextResponse.json({ error: "Error interno en el servidor proxy." }, { status: 500 });
+  }
+
+  try {
     const contentType = backendResponse.headers.get("content-type") || "application/json";
     if (contentType.includes("application/json")) {
       const responseData: Record<string, unknown> = await backendResponse.json();
@@ -140,8 +172,8 @@ async function proxyRequest(
       });
     }
   } catch (error) {
-    console.error(`[Proxy Error] Error al conectar con ${destinationUrl}:`, error);
-    return NextResponse.json({ error: "Error interno en el servidor proxy." }, { status: 500 });
+    console.error(`[Proxy Error] Error al procesar respuesta de ${destinationUrl}:`, error);
+    return NextResponse.json({ error: "Error al procesar la respuesta del servidor." }, { status: 500 });
   }
 }
 
