@@ -152,7 +152,10 @@ async function proxyRequest(
   }
 
   if (!backendResponse) {
-    console.error(`[Proxy Error] Error al conectar con ${destinationUrl} tras ${maxRetries} intentos:`, lastError);
+    console.error(
+      `[Proxy Error] Error al conectar con ${destinationUrl} tras ${maxRetries} intentos:`,
+      lastError
+    );
     return NextResponse.json({ error: "Error interno en el servidor proxy." }, { status: 500 });
   }
 
@@ -173,7 +176,10 @@ async function proxyRequest(
     }
   } catch (error) {
     console.error(`[Proxy Error] Error al procesar respuesta de ${destinationUrl}:`, error);
-    return NextResponse.json({ error: "Error al procesar la respuesta del servidor." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error al procesar la respuesta del servidor." },
+      { status: 500 }
+    );
   }
 }
 

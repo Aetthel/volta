@@ -11,10 +11,7 @@ export interface ApiResponse<T> {
 class ApiClient {
   private baseUrl = "/api/backend";
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${this.baseUrl}${cleanEndpoint}`;
 
@@ -52,7 +49,10 @@ class ApiClient {
     }
   }
 
-  public get<T>(path: string, queryParams?: Record<string, string | number | undefined>): Promise<ApiResponse<T>> {
+  public get<T>(
+    path: string,
+    queryParams?: Record<string, string | number | undefined>
+  ): Promise<ApiResponse<T>> {
     let urlPath = path;
     if (queryParams) {
       const filteredParams = Object.entries(queryParams).filter(

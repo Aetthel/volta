@@ -18,7 +18,9 @@ describe("authenticate middleware", () => {
     req.header.mockReturnValue(undefined);
     authenticate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ error: "Acceso no autorizado: API Key inválida o ausente" });
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Acceso no autorizado: API Key inválida o ausente",
+    });
   });
 
   it("should return 401 if API key is invalid", () => {
@@ -50,7 +52,9 @@ describe("authenticate middleware", () => {
     });
     authenticate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ error: "Acceso no autorizado: Token no proporcionado" });
+    expect(res.json).toHaveBeenCalledWith({
+      error: "Acceso no autorizado: Token no proporcionado",
+    });
   });
 
   it("should call next with valid API key and valid JWT token", () => {
