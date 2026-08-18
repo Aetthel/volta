@@ -88,6 +88,7 @@ services:
       - .env
     environment:
       - CI=true
+      - NEXT_TELEMETRY_DISABLED=1
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001
