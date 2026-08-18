@@ -20,6 +20,8 @@ export function useApi<T>(
   const [loading, setLoading] = useState<boolean>(autoFetch);
   const [error, setError] = useState<string | null>(null);
 
+  const queryParamsSerialized = JSON.stringify(queryParams);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -35,7 +37,8 @@ export function useApi<T>(
     }
 
     setLoading(false);
-  }, [path, JSON.stringify(queryParams)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, queryParamsSerialized, queryParams, onError, onSuccess]);
 
   useEffect(() => {
     if (autoFetch) {
