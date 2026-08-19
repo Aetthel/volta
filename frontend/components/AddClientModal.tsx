@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableModal } from "@/lib/useDraggableModal";
 import {
@@ -9,8 +9,6 @@ import {
   Phone,
   Mail,
   Sparkles,
-  Heart,
-  Pencil,
   GripHorizontal,
   AlignLeft,
 } from "lucide-react";
@@ -19,19 +17,10 @@ import {
   Field,
   FloatingInput,
   Button,
-  FloatingSelect,
   FloatingTextarea,
   InlineSelect,
 } from "@/components/ui/volta-ui";
-
-interface ClientToEdit {
-  id: string;
-  name: string;
-  surname: string;
-  phone: string;
-  email?: string;
-  frequentService?: string;
-}
+import { useAddClientForm, ClientToEdit } from "@/hooks/useAddClientForm";
 
 interface AddClientModalProps {
   isOpen: boolean;
@@ -57,14 +46,12 @@ interface AddClientModalProps {
   } | null;
 }
 
-const EMPTY_FORM = {
-  name: "",
-  surname: "",
-  phone: "",
-  email: "",
-  frequency: "",
-  notes: "",
-};
+const FREQUENCY_OPTIONS = [
+  { value: "Mensual", label: "Mensual" },
+  { value: "Cada 2 meses", label: "Cada 2 meses" },
+  { value: "Ocasional", label: "Ocasional" },
+  { value: "Primera visita", label: "Primera visita" },
+];
 
 export default function AddClientModal({
   isOpen,
@@ -73,9 +60,8 @@ export default function AddClientModal({
   clientToEdit,
   triggerRect,
 }: AddClientModalProps) {
-  const isEditMode = !!clientToEdit;
-
-  const [formData, setFormData] = useState(EMPTY_FORM);
+  const { formData, isEditMode, handleChange, handleFrequencyChange, handleSubmit } =
+    useAddClientForm(isOpen, clientToEdit, onSave, onClose);
 
   const { position, handleMouseDown } = useDraggableModal({
     isOpen,
@@ -84,60 +70,12 @@ export default function AddClientModal({
     modalHeight: 450,
   });
 
-  // Sync form when clientToEdit changes (open in edit mode)
-  useEffect(() => {
-    if (clientToEdit) {
-      const fullName = [clientToEdit.name, clientToEdit.surname].filter(Boolean).join(" ");
-      setFormData({
-        name: fullName,
-        surname: "",
-        phone: clientToEdit.phone ?? "",
-        email: clientToEdit.email ?? "",
-        frequency: clientToEdit.frequentService ?? "",
-        notes: "",
-      });
-    } else {
-      setFormData(EMPTY_FORM);
-    }
-  }, [clientToEdit, isOpen]);
-
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!isOpen) return null;
-  if (!mounted) return null;
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const parts = formData.name.trim().split(/\s+/);
-    const parsedName = parts[0] || "";
-    const parsedSurname = parts.slice(1).join(" ");
-
-    onSave({
-      ...formData,
-      name: parsedName,
-      surname: parsedSurname,
-      id: clientToEdit?.id,
-    });
-    setFormData(EMPTY_FORM);
-    onClose();
-  };
-
-  const frequencyOptions = [
-    { value: "Mensual", label: "Mensual" },
-    { value: "Cada 2 meses", label: "Cada 2 meses" },
-    { value: "Ocasional", label: "Ocasional" },
-    { value: "Primera visita", label: "Primera visita" },
-  ];
+  if (!isOpen || !mounted) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[100] pointer-events-none">
@@ -180,7 +118,7 @@ export default function AddClientModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
           <FieldGroup className="flex flex-col gap-5">
-            {/* Title / Name */}
+            {/* Name */}
             <div className="flex items-start gap-4">
               <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
                 <User className="w-5 h-5" />
@@ -251,8 +189,8 @@ export default function AddClientModal({
                     id="frequency"
                     label="Frecuencia estimada"
                     value={formData.frequency}
-                    onChange={(val) => setFormData((prev) => ({ ...prev, frequency: val }))}
-                    options={frequencyOptions}
+                    onChange={handleFrequencyChange}
+                    options={FREQUENCY_OPTIONS}
                     variant="borderless"
                   />
                 </Field>

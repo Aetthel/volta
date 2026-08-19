@@ -1,0 +1,104 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+export interface ClientToEdit {
+  id: string;
+  name: string;
+  surname: string;
+  phone: string;
+  email?: string;
+  frequentService?: string;
+}
+
+export interface ClientFormData {
+  name: string;
+  surname: string;
+  phone: string;
+  email: string;
+  frequency: string;
+  notes: string;
+}
+
+const EMPTY_FORM: ClientFormData = {
+  name: "",
+  surname: "",
+  phone: "",
+  email: "",
+  frequency: "",
+  notes: "",
+};
+
+export function useAddClientForm(
+  isOpen: boolean,
+  clientToEdit: ClientToEdit | null | undefined,
+  onSave: (clientData: {
+    id?: string;
+    name: string;
+    surname: string;
+    phone: string;
+    email?: string;
+    frequency?: string;
+    notes?: string;
+  }) => void,
+  onClose: () => void
+) {
+  const [formData, setFormData] = useState<ClientFormData>(EMPTY_FORM);
+  const isEditMode = !!clientToEdit;
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (clientToEdit) {
+      const fullName = [clientToEdit.name, clientToEdit.surname].filter(Boolean).join(" ");
+      setFormData({
+        name: fullName,
+        surname: "",
+        phone: clientToEdit.phone ?? "",
+        email: clientToEdit.email ?? "",
+        frequency: clientToEdit.frequentService ?? "",
+        notes: "",
+      });
+      return;
+    }
+
+    setFormData(EMPTY_FORM);
+  }, [clientToEdit, isOpen]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleFrequencyChange = (val: string) => {
+    setFormData((prev) => ({ ...prev, frequency: val }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const parts = formData.name.trim().split(/\s+/);
+    const parsedName = parts[0] || "";
+    const parsedSurname = parts.slice(1).join(" ");
+
+    onSave({
+      ...formData,
+      name: parsedName,
+      surname: parsedSurname,
+      id: clientToEdit?.id,
+    });
+
+    setFormData(EMPTY_FORM);
+    onClose();
+  };
+
+  return {
+    formData,
+    isEditMode,
+    handleChange,
+    handleFrequencyChange,
+    handleSubmit,
+  };
+}

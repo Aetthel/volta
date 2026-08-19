@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Sparkles, Pencil, Briefcase, Clock, DollarSign, User, Users } from "lucide-react";
+import { X, Sparkles, Pencil, Briefcase, Clock, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   FieldGroup,
   Field,
   FloatingInput,
   Button,
-  FloatingSelect,
   FloatingTextarea,
   SegmentedControl,
 } from "@/components/ui/volta-ui";
+import { useAddServiceForm, ServiceToEdit } from "@/hooks/useAddServiceForm";
 
 const EuroIcon = ({ className }: { className?: string }) => (
   <span
@@ -21,17 +20,6 @@ const EuroIcon = ({ className }: { className?: string }) => (
     €
   </span>
 );
-
-interface ServiceToEdit {
-  id: string;
-  name: string;
-  price: number;
-  duration: number;
-  description?: string;
-  capacity?: number;
-  type?: "INDIVIDUAL" | "GROUP";
-  color?: string;
-}
 
 interface AddServiceModalProps {
   isOpen: boolean;
@@ -59,66 +47,22 @@ const COLOR_OPTIONS = [
   { id: "SKY", bg: "bg-sky-500", label: "Azul Cielo" },
 ];
 
-const EMPTY_FORM = {
-  name: "",
-  price: "",
-  duration: "45",
-  capacity: "1",
-  type: "INDIVIDUAL" as "INDIVIDUAL" | "GROUP",
-  color: "TEAL",
-  description: "",
-};
-
 export default function AddServiceModal({
   isOpen,
   onClose,
   onSave,
   serviceToEdit,
 }: AddServiceModalProps) {
-  const isEditMode = !!serviceToEdit;
-
-  const [formData, setFormData] = useState(EMPTY_FORM);
-
-  useEffect(() => {
-    if (serviceToEdit) {
-      setFormData({
-        name: serviceToEdit.name ?? "",
-        price: String(serviceToEdit.price) ?? "",
-        duration: String(serviceToEdit.duration) ?? "45",
-        capacity: String(serviceToEdit.capacity ?? 1),
-        type: serviceToEdit.type ?? "INDIVIDUAL",
-        color: serviceToEdit.color ?? "TEAL",
-        description: serviceToEdit.description ?? "",
-      });
-    } else {
-      setFormData(EMPTY_FORM);
-    }
-  }, [serviceToEdit, isOpen]);
+  const {
+    formData,
+    isEditMode,
+    handleChange,
+    handleTypeChange,
+    handleColorSelect,
+    handleSubmit,
+  } = useAddServiceForm(isOpen, serviceToEdit, onSave, onClose);
 
   if (!isOpen) return null;
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({
-      id: serviceToEdit?.id,
-      name: formData.name,
-      price: parseFloat(formData.price),
-      duration: parseInt(formData.duration, 10),
-      capacity: formData.type === "INDIVIDUAL" ? 1 : parseInt(formData.capacity, 10) || 12,
-      type: formData.type,
-      color: formData.color,
-      description: formData.description,
-    });
-    setFormData(EMPTY_FORM);
-    onClose();
-  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -159,14 +103,7 @@ export default function AddServiceModal({
               </label>
               <SegmentedControl
                 value={formData.type}
-                onChange={(val) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    type: val as "INDIVIDUAL" | "GROUP",
-                    capacity:
-                      val === "INDIVIDUAL" ? "1" : prev.capacity === "1" ? "12" : prev.capacity,
-                  }))
-                }
+                onChange={handleTypeChange}
                 options={[
                   { value: "INDIVIDUAL", label: "Cita Individual (1 a 1)", icon: User },
                   { value: "GROUP", label: "Clase de Grupo (Yoga / Gym)", icon: Users },
@@ -198,7 +135,7 @@ export default function AddServiceModal({
                     key={c.id}
                     type="button"
                     title={c.label}
-                    onClick={() => setFormData((prev) => ({ ...prev, color: c.id }))}
+                    onClick={() => handleColorSelect(c.id)}
                     className={`w-7 h-7 rounded-full ${c.bg} transition-all duration-150 flex items-center justify-center ${
                       formData.color === c.id
                         ? "ring-2 ring-offset-2 ring-primary scale-110 shadow-md"

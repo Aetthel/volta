@@ -4,12 +4,18 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import dynamicImport from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import NewAppointmentModal from "@/components/NewAppointmentModal";
-import AddClientModal from "@/components/AddClientModal";
 import { Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
+
+const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
+  ssr: false,
+});
+const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
+  ssr: false,
+});
 
 const serviceDurations: Record<string, number> = {
   "Corte Caballero": 30,

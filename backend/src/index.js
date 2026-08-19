@@ -194,11 +194,37 @@ async function initActiveWhatsappClients() {
 // Start server (only if executed directly)
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 
+function setupGracefulShutdown(serverInstance) {
+  const shutdown = async (signal) => {
+    console.log(`[API] Recibida señal ${signal}. Iniciando Graceful Shutdown...`);
+    if (serverInstance) {
+      serverInstance.close(() => {
+        console.log("[API] Servidor HTTP cerrado.");
+      });
+    }
+    try {
+      if (redisClient) {
+        await redisClient.quit();
+        console.log("[API] Conexión a Redis cerrada.");
+      }
+      await prisma.$disconnect();
+      console.log("[API] Conexión a Prisma/Postgres cerrada.");
+    } catch (err) {
+      console.error("[API] Error al cerrar conexiones:", err);
+    } finally {
+      process.exit(0);
+    }
+  };
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+}
+
 if (isMain) {
   dbInit
     .ensureMockBusinessesExist()
     .then(() => {
-      app.listen(PORT, () => {
+      const server = app.listen(PORT, () => {
         console.log(`[API] Server running on port ${PORT}`);
         initActiveWhatsappClients();
         try {
@@ -207,6 +233,8 @@ if (isMain) {
           console.error("[API] Failed to initialize WhatsApp BullMQ worker:", err);
         }
       });
+
+      setupGracefulShutdown(server);
     })
     .catch((err) => {
       console.error("[API] Failed to initialize database on startup:", err);
