@@ -5,7 +5,7 @@ export const createSandboxDemo = async (req, res) => {
     const demoData = await demoService.createDemo();
     return res.status(201).json({
       success: true,
-      message: "Demo Sandbox creada exitosamente.",
+      message: "Entorno de prueba creado exitosamente.",
       credentials: {
         email: demoData.email,
         password: demoData.password,
@@ -14,7 +14,7 @@ export const createSandboxDemo = async (req, res) => {
       expiresAt: demoData.expiresAt,
     });
   } catch (error) {
-    console.error("Error al crear demo sandbox:", error);
+    console.error("Error al crear entorno de prueba:", error);
     return res.status(500).json({ error: "No se pudo generar la demo efímera." });
   }
 };
@@ -30,14 +30,14 @@ export const deleteDemo = async (req, res) => {
 
     const deleted = await demoService.deleteDemo(businessId);
     if (!deleted) {
-      return res.status(404).json({ error: "La demo no existe o no es de tipo sandbox." });
+      return res.status(404).json({ error: "El entorno de prueba no existe o ya ha expirado." });
     }
 
     return res
       .status(200)
-      .json({ success: true, message: "Demo finalizada y eliminada correctamente." });
+      .json({ success: true, message: "Entorno de prueba finalizado y eliminado correctamente." });
   } catch (error) {
-    console.error("Error al eliminar demo sandbox:", error);
-    return res.status(500).json({ error: "No se pudo eliminar la demo." });
+    console.error("Error al eliminar entorno de prueba:", error);
+    return res.status(500).json({ error: "No se pudo eliminar el entorno de prueba." });
   }
 };

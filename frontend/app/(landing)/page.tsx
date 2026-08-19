@@ -192,22 +192,13 @@ export default function RootPage() {
 
           {/* Action Buttons & Mobile Toggle */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className="hidden xs:block">
-              <Button
-                variant="ghost"
-                size="md"
-                className="text-primary hover:bg-primary/5 hover:text-primary px-3 sm:px-4 text-xs sm:text-body-md"
-              >
-                Iniciar Sesión
-              </Button>
-            </Link>
-            <Link href="/register">
+            <Link href="/login">
               <Button
                 variant="primary"
                 size="md"
-                className="px-3.5 sm:px-4 text-xs sm:text-body-md"
+                className="px-3.5 sm:px-4 text-xs sm:text-body-md shadow-sm"
               >
-                Comenzar
+                Iniciar Sesión
               </Button>
             </Link>
 
@@ -248,7 +239,7 @@ export default function RootPage() {
             </a>
             <div className="flex flex-col gap-2 pt-2">
               <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full justify-center">
+                <Button variant="primary" className="w-full justify-center">
                   Iniciar Sesión
                 </Button>
               </Link>

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, FormEvent } from "react";
+import { useState, useEffect, useCallback, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { Alert, Button } from "@/components/ui/volta-ui";
+import { COLOR_PALETTES, applyThemeColors } from "@/lib/theme";
 
 /* ── Sector options matching Screenshot 1 ── */
 const SECTORS = [
@@ -106,6 +107,14 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 /* ── Main Registration Component ── */
 export default function RegisterPage() {
   const router = useRouter();
+
+  // Enforce default Volta theme on register page
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const root = document.documentElement;
+      applyThemeColors(root, COLOR_PALETTES.CLINICAL_ELEGANCE);
+    }
+  }, []);
 
   // Form State
   const [currentStep, setCurrentStep] = useState(1);

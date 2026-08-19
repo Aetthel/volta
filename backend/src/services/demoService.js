@@ -53,9 +53,9 @@ export const createDemo = async () => {
       data: [
         {
           type: "EMERGENTE",
-          title: "¡Bienvenido a tu Demo Sandbox!",
+          title: "¡Bienvenido a tu Entorno de Prueba!",
           description:
-            "Esta demo tiene una duración de 20 minutos. Hemos preparado datos ficticios en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.",
+            "Esta sesión de prueba tiene una duración de 30 minutos. Hemos preparado datos de ejemplo en la agenda y clientes para que puedas explorar todas las funcionalidades de inmediato.",
           userId: demoUser.id,
           isRead: false,
         },

@@ -26,6 +26,62 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
   );
 }
 
+export function DialogTrigger({
+  children,
+  asChild,
+}: {
+  children: React.ReactNode;
+  asChild?: boolean;
+}) {
+  const ctx = React.useContext(DialogContext);
+  if (!ctx) return null;
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      onClick: (e: React.MouseEvent) => {
+        (children.props as any).onClick?.(e);
+        ctx.onOpenChange(true);
+      },
+    });
+  }
+
+  return (
+    <button type="button" onClick={() => ctx.onOpenChange(true)}>
+      {children}
+    </button>
+  );
+}
+
+export function DialogClose({
+  children,
+  asChild,
+}: {
+  children?: React.ReactNode;
+  asChild?: boolean;
+}) {
+  const ctx = React.useContext(DialogContext);
+  if (!ctx) return null;
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      onClick: (e: React.MouseEvent) => {
+        (children.props as any).onClick?.(e);
+        ctx.onOpenChange(false);
+      },
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => ctx.onOpenChange(false)}
+      className="p-1 rounded-lg text-on-surface-variant hover:text-on-surface transition-colors"
+    >
+      {children || <X className="h-4 w-4" />}
+    </button>
+  );
+}
+
 export function DialogContent({
   className,
   children,
@@ -43,26 +99,19 @@ export function DialogContent({
   if (!ctx?.open || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      {/* Backdrop overlay */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={() => ctx.onOpenChange(false)}
       />
-      {/* Modal Dialog Container */}
+      {/* Dialog Card Container */}
       <div
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-2xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-on-surface",
+          "relative z-[201] w-full max-w-lg rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-2xl animate-in zoom-in-95 duration-200 text-on-surface overflow-hidden",
           className
         )}
       >
-        <button
-          onClick={() => ctx.onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-full p-1 text-on-surface-variant opacity-70 hover:opacity-100 hover:bg-surface-container-high transition-colors"
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </button>
         {children}
       </div>
     </div>,
@@ -75,13 +124,29 @@ export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLD
 }
 
 export function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn("text-lg font-semibold leading-none tracking-tight text-on-surface", className)} {...props} />;
+  return (
+    <h2
+      className={cn("text-title-lg font-bold leading-snug tracking-tight text-on-surface", className)}
+      {...props}
+    />
+  );
 }
 
-export function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-on-surface-variant", className)} {...props} />;
+export function DialogDescription({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn("text-body-md text-on-surface-variant leading-relaxed", className)} {...props} />;
 }
 
 export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-6 gap-2 sm:gap-0", className)} {...props} />;
+  return (
+    <div
+      className={cn(
+        "flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center gap-2 sm:gap-3 mt-6",
+        className
+      )}
+      {...props}
+    />
+  );
 }

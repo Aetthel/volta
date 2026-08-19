@@ -22,12 +22,12 @@ function ThemeInitializerClient() {
     const localFont = localStorage.getItem("volta_font_size");
     const localRadius = localStorage.getItem("volta_border_radius");
 
-    const themeColor = getThemeColor(localColor || session?.user?.themeColor);
-    const fontSizeLevel = (localFont ||
-      session?.user?.fontSizeLevel ||
+    const themeColor = getThemeColor(session?.user?.themeColor || localColor);
+    const fontSizeLevel = (session?.user?.fontSizeLevel ||
+      localFont ||
       "MEDIUM") as keyof typeof FONT_SCALES;
-    const borderRadiusLevel = (localRadius ||
-      session?.user?.borderRadiusLevel ||
+    const borderRadiusLevel = (session?.user?.borderRadiusLevel ||
+      localRadius ||
       "MEDIUM") as keyof typeof RADIUS_SCALES;
 
     // Apply colors

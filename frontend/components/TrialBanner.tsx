@@ -38,7 +38,7 @@ function TrialBannerContent() {
             <Sparkles className="w-4 h-4 text-primary shrink-0" />
             <div className="truncate">
               <span>
-                <strong>Modo Demo Sandbox:</strong> Te quedan <strong>{minsLeft} min</strong> de
+                <strong>Modo de Prueba:</strong> Te quedan <strong>{minsLeft} min</strong> de
                 sesión efímera. Configura tu plan para conservar tus datos.
               </span>
             </div>

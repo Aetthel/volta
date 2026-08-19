@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Check, ArrowLeft } from "lucide-react";
 import FaceIcon from "@/components/FaceIcon";
 import { signIn } from "next-auth/react";
 import { FieldGroup, Field, FieldLabel, Alert, Button, InputGroup } from "@/components/ui/volta-ui";
+import { COLOR_PALETTES, applyThemeColors } from "@/lib/theme";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,14 @@ export default function LoginPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Enforce default Volta theme on login page
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const root = document.documentElement;
+      applyThemeColors(root, COLOR_PALETTES.CLINICAL_ELEGANCE);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

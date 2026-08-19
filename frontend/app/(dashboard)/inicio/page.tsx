@@ -27,9 +27,20 @@ import {
   X,
   Sparkles,
   ChevronLeft,
+  ArrowRight,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useAlerts } from "@/lib/alerts";
+import FaceIcon from "@/components/FaceIcon";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
@@ -684,123 +695,137 @@ function DemoCountdown({ expiresAt }: { expiresAt: string }) {
 }
 
 function DashboardAlertsCarousel() {
-  const { alerts, markAsRead } = useAlerts();
+  const { alerts, markAsRead, markAllAsRead } = useAlerts();
   const { data: session } = useSession();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   const emergentes = alerts.filter((a) => a.type === "EMERGENTE" && !a.isRead);
-  const total = emergentes.length;
+  const totalSteps = emergentes.length;
 
   useEffect(() => {
-    if (activeIndex >= total && total > 0) {
-      setActiveIndex(total - 1);
+    if (activeIndex >= totalSteps && totalSteps > 0) {
+      setActiveIndex(totalSteps - 1);
     }
-  }, [total, activeIndex]);
+  }, [totalSteps, activeIndex]);
 
-  if (total === 0) return null;
+  if (totalSteps === 0 || isDismissed) return null;
 
   const current = emergentes[activeIndex];
   if (!current) return null;
 
-  const handleClose = () => markAsRead(current.id);
+  // "Saltar" or "X" button closes the modal completely without clearing notifications one by one
+  const handleCloseModal = () => {
+    setIsDismissed(true);
+  };
+
+  // "Siguiente ->" advances step by step to browse
   const handleNext = () => {
-    if (activeIndex < total - 1) {
+    if (activeIndex < totalSteps - 1) {
       setActiveIndex((prev) => prev + 1);
     } else {
-      markAsRead(current.id);
+      markAllAsRead();
+      setIsDismissed(true);
     }
   };
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-in fade-in duration-200"
-      onClick={handleClose}
-    >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" />
-      {/* Modal Card */}
-      <div
-        className="relative bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col pointer-events-auto animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="default" className="text-[10px] uppercase tracking-wider">
-                Novedad
-              </Badge>
-              {session?.user?.subscriptionStatus === "TRIALING" && session.user.trialExpiresAt && (
-                <DemoCountdown expiresAt={session.user.trialExpiresAt} />
-              )}
-            </div>
+  // "Entendido" on last step
+  const handleFinish = () => {
+    markAllAsRead();
+    setIsDismissed(true);
+  };
+
+  return (
+    <Dialog open={!isDismissed} onOpenChange={() => handleCloseModal()}>
+      <DialogContent className="gap-0 p-0 sm:max-w-[400px] rounded-[16px] overflow-hidden border border-outline-variant/60 bg-surface-container-lowest shadow-2xl">
+        {/* Top Light Hero Graphic Banner with Volta Logo & Gridlines */}
+        <div className="relative w-full h-[185px] bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-low overflow-hidden flex items-center justify-center border-b border-outline-variant/30 select-none">
+          {/* Dashed Grid Lines Pattern in Light Neutral */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,101,101,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,101,101,0.06)_1px,transparent_1px)] bg-[size:24px_24px] opacity-70" />
+
+          {/* Centered Volta 3D Circle Logo in Light Card */}
+          <div className="relative z-10 w-20 h-20 rounded-full bg-surface-container-lowest border border-outline-variant/60 flex items-center justify-center shadow-[0_8px_24px_rgba(0,101,101,0.12)]">
+            <FaceIcon className="w-11 h-11 text-primary" />
           </div>
+
+          {/* Close X Button in Top Right */}
           <button
-            onClick={handleClose}
-            className="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-variant/80 hover:text-primary transition-colors"
+            type="button"
+            onClick={handleCloseModal}
+            className="absolute top-3 right-3 z-20 p-1.5 rounded-lg text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container-high transition-colors"
             aria-label="Cerrar"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-5 flex-1 overflow-y-auto custom-scrollbar">
-          <h3 className="text-title-lg font-semibold text-on-surface leading-snug tracking-tight">
-            {current.title}
-          </h3>
-          <p className="text-body-md text-on-surface-variant/90 mt-2.5 leading-relaxed">
-            {current.description}
-          </p>
-        </div>
+        {/* Content & Action Footer Section */}
+        <div className="space-y-5 px-6 pb-6 pt-5 bg-surface-container-lowest">
+          <DialogHeader className="m-0 p-0 space-y-2 text-left">
+            <DialogTitle className="text-xl font-bold text-on-surface tracking-tight leading-snug">
+              {current.title}
+            </DialogTitle>
+            <DialogDescription className="text-body-md text-on-surface-variant leading-relaxed">
+              {current.description}
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-outline-variant/30 flex items-center justify-between">
-          {/* Left: Dots + counter */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              {emergentes.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveIndex(idx)}
-                  className={`rounded-full transition-all duration-300 ${
-                    idx === activeIndex
-                      ? "bg-primary w-5 h-2"
-                      : "bg-outline-variant hover:bg-outline w-2 h-2"
-                  }`}
+          {/* Footer Bar: Dot Indicators + Actions */}
+          <div className="flex items-center justify-between pt-2">
+            {/* Step Dots */}
+            <div className="flex items-center space-x-2">
+              {[...Array(totalSteps)].map((_, index) => (
+                <div
+                  key={index}
+                  onClick={() => setActiveIndex(index)}
+                  className={cn(
+                    "rounded-full transition-all duration-300 cursor-pointer",
+                    index === activeIndex
+                      ? "w-2.5 h-2.5 bg-primary scale-110"
+                      : "w-2 h-2 bg-outline-variant/60 hover:bg-outline-variant"
+                  )}
                 />
               ))}
             </div>
-            {total > 1 && (
-              <span className="text-label-sm text-on-surface-variant/60 font-medium">
-                {activeIndex + 1} de {total}
-              </span>
-            )}
-          </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="text-on-surface-variant"
-            >
-              Cerrar
-            </Button>
-            {total > 1 && (
-              <Button variant="primary" size="sm" onClick={handleNext}>
-                {activeIndex < total - 1 ? "Siguiente" : "Entendido"}
-                <ChevronRight className="w-4 h-4" />
+            {/* Actions: Saltar / Siguiente / Entendido */}
+            <div className="flex items-center gap-2.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleCloseModal}
+                className="text-on-surface-variant hover:text-on-surface font-medium"
+              >
+                Saltar
               </Button>
-            )}
+
+              {activeIndex < totalSteps - 1 ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={handleNext}
+                  className="group flex items-center gap-1.5 font-semibold shadow-sm px-4"
+                >
+                  Siguiente
+                  <ArrowRight className="w-4 h-4 opacity-80 transition-transform group-hover:translate-x-0.5" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={handleFinish}
+                  className="font-semibold shadow-sm px-4"
+                >
+                  Entendido
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </div>,
-    document.body
+      </DialogContent>
+    </Dialog>
   );
 }
