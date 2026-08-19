@@ -114,7 +114,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ..
     <div
       ref={ref}
       className={cn(
-        "bg-surface-container-lowest border border-outline-variant rounded-default shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden",
+        "bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.02)] overflow-hidden",
         className
       )}
       {...props}

@@ -32,8 +32,17 @@ router.post(
   asyncHandler(userController.registerUser)
 );
 
+// GET /api/users/check-permissions (Heartbeat permission check)
+router.get("/check-permissions", authenticate, (req, res) => {
+  return res.json({
+    status: "ok",
+    authorized: true,
+    user: req.user,
+  });
+});
+
 // GET /api/users
-router.get("/", authenticate, validateId("businessId"), asyncHandler(userController.getUsers));
+router.get("/", authenticate, asyncHandler(userController.getUsers));
 
 // POST /api/users (Invite team member - subject to subscription limits)
 router.post(

@@ -14,50 +14,50 @@ describe("authenticate middleware", () => {
     next = jest.fn();
   });
 
-  it("should return 401 if API key is missing", () => {
+  it("should return 401 if API key is missing", async () => {
     req.header.mockReturnValue(undefined);
-    authenticate(req, res, next);
+    await authenticate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       error: "Acceso no autorizado: API Key inválida o ausente",
     });
   });
 
-  it("should return 401 if API key is invalid", () => {
+  it("should return 401 if API key is invalid", async () => {
     req.header.mockImplementation((name) => {
       if (name === "x-api-key") return "wrong-key";
       return undefined;
     });
-    authenticate(req, res, next);
+    await authenticate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
-  it("should return 401 if JWT token is invalid", () => {
+  it("should return 401 if JWT token is invalid", async () => {
     req.header.mockImplementation((name) => {
       if (name === "x-api-key") return MOCK_API_KEY;
       if (name === "Authorization") return "Bearer invalid-token";
       return undefined;
     });
-    authenticate(req, res, next);
+    await authenticate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       error: "Acceso no autorizado: Token inválido o expirado",
     });
   });
 
-  it("should return 401 if API key is valid but no JWT token", () => {
+  it("should return 401 if API key is valid but no JWT token", async () => {
     req.header.mockImplementation((name) => {
       if (name === "x-api-key") return MOCK_API_KEY;
       return undefined;
     });
-    authenticate(req, res, next);
+    await authenticate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       error: "Acceso no autorizado: Token no proporcionado",
     });
   });
 
-  it("should call next with valid API key and valid JWT token", () => {
+  it("should call next with valid API key and valid JWT token", async () => {
     const payload = { id: "user-1", role: "ADMIN", businessId: "biz-1", email: "admin@test.com" };
     const token = signToken(payload, MOCK_JWT_SECRET);
     req.header.mockImplementation((name) => {
@@ -65,7 +65,7 @@ describe("authenticate middleware", () => {
       if (name === "Authorization") return `Bearer ${token}`;
       return undefined;
     });
-    authenticate(req, res, next);
+    await authenticate(req, res, next);
     expect(next).toHaveBeenCalled();
     expect(req.user).toEqual({
       id: "user-1",
@@ -90,7 +90,9 @@ describe("requireRole middleware", () => {
     requireRole(["ADMIN"])(req, res, next);
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith({
-      error: "Forbidden: Insufficient permissions",
+      error: "Acceso denegado: Permisos insuficientes",
+      code: "PERMISSIONS_REVOKED",
+      redirect: "/",
     });
   });
 

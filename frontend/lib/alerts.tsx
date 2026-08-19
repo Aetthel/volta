@@ -30,7 +30,7 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchAlerts = useCallback(async () => {
-    if (status !== "authenticated") return;
+    if (status === "unauthenticated") return;
     try {
       const res = await fetch("/api/backend/alerts");
       if (res.ok) {
@@ -81,7 +81,7 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status !== "unauthenticated") {
       setIsLoading(true);
       fetchAlerts().finally(() => setIsLoading(false));
 

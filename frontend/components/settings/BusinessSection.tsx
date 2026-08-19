@@ -86,7 +86,7 @@ export default function BusinessSection({
   const businessLogoInputRef = useRef<HTMLInputElement>(null);
 
   const fetchHours = useCallback(() => {
-    if (!businessId) return;
+    if (!businessId || businessId === "mock-business-id") return;
     setLoadingHours(true);
     fetch(`/api/backend/business/${businessId}/hours`)
       .then((res) => res.json())
@@ -98,7 +98,7 @@ export default function BusinessSection({
   }, [businessId]);
 
   const fetchServices = useCallback(() => {
-    if (!businessId) return;
+    if (!businessId || businessId === "mock-business-id") return;
     setLoadingServices(true);
     fetch(`/api/backend/services?businessId=${businessId}`)
       .then((res) => res.json())

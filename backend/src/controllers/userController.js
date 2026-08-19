@@ -15,8 +15,8 @@ export const getUsers = async (req, res) => {
   }
 
   // Force non-admins to only query their own business
-  if (req.user.role !== "ADMIN") {
-    where.businessId = req.user.businessId || "no_business";
+  if (req.user?.role !== "ADMIN") {
+    where.businessId = req.user?.businessId || "no_business";
   }
 
   const users = await userService.getUsers(where);

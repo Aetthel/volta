@@ -62,13 +62,13 @@ html {
   --color-on-tertiary-fixed: #002020;
   --color-on-tertiary-fixed-variant: #004f50;
 
-  --radius-sm: calc(0.25rem * var(--radius-scale));
-  --radius-md: calc(0.375rem * var(--radius-scale));
+  --radius-sm: calc(0.2rem * var(--radius-scale));
+  --radius-md: calc(0.35rem * var(--radius-scale));
   --radius-lg: calc(0.5rem * var(--radius-scale));
-  --radius-xl: calc(0.75rem * var(--radius-scale));
-  --radius-2xl: calc(1rem * var(--radius-scale));
-  --radius-3xl: calc(1.5rem * var(--radius-scale));
-  --radius-default: calc(0.375rem * var(--radius-scale));
+  --radius-xl: calc(0.625rem * var(--radius-scale));
+  --radius-2xl: calc(0.75rem * var(--radius-scale));
+  --radius-3xl: calc(1rem * var(--radius-scale));
+  --radius-default: calc(0.625rem * var(--radius-scale));
 
   /* Custom Spacing scale for Volta UI & Stitch Designs */
   --spacing-gutter: clamp(1rem, 0.75rem + 1.25vw, 1.5rem);

@@ -43,7 +43,7 @@ export default function MessagesSection({
   const [savingTemplates, setSavingTemplates] = useState(false);
 
   const fetchWhatsappStatus = useCallback(() => {
-    if (!businessId) return;
+    if (!businessId || businessId === "mock-business-id") return;
     fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -57,7 +57,7 @@ export default function MessagesSection({
   }, [businessId]);
 
   const fetchTemplates = useCallback(() => {
-    if (!businessId) return;
+    if (!businessId || businessId === "mock-business-id") return;
     fetch(`/api/backend/whatsapp/templates?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {

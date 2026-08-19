@@ -1,6 +1,7 @@
 import config from "../config/index.js";
 import { verifyToken } from "../utils/crypto.js";
 import crypto from "crypto";
+import prisma from "../config/db.js";
 
 const API_KEY = config.apiKey;
 const JWT_SECRET = config.backendJwtSecret;
@@ -13,7 +14,7 @@ function safeCompare(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-const authenticate = (req, res, next) => {
+const authenticate = async (req, res, next) => {
   const apiKey = req.header("x-api-key");
   if (!apiKey || !safeCompare(apiKey, API_KEY)) {
     return res.status(401).json({ error: "Acceso no autorizado: API Key inválida o ausente" });
@@ -36,12 +37,45 @@ const authenticate = (req, res, next) => {
     businessId: decoded.businessId || null,
     email: decoded.email || null,
   };
+
+  // Perform database verification of business trial/subscription status
+  if (decoded.businessId) {
+    try {
+      const business = await prisma.business.findUnique({
+        where: { id: decoded.businessId },
+        select: { subscriptionStatus: true, trialExpiresAt: true },
+      });
+
+      if (business) {
+        const isTrialing = business.subscriptionStatus === "TRIALING";
+        const isExpiredStatus =
+          business.subscriptionStatus === "EXPIRED" || business.subscriptionStatus === "CANCELLED";
+        const isTrialEnded =
+          isTrialing && business.trialExpiresAt && new Date(business.trialExpiresAt) < new Date();
+
+        if (isExpiredStatus || isTrialEnded) {
+          return res.status(403).json({
+            error: "Tu período de prueba o suscripción ha finalizado.",
+            code: "TRIAL_EXPIRED",
+            redirect: "/",
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Auth middleware business check error:", e);
+    }
+  }
+
   next();
 };
 
 const requireRole = (allowedRoles) => (req, res, next) => {
   if (!req.user || !req.user.role || !allowedRoles.includes(req.user.role)) {
-    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+    return res.status(403).json({
+      error: "Acceso denegado: Permisos insuficientes",
+      code: "PERMISSIONS_REVOKED",
+      redirect: "/",
+    });
   }
   next();
 };

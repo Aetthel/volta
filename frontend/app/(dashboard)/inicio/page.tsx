@@ -227,13 +227,12 @@ export default function DashboardPage() {
     );
   });
 
-  // 2. Metrics calculation
-  const newClientsCount = clients.filter((c) => {
-    const createdDate = new Date(c.createdAt);
-    const diffTime = Math.abs(new Date().getTime() - createdDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays <= 30;
-  }).length;
+  // 2. Real 7-Day Analytics Calculation for Metric Cards & Sparklines
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split("T")[0];
+  });
 
   const dynamicPrices: Record<string, number> = {
     ...DEFAULT_SERVICES.reduce(
@@ -252,12 +251,85 @@ export default function DashboardPage() {
     ),
   };
 
+  // 1. Citas (daily appointment counts for last 7 days)
+  const appointmentsSparkline = last7Days.map((dateStr) => {
+    return appointments.filter(
+      (app) => app.appointmentDate && app.appointmentDate.split("T")[0] === dateStr
+    ).length;
+  });
+
+  const todayCount = appointmentsSparkline[6] || 0;
+  const yesterdayCount = appointmentsSparkline[5] || 0;
+  const appsDiff = todayCount - yesterdayCount;
+  const appsPct =
+    yesterdayCount > 0
+      ? `${Math.abs(Math.round((appsDiff / yesterdayCount) * 100))}%`
+      : todayCount > 0
+        ? "100%"
+        : "0.0%";
+  const appsTrend = appsDiff > 0 ? "up" : appsDiff < 0 ? "down" : "neutral";
+
+  // 2. Nuevos Clientes (daily new client counts for last 7 days)
+  const newClientsCount = clients.filter((c) => {
+    const createdDate = new Date(c.createdAt);
+    const diffTime = Math.abs(new Date().getTime() - createdDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 30;
+  }).length;
+
+  const clientsSparkline = last7Days.map((dateStr) => {
+    return clients.filter(
+      (c) => c.createdAt && c.createdAt.split("T")[0] === dateStr
+    ).length;
+  });
+
+  const thisWeekClients = clientsSparkline.reduce((a, b) => a + b, 0);
+  const prevWeekClients = clients.filter((c) => {
+    if (!c.createdAt) return false;
+    const createdDate = new Date(c.createdAt);
+    const diffTime = new Date().getTime() - createdDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 7 && diffDays <= 14;
+  }).length;
+
+  const clientsDiff = thisWeekClients - prevWeekClients;
+  const clientsPct =
+    prevWeekClients > 0
+      ? `${Math.abs(Math.round((clientsDiff / prevWeekClients) * 100))}%`
+      : thisWeekClients > 0
+        ? "100%"
+        : "0.0%";
+  const clientsTrend = clientsDiff > 0 ? "up" : clientsDiff < 0 ? "down" : "neutral";
+
+  // 3. Ingresos Est. (daily estimated revenue for last 7 days)
   const estimatedIncome = todayApps.reduce((acc, app) => {
     const serviceName = app.serviceName || "Corte Caballero";
     const price = dynamicPrices[serviceName] || 35;
     return acc + price;
   }, 0);
 
+  const incomeSparkline = last7Days.map((dateStr) => {
+    const dayApps = appointments.filter(
+      (app) => app.appointmentDate && app.appointmentDate.split("T")[0] === dateStr
+    );
+    return dayApps.reduce((sum, app) => {
+      const sName = app.serviceName || "Corte Caballero";
+      return sum + (dynamicPrices[sName] || 35);
+    }, 0);
+  });
+
+  const todayIncomeVal = incomeSparkline[6] || 0;
+  const yesterdayIncomeVal = incomeSparkline[5] || 0;
+  const incomeDiff = todayIncomeVal - yesterdayIncomeVal;
+  const incomePct =
+    yesterdayIncomeVal > 0
+      ? `${Math.abs(Math.round((incomeDiff / yesterdayIncomeVal) * 100))}%`
+      : todayIncomeVal > 0
+        ? "100%"
+        : "0.0%";
+  const incomeTrend = incomeDiff > 0 ? "up" : incomeDiff < 0 ? "down" : "neutral";
+
+  // 4. Ocupación (daily occupancy percentages for last 7 days)
   const timeSlotsCount = 12; // 09:00 to 20:00 slots
   const bookedSlotsCount = new Set(
     todayApps.map((app) => {
@@ -267,6 +339,30 @@ export default function DashboardPage() {
   ).size;
   const occupancyPercentage =
     timeSlotsCount > 0 ? Math.round((bookedSlotsCount / timeSlotsCount) * 100) : 0;
+
+  const occupancySparkline = last7Days.map((dateStr) => {
+    const dayApps = appointments.filter(
+      (app) => app.appointmentDate && app.appointmentDate.split("T")[0] === dateStr
+    );
+    const bookedCount = new Set(
+      dayApps.map((app) => {
+        const d = new Date(app.appointmentDate);
+        return `${d.getHours().toString().padStart(2, "0")}:00`;
+      })
+    ).size;
+    return Math.min(100, Math.round((bookedCount / 12) * 100));
+  });
+
+  const todayOcc = occupancySparkline[6] || 0;
+  const yesterdayOcc = occupancySparkline[5] || 0;
+  const occDiff = todayOcc - yesterdayOcc;
+  const occPct =
+    yesterdayOcc > 0
+      ? `${Math.abs(Math.round((occDiff / yesterdayOcc) * 100))}%`
+      : todayOcc > 0
+        ? `${todayOcc}%`
+        : "0.0%";
+  const occTrend = occDiff > 0 ? "up" : occDiff < 0 ? "down" : "neutral";
 
   // 3. Most requested services ranking
   const serviceCounts = appointments.reduce(
@@ -300,18 +396,24 @@ export default function DashboardPage() {
 
   const weeklyData = weekDays.map((day, idx) => {
     const dayStr = day.toISOString().split("T")[0];
-    const count = appointments.filter((app) => {
+    const dayApps = appointments.filter((app) => {
       if (!app.appointmentDate) return false;
       return app.appointmentDate.split("T")[0] === dayStr;
-    }).length;
+    });
+
+    const clientsCount = dayApps.length;
+    const incomeAmount = dayApps.reduce((sum, app) => {
+      const sName = app.serviceName || "Corte Caballero";
+      return sum + (dynamicPrices[sName] || 35);
+    }, 0);
+
     return {
       name: dayNames[idx],
-      count,
+      income: incomeAmount,
+      clients: clientsCount,
       isCurrent: idx === currentDayIndex,
     };
   });
-
-  const maxWeeklyCount = Math.max(...weeklyData.map((d) => d.count), 1);
 
   // 5. Featured services calculation (top 4 services, listing unused business/default services as 0%)
   const displayServiceShares = (() => {
@@ -461,14 +563,23 @@ export default function DashboardPage() {
               {[...Array(4)].map((_, i) => (
                 <Card
                   key={i}
-                  className="p-5 h-[116px] flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                  className="p-5 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)] h-[160px]"
                 >
                   <div className="flex justify-between items-center w-full">
                     <Skeleton className="w-24 h-4" />
-                    <Skeleton className="w-8 h-8 rounded-full" />
+                    <Skeleton className="w-4 h-4 rounded-full" />
                   </div>
-                  <Skeleton className="w-16 h-8 mt-2" />
-                  <Skeleton className="w-20 h-3.5 mt-1" />
+                  <div className="flex justify-between items-end my-2">
+                    <div>
+                      <Skeleton className="w-16 h-8" />
+                      <Skeleton className="w-24 h-3 mt-1.5" />
+                    </div>
+                    <Skeleton className="w-14 h-7" />
+                  </div>
+                  <div className="flex justify-between items-center pt-2 border-t border-outline-variant/20">
+                    <Skeleton className="w-12 h-3" />
+                    <Skeleton className="w-10 h-3" />
+                  </div>
                 </Card>
               ))}
             </section>
@@ -477,38 +588,42 @@ export default function DashboardPage() {
               <MetricCard
                 title="Citas Hoy"
                 value={String(todayApps.length)}
-                change={`${todayApps.length > 0 ? "+" : ""}${todayApps.length * 10}%`}
-                trend={todayApps.length > 0 ? "up" : "down"}
-                icon={<CalendarIcon className="w-5 h-5 text-primary" />}
+                change={appsPct}
+                trend={appsTrend}
+                caption="Comparado con ayer"
+                infoText="Total de citas agendadas para el día de hoy y porcentaje de variación respecto al día anterior."
+                sparklineData={appointmentsSparkline}
+                icon={<CalendarIcon className="w-4 h-4 text-on-surface-variant/80" />}
               />
               <MetricCard
                 title="Nuevos Clientes"
                 value={String(newClientsCount)}
-                change={`${newClientsCount > 0 ? "+" : ""}${newClientsCount * 5}%`}
-                trend={newClientsCount > 0 ? "up" : "down"}
-                icon={<UserPlus className="w-5 h-5 text-primary" />}
+                change={clientsPct}
+                trend={clientsTrend}
+                caption="Últimos 30 días"
+                infoText="Clientes registrados por primera vez en la plataforma durante este mes frente al período previo."
+                sparklineData={clientsSparkline}
+                icon={<UserPlus className="w-4 h-4 text-on-surface-variant/80" />}
               />
               <MetricCard
                 title="Ingresos Est."
                 value={formatCurrency(estimatedIncome)}
-                change={estimatedIncome > 0 ? "+12%" : "Estable"}
-                trend={estimatedIncome > 0 ? "up" : "down"}
-                icon={<Euro className="w-5 h-5 text-primary" />}
+                change={incomePct}
+                trend={incomeTrend}
+                caption="Citas confirmadas hoy"
+                infoText="Suma estimada de los precios de los servicios agendados para las citas programadas para hoy."
+                sparklineData={incomeSparkline}
+                icon={<Euro className="w-4 h-4 text-on-surface-variant/80" />}
               />
               <MetricCard
                 title="Ocupación"
-                value={
-                  <div className="flex items-baseline gap-1.5 mt-0.5 sm:mt-1">
-                    <span className="text-2xl sm:text-3xl font-bold text-on-surface">
-                      {occupancyPercentage}%
-                    </span>
-                    <span className="text-body-sm font-medium text-on-surface-variant">
-                      de capacidad
-                    </span>
-                  </div>
-                }
-                icon={<Activity className="w-5 h-5 text-primary" />}
-                progress={occupancyPercentage}
+                value={`${occupancyPercentage}%`}
+                change={occPct}
+                trend={occTrend}
+                caption="Capacidad diaria asignada"
+                infoText="Porcentaje de franjas horarias reservadas sobre el horario laboral total configurado para hoy."
+                sparklineData={occupancySparkline}
+                icon={<Activity className="w-4 h-4 text-on-surface-variant/80" />}
               />
             </section>
           )}
@@ -516,7 +631,7 @@ export default function DashboardPage() {
           {/* Middle Row (Weekly Performance + Featured Services) */}
           {isLoading ? (
             <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter mb-gutter">
-              <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col h-[340px] justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col h-[340px] justify-between bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                 <div className="flex justify-between items-center mb-6">
                   <Skeleton className="w-40 h-6" />
                   <Skeleton className="w-24 h-8" />
@@ -533,7 +648,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </Card>
-              <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                 <Skeleton className="w-44 h-6 mb-6" />
                 <div className="flex flex-col gap-4">
                   {[...Array(4)].map((_, i) => (
@@ -550,25 +665,14 @@ export default function DashboardPage() {
             </section>
           ) : (
             <section className="grid grid-cols-1 lg:grid-cols-10 gap-gutter mb-gutter">
-              {/* Weekly Performance Bar Chart */}
-              <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="font-medium text-xl text-on-surface">Rendimiento Semanal</h3>
-                    <div className="flex items-center text-body-sm font-semibold text-on-surface-variant border border-outline-variant rounded-lg px-3 py-1.5 bg-surface-container-low/50 cursor-pointer hover:bg-surface-container-high transition-colors">
-                      <span>Esta Semana</span>
-                      <ChevronDown className="w-4 h-4 ml-1.5 text-on-surface-variant" />
-                    </div>
-                  </div>
-
-                  <WeeklyPerformanceChart data={weeklyData} maxCount={maxWeeklyCount} />
-                </div>
+              {/* Weekly Performance Area Chart */}
+              <Card className="col-span-12 lg:col-span-6 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <WeeklyPerformanceChart data={weeklyData} />
               </Card>
 
-              {/* Featured Services */}
-              <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col bg-white border border-outline-variant/60 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                <h3 className="font-medium text-xl text-on-surface mb-6">Servicios Destacados</h3>
-                <FeaturedServicesList services={displayServiceShares} />
+              {/* Featured Services Radial Donut Chart */}
+              <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <FeaturedServicesList services={displayServiceShares} totalCount={appointments.length || 1260} />
               </Card>
             </section>
           )}
@@ -642,9 +746,6 @@ export default function DashboardPage() {
         onSave={() => fetchData()}
         triggerRect={clientModalTriggerRect}
       />
-
-      {/* Welcome Popup Modal Carousel */}
-      <DashboardAlertsCarousel />
     </div>
   );
 }
@@ -691,141 +792,5 @@ function DemoCountdown({ expiresAt }: { expiresAt: string }) {
         />
       </div>
     </div>
-  );
-}
-
-function DashboardAlertsCarousel() {
-  const { alerts, markAsRead, markAllAsRead } = useAlerts();
-  const { data: session } = useSession();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isDismissed, setIsDismissed] = useState(false);
-
-  const emergentes = alerts.filter((a) => a.type === "EMERGENTE" && !a.isRead);
-  const totalSteps = emergentes.length;
-
-  useEffect(() => {
-    if (activeIndex >= totalSteps && totalSteps > 0) {
-      setActiveIndex(totalSteps - 1);
-    }
-  }, [totalSteps, activeIndex]);
-
-  if (totalSteps === 0 || isDismissed) return null;
-
-  const current = emergentes[activeIndex];
-  if (!current) return null;
-
-  // "Saltar" or "X" button closes the modal completely without clearing notifications one by one
-  const handleCloseModal = () => {
-    setIsDismissed(true);
-  };
-
-  // "Siguiente ->" advances step by step to browse
-  const handleNext = () => {
-    if (activeIndex < totalSteps - 1) {
-      setActiveIndex((prev) => prev + 1);
-    } else {
-      markAllAsRead();
-      setIsDismissed(true);
-    }
-  };
-
-  // "Entendido" on last step
-  const handleFinish = () => {
-    markAllAsRead();
-    setIsDismissed(true);
-  };
-
-  return (
-    <Dialog open={!isDismissed} onOpenChange={() => handleCloseModal()}>
-      <DialogContent className="gap-0 p-0 sm:max-w-[400px] rounded-[16px] overflow-hidden border border-outline-variant/60 bg-surface-container-lowest shadow-2xl">
-        {/* Top Light Hero Graphic Banner with Volta Logo & Gridlines */}
-        <div className="relative w-full h-[185px] bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-low overflow-hidden flex items-center justify-center border-b border-outline-variant/30 select-none">
-          {/* Dashed Grid Lines Pattern in Light Neutral */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,101,101,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,101,101,0.06)_1px,transparent_1px)] bg-[size:24px_24px] opacity-70" />
-
-          {/* Centered Volta 3D Circle Logo in Light Card */}
-          <div className="relative z-10 w-20 h-20 rounded-full bg-surface-container-lowest border border-outline-variant/60 flex items-center justify-center shadow-[0_8px_24px_rgba(0,101,101,0.12)]">
-            <FaceIcon className="w-11 h-11 text-primary" />
-          </div>
-
-          {/* Close X Button in Top Right */}
-          <button
-            type="button"
-            onClick={handleCloseModal}
-            className="absolute top-3 right-3 z-20 p-1.5 rounded-lg text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container-high transition-colors"
-            aria-label="Cerrar"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Content & Action Footer Section */}
-        <div className="space-y-5 px-6 pb-6 pt-5 bg-surface-container-lowest">
-          <DialogHeader className="m-0 p-0 space-y-2 text-left">
-            <DialogTitle className="text-xl font-bold text-on-surface tracking-tight leading-snug">
-              {current.title}
-            </DialogTitle>
-            <DialogDescription className="text-body-md text-on-surface-variant leading-relaxed">
-              {current.description}
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Footer Bar: Dot Indicators + Actions */}
-          <div className="flex items-center justify-between pt-2">
-            {/* Step Dots */}
-            <div className="flex items-center space-x-2">
-              {[...Array(totalSteps)].map((_, index) => (
-                <div
-                  key={index}
-                  onClick={() => setActiveIndex(index)}
-                  className={cn(
-                    "rounded-full transition-all duration-300 cursor-pointer",
-                    index === activeIndex
-                      ? "w-2.5 h-2.5 bg-primary scale-110"
-                      : "w-2 h-2 bg-outline-variant/60 hover:bg-outline-variant"
-                  )}
-                />
-              ))}
-            </div>
-
-            {/* Actions: Saltar / Siguiente / Entendido */}
-            <div className="flex items-center gap-2.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleCloseModal}
-                className="text-on-surface-variant hover:text-on-surface font-medium"
-              >
-                Saltar
-              </Button>
-
-              {activeIndex < totalSteps - 1 ? (
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  onClick={handleNext}
-                  className="group flex items-center gap-1.5 font-semibold shadow-sm px-4"
-                >
-                  Siguiente
-                  <ArrowRight className="w-4 h-4 opacity-80 transition-transform group-hover:translate-x-0.5" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  onClick={handleFinish}
-                  className="font-semibold shadow-sm px-4"
-                >
-                  Entendido
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

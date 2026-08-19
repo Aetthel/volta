@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import {
   getThemeColor,
@@ -28,10 +28,17 @@ const TAB_KEY = "volta-settings-active-tab";
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
 
+const ALL_TABS = [
+  { id: "perfil", label: "Perfil y Seguridad", roles: ["ADMIN", "JEFE", "EMPLEADO"] },
+  { id: "mensajeria", label: "Mensajes y WhatsApp", roles: ["JEFE", "EMPLEADO"] },
+  { id: "gestion", label: "Gestión del Negocio", roles: ["JEFE"] },
+  { id: "personalizacion", label: "Personalización", roles: ["JEFE"] },
+];
+
 export default function AjustesPage() {
-  const { data: session, update } = useSession();
-  const role = session?.user?.role || "EMPLEADO";
-  const businessId = session?.user?.businessId || "mock-business-id";
+  const { data: session, status } = useSession();
+  const role = session?.user?.role;
+  const businessId = session?.user?.businessId || "";
 
   const [toast, setToast] = useState<ToastState>({ show: false, text: "" });
 
@@ -50,23 +57,23 @@ export default function AjustesPage() {
 
   // Business profile state (shared across sections)
   const [profile, setProfile] = useState<BusinessProfile>({
-    name: "Estilo & Spa (Ejemplo)",
-    email: "contacto@volta.com",
+    name: "Estilo & Spa",
+    email: session?.user?.email || "contacto@volta.com",
     phone: "+34 912 345 678",
     address: "Calle de Velázquez, 45, Madrid",
     logoUrl: "",
     coverUrl: "",
     description: "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
-    ownerName: "Sofía Martín",
+    ownerName: session?.user?.name || "Usuario Volta",
     workerPhoto: DEFAULT_AVATAR,
-    themeColor: "TEAL",
-    fontSizeLevel: "MEDIUM",
-    borderRadiusLevel: "MEDIUM",
+    themeColor: (session?.user?.themeColor as any) || "TEAL",
+    fontSizeLevel: (session?.user?.fontSizeLevel as any) || "MEDIUM",
+    borderRadiusLevel: (session?.user?.borderRadiusLevel as any) || "MEDIUM",
   });
 
-  // Fetch business profile and apply theme on mount
+  // Fetch business profile on mount
   useEffect(() => {
-    if (!businessId) return;
+    if (!businessId || businessId === "mock-business-id") return;
     fetch(`/api/backend/business/${businessId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -80,15 +87,15 @@ export default function AjustesPage() {
           const localRadius =
             typeof window !== "undefined" ? localStorage.getItem("volta_border_radius") : null;
 
-          const activeColor = getThemeColor(localColor || data.themeColor);
-          const activeFont = localFont || data.fontSizeLevel || "MEDIUM";
-          const activeRadius = localRadius || data.borderRadiusLevel || "MEDIUM";
+          const activeColor = getThemeColor(session?.user?.themeColor || localColor || data.themeColor);
+          const activeFont = session?.user?.fontSizeLevel || localFont || data.fontSizeLevel || "MEDIUM";
+          const activeRadius = session?.user?.borderRadiusLevel || localRadius || data.borderRadiusLevel || "MEDIUM";
 
           setProfile((prev) => ({
             ...prev,
-            name: data.name,
-            email: data.email,
-            phone: data.phone,
+            name: data.name || prev.name,
+            email: data.email || prev.email,
+            phone: data.phone || prev.phone,
             address: data.address || prev.address,
             logoUrl: data.logoUrl || prev.logoUrl,
             coverUrl: data.coverUrl || prev.coverUrl,
@@ -98,46 +105,29 @@ export default function AjustesPage() {
             fontSizeLevel: activeFont,
             borderRadiusLevel: activeRadius,
           }));
-
-          // Apply theme CSS variables
-          const root = document.documentElement;
-          const palette = COLOR_PALETTES[activeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
-          applyThemeColors(root, palette);
-          root.style.setProperty(
-            "--font-scale",
-            FONT_SCALES[activeFont as keyof typeof FONT_SCALES]?.scale || FONT_SCALES.MEDIUM.scale
-          );
-          root.style.setProperty(
-            "--radius-scale",
-            RADIUS_SCALES[activeRadius as keyof typeof RADIUS_SCALES]?.scale ||
-              RADIUS_SCALES.MEDIUM.scale
-          );
         }
       })
       .catch(() => {});
-  }, [businessId]);
+  }, [businessId, session]);
 
   // Page title
   useEffect(() => {
     if (session?.user?.name) document.title = `Ajustes - ${session.user.name} - Volta`;
   }, [session]);
 
-  // Define which tabs each role can see
-  const tabs = [
-    { id: "perfil", label: "Perfil y Seguridad", roles: ["ADMIN", "JEFE", "EMPLEADO"] },
-    { id: "mensajeria", label: "Mensajes y WhatsApp", roles: ["JEFE", "EMPLEADO"] },
-    { id: "gestion", label: "Gestión del Negocio", roles: ["JEFE"] },
-    { id: "personalizacion", label: "Personalización", roles: ["JEFE"] },
-  ];
+  // Define which tabs each role can see (memoized to prevent infinite re-render loop!)
+  const visibleTabs = useMemo(() => {
+    if (!role) return ALL_TABS;
+    return ALL_TABS.filter((t) => t.roles.includes(role));
+  }, [role]);
 
-  const visibleTabs = tabs.filter((t) => t.roles.includes(role));
-
-  // Ensure active tab is valid for this role
+  // Ensure active tab is valid for this role only AFTER session is authenticated
   useEffect(() => {
-    if (visibleTabs.length > 0 && !visibleTabs.find((t) => t.id === activeTab)) {
+    if (status === "loading" || !role) return;
+    if (visibleTabs.length > 0 && !visibleTabs.some((t) => t.id === activeTab)) {
       setActiveTab(visibleTabs[0].id);
     }
-  }, [role, activeTab, visibleTabs]);
+  }, [role, status, activeTab, visibleTabs]);
 
   // ADMIN keeps its own separate render (not touched per user request)
   if (role === "ADMIN") {
