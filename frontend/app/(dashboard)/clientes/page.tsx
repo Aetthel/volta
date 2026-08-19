@@ -25,6 +25,7 @@ import { useSession } from "next-auth/react";
 
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import { formatDateTimeParts } from "@/lib/utils";
 import TrialBanner from "@/components/TrialBanner";
 import AddClientModal from "@/components/AddClientModal";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
@@ -490,7 +491,7 @@ export default function ClientesPage() {
                   setCurrentPage(1);
                 }}
                 variant="primary"
-                className="bg-white text-[#1a3a3a] hover:bg-white/90 shadow-none px-6 py-1 rounded-full font-label-md text-label-md self-start font-semibold"
+                className="self-start px-6 py-2 rounded-full font-label-md text-label-md font-semibold bg-on-primary-container text-primary-container shadow-sm hover:bg-on-primary-container/90 hover:text-primary-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-primary-container"
               >
                 Revisar Pendientes
               </Button>
@@ -680,8 +681,25 @@ export default function ClientesPage() {
                             {formatPhoneForDisplay(client.phone)}
                           </td>
                           {/* Last visit */}
-                          <td className="px-6 py-4 text-body-md text-on-surface">
-                            {client.lastVisit}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {(() => {
+                              const visit = formatDateTimeParts(client.lastVisit);
+                              if (!visit) {
+                                return (
+                                  <span className="text-body-md text-on-surface-variant/50">—</span>
+                                );
+                              }
+                              return (
+                                <span className="inline-flex items-baseline gap-2">
+                                  <span className="text-body-md text-on-surface">{visit.date}</span>
+                                  {visit.time && (
+                                    <span className="text-body-sm text-on-surface-variant tabular-nums">
+                                      {visit.time}
+                                    </span>
+                                  )}
+                                </span>
+                              );
+                            })()}
                           </td>
                           {/* Service badge */}
                           <td className="px-6 py-4">

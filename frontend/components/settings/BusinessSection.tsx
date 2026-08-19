@@ -25,6 +25,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import type { BusinessProfile, BusinessHours, Service, Worker, ToastState } from "@/types/settings";
+import { formatCurrency } from "@/lib/utils";
 import AddServiceModal from "@/components/AddServiceModal";
 import WorkerModal from "@/components/settings/WorkerModal";
 import {
@@ -842,7 +843,7 @@ export default function BusinessSection({
                           {service.name}
                         </p>
                         <p className="font-body-md text-body-md text-on-surface-variant">
-                          {service.duration} min · {service.price}€
+                          {service.duration} min · {formatCurrency(service.price)}
                         </p>
                       </div>
                     </div>

@@ -17,4 +17,17 @@ const normalizePhone = (phone) => {
   return digits;
 };
 
-export { normalizeString, normalizePhone };
+const eurFormatter = new Intl.NumberFormat("es-ES", {
+  style: "currency",
+  currency: "EUR",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** Formatea un importe en euros con la convención española: "1.234,56 €". */
+const formatCurrency = (value) => {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return eurFormatter.format(Number.isFinite(parsed) ? parsed : 0);
+};
+
+export { normalizeString, normalizePhone, formatCurrency };

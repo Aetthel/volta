@@ -23,6 +23,7 @@ import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
 import MetricCard from "@/components/MetricCard";
 import { Button, PageHeader, Skeleton, Alert } from "@/components/ui/volta-ui";
+import { formatCurrency } from "@/lib/utils";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -85,9 +86,9 @@ export default function AdminPage() {
   };
 
   const [kpis, setKpis] = useState({
-    totalRevenue: "€0",
+    totalRevenue: formatCurrency(0),
     totalClients: "0",
-    averageTicket: "€0",
+    averageTicket: formatCurrency(0),
     growth: "+0%",
   });
   const [rankings, setRankings] = useState<

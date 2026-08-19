@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
+import { toAmount } from "@/lib/utils";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
@@ -743,7 +744,7 @@ export default function AgendaPage() {
     "Spa Facial": 40,
     ...services.reduce(
       (acc, s) => {
-        acc[s.name] = s.price;
+        acc[s.name] = toAmount(s.price);
         return acc;
       },
       {} as Record<string, number>

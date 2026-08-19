@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableModal } from "@/lib/useDraggableModal";
+import { formatCurrency } from "@/lib/utils";
 import {
   X,
   Calendar,
@@ -332,7 +333,7 @@ export default function NewAppointmentModal({
     label: srv.name,
     sublabel:
       srv.price !== undefined
-        ? `€${srv.price}${srv.capacity && srv.capacity > 1 ? ` · Máx. ${srv.capacity} alumnos` : ""}`
+        ? `${formatCurrency(srv.price)}${srv.capacity && srv.capacity > 1 ? ` · Máx. ${srv.capacity} alumnos` : ""}`
         : undefined,
   }));
 

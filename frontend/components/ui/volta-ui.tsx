@@ -395,6 +395,10 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
 FloatingSelect.displayName = "FloatingSelect";
 
 // InlineSelect
+const DROPDOWN_MAX_HEIGHT = 240;
+const DROPDOWN_MIN_HEIGHT = 140;
+const DROPDOWN_VIEWPORT_MARGIN = 16;
+
 export interface InlineSelectOption {
   value: string;
   label: string;
@@ -423,8 +427,9 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({
   className,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [openUpward, setOpenUpward] = React.useState(false);
+  const [maxHeight, setMaxHeight] = React.useState(DROPDOWN_MAX_HEIGHT);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const selectedOption = options.find((o) => o.value === value);
 
   const displayValue = selectedOption
@@ -433,17 +438,38 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({
       : selectedOption.label
     : "";
 
-  React.useEffect(() => {
-    if (isOpen && containerRef.current) {
+  // El desplegable siempre se abre hacia abajo; en lugar de voltearlo hacia
+  // arriba (que lo hacía solaparse con el contenido superior), se limita su
+  // altura al espacio disponible y scrollea por dentro.
+  React.useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const updateMaxHeight = () => {
+      if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const dropdownHeight = 240; // max-h-60 is 240px
-      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-        setOpenUpward(true);
-      } else {
-        setOpenUpward(false);
+      const spaceBelow = window.innerHeight - rect.bottom - DROPDOWN_VIEWPORT_MARGIN;
+      // Nunca por encima del hueco real: si no cabe, encoge y scrollea por dentro.
+      setMaxHeight(Math.max(0, Math.min(DROPDOWN_MAX_HEIGHT, Math.round(spaceBelow))));
+    };
+
+    updateMaxHeight();
+    // Si el hueco es demasiado pequeño, intenta ganarlo desplazando el
+    // contenedor scrollable más cercano en vez de abrirse hacia arriba.
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom - DROPDOWN_VIEWPORT_MARGIN;
+      if (spaceBelow < DROPDOWN_MIN_HEIGHT) {
+        dropdownRef.current?.scrollIntoView({ block: "nearest" });
+        requestAnimationFrame(updateMaxHeight);
       }
     }
+
+    window.addEventListener("resize", updateMaxHeight);
+    window.addEventListener("scroll", updateMaxHeight, true);
+    return () => {
+      window.removeEventListener("resize", updateMaxHeight);
+      window.removeEventListener("scroll", updateMaxHeight, true);
+    };
   }, [isOpen]);
 
   return (
@@ -480,10 +506,9 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div
-            className={cn(
-              "absolute left-0 right-0 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 p-2 flex flex-col gap-1",
-              openUpward ? "bottom-full mb-1" : "top-full mt-1"
-            )}
+            ref={dropdownRef}
+            style={{ maxHeight }}
+            className="absolute left-0 right-0 top-full mt-1 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg overflow-y-auto overscroll-contain z-50 p-2 flex flex-col gap-1"
           >
             {options.map((opt) => (
               <button

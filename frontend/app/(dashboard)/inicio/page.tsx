@@ -57,7 +57,7 @@ import {
   PageHeader,
   Skeleton,
 } from "@/components/ui/volta-ui";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency, toAmount } from "@/lib/utils";
 
 interface AppointmentItem {
   id: string;
@@ -227,14 +227,14 @@ export default function DashboardPage() {
   const dynamicPrices: Record<string, number> = {
     ...DEFAULT_SERVICES.reduce(
       (acc, s) => {
-        acc[s.name] = s.price;
+        acc[s.name] = toAmount(s.price);
         return acc;
       },
       {} as Record<string, number>
     ),
     ...services.reduce(
       (acc, s) => {
-        acc[s.name] = s.price;
+        acc[s.name] = toAmount(s.price);
         return acc;
       },
       {} as Record<string, number>
@@ -469,7 +469,6 @@ export default function DashboardPage() {
                 change={`${todayApps.length > 0 ? "+" : ""}${todayApps.length * 10}%`}
                 trend={todayApps.length > 0 ? "up" : "down"}
                 icon={<CalendarIcon className="w-5 h-5 text-primary" />}
-                iconClassName="bg-secondary-container/30"
               />
               <MetricCard
                 title="Nuevos Clientes"
@@ -477,15 +476,13 @@ export default function DashboardPage() {
                 change={`${newClientsCount > 0 ? "+" : ""}${newClientsCount * 5}%`}
                 trend={newClientsCount > 0 ? "up" : "down"}
                 icon={<UserPlus className="w-5 h-5 text-primary" />}
-                iconClassName="bg-secondary-container/30"
               />
               <MetricCard
                 title="Ingresos Est."
-                value={`€${estimatedIncome}`}
+                value={formatCurrency(estimatedIncome)}
                 change={estimatedIncome > 0 ? "+12%" : "Estable"}
                 trend={estimatedIncome > 0 ? "up" : "down"}
                 icon={<Euro className="w-5 h-5 text-primary" />}
-                iconClassName="bg-secondary-container/30"
               />
               <MetricCard
                 title="Ocupación"
@@ -500,7 +497,6 @@ export default function DashboardPage() {
                   </div>
                 }
                 icon={<Activity className="w-5 h-5 text-primary" />}
-                iconClassName="bg-secondary-container/30"
                 progress={occupancyPercentage}
               />
             </section>

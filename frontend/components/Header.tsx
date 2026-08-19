@@ -148,9 +148,9 @@ function HeaderContent({
             <div className="fixed inset-0 z-30" onClick={() => setIsNotificationsOpen(false)} />
 
             {/* Notification Dropdown (redesigned matching the screenshot) */}
-            <div className="absolute right-0 mt-2 w-[420px] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-40 flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
+            <div className="absolute right-0 mt-2 w-[min(380px,calc(100vw-24px))] max-h-[min(520px,calc(100dvh-200px))] bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xl z-40 flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30">
+              <div className="shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-outline-variant/30">
                 <h2 className="font-display text-headline-sm font-bold text-on-surface">
                   Notificaciones
                 </h2>
@@ -164,7 +164,7 @@ function HeaderContent({
               </div>
 
               {/* Segmented control tabs */}
-              <div className="px-6 py-3 border-b border-outline-variant/20">
+              <div className="shrink-0 px-5 py-2.5 border-b border-outline-variant/20">
                 <div className="flex bg-surface-container-low rounded-xl p-1 border border-outline-variant/40">
                   <button
                     onClick={() => setActiveTab("all")}
@@ -191,7 +191,7 @@ function HeaderContent({
 
               {/* Pinned Emergente Carousel */}
               {totalEmergentes > 0 && currentEmergente && (
-                <div className="p-4 bg-primary/[0.03] border-b border-outline-variant/40">
+                <div className="shrink-0 p-3 bg-primary/[0.03] border-b border-outline-variant/40">
                   <div className="bg-surface-container-lowest border border-primary/15 rounded-xl p-4 shadow-sm relative flex flex-col gap-3">
                     {/* Top row: icon + title + close */}
                     <div className="flex items-start justify-between gap-3">
@@ -267,7 +267,7 @@ function HeaderContent({
               )}
 
               {/* Scrollable Avisos and Notificaciones grouped by date */}
-              <div className="flex-1 max-h-[360px] overflow-y-auto px-6 py-4 divide-y divide-outline-variant/10">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-3 divide-y divide-outline-variant/10">
                 {groupKeys.length === 0 ? (
                   <div className="p-8 text-center flex flex-col items-center justify-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant/40">
@@ -279,9 +279,9 @@ function HeaderContent({
                   </div>
                 ) : (
                   groupKeys.map((groupKey) => (
-                    <div key={groupKey} className="py-4 first:pt-0 last:pb-0">
+                    <div key={groupKey} className="py-3 first:pt-0 last:pb-0">
                       {/* Group Title Header */}
-                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-4 mt-1 first:mt-0">
+                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-3 mt-1 first:mt-0">
                         {groupKey === "Today"
                           ? "Hoy"
                           : groupKey === "Yesterday"
@@ -290,7 +290,7 @@ function HeaderContent({
                       </div>
 
                       {/* Group Items */}
-                      <div className="flex flex-col gap-5">
+                      <div className="flex flex-col gap-4">
                         {groupedAlerts[groupKey].map((alert) => {
                           const isAviso = alert.type === "AVISO";
                           const timeText = getRelativeTime(alert.createdAt);
@@ -360,7 +360,7 @@ function HeaderContent({
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-outline-variant/30 bg-surface-container-lowest flex items-center justify-between">
+              <div className="shrink-0 p-3 border-t border-outline-variant/30 bg-surface-container-lowest flex items-center justify-between">
                 <Link
                   href="/ajustes"
                   onClick={() => setIsNotificationsOpen(false)}

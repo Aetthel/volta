@@ -29,13 +29,11 @@ export default function MetricCard({
       case "up":
         return {
           textColor: "text-tertiary",
-          bgColor: "bg-secondary-container/30",
           icon: TrendingUp,
         };
       case "down":
         return {
           textColor: "text-error",
-          bgColor: "bg-error-container/30",
           icon: TrendingDown,
         };
       case "neutral":
@@ -43,7 +41,6 @@ export default function MetricCard({
       default:
         return {
           textColor: "text-on-surface-variant",
-          bgColor: "bg-surface-container",
           icon: Minus,
         };
     }
@@ -56,19 +53,12 @@ export default function MetricCard({
     <Card className={cn("p-4 sm:p-6 flex flex-col gap-2 sm:gap-3", className)}>
       <div className="flex justify-between items-start">
         {/* Metric Icon Wrapper */}
-        <div
-          className={cn(
-            "p-1 sm:p-1.5 bg-surface-container text-primary rounded-lg shrink-0 transition-colors",
-            iconClassName
-          )}
-        >
-          {icon}
-        </div>
+        <div className={cn("text-primary shrink-0 transition-colors", iconClassName)}>{icon}</div>
 
         {/* Trend Indicator */}
         {change && (
           <div
-            className={`flex items-center gap-0.5 sm:gap-1 px-2 py-[1px] sm:px-3 sm:py-[2px] rounded-full text-label-sm sm:text-label-md font-bold ${trendStyles.bgColor} ${trendStyles.textColor}`}
+            className={`flex items-center gap-0.5 sm:gap-1 text-label-sm sm:text-label-md font-bold ${trendStyles.textColor}`}
           >
             {trend !== "neutral" && trend !== "stable" && (
               <TrendIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />

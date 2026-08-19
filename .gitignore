@@ -24,6 +24,9 @@ build/
 # Cloudflare Tunnel credentials (contain secrets — never commit)
 cloudflared/*.json
 
+# Local docker-compose overrides (puertos/entorno de cada máquina)
+docker-compose.override.yml
+
 
 # Gemini CLI / Agent specific
 .agents/

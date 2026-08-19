@@ -1,5 +1,6 @@
 import prisma from "../config/db.js";
 import bcrypt from "bcryptjs";
+import { formatCurrency } from "../utils/formatters.js";
 
 /**
  * Cascade-delete a business and all its related data within a transaction.
@@ -248,12 +249,12 @@ export const getDashboardData = async () => {
   const formattedRankings = rankings.map((r, idx) => ({
     rank: idx + 1,
     name: r.name,
-    revenue: `€${r.revenue.toLocaleString()}`,
+    revenue: formatCurrency(r.revenue),
     change: r.change,
   }));
 
   const totalAppointments = await prisma.appointment.count();
-  const averageTicket = totalAppointments > 0 ? Math.round(totalRevenue / totalAppointments) : 35;
+  const averageTicket = totalAppointments > 0 ? totalRevenue / totalAppointments : 35;
 
   const globalGrowth =
     totalLastMonth === 0
@@ -263,9 +264,9 @@ export const getDashboardData = async () => {
       : `${totalThisMonth >= totalLastMonth ? "+" : ""}${Math.round(((totalThisMonth - totalLastMonth) / totalLastMonth) * 100)}%`;
 
   return {
-    totalRevenue: `€${totalRevenue.toLocaleString()}`,
-    totalClients: totalClients.toLocaleString(),
-    averageTicket: `€${averageTicket}`,
+    totalRevenue: formatCurrency(totalRevenue),
+    totalClients: totalClients.toLocaleString("es-ES"),
+    averageTicket: formatCurrency(averageTicket),
     growth: globalGrowth,
     rankings: formattedRankings,
   };

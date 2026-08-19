@@ -16,6 +16,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { COLOR_PALETTES, getThemeColor, applyThemeColors } from "@/lib/theme";
+import { formatCurrency } from "@/lib/utils";
 import {
   Button,
   Card,
@@ -320,7 +321,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                   </div>
                   <div className="text-right shrink-0 ml-4">
                     <span className="font-bold text-title-lg text-primary">
-                      {srv.price.toFixed(2)} €
+                      {formatCurrency(srv.price)}
                     </span>
                   </div>
                 </div>
@@ -485,7 +486,7 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
                   <div className="text-body-sm text-on-surface space-y-1">
                     <p>
                       <strong>Servicio:</strong> {selectedService.name} (
-                      {selectedService.price.toFixed(2)} €)
+                      {formatCurrency(selectedService.price)})
                     </p>
                     <p>
                       <strong>Fecha y Hora:</strong> {selectedDate} a las {selectedTime} hs
