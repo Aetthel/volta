@@ -42,7 +42,9 @@ services:
           memory: 256M
 
   backend:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: volta-backend
     restart: unless-stopped
     depends_on:
@@ -60,6 +62,12 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - PORT=3001
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'fetch(\"http://localhost:3001/health\").then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
@@ -78,16 +86,19 @@ services:
           memory: 2048M
 
   frontend:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: volta-frontend
     restart: unless-stopped
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - .env
     environment:
       - CI=true
+      - NEXT_TELEMETRY_DISABLED=1
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001

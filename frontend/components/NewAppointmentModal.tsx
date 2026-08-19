@@ -1,32 +1,28 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableModal } from "@/lib/useDraggableModal";
-import { formatCurrency } from "@/lib/utils";
 import {
   X,
-  Calendar,
   Clock,
   User,
   Users,
   Phone,
   Sparkles,
   GripHorizontal,
-  ChevronDown,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import {
   FieldGroup,
   Field,
   FloatingInput,
   Button,
-  FloatingSelect,
   Alert,
   InlineSelect,
   CalendarSelect,
   SegmentedControl,
 } from "@/components/ui/volta-ui";
+import { useNewAppointmentForm } from "@/hooks/useNewAppointmentForm";
 
 interface NewAppointmentModalProps {
   isOpen: boolean;
@@ -58,32 +54,6 @@ interface NewAppointmentModalProps {
   } | null;
 }
 
-const normalizeString = (str: string) => {
-  return str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .replace(/\s+/g, " ");
-};
-
-const normalizePhone = (phone: string) => {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.startsWith("34") && digits.length > 9) {
-    return digits.slice(2);
-  }
-  return digits;
-};
-
-const DEFAULT_SERVICES = [
-  { name: "Corte Caballero", price: 35 },
-  { name: "Corte Dama", price: 45 },
-  { name: "Coloración Premium", price: 85 },
-  { name: "Tratamiento Keratina", price: 50 },
-  { name: "Manicura", price: 20 },
-  { name: "Spa Facial", price: 40 },
-];
-
 export default function NewAppointmentModal({
   isOpen,
   onClose,
@@ -92,19 +62,26 @@ export default function NewAppointmentModal({
   initialTime,
   triggerRect,
 }: NewAppointmentModalProps) {
-  const { data: session } = useSession();
-  const businessId = session?.user?.businessId || "mock-business-id";
-
-  const [bookingType, setBookingType] = useState<"INDIVIDUAL" | "GROUP">("INDIVIDUAL");
-
-  const [formData, setFormData] = useState({
-    clientName: "",
-    clientPhone: "",
-    service: "",
-    date: "",
-    time: "10:00",
-    stylist: "Volta",
-  });
+  const {
+    bookingType,
+    setBookingType,
+    formData,
+    setFormData,
+    suggestions,
+    showSuggestions,
+    setShowSuggestions,
+    showConsentToast,
+    toastPhone,
+    handleChange,
+    handleNameChange,
+    handleSelectSuggestion,
+    handleSubmit,
+    handleHourChange,
+    handleHourBlur,
+    handleMinChange,
+    handleMinBlur,
+    serviceOptions,
+  } = useNewAppointmentForm(isOpen, initialDate, initialTime, onSave, onClose);
 
   const { position, handleMouseDown } = useDraggableModal({
     isOpen,
@@ -113,229 +90,14 @@ export default function NewAppointmentModal({
     modalHeight: 550,
   });
 
-  // Prefill date and time when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        clientName: "",
-        clientPhone: "",
-        service: "",
-        date: initialDate || new Date().toISOString().split("T")[0],
-        time: initialTime || "10:00",
-        stylist: "Volta",
-      });
-    }
-  }, [isOpen, initialDate, initialTime]);
-
-  const [clientsList, setClientsList] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showConsentToast, setShowConsentToast] = useState(false);
-  const [toastPhone, setToastPhone] = useState("");
-
-  // Load clients and services on modal open
-  useEffect(() => {
-    if (isOpen && businessId) {
-      // Fetch clients
-      fetch(`/api/backend/clients?businessId=${businessId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setClientsList(data);
-          }
-        })
-        .catch((e) => {
-          console.error("Error loading clients:", e);
-          setClientsList([]);
-        });
-
-      // Fetch services
-      fetch(`/api/backend/services?businessId=${businessId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setServices(data);
-            setFormData((prev) => ({
-              ...prev,
-              service: data[0].name,
-            }));
-          } else {
-            setServices(DEFAULT_SERVICES);
-            setFormData((prev) => ({
-              ...prev,
-              service: DEFAULT_SERVICES[0].name,
-            }));
-          }
-        })
-        .catch((e) => {
-          console.error("Error loading services:", e);
-          setServices(DEFAULT_SERVICES);
-        });
-    }
-  }, [isOpen, businessId]);
-
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!isOpen) return null;
-  if (!mounted) return null;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, clientName: value }));
-
-    if (value.trim().length > 1) {
-      const filtered = clientsList.filter((c) => {
-        const fullName = `${c.name} ${c.surname || ""}`.trim();
-        return (
-          normalizeString(fullName).includes(normalizeString(value)) ||
-          normalizePhone(c.phone).includes(normalizePhone(value))
-        );
-      });
-      setSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSelectSuggestion = (client: { name: string; surname?: string; phone: string }) => {
-    const fullName = `${client.name} ${client.surname || ""}`.trim();
-    setFormData((prev) => ({
-      ...prev,
-      clientName: fullName,
-      clientPhone: client.phone,
-    }));
-    setShowSuggestions(false);
-  };
-
-  const resetFormAndClose = () => {
-    setFormData({
-      clientName: "",
-      clientPhone: "",
-      service: "",
-      date: "",
-      time: "10:00",
-      stylist: "Volta",
-    });
-    onClose();
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Strictly format time as HH:MM to prevent Invalid Date on Safari
-    const [h, m] = (formData.time || "10:00").split(":");
-    const cleanH = (h || "10").padStart(2, "0");
-    const cleanM = (m || "00").padStart(2, "0");
-    const formattedTime = `${cleanH}:${cleanM}`;
-
-    // Parse as local browser date/time and convert to ISO string to handle timezone offsets correctly
-    const localDate = new Date(`${formData.date}T${formattedTime}:00`);
-    if (isNaN(localDate.getTime())) {
-      console.error("Invalid appointment date/time calculated");
-      return;
-    }
-    const appointmentDateStr = localDate.toISOString();
-
-    fetch("/api/backend/appointments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        clientName: formData.clientName,
-        clientPhone: formData.clientPhone,
-        appointmentDate: appointmentDateStr,
-        businessId: businessId,
-        service: formData.service,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to save appointment");
-        return res.json();
-      })
-      .then((savedApp) => {
-        // Call parent onSave with the response data (which is a real DB appointment)
-        onSave({
-          ...savedApp,
-          service: formData.service, // pass original service name for frontend layout state updates
-        });
-
-        // Check if client exists to show toast if it's new
-        const exist = clientsList.some((c) => {
-          const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
-          const inputName = normalizeString(formData.clientName);
-
-          const existingPhone = normalizePhone(c.phone);
-          const inputPhone = normalizePhone(formData.clientPhone);
-
-          return existingName === inputName || existingPhone === inputPhone;
-        });
-
-        if (!exist && formData.clientName.trim().length > 0) {
-          setToastPhone(formData.clientPhone);
-          setShowConsentToast(true);
-          setTimeout(() => {
-            setShowConsentToast(false);
-            resetFormAndClose();
-          }, 2500);
-        } else {
-          resetFormAndClose();
-        }
-      })
-      .catch((err) => {
-        console.error("Error saving appointment:", err);
-        // Fallback in case of network issues to keep UX working
-        onSave({
-          id: String(Date.now()),
-          clientName: formData.clientName,
-          clientPhone: formData.clientPhone,
-          service: formData.service,
-          date: formData.date,
-          time: formData.time,
-        });
-        resetFormAndClose();
-      });
-  };
+  if (!isOpen || !mounted) return null;
 
   const [selectedHour, selectedMin] = (formData.time || "10:00").split(":");
-
-  const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const h = e.target.value;
-    const [, currentMin] = (formData.time || "10:00").split(":");
-    setFormData((prev) => ({ ...prev, time: `${h}:${currentMin || "00"}` }));
-  };
-
-  const handleMinChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const m = e.target.value;
-    const [currentHour] = (formData.time || "10:00").split(":");
-    setFormData((prev) => ({ ...prev, time: `${currentHour || "10"}:${m}` }));
-  };
-  const filteredServices = services.filter((srv) => {
-    if (bookingType === "GROUP") {
-      return srv.type === "GROUP" || (srv.capacity && srv.capacity > 1);
-    }
-    return srv.type === "INDIVIDUAL" || !srv.type || srv.capacity === 1;
-  });
-
-  const serviceOptions = filteredServices.map((srv) => ({
-    value: srv.name,
-    label: srv.name,
-    sublabel:
-      srv.price !== undefined
-        ? `${formatCurrency(srv.price)}${srv.capacity && srv.capacity > 1 ? ` · Máx. ${srv.capacity} alumnos` : ""}`
-        : undefined,
-  }));
 
   return createPortal(
     <div className="fixed inset-0 z-[100] pointer-events-none">
@@ -524,26 +286,8 @@ export default function NewAppointmentModal({
                         pattern="[0-9]*"
                         maxLength={2}
                         value={selectedHour}
-                        onChange={(e) => {
-                          let val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                          if (val !== "") {
-                            const num = parseInt(val, 10);
-                            if (num > 23) val = "23";
-                          }
-                          const [, currentMin] = (formData.time || "10:00").split(":");
-                          setFormData((prev) => ({
-                            ...prev,
-                            time: `${val}:${currentMin || "00"}`,
-                          }));
-                        }}
-                        onBlur={() => {
-                          const [h, m] = (formData.time || "10:00").split(":");
-                          const paddedH = h.padStart(2, "0") || "10";
-                          setFormData((prev) => ({
-                            ...prev,
-                            time: `${paddedH}:${m}`,
-                          }));
-                        }}
+                        onChange={(e) => handleHourChange(e.target.value)}
+                        onBlur={handleHourBlur}
                         className="w-10 bg-transparent text-body-lg text-on-surface border-0 rounded-none focus:ring-0 py-1 outline-none text-center hover:bg-on-surface/[0.04] focus:bg-on-surface/[0.06] rounded-md transition-all duration-200"
                         placeholder="10"
                       />
@@ -553,26 +297,8 @@ export default function NewAppointmentModal({
                         pattern="[0-9]*"
                         maxLength={2}
                         value={selectedMin}
-                        onChange={(e) => {
-                          let val = e.target.value.replace(/\D/g, "").slice(0, 2);
-                          if (val !== "") {
-                            const num = parseInt(val, 10);
-                            if (num > 59) val = "59";
-                          }
-                          const [currentHour] = (formData.time || "10:00").split(":");
-                          setFormData((prev) => ({
-                            ...prev,
-                            time: `${currentHour || "10"}:${val}`,
-                          }));
-                        }}
-                        onBlur={() => {
-                          const [h, m] = (formData.time || "10:00").split(":");
-                          const paddedM = m.padStart(2, "0") || "00";
-                          setFormData((prev) => ({
-                            ...prev,
-                            time: `${h}:${paddedM}`,
-                          }));
-                        }}
+                        onChange={(e) => handleMinChange(e.target.value)}
+                        onBlur={handleMinBlur}
                         className="w-10 bg-transparent text-body-lg text-on-surface border-0 rounded-none focus:ring-0 py-1 outline-none text-center hover:bg-on-surface/[0.04] focus:bg-on-surface/[0.06] rounded-md transition-all duration-200"
                         placeholder="00"
                       />

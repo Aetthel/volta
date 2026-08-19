@@ -1,6 +1,16 @@
 import prisma from "../config/db.js";
 import { ApiResponse } from "../utils/index.js";
 import { validateBusinessHours, calculateAvailableSlots } from "../utils/businessHours.js";
+import { z } from "zod";
+
+const createBookingSchema = z.object({
+  businessId: z.string().min(1, "businessId es requerido"),
+  serviceId: z.string().min(1, "serviceId es requerido"),
+  appointmentDate: z.string().min(1, "Fecha de cita no válida"),
+  clientName: z.string().min(1, "El nombre del cliente es obligatorio").trim(),
+  clientPhone: z.string().min(6, "El teléfono del cliente es obligatorio").trim(),
+  clientEmail: z.string().email("Formato de correo no válido").optional().or(z.literal("")),
+});
 
 export const getPublicBusinessData = async (req, res) => {
   const { businessId } = req.params;
@@ -45,7 +55,7 @@ export const getAvailableSlots = async (req, res) => {
   const { businessId } = req.params;
   const { serviceId, date } = req.query; // date in YYYY-MM-DD
 
-  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(String(date))) {
     return res.status(400).json({ error: "Debe proporcionar una fecha válida (YYYY-MM-DD)." });
   }
 
@@ -66,7 +76,7 @@ export const getAvailableSlots = async (req, res) => {
     }
   }
 
-  const [year, month, day] = date.split("-").map(Number);
+  const [year, month, day] = String(date).split("-").map(Number);
   const dayStart = new Date(year, month - 1, day, 0, 0, 0, 0);
   const dayEnd = new Date(year, month - 1, day, 23, 59, 59, 999);
 
@@ -85,7 +95,7 @@ export const getAvailableSlots = async (req, res) => {
   const slots = calculateAvailableSlots(
     businessHours,
     existingAppointments,
-    date,
+    String(date),
     duration,
     capacity
   );
@@ -94,11 +104,15 @@ export const getAvailableSlots = async (req, res) => {
 };
 
 export const createPublicBooking = async (req, res) => {
-  const { businessId, serviceId, appointmentDate, clientName, clientPhone, clientEmail } = req.body;
+  const validationResult = createBookingSchema.safeParse(req.body);
 
-  if (!businessId || !serviceId || !appointmentDate || !clientName || !clientPhone) {
-    return res.status(400).json({ error: "Todos los campos obligatorios deben ser completados." });
+  if (!validationResult.success) {
+    const firstError = validationResult.error.errors[0]?.message || "Datos de reserva no válidos.";
+    return res.status(400).json({ error: firstError, details: validationResult.error.errors });
   }
+
+  const { businessId, serviceId, appointmentDate, clientName, clientPhone, clientEmail } =
+    validationResult.data;
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },

@@ -24,6 +24,7 @@ import {
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
 import FullScreenSplash from "@/components/FullScreenSplash";
+import { COLOR_PALETTES, applyThemeColors } from "@/lib/theme";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -33,6 +34,14 @@ export default function RootPage() {
   const [demoMessage, setDemoMessage] = useState("Preparando tu entorno de demo...");
   const [demoProgress, setDemoProgress] = useState(15);
   const router = useRouter();
+
+  // Enforce default Volta theme on the landing page
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const root = document.documentElement;
+      applyThemeColors(root, COLOR_PALETTES.CLINICAL_ELEGANCE);
+    }
+  }, []);
 
   // Monitor scroll for header styling (Task 2.2)
   useEffect(() => {

@@ -15,7 +15,7 @@ describe("appointmentsService", () => {
       const res = await appointmentsService.getAppointmentsByBusiness("biz-1");
       expect(prisma.appointment.findMany).toHaveBeenCalledWith({
         where: { businessId: "biz-1" },
-        include: { client: true },
+        include: { client: true, service: true },
         orderBy: { appointmentDate: "asc" },
       });
       expect(res).toEqual(mockAppts);

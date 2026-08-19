@@ -5,9 +5,6 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig = {
   output: "standalone",
-  experimental: {
-    prerenderEarlyExit: false,
-  },
   turbopack: {
     root: path.resolve(process.cwd(), ".."),
   },

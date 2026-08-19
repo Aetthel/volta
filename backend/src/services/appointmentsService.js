@@ -7,7 +7,7 @@ import { logger } from "../utils/logger.js";
 export const getAppointmentsByBusiness = async (businessId) => {
   return await prisma.appointment.findMany({
     where: { businessId },
-    include: { client: true },
+    include: { client: true, service: true },
     orderBy: { appointmentDate: "asc" },
   });
 };

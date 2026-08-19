@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "dotenvx run -f ../.env -- next dev",
+    "dev": "dotenvx run -f ../.env -- next dev --webpack",
     "build": "next build --debug-prerender",
     "start": "next start",
     "lint": "eslint .",

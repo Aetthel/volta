@@ -11,7 +11,9 @@ const baseOptions = {
   offlineQueue: false,
   retryStrategy(times) {
     if (IS_TEST) return null;
-    return Math.min(times * 100, 3000);
+    const delay = Math.min(times * 150, 5000);
+    logger.warn(`[Redis] Intentando reconexión #${times} en ${delay}ms...`);
+    return delay;
   },
 };
 
