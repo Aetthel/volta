@@ -1,4 +1,15 @@
-const attempts = new Map();
+interface RateLimitRecord {
+  count: number;
+  firstAttempt: number;
+}
+
+interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  retryAfter?: number;
+}
+
+const attempts = new Map<string, RateLimitRecord>();
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = process.env.NODE_ENV === "production" ? 5 : 100;
@@ -6,7 +17,7 @@ const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
 let lastCleanup = Date.now();
 
-function cleanupStaleEntries() {
+function cleanupStaleEntries(): void {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL_MS) return;
   lastCleanup = now;
@@ -17,7 +28,7 @@ function cleanupStaleEntries() {
   }
 }
 
-export function checkRateLimit(key) {
+export function checkRateLimit(key: string): RateLimitResult {
   cleanupStaleEntries();
   const now = Date.now();
   const record = attempts.get(key);
@@ -36,6 +47,6 @@ export function checkRateLimit(key) {
   return { allowed: true, remaining: MAX_ATTEMPTS - record.count };
 }
 
-export function resetRateLimit(key) {
+export function resetRateLimit(key: string): void {
   attempts.delete(key);
 }

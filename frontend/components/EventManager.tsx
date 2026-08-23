@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -91,7 +91,7 @@ export function EventManager({
   })
 
   // Sync state if initialEvents changes from parent API updates
-  useMemo(() => {
+  useEffect(() => {
     setEvents(initialEvents)
   }, [initialEvents])
 

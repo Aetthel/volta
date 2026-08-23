@@ -148,7 +148,7 @@ export const createAppointment = async (appointmentData) => {
         lopdStatus: "Pendiente",
         businessId,
         frequentService: reqService || null,
-        lastVisit: "Hoy",
+        lastVisit: new Date(),
       },
     });
     logger.info(`[Service] Automatically registered new LOPD-pending client: ${client.id}`);

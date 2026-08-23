@@ -1,7 +1,8 @@
 import { handlers } from "@/auth";
 import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
+import { NextRequest } from "next/server";
 
-async function rateLimitedPost(request) {
+async function rateLimitedPost(request: NextRequest) {
   const forwarded = request.headers.get("x-forwarded-for");
   const ip = forwarded?.split(",")[0]?.trim() || "unknown";
 
@@ -28,11 +29,11 @@ async function rateLimitedPost(request) {
 
   // Check if a new valid session cookie was actually assigned (ignore deletion/invalidation cookies)
   const setCookieHeader = response.headers.get("set-cookie") || "";
-  const setCookies = response.headers.getSetCookie
-    ? response.headers.getSetCookie()
+  const setCookies = (response.headers as any).getSetCookie
+    ? (response.headers as any).getSetCookie()
     : [setCookieHeader];
 
-  const isValidSessionCreated = setCookies.some((cookie) => {
+  const isValidSessionCreated = setCookies.some((cookie: string) => {
     const lower = cookie.toLowerCase();
     const isSession = lower.includes("session-token=");
     const isCleared =

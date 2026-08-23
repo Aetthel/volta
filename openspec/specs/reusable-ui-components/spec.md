@@ -156,3 +156,12 @@ El componente `Combobox` SHALL permitir la desactivación opcional de la barra d
 
 - **WHEN** el componente `Combobox` se instancia con la propiedad `searchable={false}`
 - **THEN** el menú de opciones flotante oculta el input de búsqueda con lupa, mostrando únicamente la lista de opciones de forma estática.
+
+### Requirement: EventManager React State Synchronization
+
+The `EventManager` component SHALL synchronize state updates without invoking `setState` callbacks within `useMemo`.
+
+#### Scenario: Props update synchronization
+
+- **WHEN** parent components supply updated `initialEvents` props to `EventManager`
+- **THEN** state synchronization MUST occur inside `useEffect` or pure render derivation to comply with React Hooks rules
