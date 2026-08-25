@@ -40,6 +40,24 @@ const DEFAULT_BUSINESS_TYPE_PHRASE = "al establecimiento";
 const toBusinessTypePhrase = (businessType) =>
   BUSINESS_TYPE_PHRASES[businessType] ?? DEFAULT_BUSINESS_TYPE_PHRASE;
 
+/**
+ * Canal de contacto del responsable. El artículo 13 exige datos de contacto
+ * reales, así que degrada al teléfono (obligatorio en Business) cuando el
+ * negocio no ha rellenado el correo, que es opcional.
+ */
+const businessContactPhrase = ({ businessEmail, businessPhone }) => {
+  if (businessEmail) return `el correo electrónico ${businessEmail}`;
+  if (businessPhone) return `el teléfono ${businessPhone}`;
+  return "los datos facilitados en el propio establecimiento";
+};
+
+/**
+ * Cláusula de domicilio. Se devuelve vacía si no consta, de forma que la frase
+ * siga siendo correcta sin necesidad de condicionales dentro del texto legal.
+ */
+const businessAddressClause = ({ businessAddress }) =>
+  businessAddress ? `, con domicilio en ${businessAddress}` : "";
+
 const POLICY_VERSIONS = [
   {
     version: "1.0",
@@ -101,6 +119,45 @@ const POLICY_VERSIONS = [
       },
     ],
   },
+  {
+    // v1.2 completa la información obligatoria del artículo 13 del RGPD, que las
+    // versiones anteriores no cubrían: plazo de conservación, catálogo completo
+    // de derechos (incluidas portabilidad y oposición), derecho a reclamar ante
+    // la autoridad de control y datos de contacto reales del responsable.
+    version: "1.2",
+    effectiveDate: "2026-08-25",
+    title: "Información Básica sobre Protección de Datos",
+    sections: [
+      {
+        heading: "Responsable del Tratamiento",
+        body: "{{businessName}}{{businessAddressClause}}. Puedes contactar con el responsable en {{businessContact}}.",
+      },
+      {
+        heading: "Finalidad",
+        body: "Envío de confirmaciones de reserva, modificaciones o cancelaciones de tus citas, y recordatorios automáticos 24 horas antes del servicio contratado a través del canal de WhatsApp.",
+      },
+      {
+        heading: "Legitimación",
+        body: "Consentimiento expreso del interesado, otorgado al pulsar el botón de aceptación de esta página.",
+      },
+      {
+        heading: "Destinatarios",
+        body: "No se cederán datos a terceros salvo obligación legal o para la prestación del servicio técnico de envío de mensajes automatizados (Plataforma Volta).",
+      },
+      {
+        heading: "Plazo de Conservación",
+        body: "Tus datos de contacto se conservarán mientras se mantenga la relación con el negocio y no retires tu consentimiento. Una vez retirado, se conservarán bloqueados durante los plazos legalmente exigibles para atender posibles responsabilidades. El registro de tu consentimiento se conserva mientras esté vigente y durante los tres años posteriores a su retirada, como prueba del cumplimiento de esta obligación.",
+      },
+      {
+        heading: "Derechos",
+        body: "Puedes ejercer los derechos de acceso, rectificación, supresión, limitación del tratamiento, portabilidad de tus datos y oposición al mismo. Asimismo, puedes retirar tu consentimiento en cualquier momento, sin que ello afecte a la licitud del tratamiento realizado antes de la retirada. Para ejercer cualquiera de estos derechos, dirígete {{toBusinessType}} {{businessName}} a través de los datos de contacto indicados más arriba.",
+      },
+      {
+        heading: "Reclamación",
+        body: "Si consideras que el tratamiento de tus datos no se ajusta a la normativa, puedes presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD), autoridad de control competente, a través de su sede electrónica en www.aepd.es.",
+      },
+    ],
+  },
 ];
 
 /** Versión vigente: la última de la lista. */
@@ -114,7 +171,9 @@ const interpolate = (text, vars) =>
   text
     .replace(/{{clientName}}/g, vars.clientName ?? "")
     .replace(/{{businessName}}/g, vars.businessName ?? "")
-    .replace(/{{toBusinessType}}/g, toBusinessTypePhrase(vars.businessType));
+    .replace(/{{toBusinessType}}/g, toBusinessTypePhrase(vars.businessType))
+    .replace(/{{businessContact}}/g, businessContactPhrase(vars))
+    .replace(/{{businessAddressClause}}/g, businessAddressClause(vars));
 
 /**
  * Devuelve la política solicitada (por defecto, la vigente) con los marcadores

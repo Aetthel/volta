@@ -52,6 +52,9 @@ export const getConsent = async (req, res) => {
     clientName: client.name,
     businessName: client.business?.name,
     businessType: client.business?.businessType,
+    businessEmail: client.business?.email,
+    businessPhone: client.business?.phone,
+    businessAddress: client.business?.address,
   });
 
   return ApiResponse.success(res, { ...toPublicConsent(client), policy });

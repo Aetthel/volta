@@ -210,7 +210,10 @@ export default function LOPDConsentClient() {
               autorices a procesar tus datos de contacto.
             </p>
 
-            <div className="bg-surface-container-low rounded-md p-6 mb-3 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-48 overflow-y-auto custom-scrollbar">
+            {/* h-64: la política del Art. 13 son siete secciones. Con la altura
+                anterior se veían dos y el resto quedaba enterrado en el scroll,
+                que es justo lo contrario de "información previa y accesible". */}
+            <div className="bg-surface-container-low rounded-md p-6 mb-3 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-64 overflow-y-auto custom-scrollbar">
               <h3 className="font-semibold text-on-surface mb-2">{data.policy?.title}</h3>
               {data.policy?.sections.map((section) => (
                 <p key={section.heading} className="mb-3 last:mb-0">
