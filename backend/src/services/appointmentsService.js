@@ -90,7 +90,13 @@ export const createAppointment = async (appointmentData) => {
         lte: dayEnd,
       },
     },
-    include: { service: true },
+    select: {
+      id: true,
+      appointmentDate: true,
+      service: {
+        select: { duration: true },
+      },
+    },
   });
 
   const overlappingCount = existingAppointments.filter((appt) => {

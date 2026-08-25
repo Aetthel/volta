@@ -25,9 +25,15 @@ import {
   ExternalLink,
 } from "lucide-react";
 import type { BusinessProfile, BusinessHours, Service, Worker, ToastState } from "@/types/settings";
+import dynamic from "next/dynamic";
 import { formatCurrency } from "@/lib/utils";
-import AddServiceModal from "@/components/AddServiceModal";
-import WorkerModal from "@/components/settings/WorkerModal";
+
+const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
+  ssr: false,
+});
+const WorkerModal = dynamic(() => import("@/components/settings/WorkerModal"), {
+  ssr: false,
+});
 import {
   Card,
   CardHeader,

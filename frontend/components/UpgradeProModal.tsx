@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { X, Sparkles, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
-import SubscriptionCheckoutModal from "./SubscriptionCheckoutModal";
+
+const SubscriptionCheckoutModal = dynamic(() => import("./SubscriptionCheckoutModal"), {
+  ssr: false,
+});
 
 interface UpgradeProModalProps {
   isOpen: boolean;

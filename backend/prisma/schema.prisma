@@ -75,6 +75,7 @@ model User {
   alerts     Alert[]
 
   @@index([businessId])
+  @@index([businessId, role])
 }
 
 enum WhatsAppStatus {
@@ -101,6 +102,8 @@ model Client {
   updatedAt       DateTime         @updatedAt
 
   @@index([businessId, phone])
+  @@index([businessId, email])
+  @@index([businessId, lopdStatus])
   @@index([businessId])
 }
 
@@ -126,6 +129,8 @@ model Appointment {
 
   @@index([businessId, appointmentDate])
   @@index([businessId, status])
+  @@index([businessId, clientId])
+  @@index([businessId, serviceId])
   @@index([clientId])
   @@index([serviceId])
 }
@@ -166,6 +171,7 @@ model Service {
   updatedAt   DateTime      @updatedAt
 
   @@index([businessId])
+  @@index([businessId, isActive])
 }
 
 enum AlertType {
@@ -186,6 +192,7 @@ model Alert {
   updatedAt   DateTime  @updatedAt
 
   @@index([userId])
+  @@index([userId, isRead])
 }
 
 model LopdConsentLog {
@@ -201,6 +208,7 @@ model LopdConsentLog {
 
   @@index([clientId])
   @@index([businessId])
+  @@index([businessId, clientId])
 }
 
 enum InvoiceStatus {
@@ -225,5 +233,7 @@ model Invoice {
   updatedAt             DateTime      @updatedAt
 
   @@index([businessId])
+  @@index([businessId, createdAt])
+  @@index([businessId, status])
 }
 

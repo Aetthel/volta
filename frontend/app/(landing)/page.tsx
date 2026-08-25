@@ -21,11 +21,16 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
 import FullScreenSplash from "@/components/FullScreenSplash";
-import SubscriptionCheckoutModal from "@/components/SubscriptionCheckoutModal";
 import { COLOR_PALETTES, applyThemeColors } from "@/lib/theme";
+
+const SubscriptionCheckoutModal = dynamic(
+  () => import("@/components/SubscriptionCheckoutModal"),
+  { ssr: false }
+);
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);

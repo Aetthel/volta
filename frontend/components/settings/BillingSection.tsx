@@ -15,9 +15,14 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import type { Invoice } from "@/types/domain";
-import SubscriptionCheckoutModal from "@/components/SubscriptionCheckoutModal";
+
+const SubscriptionCheckoutModal = dynamic(
+  () => import("@/components/SubscriptionCheckoutModal"),
+  { ssr: false }
+);
 
 interface BillingSectionProps {
   onShowToast: (message: string) => void;
