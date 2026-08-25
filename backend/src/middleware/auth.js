@@ -49,6 +49,14 @@ const authenticate = async (req, res, next) => {
         select: { subscriptionStatus: true, trialExpiresAt: true },
       });
 
+      if (!business && req.user.role !== "ADMIN") {
+        return res.status(401).json({
+          error: "Negocio no encontrado o sesión expirada. Por favor, inicia sesión de nuevo.",
+          code: "SESSION_ORPHANED",
+          redirect: "/",
+        });
+      }
+
       if (business) {
         const isTrialing = business.subscriptionStatus === "TRIALING";
         const isExpiredStatus =
