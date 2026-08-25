@@ -1,10 +1,10 @@
 ## 1. Modelo de Datos y Backend de Lemon Squeezy
 
-- [ ] 1.1 Extender `schema.prisma` con el modelo `Invoice` (con `lemonSqueezyId`, `invoiceUrl`, `amount`, `status`, `createdAt`) y añadir campos `lemonSqueezyCustomerId`, `lemonSqueezySubscriptionId`, `gracePeriodExpiresAt` y `cancelAtPeriodEnd` en `Business`, ejecutando `pnpm --filter backend prisma:push`.
-- [ ] 1.2 Implementar el servicio de integración con Lemon Squeezy en backend (`POST /api/backend/subscription/checkout-url`, `POST /api/backend/subscription/cancel`, `GET /api/backend/subscription/current`) con soporte de trial, planes Básico/Pro y modo mock local sin claves.
-- [ ] 1.3 Implementar el manejador de webhooks seguro en backend (`POST /api/backend/webhooks/lemonsqueezy`) con validación criptográfica HMAC SHA-256 para eventos de creación, cobro exitoso, fallo de pago (gracia 3 días) y cancelación.
-- [ ] 1.4 Implementar endpoint de listado de facturas (`GET /api/backend/subscription/invoices`) con URLs de descarga al PDF oficial de Lemon Squeezy.
-- [ ] 1.5 Añadir pruebas unitarias y de integración para la creación de sesiones de checkout, validación de webhooks y sincronización del estado de suscripción.
+- [x] 1.1 Extender `schema.prisma` con el modelo `Invoice` (con `lemonSqueezyId`, `invoiceUrl`, `amount`, `status`, `createdAt`) y añadir campos `lemonSqueezyCustomerId`, `lemonSqueezySubscriptionId`, `gracePeriodExpiresAt` y `cancelAtPeriodEnd` en `Business`, ejecutando `pnpm --filter backend prisma:push`.
+- [x] 1.2 Implementar el servicio de integración con Lemon Squeezy en backend (`POST /api/backend/subscription/checkout-url`, `POST /api/backend/subscription/cancel`, `GET /api/backend/subscription/current`) con soporte de trial, planes Básico/Pro y modo mock local sin claves.
+- [x] 1.3 Implementar el manejador de webhooks seguro en backend (`POST /api/backend/webhooks/lemonsqueezy`) con validación criptográfica HMAC SHA-256 para eventos de creación, cobro exitoso, fallo de pago (gracia 3 días) y cancelación.
+- [x] 1.4 Implementar endpoint de listado de facturas (`GET /api/backend/subscription/invoices`) con URLs de descarga al PDF oficial de Lemon Squeezy.
+- [x] 1.5 Añadir pruebas unitarias y de integración para la creación de sesiones de checkout, validación de webhooks y sincronización del estado de suscripción.
 
 ## 2. Componente de Checkout en Frontend (Lemon.js Overlay)
 

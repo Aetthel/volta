@@ -26,6 +26,8 @@ async function proxyRequest(
     pathParts[0] === "lopd" ||
     pathParts[0] === "health" ||
     pathParts[0] === "demo" ||
+    pathParts[0] === "public" ||
+    pathParts[0] === "webhooks" ||
     (pathParts[0] === "users" && pathParts[1] === "register");
 
   let session: Session | null = null;

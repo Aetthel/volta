@@ -38,8 +38,11 @@ const authenticate = async (req, res, next) => {
     email: decoded.email || null,
   };
 
-  // Perform database verification of business trial/subscription status
-  if (decoded.businessId) {
+  // Perform database verification of business trial/subscription status (except for subscription endpoints)
+  const isSubscriptionRoute =
+    req.baseUrl === "/api/subscription" || req.originalUrl?.startsWith("/api/subscription");
+
+  if (decoded.businessId && !isSubscriptionRoute) {
     try {
       const business = await prisma.business.findUnique({
         where: { id: decoded.businessId },
