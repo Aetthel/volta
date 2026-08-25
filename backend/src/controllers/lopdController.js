@@ -1,4 +1,9 @@
 import * as lopdService from "../services/lopdService.js";
+import {
+  getPolicy,
+  isKnownPolicyVersion,
+  CURRENT_POLICY_VERSION,
+} from "../policies/privacyPolicy.js";
 import { computeHmac } from "../utils/index.js";
 import config from "../config/index.js";
 import { ApiResponse } from "../utils/index.js";
@@ -40,7 +45,15 @@ export const getConsent = async (req, res) => {
     return res.status(404).json({ error: "Cliente no encontrado" });
   }
 
-  return ApiResponse.success(res, toPublicConsent(client));
+  // La política se sirve desde el backend, que es quien luego estampa la versión
+  // en el registro de auditoría. Si el texto viviera en el frontend, editarlo
+  // dejaría al backend firmando una versión que ya no corresponde a lo mostrado.
+  const policy = getPolicy({
+    clientName: client.name,
+    businessName: client.business?.name,
+  });
+
+  return ApiResponse.success(res, { ...toPublicConsent(client), policy });
 };
 
 export const acceptConsent = async (req, res) => {
@@ -67,10 +80,19 @@ export const acceptConsent = async (req, res) => {
   const ipAddress = req.ip || "Unknown";
   const userAgent = req.headers["user-agent"] || "Unknown";
 
+  // Se registra la versión que el cliente tenía delante, no la vigente en este
+  // instante: entre cargar la página y pulsar puede haberse desplegado otra, y
+  // firmaríamos un texto que nunca llegó a ver. Si lo que llega no es una
+  // versión conocida, se cae a la vigente en lugar de guardar algo arbitrario.
+  const reportedVersion = req.body?.policyVersion;
+  const policyVersion = isKnownPolicyVersion(reportedVersion)
+    ? reportedVersion
+    : CURRENT_POLICY_VERSION;
+
   const { updatedClient } = await lopdService.acceptConsent(id, {
     ipAddress,
     userAgent,
-    policyVersion: "1.0",
+    policyVersion,
   });
 
   // El consentLog NO se devuelve: contiene la IP y el user-agent recién

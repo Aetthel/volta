@@ -5,6 +5,23 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
+// La política llega servida por el backend, que es quien registra qué versión
+// aceptó el cliente. Mantenerla aquí como JSX permitiría editar el texto sin
+// que cambiara la versión firmada en el registro de auditoría.
+type PolicyDocument = {
+  version: string;
+  effectiveDate: string;
+  title: string;
+  sections: { heading: string; body: string }[];
+};
+
+type ConsentData = {
+  clientName: string;
+  businessName: string;
+  lopdStatus: string;
+  policy: PolicyDocument | null;
+};
+
 export default function LOPDConsentClient() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -12,10 +29,11 @@ export default function LOPDConsentClient() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [data, setData] = useState({
+  const [data, setData] = useState<ConsentData>({
     clientName: "",
     businessName: "",
     lopdStatus: "",
+    policy: null,
   });
   const [accepted, setAccepted] = useState(false);
   const [rejected, setRejected] = useState(false);
@@ -78,7 +96,14 @@ export default function LOPDConsentClient() {
 
     fetch(`/api/backend/lopd/${clientId}/${action}`, {
       method: "POST",
-      headers: { "x-lopd-token": token || "", "x-lopd-exp": exp || "" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-lopd-token": token || "",
+        "x-lopd-exp": exp || "",
+      },
+      // Se devuelve la versión que esta página tiene renderizada, para que el
+      // registro refleje el texto que el cliente vio y no el vigente al pulsar.
+      body: JSON.stringify({ policyVersion: data.policy?.version }),
     })
       .then((res) => {
         if (!res.ok) throw new Error("No se pudo procesar tu respuesta.");
@@ -185,35 +210,27 @@ export default function LOPDConsentClient() {
               autorices a procesar tus datos de contacto.
             </p>
 
-            <div className="bg-surface-container-low rounded-md p-6 mb-8 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-48 overflow-y-auto custom-scrollbar">
-              <h3 className="font-semibold text-on-surface mb-2">
-                Información Básica sobre Protección de Datos
-              </h3>
-              <p className="mb-3">
-                <strong>Responsable del Tratamiento:</strong> {data.businessName}.
-              </p>
-              <p className="mb-3">
-                <strong>Finalidad:</strong> Envío de confirmaciones de reserva, modificaciones o
-                cancelaciones de tus citas, y recordatorios automáticos 24 horas antes del servicio
-                contratado a través del canal de WhatsApp.
-              </p>
-              <p className="mb-3">
-                <strong>Legitimación:</strong> Consentimiento expreso del interesado al marcar la
-                casilla de aceptación y presionar el botón inferior.
-              </p>
-              <p className="mb-3">
-                <strong>Destinatarios:</strong> No se cederán datos a terceros salvo obligación
-                legal o para la prestación del servicio técnico de envío de mensajes automatizados
-                (Plataforma Volta).
-              </p>
-              <p>
-                <strong>Derechos:</strong> Tienes derecho a acceder, rectificar y suprimir los
-                datos, así como otros derechos explicados en la política de privacidad detallada,
-                enviando un correo al centro de estética {data.businessName}. Puedes revocar este
-                consentimiento en cualquier momento solicitándolo directamente en tu próxima visita
-                al salón.
-              </p>
+            <div className="bg-surface-container-low rounded-md p-6 mb-3 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-48 overflow-y-auto custom-scrollbar">
+              <h3 className="font-semibold text-on-surface mb-2">{data.policy?.title}</h3>
+              {data.policy?.sections.map((section) => (
+                <p key={section.heading} className="mb-3 last:mb-0">
+                  <strong>{section.heading}:</strong> {section.body}
+                </p>
+              ))}
             </div>
+
+            {/* La versión aceptada queda registrada en el log de auditoría, así que
+                el cliente debe poder ver cuál es la que está aceptando. */}
+            {data.policy && (
+              <p className="text-label-sm font-label-sm text-on-surface-variant mb-8 text-right">
+                Versión {data.policy.version} · en vigor desde{" "}
+                {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            )}
 
             {confirmingReject ? (
               <div className="flex flex-col gap-3 animate-in fade-in duration-200">

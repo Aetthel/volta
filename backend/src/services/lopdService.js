@@ -1,5 +1,6 @@
 import prisma from "../config/db.js";
 import { sendWelcomeMessage } from "./botService.js";
+import { CURRENT_POLICY_VERSION } from "../policies/privacyPolicy.js";
 import { logger } from "../utils/logger.js";
 
 export const getClientConsent = async (id) => {
@@ -10,7 +11,11 @@ export const getClientConsent = async (id) => {
 };
 
 export const acceptConsent = async (id, metadata = {}) => {
-  const { ipAddress = "127.0.0.1", userAgent = "Unknown", policyVersion = "1.0" } = metadata;
+  const {
+    ipAddress = "Unknown",
+    userAgent = "Unknown",
+    policyVersion = CURRENT_POLICY_VERSION,
+  } = metadata;
 
   const client = await prisma.client.findUnique({
     where: { id },
