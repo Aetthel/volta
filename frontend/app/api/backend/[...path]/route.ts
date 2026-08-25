@@ -22,8 +22,13 @@ async function proxyRequest(
 
   const path = pathParts.join("/");
 
+  // Solo el flujo de consentimiento es público: GET /lopd/:id y POST /lopd/:id/accept.
+  // El resto de subrutas (p. ej. /lopd/:id/logs) exigen sesión autenticada.
+  const isPublicLopdRoute =
+    pathParts[0] === "lopd" && (pathParts.length === 2 || pathParts[2] === "accept");
+
   const isPublicRoute =
-    pathParts[0] === "lopd" ||
+    isPublicLopdRoute ||
     pathParts[0] === "health" ||
     pathParts[0] === "demo" ||
     (pathParts[0] === "users" && pathParts[1] === "register");
@@ -60,6 +65,18 @@ async function proxyRequest(
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
   headers.set("x-api-key", apiKey);
+
+  // El navegador nunca habla con el backend directamente: este proxy hace su
+  // propio fetch. Sin reenviar estos dos valores, el backend registraría la IP
+  // y el user-agent del servidor de Next en lugar de los del cliente, dejando
+  // sin valor probatorio el log de consentimiento LOPD.
+  // El backend solo los honra a través de su `trust proxy`, que cuenta con
+  // exactamente este salto.
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) headers.set("x-forwarded-for", forwardedFor);
+
+  const userAgent = request.headers.get("user-agent");
+  if (userAgent) headers.set("user-agent", userAgent);
 
   // Pass LOPD headers for consent routes
   if (pathParts[0] === "lopd") {
