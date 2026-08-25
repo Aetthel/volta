@@ -73,14 +73,14 @@ export default function AjustesPage() {
 
   // Business profile state (shared across sections)
   const [profile, setProfile] = useState<BusinessProfile>({
-    name: "Estilo & Spa",
-    email: session?.user?.email || "contacto@volta.com",
-    phone: "+34 912 345 678",
-    address: "Calle de Velázquez, 45, Madrid",
+    name: session?.user?.name || "",
+    email: session?.user?.email || "",
+    phone: "",
+    address: "",
     logoUrl: "",
     coverUrl: "",
-    description: "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
-    ownerName: session?.user?.name || "Usuario Volta",
+    description: "",
+    ownerName: session?.user?.name || "",
     workerPhoto: DEFAULT_AVATAR,
     themeColor: (session?.user?.themeColor as any) || "TEAL",
     fontSizeLevel: (session?.user?.fontSizeLevel as any) || "MEDIUM",
