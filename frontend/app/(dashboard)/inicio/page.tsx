@@ -42,15 +42,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import dynamicImport from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
 import MetricCard from "@/components/MetricCard";
-import NewAppointmentModal from "@/components/NewAppointmentModal";
 import { WeeklyPerformanceChart } from "@/components/WeeklyPerformanceChart";
 import { FeaturedServicesList } from "@/components/FeaturedServicesList";
 import { UpcomingAppointmentsList } from "@/components/UpcomingAppointmentsList";
-import AddClientModal from "@/components/AddClientModal";
+
+const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
+  ssr: false,
+});
+const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
+  ssr: false,
+});
 import {
   Alert,
   Badge,

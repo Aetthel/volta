@@ -23,13 +23,19 @@ import {
 import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 
+import dynamicImport from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import { formatDateTimeParts } from "@/lib/utils";
 import TrialBanner from "@/components/TrialBanner";
-import AddClientModal from "@/components/AddClientModal";
-import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
+
+const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
+  ssr: false,
+});
+const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
+  ssr: false,
+});
 import {
   Alert,
   Badge,

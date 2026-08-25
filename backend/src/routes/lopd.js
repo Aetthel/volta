@@ -1,5 +1,5 @@
 import express from "express";
-import { validateId } from "../middleware/index.js";
+import { authenticate, validateId } from "../middleware/index.js";
 import * as lopdController from "../controllers/lopdController.js";
 import { asyncHandler } from "../utils/index.js";
 import rateLimit from "express-rate-limit";
@@ -26,7 +26,12 @@ router.post(
   asyncHandler(lopdController.acceptConsent)
 );
 
-// GET registros de auditoría LOPD de un cliente
-router.get("/:id/logs", validateId("id"), asyncHandler(lopdController.getConsentLogs));
+// GET registros de auditoría LOPD de un cliente (protegido)
+router.get(
+  "/:id/logs",
+  authenticate,
+  validateId("id"),
+  asyncHandler(lopdController.getConsentLogs)
+);
 
 export default router;

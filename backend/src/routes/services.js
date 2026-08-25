@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, validateId, validateBody } from "../middleware/index.js";
+import { authenticate, requireRole, validateId, validateBody } from "../middleware/index.js";
 import { createServiceSchema, updateServiceSchema } from "../validators/index.js";
 import * as servicesController from "../controllers/servicesController.js";
 import { asyncHandler } from "../utils/index.js";
@@ -18,6 +18,7 @@ router.get(
 router.post(
   "/",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateId("businessId"),
   validateBody(createServiceSchema),
   asyncHandler(servicesController.createService)
@@ -27,6 +28,7 @@ router.post(
 router.put(
   "/:id",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateId("id"),
   validateBody(updateServiceSchema),
   asyncHandler(servicesController.updateService)
@@ -36,6 +38,7 @@ router.put(
 router.delete(
   "/:id",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateId("id"),
   asyncHandler(servicesController.deleteService)
 );
