@@ -14,6 +14,7 @@ export function setupSecurityInterceptor() {
     // Ejecutar siempre bound al objeto window para compatibilidad estricta con Safari
     const response = await originalFetch.apply(window, args);
 
+    if (response.status === 403 || response.status === 401) {
       const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url || "";
       if (
         url.includes("__nextjs") ||
