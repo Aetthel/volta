@@ -8,9 +8,9 @@
 
 ## 2. Componente de Checkout en Frontend (Lemon.js Overlay)
 
-- [ ] 2.1 Crear el componente `SubscriptionCheckoutModal.tsx` con selector de plan mensual (Básico 18€/mes vs Pro 25€/mes), soporte de cupones promocionales y botón de lanzamiento del overlay seguro.
-- [ ] 2.2 Integrar el script de `Lemon.js` en el layout para habilitar el checkout overlay embebido en la aplicación y capturar el evento `CheckoutSuccess`.
-- [ ] 2.3 Implementar el refresco reactivo de la sesión en NextAuth vía `update()` y pantalla de confirmación tras el pago exitoso.
+- [x] 2.1 Crear el componente `SubscriptionCheckoutModal.tsx` con selector de plan mensual (Básico 18€/mes vs Pro 25€/mes), soporte de cupones promocionales y botón de lanzamiento del overlay seguro.
+- [x] 2.2 Integrar el script de `Lemon.js` en el layout para habilitar el checkout overlay embebido en la aplicación y capturar el evento `CheckoutSuccess`.
+- [x] 2.3 Implementar el refresco reactivo de la sesión en NextAuth vía `update()` y pantalla de confirmación tras el pago exitoso.
 
 ## 3. Integración en Ajustes, Avisos y Bloqueos
 

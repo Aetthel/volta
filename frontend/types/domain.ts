@@ -9,12 +9,27 @@ export interface Business {
   subscriptionStatus: "TRIALING" | "ACTIVE" | "EXPIRED" | "CANCELLED" | "DEMO_SANDBOX";
   trialExpiresAt?: string | null;
   sandboxExpiresAt?: string | null;
+  gracePeriodExpiresAt?: string | null;
+  cancelAtPeriodEnd?: boolean;
   themeColor?: string;
   fontSizeLevel?: string;
   borderRadiusLevel?: string;
   logoUrl?: string | null;
   coverUrl?: string | null;
   description?: string | null;
+}
+
+export interface Invoice {
+  id: string;
+  businessId: string;
+  lemonSqueezyId?: string | null;
+  invoiceNumber: string;
+  amount: number;
+  currency: string;
+  status: "PAID" | "PENDING" | "FAILED" | "REFUNDED";
+  invoiceUrl?: string | null;
+  billingReason?: string | null;
+  createdAt: string;
 }
 
 export interface User {

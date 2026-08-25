@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import ClientProvidersWrapper from "@/components/ClientProvidersWrapper";
 import {
   COLOR_PALETTES,
@@ -150,6 +151,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         style={inlineStyles}
       >
         <ClientProvidersWrapper session={session}>{children}</ClientProvidersWrapper>
+        <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="lazyOnload" />
       </body>
     </html>
   );
