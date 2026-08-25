@@ -21,6 +21,7 @@ import ProfileSection from "@/components/settings/ProfileSection";
 import MessagesSection from "@/components/settings/MessagesSection";
 import BusinessSection from "@/components/settings/BusinessSection";
 import PersonalizationSection from "@/components/settings/PersonalizationSection";
+import BillingSection from "@/components/settings/BillingSection";
 import { Button, PageHeader } from "@/components/ui/volta-ui";
 
 const TAB_KEY = "volta-settings-active-tab";
@@ -32,6 +33,7 @@ const ALL_TABS = [
   { id: "perfil", label: "Perfil y Seguridad", roles: ["ADMIN", "JEFE", "EMPLEADO"] },
   { id: "mensajeria", label: "Mensajes y WhatsApp", roles: ["JEFE", "EMPLEADO"] },
   { id: "gestion", label: "Gestión del Negocio", roles: ["JEFE"] },
+  { id: "facturacion", label: "Facturación y Suscripción", roles: ["ADMIN", "JEFE"] },
   { id: "personalizacion", label: "Personalización", roles: ["JEFE"] },
 ];
 
@@ -184,6 +186,14 @@ export default function AjustesPage() {
               setProfile={setProfile}
               businessId={businessId}
               setToast={setToast}
+            />
+          )}
+          {activeTab === "facturacion" && (
+            <BillingSection
+              onShowToast={(text) => {
+                setToast({ show: true, text });
+                setTimeout(() => setToast({ show: false, text: "" }), 3000);
+              }}
             />
           )}
           {activeTab === "personalizacion" && (

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import {
   Calendar,
   BarChart3,
@@ -24,6 +24,7 @@ import {
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
 import FullScreenSplash from "@/components/FullScreenSplash";
+import SubscriptionCheckoutModal from "@/components/SubscriptionCheckoutModal";
 import { COLOR_PALETTES, applyThemeColors } from "@/lib/theme";
 
 export default function RootPage() {
@@ -32,7 +33,8 @@ export default function RootPage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isCreatingDemo, setIsCreatingDemo] = useState(false);
   const [demoMessage, setDemoMessage] = useState("Preparando tu entorno de demo...");
-  const [demoProgress, setDemoProgress] = useState(15);
+  const { data: session } = useSession();
+  const [checkoutPlan, setCheckoutPlan] = useState<"BASIC" | "PRO" | null>(null);
   const router = useRouter();
 
   // Enforce default Volta theme on the landing page
@@ -754,11 +756,22 @@ export default function RootPage() {
                 </div>
 
                 <div className="mt-8 space-y-3">
-                  <Link href="/register">
-                    <Button variant="outline" size="lg" className="w-full">
-                      Probar 14 días gratis
+                  {session?.user ? (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full cursor-pointer"
+                      onClick={() => setCheckoutPlan("BASIC")}
+                    >
+                      Contratar Plan Básico
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link href="/register">
+                      <Button variant="outline" size="lg" className="w-full">
+                        Probar 14 días gratis
+                      </Button>
+                    </Link>
+                  )}
                   <p className="text-body-sm text-on-surface-variant text-center mt-2">
                     Sin compromiso
                   </p>
@@ -817,15 +830,26 @@ export default function RootPage() {
                 </div>
 
                 <div className="mt-8 space-y-3">
-                  <Link href="/register">
+                  {session?.user ? (
                     <Button
                       variant="secondary"
                       size="lg"
-                      className="w-full bg-white text-primary hover:bg-surface-container-lowest"
+                      className="w-full bg-white text-primary hover:bg-surface-container-lowest cursor-pointer"
+                      onClick={() => setCheckoutPlan("PRO")}
                     >
-                      Probar 14 días gratis
+                      Contratar Plan Pro
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link href="/register">
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="w-full bg-white text-primary hover:bg-surface-container-lowest"
+                      >
+                        Probar 14 días gratis
+                      </Button>
+                    </Link>
+                  )}
                   <p className="text-body-sm text-on-primary/70 text-center mt-2">Sin compromiso</p>
                 </div>
               </Card>
@@ -1213,6 +1237,12 @@ export default function RootPage() {
       </footer>
 
       {isCreatingDemo && <FullScreenSplash message={demoMessage} progress={demoProgress} />}
+
+      <SubscriptionCheckoutModal
+        isOpen={!!checkoutPlan}
+        onClose={() => setCheckoutPlan(null)}
+        initialPlan={checkoutPlan || "PRO"}
+      />
     </div>
   );
 }

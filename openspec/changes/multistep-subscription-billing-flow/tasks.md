@@ -14,12 +14,12 @@
 
 ## 3. Integración en Ajustes, Avisos y Bloqueos
 
-- [ ] 3.1 Añadir la pestaña "Facturación y Suscripción" en la página de Ajustes (`/ajustes`) para roles `JEFE` y `ADMIN`, con visualización del plan activo, botón de cambio de plan, botón de cancelación y tabla de facturas con enlace de descarga al PDF oficial del MoR.
-- [ ] 3.2 Actualizar `TrialBanner.tsx` y `UpgradeProModal.tsx` para abrir directamente el checkout modal con el plan correspondiente preseleccionado, e incorporar la alerta visual de 3 días de gracia ante fallos de cobro.
-- [ ] 3.3 Implementar el bloqueo de interfaz cuando el periodo de prueba ha expirado (`subscriptionStatus === "EXPIRED"`), obligando al usuario a suscribir un plan para reactivar su cuenta.
-- [ ] 3.4 Conectar los botones de la tabla de precios en la Landing Page (`#pricing`) para iniciar el checkout en usuarios autenticados.
+- [x] 3.1 Añadir la pestaña "Facturación y Suscripción" en la página de Ajustes (`/ajustes`) para roles `JEFE` y `ADMIN`, con visualización del plan activo, botón de cambio de plan, botón de cancelación y tabla de facturas con enlace de descarga al PDF oficial del MoR.
+- [x] 3.2 Actualizar `TrialBanner.tsx` y `UpgradeProModal.tsx` para abrir directamente el checkout modal con el plan correspondiente preseleccionado, e incorporar la alerta visual de 3 días de gracia ante fallos de cobro.
+- [x] 3.3 Implementar el bloqueo de interfaz cuando el periodo de prueba ha expirado (`subscriptionStatus === "EXPIRED"`), obligando al usuario a suscribir un plan para reactivar su cuenta.
+- [x] 3.4 Conectar los botones de la tabla de precios en la Landing Page (`#pricing`) para iniciar el checkout en usuarios autenticados.
 
 ## 4. Verificación y Pruebas End-to-End
 
-- [ ] 4.1 Ejecutar la suite de tests del proyecto para comprobar que todas las suites de frontend y backend pasen satisfactoriamente.
-- [ ] 4.2 Probar el flujo completo: apertura de modal, generación de sesión de checkout, simulación/cobro exitoso, actualización de suscripción a `ACTIVE`, periodo de gracia y visualización de facturas descargables.
+- [x] 4.1 Ejecutar la suite de tests del proyecto para comprobar que todas las suites de frontend y backend pasen satisfactoriamente.
+- [x] 4.2 Probar el flujo completo: apertura de modal, generación de sesión de checkout, simulación/cobro exitoso, actualización de suscripción a `ACTIVE`, periodo de gracia y visualización de facturas descargables.
