@@ -296,8 +296,8 @@ export default function BusinessSection({
       .catch((err) => alert(err.message));
   };
 
-  const filteredServices = services.filter((s) =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredServices = (services || []).filter((s) =>
+    (s?.name || "").toLowerCase().includes((searchQuery || "").toLowerCase())
   );
 
   return (

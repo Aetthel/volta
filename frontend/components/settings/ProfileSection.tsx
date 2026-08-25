@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { User, Key, Mail, Camera, Save, Loader2, ShieldCheck, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,7 +46,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
   const workerPhotoInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profile data
-  useState(() => {
+  useEffect(() => {
     if (session?.user?.id) {
       fetch(`/api/backend/users`)
         .then((res) => res.json())
@@ -58,7 +58,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
         })
         .catch(() => {});
     }
-  });
+  }, [session?.user?.id]);
 
   const formatProfileDate = (dateString: string) => {
     if (!dateString) return "Fecha no disponible";

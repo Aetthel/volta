@@ -22,7 +22,21 @@ import MessagesSection from "@/components/settings/MessagesSection";
 import BusinessSection from "@/components/settings/BusinessSection";
 import PersonalizationSection from "@/components/settings/PersonalizationSection";
 import BillingSection from "@/components/settings/BillingSection";
-import { Button, PageHeader } from "@/components/ui/volta-ui";
+import {
+  Button,
+  PageHeader,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FloatingInput,
+  Skeleton,
+} from "@/components/ui/volta-ui";
+import { User, Mail, Key, Save, Loader2 } from "lucide-react";
 
 const TAB_KEY = "volta-settings-active-tab";
 
@@ -252,19 +266,6 @@ function AdminView({ toast, setToast }: { toast: ToastState; setToast: (t: Toast
       .catch((err) => alert(err.message))
       .finally(() => setSavingAdmin(false));
   };
-
-  const {
-    FloatingInput,
-    FieldGroup,
-    Field,
-    FieldLabel,
-    Card,
-    CardHeader,
-    CardTitle,
-    CardContent,
-    CardFooter,
-  } = require("@/components/ui/volta-ui");
-  const { User, Mail, Key, Save, Loader2, CheckCircle } = require("lucide-react");
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
