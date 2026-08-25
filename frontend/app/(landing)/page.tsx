@@ -38,7 +38,7 @@ export default function RootPage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [isCreatingDemo, setIsCreatingDemo] = useState(false);
   const [demoMessage, setDemoMessage] = useState("Preparando tu entorno de demo...");
-  const [demoProgress, setDemoProgress] = useState<number | undefined>(undefined);
+  const [demoProgress, setDemoProgress] = useState<number>(0);
   const { data: session } = useSession();
   const [checkoutPlan, setCheckoutPlan] = useState<"BASIC" | "PRO" | null>(null);
   const router = useRouter();

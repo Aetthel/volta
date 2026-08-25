@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import {
   X,
@@ -59,8 +59,28 @@ export default function SubscriptionCheckoutModal({
   const [billingEmail, setBillingEmail] = useState(session?.user?.email || "");
 
   // Loading and error states
+  // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSuccessRef = useRef(onSuccess);
+  useEffect(() => {
+    handleSuccessRef.current = onSuccess;
+  }, [onSuccess]);
+
+  const handleCheckoutSuccess = useCallback(async () => {
+    setStep(4);
+    // Refresh NextAuth session reactively
+    try {
+      await updateSession({
+        subscriptionPlan: selectedPlan,
+        subscriptionStatus: "ACTIVE",
+      });
+    } catch (e) {
+      console.warn("Session update warning:", e);
+    }
+    if (handleSuccessRef.current) handleSuccessRef.current();
+  }, [selectedPlan, updateSession]);
 
   // Reset state on open
   useEffect(() => {
@@ -84,6 +104,7 @@ export default function SubscriptionCheckoutModal({
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialPlan]);
 
   if (!isOpen) return null;
@@ -91,7 +112,7 @@ export default function SubscriptionCheckoutModal({
   const isTrialing = session?.user?.subscriptionStatus === "TRIALING";
   const trialExpiresAt = session?.user?.trialExpiresAt;
   const daysLeftInTrial = trialExpiresAt
-    ? Math.max(0, Math.ceil((new Date(trialExpiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    ? Math.max(0, Math.ceil((new Date(trialExpiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
 
   // Price calculations
@@ -167,20 +188,6 @@ export default function SubscriptionCheckoutModal({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCheckoutSuccess = async () => {
-    setStep(4);
-    // Refresh NextAuth session reactively
-    try {
-      await updateSession({
-        subscriptionPlan: selectedPlan,
-        subscriptionStatus: "ACTIVE",
-      });
-    } catch (e) {
-      console.warn("Session update warning:", e);
-    }
-    if (onSuccess) onSuccess();
   };
 
   return (

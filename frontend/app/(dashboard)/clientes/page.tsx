@@ -60,11 +60,13 @@ interface ClientItem {
   surname: string;
   email: string;
   phone: string;
-  lastVisit: string;
-  frequentService: string;
-  stylist: string;
-  avatarUrl: string;
+  lastVisit?: string;
+  frequentService?: string;
+  stylist?: string;
+  avatarUrl?: string;
   lopdStatus: "Aceptado" | "Pendiente";
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const normalizeString = (str: string) => {
@@ -413,7 +415,7 @@ export default function ClientesPage() {
   const prevWeekClients = clients.filter((c) => {
     if (!c.createdAt) return false;
     const createdDate = new Date(c.createdAt);
-    const diffDays = Math.ceil(Math.abs(Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(Math.abs(today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
     return diffDays > 7 && diffDays <= 14;
   }).length;
 

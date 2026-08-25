@@ -85,6 +85,13 @@ interface AppointmentItem {
   status: "PENDING" | "SENT" | "ERROR";
   serviceName: string;
   duration?: string;
+  price?: number;
+  service?: {
+    name?: string;
+    price?: number;
+    duration?: number;
+    color?: string;
+  };
 }
 
 export default function DashboardPage() {
@@ -228,6 +235,9 @@ export default function DashboardPage() {
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split("T")[0];
+  });
+
   const dynamicPrices: Record<string, number> = services.reduce(
     (acc, s) => {
       if (s.name) {
