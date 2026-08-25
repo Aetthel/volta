@@ -31,8 +31,8 @@ function MiniSparkline({
   const strokeColor =
     trend === "up" ? "#10b981" : trend === "down" ? "#ef4444" : "#6366f1";
 
-  // Use real data array or smooth fallback
-  const points = data.length >= 2 ? data : [4, 6, 5, 8, 7, 9, 10];
+  // Use real data array or flat zero baseline
+  const points = data && data.length >= 2 ? data : [0, 0, 0, 0, 0, 0, 0];
   const max = Math.max(...points, 1);
   const min = Math.min(...points, 0);
   const range = max - min || 1;

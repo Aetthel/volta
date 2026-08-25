@@ -68,7 +68,7 @@ export function EventManager({
   onEventCreate,
   onEventUpdate,
   onEventDelete,
-  categories = ["Corte", "Coloración", "Tratamiento", "Manicura", "Spa"],
+  categories = [],
   colors = defaultColors,
   defaultView = "week",
   className,

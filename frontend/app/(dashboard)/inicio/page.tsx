@@ -87,15 +87,6 @@ interface AppointmentItem {
   duration?: string;
 }
 
-const DEFAULT_SERVICES = [
-  { name: "Corte Caballero", price: 35 },
-  { name: "Corte Dama", price: 45 },
-  { name: "Coloración Premium", price: 85 },
-  { name: "Tratamiento Keratina", price: 50 },
-  { name: "Manicura", price: 20 },
-  { name: "Spa Facial", price: 40 },
-];
-
 export default function DashboardPage() {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "";
@@ -237,24 +228,21 @@ export default function DashboardPage() {
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    return d.toISOString().split("T")[0];
-  });
+  const dynamicPrices: Record<string, number> = services.reduce(
+    (acc, s) => {
+      if (s.name) {
+        acc[s.name.trim().toLowerCase()] = toAmount(s.price);
+      }
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const dynamicPrices: Record<string, number> = {
-    ...DEFAULT_SERVICES.reduce(
-      (acc, s) => {
-        acc[s.name] = toAmount(s.price);
-        return acc;
-      },
-      {} as Record<string, number>
-    ),
-    ...services.reduce(
-      (acc, s) => {
-        acc[s.name] = toAmount(s.price);
-        return acc;
-      },
-      {} as Record<string, number>
-    ),
+  const getAppointmentPrice = (app: any) => {
+    if (typeof app.service?.price === "number") return app.service.price;
+    if (typeof app.price === "number") return app.price;
+    const sName = (app.serviceName || app.service?.name || "").trim().toLowerCase();
+    return dynamicPrices[sName] || 0;
   };
 
   // 1. Citas (daily appointment counts for last 7 days)
@@ -309,19 +297,14 @@ export default function DashboardPage() {
 
   // 3. Ingresos Est. (daily estimated revenue for last 7 days)
   const estimatedIncome = todayApps.reduce((acc, app) => {
-    const serviceName = app.serviceName || "Corte Caballero";
-    const price = dynamicPrices[serviceName] || 35;
-    return acc + price;
+    return acc + getAppointmentPrice(app);
   }, 0);
 
   const incomeSparkline = last7Days.map((dateStr) => {
     const dayApps = appointments.filter(
       (app) => app.appointmentDate && app.appointmentDate.split("T")[0] === dateStr
     );
-    return dayApps.reduce((sum, app) => {
-      const sName = app.serviceName || "Corte Caballero";
-      return sum + (dynamicPrices[sName] || 35);
-    }, 0);
+    return dayApps.reduce((sum, app) => sum + getAppointmentPrice(app), 0);
   });
 
   const todayIncomeVal = incomeSparkline[6] || 0;
@@ -408,10 +391,7 @@ export default function DashboardPage() {
     });
 
     const clientsCount = dayApps.length;
-    const incomeAmount = dayApps.reduce((sum, app) => {
-      const sName = app.serviceName || "Corte Caballero";
-      return sum + (dynamicPrices[sName] || 35);
-    }, 0);
+    const incomeAmount = dayApps.reduce((sum, app) => sum + getAppointmentPrice(app), 0);
 
     return {
       name: dayNames[idx],
@@ -421,28 +401,21 @@ export default function DashboardPage() {
     };
   });
 
-  // 5. Featured services calculation (top 4 services, listing unused business/default services as 0%)
+  // 5. Featured services calculation (top 4 services based strictly on business services and bookings)
   const displayServiceShares = (() => {
     const totalAppointments = appointments.length;
 
     // Create a map of all services initialized to 0
     const serviceMap: Record<string, { count: number; pct: number }> = {};
 
-    // Pre-populate with all business services
+    // Pre-populate with actual business services
     services.forEach((s) => {
       if (s.name) serviceMap[s.name] = { count: 0, pct: 0 };
     });
 
-    // Pre-populate with default services if list is empty
-    DEFAULT_SERVICES.forEach((s) => {
-      if (!(s.name in serviceMap)) {
-        serviceMap[s.name] = { count: 0, pct: 0 };
-      }
-    });
-
     // Populate with actual counts
     appointments.forEach((app) => {
-      const sName = app.serviceName || "Servicio General";
+      const sName = app.serviceName || app.service?.name || "Servicio General";
       if (sName in serviceMap) {
         serviceMap[sName].count += 1;
       } else {
@@ -460,13 +433,14 @@ export default function DashboardPage() {
       };
     });
 
-    // Sort: services with bookings first, then alphabetically or by ID
+    // Sort: services with bookings first
     list.sort((a, b) => b.count - a.count);
 
-    // Return top 4 with Scissors icon
+    // Return top 4
     return list.slice(0, 4).map((s) => ({
       name: s.name,
       pct: s.pct,
+      count: s.count,
       icon: Briefcase,
     }));
   })();
