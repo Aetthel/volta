@@ -76,6 +76,15 @@ export const resendConsent = async (req, res) => {
     return res.status(403).json({ error: "Acceso denegado a este cliente" });
   }
 
+  // Un rechazo expreso no se puede sortear reenviando la solicitud desde el panel.
+  if (client.lopdStatus === "Rechazado") {
+    return res.status(409).json({
+      error:
+        "Este cliente rechazó expresamente el consentimiento. No se le puede reenviar la solicitud.",
+      code: "LOPD_REJECTED",
+    });
+  }
+
   await clientsService.resendConsent(client);
   return ApiResponse.ok(res);
 };

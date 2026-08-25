@@ -1,5 +1,6 @@
 import prisma from "../config/db.js";
 import { sendWelcomeMessage } from "./botService.js";
+import { logger } from "../utils/logger.js";
 
 export const getClientConsent = async (id) => {
   return prisma.client.findUnique({
@@ -52,6 +53,32 @@ export const acceptConsent = async (id, metadata = {}) => {
   }
 
   return { updatedClient, futureAppointments, consentLog };
+};
+
+export const rejectConsent = async (id) => {
+  const client = await prisma.client.findUnique({
+    where: { id },
+  });
+
+  if (!client) {
+    const error = new Error("Client not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const updatedClient = await prisma.client.update({
+    where: { id },
+    data: { lopdStatus: "Rechazado" },
+  });
+
+  // PENDIENTE (bloqueado por migración): cuando LopdConsentLog tenga la columna
+  // `action`, este rechazo debe crear una fila REJECTED igual que acceptConsent
+  // crea la de GRANTED. Hasta entonces este log es el único rastro del evento.
+  logger.info(
+    `[LOPD] Consentimiento rechazado por el cliente ${id} (estado previo: ${client.lopdStatus})`
+  );
+
+  return { updatedClient, previousStatus: client.lopdStatus };
 };
 
 export const getConsentLogsByClient = async (clientId, businessId) => {

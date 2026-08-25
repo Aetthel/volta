@@ -82,6 +82,33 @@ export const acceptConsent = async (req, res) => {
   });
 };
 
+export const rejectConsent = async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers["x-lopd-token"] || req.query.token;
+  const exp = req.headers["x-lopd-exp"] || req.query.exp;
+
+  if (!verifyToken(id, token, exp)) {
+    return res.status(400).json({ error: "Token de firma inválido, faltante o expirado." });
+  }
+
+  const client = await lopdService.getClientConsent(id);
+  if (!client) {
+    return res.status(404).json({ error: "Cliente no encontrado" });
+  }
+
+  // Idempotencia — ya rechazado, nada que hacer
+  if (client.lopdStatus === "Rechazado") {
+    return ApiResponse.success(res, { success: true, client: toPublicConsent(client) });
+  }
+
+  const { updatedClient } = await lopdService.rejectConsent(id);
+
+  return ApiResponse.success(res, {
+    success: true,
+    client: toPublicConsent({ ...updatedClient, business: client.business }),
+  });
+};
+
 export const getConsentLogs = async (req, res) => {
   const { id: clientId } = req.params;
   // El businessId sale SIEMPRE de la sesión verificada, nunca de la petición:

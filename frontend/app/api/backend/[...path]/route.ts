@@ -22,10 +22,13 @@ async function proxyRequest(
 
   const path = pathParts.join("/");
 
-  // Solo el flujo de consentimiento es público: GET /lopd/:id y POST /lopd/:id/accept.
-  // El resto de subrutas (p. ej. /lopd/:id/logs) exigen sesión autenticada.
+  // Solo el flujo de consentimiento es público: GET /lopd/:id y las decisiones
+  // del cliente (accept / reject). El resto de subrutas (p. ej. /lopd/:id/logs)
+  // exigen sesión autenticada.
+  const PUBLIC_LOPD_ACTIONS = ["accept", "reject"];
   const isPublicLopdRoute =
-    pathParts[0] === "lopd" && (pathParts.length === 2 || pathParts[2] === "accept");
+    pathParts[0] === "lopd" &&
+    (pathParts.length === 2 || PUBLIC_LOPD_ACTIONS.includes(pathParts[2]));
 
   const isPublicRoute =
     isPublicLopdRoute ||

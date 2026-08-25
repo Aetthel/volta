@@ -58,8 +58,19 @@ interface ClientItem {
   frequentService: string;
   stylist: string;
   avatarUrl: string;
-  lopdStatus: "Aceptado" | "Pendiente";
+  lopdStatus: LopdStatus;
 }
+
+type LopdStatus = "Aceptado" | "Pendiente" | "Rechazado";
+
+// "Pendiente" es una tarea abierta y se marca en rojo para que se actúe sobre ella.
+// "Rechazado" es una decisión cerrada del cliente, no una incidencia a resolver:
+// va en tono neutro para que nadie lo lea como algo que hay que "arreglar".
+const LOPD_BADGE_STYLES: Record<LopdStatus, string> = {
+  Aceptado: "bg-tertiary-container text-on-tertiary-container",
+  Pendiente: "bg-error-container text-on-error-container",
+  Rechazado: "bg-surface-variant text-on-surface-variant",
+};
 
 const normalizeString = (str: string) => {
   return str
@@ -133,7 +144,7 @@ export default function ClientesPage() {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [lopdFilter, setLopdFilter] = useState<"all" | "Aceptado" | "Pendiente">("all");
+  const [lopdFilter, setLopdFilter] = useState<"all" | LopdStatus>("all");
   const [serviceFilter, setServiceFilter] = useState("all");
   const [activityFilter, setActivityFilter] = useState<"all" | "inactive" | "new">("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -310,29 +321,38 @@ export default function ClientesPage() {
       });
   };
 
+  const showErrorToast = (text: string) => {
+    setToastText(text);
+    setShowGeneralToast(true);
+    setTimeout(() => setShowGeneralToast(false), 4000);
+  };
+
   const handleSendWhatsAppConsent = (client: ClientItem) => {
     fetch(`/api/backend/clients/${client.id}/resend-consent`, {
       method: "POST",
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to send LOPD consent");
-        return res.json();
-      })
-      .then(() => {
-        setToastPhone(client.phone);
-        setShowConsentToast(true);
-        setTimeout(() => {
-          setShowConsentToast(false);
-        }, 3000);
+      .then(async (res) => {
+        if (res.ok) {
+          setToastPhone(client.phone);
+          setShowConsentToast(true);
+          setTimeout(() => {
+            setShowConsentToast(false);
+          }, 3000);
+          return;
+        }
+
+        // Un fallo NO puede mostrar el toast de éxito: el usuario se quedaría
+        // creyendo que el cliente recibió la solicitud cuando no ha salido nada.
+        const body = await res.json().catch(() => ({}));
+        showErrorToast(
+          body?.code === "LOPD_REJECTED"
+            ? "Este cliente rechazó el consentimiento. No se le puede reenviar la solicitud."
+            : "No se pudo reenviar el consentimiento. Inténtalo de nuevo."
+        );
       })
       .catch((err) => {
         console.error("Error resending consent:", err);
-        // fallback
-        setToastPhone(client.phone);
-        setShowConsentToast(true);
-        setTimeout(() => {
-          setShowConsentToast(false);
-        }, 3000);
+        showErrorToast("No se pudo reenviar el consentimiento. Inténtalo de nuevo.");
       });
   };
 
@@ -711,9 +731,8 @@ export default function ClientesPage() {
                           <td className="px-6 py-4">
                             <span
                               className={`inline-flex items-center px-2.5 py-1 rounded-md text-label-sm font-medium ${
-                                client.lopdStatus === "Aceptado"
-                                  ? "bg-tertiary-container text-on-tertiary-container"
-                                  : "bg-error-container text-on-error-container"
+                                LOPD_BADGE_STYLES[client.lopdStatus] ??
+                                LOPD_BADGE_STYLES.Pendiente
                               }`}
                             >
                               {client.lopdStatus}
@@ -739,7 +758,7 @@ export default function ClientesPage() {
                                   }}
                                   className="w-48 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-[9999] animate-in fade-in slide-in-from-top-2 duration-150"
                                 >
-                                  {client.lopdStatus === "Aceptado" ? (
+                                  {client.lopdStatus === "Aceptado" && (
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -751,7 +770,8 @@ export default function ClientesPage() {
                                       <MessageCircle className="w-4 h-4 text-primary" />
                                       <span>Enviar WhatsApp</span>
                                     </button>
-                                  ) : (
+                                  )}
+                                  {client.lopdStatus === "Pendiente" && (
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
@@ -763,6 +783,13 @@ export default function ClientesPage() {
                                       <ShieldCheck className="w-4 h-4 text-error" />
                                       <span>Enviar LOPD</span>
                                     </button>
+                                  )}
+                                  {/* "Rechazado" no ofrece ninguna acción de envío: ni mensajes
+                                      (no hay consentimiento) ni solicitud LOPD (ya dijo que no). */}
+                                  {client.lopdStatus === "Rechazado" && (
+                                    <p className="px-4 py-2.5 text-label-sm text-on-surface-variant">
+                                      Rechazó el consentimiento
+                                    </p>
                                   )}
                                   <button
                                     onClick={(e) => {
@@ -797,12 +824,13 @@ export default function ClientesPage() {
                           </td>
                         </ContextMenuTrigger>
                         <ContextMenuContent>
-                          {client.lopdStatus === "Aceptado" ? (
+                          {client.lopdStatus === "Aceptado" && (
                             <ContextMenuItem onClick={() => handleSendCustomMessage(client)}>
                               <MessageCircle className="w-4 h-4 text-primary" />
                               <span>Enviar WhatsApp</span>
                             </ContextMenuItem>
-                          ) : (
+                          )}
+                          {client.lopdStatus === "Pendiente" && (
                             <ContextMenuItem onClick={() => handleSendWhatsAppConsent(client)}>
                               <ShieldCheck className="w-4 h-4 text-error" />
                               <span>Enviar LOPD</span>

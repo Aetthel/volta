@@ -171,6 +171,12 @@ export const createAppointment = async (appointmentData) => {
     sendWelcomeMessage(appointment.id).catch((err) => {
       logger.error("[Service] Error sending welcome message on appointment creation:", err);
     });
+  } else if (client.lopdStatus === "Rechazado") {
+    // El cliente rechazó expresamente el consentimiento: no se le vuelve a pedir.
+    // Insistir por el mismo canal que acaba de rechazar sería contrario al RGPD.
+    logger.info(
+      `[Service] Cliente ${client.id} rechazó el consentimiento LOPD: no se envía solicitud.`
+    );
   } else {
     sendConsentMessage(businessId, client).catch((err) => {
       logger.error("[Service] Error sending LOPD consent request:", err);

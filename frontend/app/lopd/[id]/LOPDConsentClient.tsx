@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertCircle, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
 export default function LOPDConsentClient() {
@@ -18,6 +18,8 @@ export default function LOPDConsentClient() {
     lopdStatus: "",
   });
   const [accepted, setAccepted] = useState(false);
+  const [rejected, setRejected] = useState(false);
+  const [confirmingReject, setConfirmingReject] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -54,6 +56,9 @@ export default function LOPDConsentClient() {
         if (resData.lopdStatus === "Aceptado") {
           setAccepted(true);
         }
+        if (resData.lopdStatus === "Rechazado") {
+          setRejected(true);
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -63,26 +68,30 @@ export default function LOPDConsentClient() {
       });
   }, [clientId, searchParams]);
 
-  const handleAccept = () => {
+  // Aceptar y rechazar son la misma operación con distinto destino: una decisión
+  // del cliente que el backend registra. Comparten flujo para que ninguna de las
+  // dos quede como el "camino secundario" con menos garantías que la otra.
+  const submitDecision = (action: "accept" | "reject") => {
     setSubmitting(true);
     const token = sessionStorage.getItem("lopd_token");
     const exp = sessionStorage.getItem("lopd_exp");
 
-    fetch(`/api/backend/lopd/${clientId}/accept`, {
+    fetch(`/api/backend/lopd/${clientId}/${action}`, {
       method: "POST",
       headers: { "x-lopd-token": token || "", "x-lopd-exp": exp || "" },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("No se pudo procesar la aceptación.");
+        if (!res.ok) throw new Error("No se pudo procesar tu respuesta.");
         return res.json();
       })
       .then(() => {
-        setAccepted(true);
+        if (action === "accept") setAccepted(true);
+        else setRejected(true);
         setSubmitting(false);
       })
       .catch((err) => {
-        console.error("Error accepting LOPD:", err);
-        setError("Ocurrió un error al procesar tu aceptación. Por favor, inténtalo de nuevo.");
+        console.error(`Error submitting LOPD decision (${action}):`, err);
+        setError("Ocurrió un error al procesar tu respuesta. Por favor, inténtalo de nuevo.");
         setSubmitting(false);
       });
   };
@@ -138,6 +147,22 @@ export default function LOPDConsentClient() {
               directamente por WhatsApp.
             </p>
           </div>
+        ) : rejected ? (
+          <div className="text-center py-6 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+            <XCircle className="w-20 h-20 text-on-surface-variant mb-6" />
+            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-3">
+              Entendido, {data.clientName}
+            </h2>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed mb-6">
+              Hemos registrado que <strong>no autorizas</strong> el envío de mensajes automáticos
+              por parte de <strong>{data.businessName}</strong>.
+            </p>
+            <p className="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-6 py-4 rounded-lg border border-outline-variant/50 max-w-sm">
+              No recibirás confirmaciones ni recordatorios por WhatsApp. Tus citas siguen siendo
+              válidas: el salón te atenderá con normalidad. Si cambias de opinión, puedes volver a
+              abrir este mismo enlace.
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col">
             <div className="flex items-center gap-3 mb-6">
@@ -190,23 +215,72 @@ export default function LOPDConsentClient() {
               </p>
             </div>
 
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              onClick={handleAccept}
-              disabled={submitting}
-              className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Procesando...</span>
-                </>
-              ) : (
-                <span>Aceptar y permitir recordatorios</span>
-              )}
-            </Button>
+            {confirmingReject ? (
+              <div className="flex flex-col gap-3 animate-in fade-in duration-200">
+                <p className="font-body-md text-body-md text-on-surface text-center leading-relaxed">
+                  Si no aceptas, <strong>no recibirás recordatorios de tus citas</strong> por
+                  WhatsApp. ¿Confirmas?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="lg"
+                    onClick={() => setConfirmingReject(false)}
+                    disabled={submitting}
+                    className="flex-1 py-4 font-medium"
+                  >
+                    Volver
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="lg"
+                    onClick={() => submitDecision("reject")}
+                    disabled={submitting}
+                    className="flex-1 py-4 flex items-center justify-center gap-2 font-medium"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Procesando...</span>
+                      </>
+                    ) : (
+                      <span>Sí, no acepto</span>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  onClick={() => submitDecision("accept")}
+                  disabled={submitting}
+                  className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Procesando...</span>
+                    </>
+                  ) : (
+                    <span>Aceptar y permitir recordatorios</span>
+                  )}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setConfirmingReject(true)}
+                  disabled={submitting}
+                  className="w-full py-3 text-label-lg font-label-lg text-on-surface-variant hover:text-on-surface underline underline-offset-4 disabled:opacity-50 transition-colors"
+                >
+                  No acepto
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

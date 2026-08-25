@@ -26,6 +26,14 @@ router.post(
   asyncHandler(lopdController.acceptConsent)
 );
 
+// POST rechazar consentimiento LOPD (token via headers + rate limited)
+router.post(
+  "/:id/reject",
+  consentLimiter,
+  validateId("id"),
+  asyncHandler(lopdController.rejectConsent)
+);
+
 // GET registros de auditoría LOPD de un cliente (privado: sesión + rol)
 router.get(
   "/:id/logs",
