@@ -9,7 +9,7 @@ export default auth((req) => {
   const pathname = nextUrl.pathname;
   const isLoggedIn = !!req.auth;
 
-  const isLoginRoute = pathname === "/login";
+  const isPublicAuthRoute = pathname === "/" || pathname === "/login" || pathname === "/register";
 
   // Definición de permisos de rutas por Rol
   const adminRoutes = ["/admin", "/sedes", "/ajustes", "/agenda"];
@@ -27,8 +27,8 @@ export default auth((req) => {
   const user = req.auth?.user;
   const role = (req.auth as any)?.role || user?.role;
 
-  // 2. Redirección si usuario ya autenticado intenta acceder al Login
-  if (isLoggedIn && user && isLoginRoute) {
+  // 2. Redirección si usuario ya autenticado intenta acceder a la Landing, Login o Register
+  if (isLoggedIn && user && isPublicAuthRoute) {
     return NextResponse.redirect(new URL(role === "ADMIN" ? "/admin" : "/inicio", nextUrl));
   }
 

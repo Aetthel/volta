@@ -50,6 +50,14 @@ export default function RootPage() {
     }
   }, []);
 
+  // If user already has an active session, automatically navigate to Dashboard
+  useEffect(() => {
+    if (session?.user) {
+      const role = (session.user as any)?.role;
+      router.replace(role === "ADMIN" ? "/admin" : "/inicio");
+    }
+  }, [session, router]);
+
   // Monitor scroll for header styling (Task 2.2)
   useEffect(() => {
     const handleScroll = () => {
