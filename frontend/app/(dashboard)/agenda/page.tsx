@@ -9,6 +9,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import { Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
+import TrialBanner from "@/components/TrialBanner";
 
 const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
   ssr: false,
@@ -259,6 +260,7 @@ export default function AgendaPage() {
       <BottomNav />
 
       <div className="md:ml-[240px] transition-all duration-300">
+        <TrialBanner />
         <main className="p-4 sm:p-6 space-y-6">
           {isLoading ? (
             <div className="space-y-4">
