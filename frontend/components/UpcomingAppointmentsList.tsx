@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Card } from "@/components/ui/volta-ui";
 import { Clock, CalendarIcon } from "lucide-react";
+import UserAvatar from "@/components/UserAvatar";
 
 export interface UpcomingAppointment {
   id: string;
@@ -18,29 +19,6 @@ export interface UpcomingAppointmentsListProps {
   appointments: UpcomingAppointment[];
 }
 
-const getInitials = (name: string, surname?: string) => {
-  const first = name ? name.charAt(0).toUpperCase() : "";
-  const last = surname ? surname.charAt(0).toUpperCase() : "";
-  return `${first}${last}`;
-};
-
-const getAvatarColor = (name: string) => {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const colors = [
-    "bg-primary text-on-primary",
-    "bg-secondary text-on-secondary",
-    "bg-tertiary text-on-tertiary",
-    "bg-primary-container text-on-primary-container",
-    "bg-secondary-container text-on-secondary-container",
-    "bg-tertiary-container text-on-tertiary-container",
-  ];
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
-};
-
 export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> = ({
   appointments,
 }) => {
@@ -54,20 +32,12 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
               className="p-4 flex items-center justify-between bg-white rounded-default shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 gap-4"
             >
               <div className="flex items-center gap-3.5 min-w-0">
-                {app.avatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={app.avatarUrl}
-                    alt={app.clientName}
-                    className="w-12 h-12 rounded-full object-cover shrink-0 border border-outline-variant/60"
-                  />
-                ) : (
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-label-lg shrink-0 select-none ${getAvatarColor(app.clientName)}`}
-                  >
-                    {getInitials(app.clientName, app.clientSurname)}
-                  </div>
-                )}
+                <UserAvatar
+                  name={app.clientName}
+                  surname={app.clientSurname}
+                  avatarUrl={app.avatarUrl}
+                  size="lg"
+                />
                 <div className="min-w-0">
                   <h4 className="font-bold text-on-surface text-body-md truncate">
                     {app.clientName}

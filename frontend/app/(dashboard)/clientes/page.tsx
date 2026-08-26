@@ -41,8 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import UserAvatar from "@/components/UserAvatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -625,24 +624,50 @@ export default function ClientesPage() {
             <div className="relative w-full overflow-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-surface-container-low/60 hover:bg-surface-container-low/60">
-                    {visibleColumns.has("cliente") && <TableHead>Cliente</TableHead>}
-                    {visibleColumns.has("contacto") && <TableHead>Contacto</TableHead>}
-                    {visibleColumns.has("lopd") && <TableHead>Estado LOPD</TableHead>}
-                    {visibleColumns.has("ultimaVisita") && <TableHead>Última Visita</TableHead>}
-                    {visibleColumns.has("servicio") && <TableHead>Servicio Habitual</TableHead>}
-                    {visibleColumns.has("citas") && <TableHead>Citas Totales</TableHead>}
+                  <TableRow className="bg-surface-container-low/40 hover:bg-surface-container-low/40 border-b border-outline-variant/30">
+                    {visibleColumns.has("cliente") && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Cliente
+                      </TableHead>
+                    )}
+                    {visibleColumns.has("contacto") && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Contacto
+                      </TableHead>
+                    )}
+                    {visibleColumns.has("lopd") && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Estado LOPD
+                      </TableHead>
+                    )}
+                    {visibleColumns.has("ultimaVisita") && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Última Visita
+                      </TableHead>
+                    )}
+                    {visibleColumns.has("servicio") && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Servicio Habitual
+                      </TableHead>
+                    )}
+                    {visibleColumns.has("citas") && (
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Citas
+                      </TableHead>
+                    )}
                     {visibleColumns.has("acciones") && (
-                      <TableHead className="text-right">Acciones</TableHead>
+                      <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                        Acciones
+                      </TableHead>
                     )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     [...Array(6)].map((_, i) => (
-                      <TableRow key={i} className="animate-pulse">
+                      <TableRow key={i} className="animate-pulse border-b border-outline-variant/20">
                         {visibleColumns.has("cliente") && (
-                          <TableCell>
+                          <TableCell className="py-4">
                             <div className="flex items-center gap-3">
                               <Skeleton className="w-10 h-10 rounded-full shrink-0" />
                               <div className="flex flex-col gap-1.5">
@@ -653,7 +678,7 @@ export default function ClientesPage() {
                           </TableCell>
                         )}
                         {visibleColumns.has("contacto") && (
-                          <TableCell>
+                          <TableCell className="py-4">
                             <div className="flex flex-col gap-1">
                               <Skeleton className="w-28 h-4" />
                               <Skeleton className="w-36 h-3" />
@@ -661,27 +686,27 @@ export default function ClientesPage() {
                           </TableCell>
                         )}
                         {visibleColumns.has("lopd") && (
-                          <TableCell>
+                          <TableCell className="py-4">
                             <Skeleton className="w-24 h-6 rounded-full" />
                           </TableCell>
                         )}
                         {visibleColumns.has("ultimaVisita") && (
-                          <TableCell>
+                          <TableCell className="py-4">
                             <Skeleton className="w-24 h-4" />
                           </TableCell>
                         )}
                         {visibleColumns.has("servicio") && (
-                          <TableCell>
+                          <TableCell className="py-4">
                             <Skeleton className="w-28 h-6 rounded-full" />
                           </TableCell>
                         )}
                         {visibleColumns.has("citas") && (
-                          <TableCell>
+                          <TableCell className="py-4">
                             <Skeleton className="w-12 h-4" />
                           </TableCell>
                         )}
                         {visibleColumns.has("acciones") && (
-                          <TableCell className="text-right">
+                          <TableCell className="text-right py-4">
                             <Skeleton className="w-8 h-8 rounded-lg ml-auto" />
                           </TableCell>
                         )}
@@ -699,22 +724,18 @@ export default function ClientesPage() {
                           initial="hidden"
                           animate="visible"
                           variants={rowVariants}
-                          className="border-b border-outline-variant/30 transition-colors hover:bg-surface-container-high/30 group/row"
+                          className="border-b border-outline-variant/20 transition-colors hover:bg-surface-container-low/60 group/row"
                         >
                           {/* Cliente Column */}
                           {visibleColumns.has("cliente") && (
-                            <TableCell className="font-medium">
+                            <TableCell className="py-4 font-medium">
                               <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10 shrink-0">
-                                  {client.avatarUrl ? (
-                                    <AvatarImage src={client.avatarUrl} alt={client.name} />
-                                  ) : null}
-                                  <AvatarFallback
-                                    className={cn("font-bold text-xs select-none", getAvatarColor(client.name))}
-                                  >
-                                    {getInitials(client.name, client.surname)}
-                                  </AvatarFallback>
-                                </Avatar>
+                                <UserAvatar
+                                  name={client.name}
+                                  surname={client.surname}
+                                  avatarUrl={client.avatarUrl}
+                                  size="md"
+                                />
                                 <div className="min-w-0">
                                   <p className="font-semibold text-sm text-on-surface truncate">
                                     {client.name} {client.surname || ""}
@@ -729,7 +750,7 @@ export default function ClientesPage() {
 
                           {/* Contacto Column */}
                           {visibleColumns.has("contacto") && (
-                            <TableCell>
+                            <TableCell className="py-4">
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-sm font-medium text-on-surface">
                                   {formatPhoneForDisplay(client.phone)}
@@ -745,33 +766,33 @@ export default function ClientesPage() {
 
                           {/* LOPD Column */}
                           {visibleColumns.has("lopd") && (
-                            <TableCell>
+                            <TableCell className="py-4">
                               {client.lopdStatus === "Aceptado" ? (
-                                <Badge variant="success" className="gap-1.5 font-medium">
-                                  <ShieldCheck className="w-3.5 h-3.5" />
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                                   <span>Aceptado</span>
-                                </Badge>
+                                </span>
                               ) : client.lopdStatus === "Pendiente" ? (
-                                <Badge
-                                  variant="warning"
-                                  className="gap-1.5 font-medium cursor-pointer hover:opacity-90"
+                                <span
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 cursor-pointer hover:bg-amber-500/20 transition-colors"
                                   onClick={() => handleSendWhatsAppConsent(client)}
                                   title="Haz clic para enviar consentimiento por WhatsApp"
                                 >
-                                  <ShieldAlert className="w-3.5 h-3.5" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
                                   <span>Pendiente</span>
-                                </Badge>
+                                </span>
                               ) : (
-                                <Badge variant="neutral" className="gap-1.5 font-medium">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-700 dark:text-rose-300">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
                                   <span>Rechazado</span>
-                                </Badge>
+                                </span>
                               )}
                             </TableCell>
                           )}
 
                           {/* Última Visita Column */}
                           {visibleColumns.has("ultimaVisita") && (
-                            <TableCell className="whitespace-nowrap">
+                            <TableCell className="whitespace-nowrap py-4">
                               {visit ? (
                                 <div className="flex flex-col">
                                   <span className="text-sm font-medium text-on-surface">
@@ -793,11 +814,11 @@ export default function ClientesPage() {
 
                           {/* Servicio Habitual Column */}
                           {visibleColumns.has("servicio") && (
-                            <TableCell>
+                            <TableCell className="py-4">
                               {client.frequentService ? (
-                                <Badge variant="secondary" className="font-normal text-xs">
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container-high/60 text-on-surface-variant">
                                   {client.frequentService}
-                                </Badge>
+                                </span>
                               ) : (
                                 <span className="text-xs text-on-surface-variant/50">—</span>
                               )}
@@ -806,8 +827,8 @@ export default function ClientesPage() {
 
                           {/* Citas Totales Column */}
                           {visibleColumns.has("citas") && (
-                            <TableCell>
-                              <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-xs font-semibold bg-surface-container-high text-on-surface">
+                            <TableCell className="py-4">
+                              <span className="inline-flex items-center justify-center min-w-6 h-6 px-2.5 rounded-full text-xs font-semibold bg-surface-container-high/60 text-on-surface">
                                 {apptCount}
                               </span>
                             </TableCell>
@@ -815,7 +836,7 @@ export default function ClientesPage() {
 
                           {/* Acciones Column */}
                           {visibleColumns.has("acciones") && (
-                            <TableCell className="text-right">
+                            <TableCell className="text-right py-4">
                               <div className="flex items-center justify-end gap-1">
                                 {client.lopdStatus === "Aceptado" && (
                                   <button
