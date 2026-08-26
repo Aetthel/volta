@@ -291,7 +291,8 @@ export function EventManager({
     <div className={cn("flex-1 flex flex-col w-full h-full min-h-full", className)}>
       {/* Header & Controls bar with standard top and lateral page margins */}
       <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Row 1: Title + Date Navigation & Header Profile/Notifications */}
+        <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="font-display text-headline-lg text-on-surface font-semibold capitalize tracking-tight">
               {view === "month" &&
@@ -326,9 +327,17 @@ export function EventManager({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="shrink-0">
+            <Header />
+          </div>
+        </div>
+
+        {/* Row 2: View Switchers (Left) and Filters (Right) */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* View Switchers */}
+          <div className="flex items-center">
             {/* Mobile: Select dropdown */}
-            <div className="sm:hidden">
+            <div className="sm:hidden w-full">
               <Select value={view} onValueChange={(value: any) => setView(value)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -401,47 +410,6 @@ export function EventManager({
                 <span className="ml-1">Lista</span>
               </Button>
             </div>
-
-            <Button
-              onClick={() => {
-                if (onOpenNewModal) {
-                  onOpenNewModal(currentDate);
-                } else {
-                  setIsCreating(true);
-                  setIsDialogOpen(true);
-                }
-              }}
-              className="h-9 px-4 rounded-lg font-semibold text-xs shadow-sm"
-            >
-              <Plus className="mr-1.5 h-4 w-4" />
-              Nueva Cita
-            </Button>
-
-            <div className="shrink-0 ml-1">
-              <Header />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant/60" />
-            <Input
-              placeholder="Buscar por cliente, servicio o etiqueta..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-surface-container-lowest"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-                onClick={() => setSearchQuery("")}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
           </div>
 
           {/* Filters */}
