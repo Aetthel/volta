@@ -287,367 +287,371 @@ export function EventManager({
   );
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      {/* Header */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <h2 className="text-xl font-semibold sm:text-2xl capitalize">
-            {view === "month" &&
-              currentDate.toLocaleDateString("es-ES", {
-                month: "long",
-                year: "numeric",
-              })}
-            {view === "week" &&
-              `Semana del ${currentDate.toLocaleDateString("es-ES", {
-                month: "short",
-                day: "numeric",
-              })}`}
-            {view === "day" &&
-              currentDate.toLocaleDateString("es-ES", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            {view === "list" && "Todas las Citas"}
-          </h2>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>
-              Hoy
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => navigateDate("next")} className="h-8 w-8">
-              <ChevronRight className="h-4 w-4" />
+    <div className={cn("flex-1 flex flex-col w-full h-full min-h-full", className)}>
+      {/* Header & Controls bar */}
+      <div className="px-4 sm:px-6 py-3 flex flex-col gap-3 bg-surface border-b border-outline-variant/30 shrink-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <h2 className="text-xl font-bold sm:text-2xl capitalize text-on-surface tracking-tight">
+              {view === "month" &&
+                currentDate.toLocaleDateString("es-ES", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              {view === "week" &&
+                `Semana del ${currentDate.toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "numeric",
+                })}`}
+              {view === "day" &&
+                currentDate.toLocaleDateString("es-ES", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              {view === "list" && "Todas las Citas"}
+            </h2>
+            <div className="flex items-center gap-1">
+              <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8 rounded-lg">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="h-8 px-3 rounded-lg text-xs font-semibold">
+                Hoy
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => navigateDate("next")} className="h-8 w-8 rounded-lg">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            {/* Mobile: Select dropdown */}
+            <div className="sm:hidden">
+              <Select value={view} onValueChange={(value: any) => setView(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Vista Mes
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="week">
+                    <div className="flex items-center gap-2">
+                      <Grid3x3 className="h-4 w-4" />
+                      Vista Semana
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="day">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Vista Día
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="list">
+                    <div className="flex items-center gap-2">
+                      <List className="h-4 w-4" />
+                      Vista Lista
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Desktop: Button group */}
+            <div className="hidden sm:flex items-center gap-1 rounded-lg border border-outline-variant/60 bg-surface p-1">
+              <Button
+                variant={view === "month" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("month")}
+                className="h-8"
+              >
+                <Calendar className="h-4 w-4" />
+                <span className="ml-1">Mes</span>
+              </Button>
+              <Button
+                variant={view === "week" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("week")}
+                className="h-8"
+              >
+                <Grid3x3 className="h-4 w-4" />
+                <span className="ml-1">Semana</span>
+              </Button>
+              <Button
+                variant={view === "day" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("day")}
+                className="h-8"
+              >
+                <Clock className="h-4 w-4" />
+                <span className="ml-1">Día</span>
+              </Button>
+              <Button
+                variant={view === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("list")}
+                className="h-8"
+              >
+                <List className="h-4 w-4" />
+                <span className="ml-1">Lista</span>
+              </Button>
+            </div>
+
+            <Button
+              onClick={() => {
+                if (onOpenNewModal) {
+                  onOpenNewModal(currentDate);
+                } else {
+                  setIsCreating(true);
+                  setIsDialogOpen(true);
+                }
+              }}
+              className="w-full sm:w-auto h-9 px-4 rounded-lg font-semibold text-xs shadow-sm"
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Nueva Cita
             </Button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {/* Mobile: Select dropdown */}
-          <div className="sm:hidden">
-            <Select value={view} onValueChange={(value: any) => setView(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Vista Mes
-                  </div>
-                </SelectItem>
-                <SelectItem value="week">
-                  <div className="flex items-center gap-2">
-                    <Grid3x3 className="h-4 w-4" />
-                    Vista Semana
-                  </div>
-                </SelectItem>
-                <SelectItem value="day">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Vista Día
-                  </div>
-                </SelectItem>
-                <SelectItem value="list">
-                  <div className="flex items-center gap-2">
-                    <List className="h-4 w-4" />
-                    Vista Lista
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant/60" />
+            <Input
+              placeholder="Buscar por cliente, servicio o etiqueta..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-surface-container-lowest"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
-          {/* Desktop: Button group */}
-          <div className="hidden sm:flex items-center gap-1 rounded-lg border border-outline-variant/60 bg-surface p-1">
-            <Button
-              variant={view === "month" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("month")}
-              className="h-8"
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="ml-1">Mes</span>
-            </Button>
-            <Button
-              variant={view === "week" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("week")}
-              className="h-8"
-            >
-              <Grid3x3 className="h-4 w-4" />
-              <span className="ml-1">Semana</span>
-            </Button>
-            <Button
-              variant={view === "day" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("day")}
-              className="h-8"
-            >
-              <Clock className="h-4 w-4" />
-              <span className="ml-1">Día</span>
-            </Button>
-            <Button
-              variant={view === "list" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("list")}
-              className="h-8"
-            >
-              <List className="h-4 w-4" />
-              <span className="ml-1">Lista</span>
-            </Button>
+          {/* Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            {/* Color Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+                  <Filter className="h-4 w-4" />
+                  Colores
+                  {selectedColors.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedColors.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrar por Color</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {colors.map((color) => (
+                  <DropdownMenuCheckboxItem
+                    key={color.value}
+                    checked={selectedColors.includes(color.value)}
+                    onCheckedChange={(checked) => {
+                      setSelectedColors((prev) =>
+                        checked ? [...prev, color.value] : prev.filter((c) => c !== color.value),
+                      )
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={cn("h-3 w-3 rounded", color.bg)} />
+                      {color.name}
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Tag Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+                  <Filter className="h-4 w-4" />
+                  Etiquetas
+                  {selectedTags.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedTags.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrar por Etiqueta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {availableTags.map((tag) => (
+                  <DropdownMenuCheckboxItem
+                    key={tag}
+                    checked={selectedTags.includes(tag)}
+                    onCheckedChange={(checked) => {
+                      setSelectedTags((prev) => (checked ? [...prev, tag] : prev.filter((t) => t !== tag)))
+                    }}
+                  >
+                    {tag}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Category Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+                  <Filter className="h-4 w-4" />
+                  Categorías
+                  {selectedCategories.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedCategories.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrar por Categoría</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {categories.map((category) => (
+                  <DropdownMenuCheckboxItem
+                    key={category}
+                    checked={selectedCategories.includes(category)}
+                    onCheckedChange={(checked) => {
+                      setSelectedCategories((prev) =>
+                        checked ? [...prev, category] : prev.filter((c) => c !== category),
+                      )
+                    }}
+                  >
+                    {category}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 whitespace-nowrap shrink-0">
+                <X className="h-4 w-4" />
+                Limpiar
+              </Button>
+            )}
           </div>
-
-          <Button
-            onClick={() => {
-              if (onOpenNewModal) {
-                onOpenNewModal(currentDate);
-              } else {
-                setIsCreating(true);
-                setIsDialogOpen(true);
-              }
-            }}
-            className="w-full sm:w-auto"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Cita
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant/60" />
-          <Input
-            placeholder="Buscar por cliente, servicio o etiqueta..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          {/* Color Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
-                <Filter className="h-4 w-4" />
-                Colores
-                {selectedColors.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                    {selectedColors.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Filtrar por Color</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {colors.map((color) => (
-                <DropdownMenuCheckboxItem
-                  key={color.value}
-                  checked={selectedColors.includes(color.value)}
-                  onCheckedChange={(checked) => {
-                    setSelectedColors((prev) =>
-                      checked ? [...prev, color.value] : prev.filter((c) => c !== color.value),
-                    )
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={cn("h-3 w-3 rounded", color.bg)} />
-                    {color.name}
-                  </div>
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Tag Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
-                <Filter className="h-4 w-4" />
-                Etiquetas
-                {selectedTags.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                    {selectedTags.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Filtrar por Etiqueta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {availableTags.map((tag) => (
-                <DropdownMenuCheckboxItem
-                  key={tag}
-                  checked={selectedTags.includes(tag)}
-                  onCheckedChange={(checked) => {
-                    setSelectedTags((prev) => (checked ? [...prev, tag] : prev.filter((t) => t !== tag)))
-                  }}
-                >
-                  {tag}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Category Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
-                <Filter className="h-4 w-4" />
-                Categorías
-                {selectedCategories.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                    {selectedCategories.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Filtrar por Categoría</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {categories.map((category) => (
-                <DropdownMenuCheckboxItem
-                  key={category}
-                  checked={selectedCategories.includes(category)}
-                  onCheckedChange={(checked) => {
-                    setSelectedCategories((prev) =>
-                      checked ? [...prev, category] : prev.filter((c) => c !== category),
-                    )
-                  }}
-                >
-                  {category}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 whitespace-nowrap shrink-0">
-              <X className="h-4 w-4" />
-              Limpiar
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-on-surface-variant">Filtros activos:</span>
-          {selectedColors.map((colorValue) => {
-            const color = getColorClasses(colorValue)
-            return (
-              <Badge key={colorValue} variant="secondary" className="gap-1">
-                <div className={cn("h-2 w-2 rounded-full", color.bg)} />
-                {color.name}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-on-surface-variant">Filtros activos:</span>
+            {selectedColors.map((colorValue) => {
+              const color = getColorClasses(colorValue)
+              return (
+                <Badge key={colorValue} variant="secondary" className="gap-1">
+                  <div className={cn("h-2 w-2 rounded-full", color.bg)} />
+                  {color.name}
+                  <button
+                    onClick={() => setSelectedColors((prev) => prev.filter((c) => c !== colorValue))}
+                    className="ml-1 hover:text-on-surface"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )
+            })}
+            {selectedTags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="gap-1">
+                {tag}
                 <button
-                  onClick={() => setSelectedColors((prev) => prev.filter((c) => c !== colorValue))}
+                  onClick={() => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
                   className="ml-1 hover:text-on-surface"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
-            )
-          })}
-          {selectedTags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1">
-              {tag}
-              <button
-                onClick={() => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
-                className="ml-1 hover:text-on-surface"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-          {selectedCategories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1">
-              {category}
-              <button
-                onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== category))}
-                className="ml-1 hover:text-on-surface"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
+            ))}
+            {selectedCategories.map((category) => (
+              <Badge key={category} variant="secondary" className="gap-1">
+                {category}
+                <button
+                  onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== category))}
+                  className="ml-1 hover:text-on-surface"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Calendar Views */}
-      {view === "month" && (
-        <MonthView
-          currentDate={currentDate}
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          onSlotClick={handleSlotClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          getColorClasses={getColorClasses}
-        />
-      )}
+      {/* Calendar Views Container — Full Height & Edge-to-Edge */}
+      <div className="flex-1 w-full overflow-auto bg-surface-container-lowest flex flex-col">
+        {view === "month" && (
+          <MonthView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            onSlotClick={handleSlotClick}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            getColorClasses={getColorClasses}
+          />
+        )}
 
-      {view === "week" && (
-        <WeekView
-          currentDate={currentDate}
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          onSlotClick={handleSlotClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          getColorClasses={getColorClasses}
-        />
-      )}
+        {view === "week" && (
+          <WeekView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            onSlotClick={handleSlotClick}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            getColorClasses={getColorClasses}
+          />
+        )}
 
-      {view === "day" && (
-        <DayView
-          currentDate={currentDate}
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          onSlotClick={handleSlotClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          getColorClasses={getColorClasses}
-        />
-      )}
+        {view === "day" && (
+          <DayView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            onSlotClick={handleSlotClick}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            getColorClasses={getColorClasses}
+          />
+        )}
 
-      {view === "list" && (
-        <ListView
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          getColorClasses={getColorClasses}
-        />
-      )}
+        {view === "list" && (
+          <ListView
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            getColorClasses={getColorClasses}
+          />
+        )}
+      </div>
 
       {/* Event Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -1091,16 +1095,16 @@ function MonthView({
   }
 
   return (
-    <Card className="overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-outline-variant/40">
+    <div className="w-full h-full flex flex-col min-w-[700px]">
+      <div className="grid grid-cols-7 border-b border-outline-variant/30 bg-surface-container-low/50 sticky top-0 z-20">
         {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
-          <div key={day} className="border-r border-outline-variant/40 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm">
+          <div key={day} className="border-r border-outline-variant/30 p-2.5 text-center text-xs font-semibold text-on-surface-variant last:border-r-0 sm:text-sm">
             <span className="hidden sm:inline">{day}</span>
             <span className="sm:hidden">{day.charAt(0)}</span>
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 flex-1">
         {days.map((day, index) => {
           const dayEvents = getEventsForDay(day)
           const isCurrentMonth = day.getMonth() === currentDate.getMonth()
@@ -1110,9 +1114,9 @@ function MonthView({
             <div
               key={index}
               className={cn(
-                "min-h-20 border-b border-r border-outline-variant/40 p-1 transition-colors last:border-r-0 sm:min-h-24 sm:p-2 cursor-pointer",
-                !isCurrentMonth && "bg-surface-container-low/40 opacity-60",
-                "hover:bg-surface-container-low",
+                "min-h-24 border-b border-r border-outline-variant/30 p-1.5 transition-colors last:border-r-0 sm:min-h-28 sm:p-2 cursor-pointer",
+                !isCurrentMonth && "bg-surface-container-low/30 opacity-60",
+                "hover:bg-surface-container-low/60",
               )}
               onClick={() => {
                 const clickDate = new Date(day);
@@ -1124,14 +1128,14 @@ function MonthView({
             >
               <div
                 className={cn(
-                  "mb-1 flex h-5 w-5 items-center justify-center rounded-full text-xs sm:h-6 sm:w-6 sm:text-sm",
-                  isToday && "bg-primary text-on-primary font-semibold",
+                  "mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs sm:text-sm font-semibold",
+                  isToday ? "bg-primary text-on-primary" : "text-on-surface",
                 )}
               >
                 {day.getDate()}
               </div>
               <div className="space-y-1">
-                {dayEvents.slice(0, 3).map((event) => (
+                {dayEvents.slice(0, 4).map((event) => (
                   <EventCard
                     key={event.id}
                     event={event}
@@ -1142,15 +1146,15 @@ function MonthView({
                     variant="compact"
                   />
                 ))}
-                {dayEvents.length > 3 && (
-                  <div className="text-[10px] text-on-surface-variant sm:text-xs">+{dayEvents.length - 3} más</div>
+                {dayEvents.length > 4 && (
+                  <div className="text-[10px] text-on-surface-variant font-medium sm:text-xs">+{dayEvents.length - 4} más</div>
                 )}
               </div>
             </div>
           )
         })}
       </div>
-    </Card>
+    </div>
   )
 }
 
@@ -1201,26 +1205,31 @@ function WeekView({
   }
 
   return (
-    <Card className="overflow-auto">
-      <div className="grid grid-cols-8 border-b border-outline-variant/40 min-w-[700px]">
-        <div className="border-r border-outline-variant/40 p-2 text-center text-xs font-medium sm:text-sm">Hora</div>
-        {weekDays.map((day) => (
-          <div
-            key={day.toISOString()}
-            className="border-r border-outline-variant/40 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm"
-          >
-            <div className="hidden sm:block capitalize">{day.toLocaleDateString("es-ES", { weekday: "short" })}</div>
-            <div className="sm:hidden capitalize">{day.toLocaleDateString("es-ES", { weekday: "narrow" })}</div>
-            <div className="text-[10px] text-on-surface-variant sm:text-xs">
-              {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
+    <div className="w-full h-full overflow-auto">
+      <div className="grid grid-cols-8 border-b border-outline-variant/30 bg-surface-container-low/50 min-w-[700px] sticky top-0 z-20">
+        <div className="border-r border-outline-variant/30 p-2.5 text-center text-xs font-semibold text-on-surface-variant sm:text-sm">Hora</div>
+        {weekDays.map((day) => {
+          const isToday = day.toDateString() === new Date().toDateString()
+          return (
+            <div
+              key={day.toISOString()}
+              className="border-r border-outline-variant/30 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm"
+            >
+              <div className={cn("hidden sm:block capitalize", isToday ? "text-primary font-bold" : "text-on-surface font-semibold")}>
+                {day.toLocaleDateString("es-ES", { weekday: "short" })}
+              </div>
+              <div className="sm:hidden capitalize font-semibold">{day.toLocaleDateString("es-ES", { weekday: "narrow" })}</div>
+              <div className={cn("text-[11px]", isToday ? "text-primary font-bold" : "text-on-surface-variant")}>
+                {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <div className="grid grid-cols-8 min-w-[700px]">
         {hours.map((hour) => (
           <div key={`row-${hour}`} className="contents">
-            <div className="border-b border-r border-outline-variant/40 p-1 text-[10px] text-on-surface-variant sm:p-2 sm:text-xs">
+            <div className="border-b border-r border-outline-variant/30 p-1.5 text-[11px] font-medium text-on-surface-variant/70 sm:p-2 sm:text-xs text-center">
               {hour.toString().padStart(2, "0")}:00
             </div>
             {weekDays.map((day) => {
@@ -1228,7 +1237,7 @@ function WeekView({
               return (
                 <div
                   key={`${day.toISOString()}-${hour}`}
-                  className="min-h-12 border-b border-r border-outline-variant/40 p-0.5 transition-colors hover:bg-surface-container-low/80 last:border-r-0 sm:min-h-16 sm:p-1 cursor-pointer"
+                  className="min-h-14 border-b border-r border-outline-variant/30 p-1 transition-colors hover:bg-surface-container-low/60 last:border-r-0 sm:min-h-16 cursor-pointer"
                   onClick={() => {
                     const slotDate = new Date(day);
                     slotDate.setHours(hour, 0, 0, 0);
@@ -1256,7 +1265,7 @@ function WeekView({
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   )
 }
 
@@ -1296,22 +1305,22 @@ function DayView({
   }
 
   return (
-    <Card className="overflow-auto">
-      <div className="space-y-0">
+    <div className="w-full h-full overflow-auto">
+      <div className="space-y-0 min-w-[500px]">
         {hours.map((hour) => {
           const hourEvents = getEventsForHour(hour)
           return (
             <div
               key={hour}
-              className="flex border-b border-outline-variant/40 last:border-b-0"
+              className="flex border-b border-outline-variant/30 last:border-b-0"
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => onDrop(currentDate, hour)}
             >
-              <div className="w-14 flex-shrink-0 border-r border-outline-variant/40 p-2 text-xs text-on-surface-variant sm:w-20 sm:p-3 sm:text-sm">
+              <div className="w-16 flex-shrink-0 border-r border-outline-variant/30 p-2 text-xs font-semibold text-on-surface-variant sm:w-24 sm:p-3 sm:text-sm text-center">
                 {hour.toString().padStart(2, "0")}:00
               </div>
               <div
-                className="min-h-16 flex-1 p-1 transition-colors hover:bg-surface-container-low/80 sm:min-h-20 sm:p-2 cursor-pointer"
+                className="min-h-16 flex-1 p-1.5 transition-colors hover:bg-surface-container-low/60 sm:min-h-20 sm:p-2.5 cursor-pointer"
                 onClick={() => {
                   const slotDate = new Date(currentDate);
                   slotDate.setHours(hour, 0, 0, 0);
@@ -1336,7 +1345,7 @@ function DayView({
           )
         })}
       </div>
-    </Card>
+    </div>
   )
 }
 
@@ -1370,8 +1379,8 @@ function ListView({
   )
 
   return (
-    <Card className="p-3 sm:p-4">
-      <div className="space-y-6">
+    <div className="w-full h-full overflow-auto p-4 sm:p-6">
+      <div className="space-y-6 max-w-4xl mx-auto">
         {Object.entries(groupedEvents).map(([date, dateEvents]) => (
           <div key={date} className="space-y-3">
             <h3 className="text-xs font-semibold text-on-surface-variant sm:text-sm capitalize">{date}</h3>
@@ -1441,6 +1450,6 @@ function ListView({
           <div className="py-12 text-center text-sm text-on-surface-variant sm:text-base">No hay citas registradas</div>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

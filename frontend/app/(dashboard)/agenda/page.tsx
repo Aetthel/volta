@@ -255,17 +255,17 @@ export default function AgendaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface pb-24 md:pb-6">
+    <div className="min-h-screen bg-surface text-on-surface flex flex-col">
       <Sidebar />
       <BottomNav />
 
-      <div className="md:ml-[240px] transition-all duration-300">
+      <div className="md:ml-[240px] flex-1 flex flex-col transition-all duration-300 min-h-screen">
         <TrialBanner />
-        <main className="p-4 sm:p-6 space-y-6">
+        <main className="flex-1 flex flex-col p-0">
           {isLoading ? (
-            <div className="space-y-4">
+            <div className="p-6 space-y-4">
               <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-[500px] w-full rounded-2xl" />
+              <Skeleton className="h-[600px] w-full rounded-2xl" />
             </div>
           ) : (
             <EventManager
@@ -277,6 +277,7 @@ export default function AgendaPage() {
               availableTags={availableTags}
               defaultView="week"
               onOpenNewModal={handleOpenNewModalWithDate}
+              className="flex-1 flex flex-col"
             />
           )}
         </main>
