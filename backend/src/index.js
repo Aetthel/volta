@@ -7,6 +7,7 @@ import { createWhatsAppWorker } from "./workers/whatsappWorker.js";
 import cron from "node-cron";
 import { runSentinel } from "./services/botService.js";
 import { cleanupExpiredDemos } from "./services/demoService.js";
+import { purgeExpiredConsentIdentifiers } from "./services/lopdService.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { fileURLToPath } from "url";
@@ -67,6 +68,16 @@ cron.schedule("*/5 * * * *", async () => {
     }
   } catch (err) {
     console.error("[Demo Cleanup] Error:", err);
+  }
+});
+
+// Purge expired LOPD consent identifiers every day at 03:30, off-peak and away
+// from the Sentinel window so a long scan never overlaps with the evening send.
+cron.schedule("30 3 * * *", async () => {
+  try {
+    await purgeExpiredConsentIdentifiers();
+  } catch (err) {
+    console.error("[LOPD Purge] Error:", err);
   }
 });
 
