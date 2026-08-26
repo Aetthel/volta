@@ -116,8 +116,8 @@ export default function AddClientModal({
           {/* Nombre y Apellidos (2 Columns) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label htmlFor="name" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
-                <User className="w-4 h-4 text-on-surface shrink-0" />
+              <label htmlFor="name" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
                 <span>Nombre <span className="text-error">*</span></span>
               </label>
               <input
@@ -132,8 +132,8 @@ export default function AddClientModal({
               />
             </div>
             <div>
-              <label htmlFor="surname" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
-                <User className="w-4 h-4 text-on-surface shrink-0" />
+              <label htmlFor="surname" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
                 <span>Apellidos</span>
               </label>
               <input
@@ -151,8 +151,8 @@ export default function AddClientModal({
           {/* Teléfono y Email (2 Columns) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label htmlFor="phone" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
-                <Phone className="w-4 h-4 text-on-surface shrink-0" />
+              <label htmlFor="phone" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-on-surface shrink-0" />
                 <span>Teléfono <span className="text-error">*</span></span>
               </label>
               <input
@@ -167,8 +167,8 @@ export default function AddClientModal({
               />
             </div>
             <div>
-              <label htmlFor="email" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
-                <Mail className="w-4 h-4 text-on-surface shrink-0" />
+              <label htmlFor="email" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-on-surface shrink-0" />
                 <span>Correo electrónico</span>
               </label>
               <input
@@ -185,8 +185,8 @@ export default function AddClientModal({
 
           {/* Frecuencia Estimada */}
           <div>
-            <label htmlFor="frequency" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-on-surface shrink-0" />
+            <label htmlFor="frequency" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-on-surface shrink-0" />
               <span>Frecuencia estimada de visita</span>
             </label>
             <select
@@ -206,8 +206,8 @@ export default function AddClientModal({
 
           {/* Notas y Alergias */}
           <div>
-            <label htmlFor="notes" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-on-surface shrink-0" />
+            <label htmlFor="notes" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-on-surface shrink-0" />
               <span>Notas, preferencias y alergias</span>
             </label>
             <textarea
