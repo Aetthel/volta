@@ -151,8 +151,8 @@ export default function NewAppointmentModal({
         <form onSubmit={handleSubmit} className="p-6 pt-3 flex flex-col gap-4">
           {/* Servicio Selection */}
           <div>
-            <label htmlFor="service" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <label htmlFor="service" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-on-surface shrink-0" />
               <span>{bookingType === "GROUP" ? "Clase de Grupo" : "Servicio"} <span className="text-error">*</span></span>
             </label>
             <select
@@ -173,8 +173,8 @@ export default function NewAppointmentModal({
 
           {/* Cliente (with Autocomplete) */}
           <div className="relative">
-            <label htmlFor="clientName" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-primary" />
+            <label htmlFor="clientName" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
+              <User className="w-4 h-4 text-on-surface shrink-0" />
               <span>{bookingType === "GROUP" ? "Nombre del Alumno (opcional)" : "Cliente"} {bookingType === "INDIVIDUAL" && <span className="text-error">*</span>}</span>
             </label>
             <input
@@ -231,8 +231,8 @@ export default function NewAppointmentModal({
 
           {/* Teléfono */}
           <div>
-            <label htmlFor="clientPhone" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-primary" />
+            <label htmlFor="clientPhone" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
+              <Phone className="w-4 h-4 text-on-surface shrink-0" />
               <span>Teléfono de contacto {bookingType === "INDIVIDUAL" && <span className="text-error">*</span>}</span>
             </label>
             <input
@@ -250,8 +250,8 @@ export default function NewAppointmentModal({
           {/* Fecha y Hora (2 Columns) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label htmlFor="date" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1.5">
-                <CalendarIcon className="w-3.5 h-3.5 text-primary" />
+              <label htmlFor="date" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-on-surface shrink-0" />
                 <span>Fecha <span className="text-error">*</span></span>
               </label>
               <input
@@ -265,8 +265,8 @@ export default function NewAppointmentModal({
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-primary" />
+              <label className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-on-surface shrink-0" />
                 <span>Hora <span className="text-error">*</span></span>
               </label>
               <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low/60 border border-outline-variant/70 rounded-lg focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
