@@ -9,7 +9,6 @@ import {
   Phone,
   Mail,
   Sparkles,
-  GripHorizontal,
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
@@ -87,19 +86,16 @@ export default function AddClientModal({
         }}
         className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 overflow-hidden z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col"
       >
-        {/* Header with drag grip */}
+        {/* Header */}
         <div
           onMouseDown={handleMouseDown}
           className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none"
         >
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-              <GripHorizontal className="w-4 h-4 text-on-surface-variant/40 pointer-events-none" />
-              <h2 className="text-lg font-bold text-on-surface">
-                {isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}
-              </h2>
-            </div>
-            <p className="text-xs text-on-surface-variant pl-6">
+          <div className="flex flex-col">
+            <h2 className="text-xl font-bold text-on-surface tracking-tight">
+              {isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}
+            </h2>
+            <p className="text-sm text-on-surface-variant mt-0.5">
               {isEditMode
                 ? "Modifica los datos personales y de contacto"
                 : "Completa la ficha para registrar al cliente"}
@@ -108,10 +104,10 @@ export default function AddClientModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer -mr-1"
             aria-label="Cerrar modal"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
