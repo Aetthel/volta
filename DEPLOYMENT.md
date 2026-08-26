@@ -13,7 +13,7 @@ Esta guía explica la configuración e integración de **Volta** en producción 
 [ Portainer / Servidor ] ◀─── [ Contenedores backend/frontend conectan a Postgres/Redis externos ]
 ```
 
-1. **GitHub Actions** compila la imagen Docker de producción (`ghcr.io/kore29/volta:latest`) y la publica en GitHub Container Registry.
+1. **GitHub Actions** compila la imagen Docker de producción (`ghcr.io/aetthel/volta:latest`) y la publica en GitHub Container Registry.
 2. **Portainer** gestiona el Stack utilizando `docker-compose.prod.yml` y las variables de entorno inyectadas directamente desde la interfaz de Portainer.
 
 ---

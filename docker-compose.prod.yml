@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/kore29/volta:latest
+    image: ghcr.io/aetthel/volta:latest
     pull_policy: always
     container_name: volta-backend
     restart: always
@@ -42,7 +42,7 @@ services:
       - "host.docker.internal:host-gateway"
 
   frontend:
-    image: ghcr.io/kore29/volta:latest
+    image: ghcr.io/aetthel/volta:latest
     pull_policy: always
     container_name: volta-frontend
     restart: always
