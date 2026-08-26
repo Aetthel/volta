@@ -2,8 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertCircle, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
+
+// La política llega servida por el backend, que es quien registra qué versión
+// aceptó el cliente. Mantenerla aquí como JSX permitiría editar el texto sin
+// que cambiara la versión firmada en el registro de auditoría.
+type PolicyDocument = {
+  version: string;
+  effectiveDate: string;
+  title: string;
+  sections: { heading: string; body: string }[];
+};
+
+type ConsentData = {
+  clientName: string;
+  businessName: string;
+  lopdStatus: string;
+  policy: PolicyDocument | null;
+};
 
 export default function LOPDConsentClient() {
   const params = useParams();
@@ -12,12 +29,15 @@ export default function LOPDConsentClient() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [data, setData] = useState({
+  const [data, setData] = useState<ConsentData>({
     clientName: "",
     businessName: "",
     lopdStatus: "",
+    policy: null,
   });
   const [accepted, setAccepted] = useState(false);
+  const [rejected, setRejected] = useState(false);
+  const [confirmingReject, setConfirmingReject] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -54,6 +74,9 @@ export default function LOPDConsentClient() {
         if (resData.lopdStatus === "Aceptado") {
           setAccepted(true);
         }
+        if (resData.lopdStatus === "Rechazado") {
+          setRejected(true);
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -63,26 +86,37 @@ export default function LOPDConsentClient() {
       });
   }, [clientId, searchParams]);
 
-  const handleAccept = () => {
+  // Aceptar y rechazar son la misma operación con distinto destino: una decisión
+  // del cliente que el backend registra. Comparten flujo para que ninguna de las
+  // dos quede como el "camino secundario" con menos garantías que la otra.
+  const submitDecision = (action: "accept" | "reject") => {
     setSubmitting(true);
     const token = sessionStorage.getItem("lopd_token");
     const exp = sessionStorage.getItem("lopd_exp");
 
-    fetch(`/api/backend/lopd/${clientId}/accept`, {
+    fetch(`/api/backend/lopd/${clientId}/${action}`, {
       method: "POST",
-      headers: { "x-lopd-token": token || "", "x-lopd-exp": exp || "" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-lopd-token": token || "",
+        "x-lopd-exp": exp || "",
+      },
+      // Se devuelve la versión que esta página tiene renderizada, para que el
+      // registro refleje el texto que el cliente vio y no el vigente al pulsar.
+      body: JSON.stringify({ policyVersion: data.policy?.version }),
     })
       .then((res) => {
-        if (!res.ok) throw new Error("No se pudo procesar la aceptación.");
+        if (!res.ok) throw new Error("No se pudo procesar tu respuesta.");
         return res.json();
       })
       .then(() => {
-        setAccepted(true);
+        if (action === "accept") setAccepted(true);
+        else setRejected(true);
         setSubmitting(false);
       })
       .catch((err) => {
-        console.error("Error accepting LOPD:", err);
-        setError("Ocurrió un error al procesar tu aceptación. Por favor, inténtalo de nuevo.");
+        console.error(`Error submitting LOPD decision (${action}):`, err);
+        setError("Ocurrió un error al procesar tu respuesta. Por favor, inténtalo de nuevo.");
         setSubmitting(false);
       });
   };
@@ -138,6 +172,22 @@ export default function LOPDConsentClient() {
               directamente por WhatsApp.
             </p>
           </div>
+        ) : rejected ? (
+          <div className="text-center py-6 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+            <XCircle className="w-20 h-20 text-on-surface-variant mb-6" />
+            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-3">
+              Entendido, {data.clientName}
+            </h2>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed mb-6">
+              Hemos registrado que <strong>no autorizas</strong> el envío de mensajes automáticos
+              por parte de <strong>{data.businessName}</strong>.
+            </p>
+            <p className="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-6 py-4 rounded-lg border border-outline-variant/50 max-w-sm">
+              No recibirás confirmaciones ni recordatorios por WhatsApp. Tus citas siguen siendo
+              válidas: el salón te atenderá con normalidad. Si cambias de opinión, puedes volver a
+              abrir este mismo enlace.
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col">
             <div className="flex items-center gap-3 mb-6">
@@ -160,53 +210,97 @@ export default function LOPDConsentClient() {
               autorices a procesar tus datos de contacto.
             </p>
 
-            <div className="bg-surface-container-low rounded-md p-6 mb-8 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-48 overflow-y-auto custom-scrollbar">
-              <h3 className="font-semibold text-on-surface mb-2">
-                Información Básica sobre Protección de Datos
-              </h3>
-              <p className="mb-3">
-                <strong>Responsable del Tratamiento:</strong> {data.businessName}.
-              </p>
-              <p className="mb-3">
-                <strong>Finalidad:</strong> Envío de confirmaciones de reserva, modificaciones o
-                cancelaciones de tus citas, y recordatorios automáticos 24 horas antes del servicio
-                contratado a través del canal de WhatsApp.
-              </p>
-              <p className="mb-3">
-                <strong>Legitimación:</strong> Consentimiento expreso del interesado al marcar la
-                casilla de aceptación y presionar el botón inferior.
-              </p>
-              <p className="mb-3">
-                <strong>Destinatarios:</strong> No se cederán datos a terceros salvo obligación
-                legal o para la prestación del servicio técnico de envío de mensajes automatizados
-                (Plataforma Volta).
-              </p>
-              <p>
-                <strong>Derechos:</strong> Tienes derecho a acceder, rectificar y suprimir los
-                datos, así como otros derechos explicados en la política de privacidad detallada,
-                enviando un correo al centro de estética {data.businessName}. Puedes revocar este
-                consentimiento en cualquier momento solicitándolo directamente en tu próxima visita
-                al salón.
-              </p>
+            {/* h-64: la política del Art. 13 son siete secciones. Con la altura
+                anterior se veían dos y el resto quedaba enterrado en el scroll,
+                que es justo lo contrario de "información previa y accesible". */}
+            <div className="bg-surface-container-low rounded-md p-6 mb-3 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-64 overflow-y-auto custom-scrollbar">
+              <h3 className="font-semibold text-on-surface mb-2">{data.policy?.title}</h3>
+              {data.policy?.sections.map((section) => (
+                <p key={section.heading} className="mb-3 last:mb-0">
+                  <strong>{section.heading}:</strong> {section.body}
+                </p>
+              ))}
             </div>
 
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              onClick={handleAccept}
-              disabled={submitting}
-              className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Procesando...</span>
-                </>
-              ) : (
-                <span>Aceptar y permitir recordatorios</span>
-              )}
-            </Button>
+            {/* La versión aceptada queda registrada en el log de auditoría, así que
+                el cliente debe poder ver cuál es la que está aceptando. */}
+            {data.policy && (
+              <p className="text-label-sm font-label-sm text-on-surface-variant mb-8 text-right">
+                Versión {data.policy.version} · en vigor desde{" "}
+                {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+
+            {confirmingReject ? (
+              <div className="flex flex-col gap-3 animate-in fade-in duration-200">
+                <p className="font-body-md text-body-md text-on-surface text-center leading-relaxed">
+                  Si no aceptas, <strong>no recibirás recordatorios de tus citas</strong> por
+                  WhatsApp. ¿Confirmas?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="lg"
+                    onClick={() => setConfirmingReject(false)}
+                    disabled={submitting}
+                    className="flex-1 py-4 font-medium"
+                  >
+                    Volver
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="lg"
+                    onClick={() => submitDecision("reject")}
+                    disabled={submitting}
+                    className="flex-1 py-4 flex items-center justify-center gap-2 font-medium"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Procesando...</span>
+                      </>
+                    ) : (
+                      <span>Sí, no acepto</span>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  onClick={() => submitDecision("accept")}
+                  disabled={submitting}
+                  className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Procesando...</span>
+                    </>
+                  ) : (
+                    <span>Aceptar y permitir recordatorios</span>
+                  )}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setConfirmingReject(true)}
+                  disabled={submitting}
+                  className="w-full py-3 text-label-lg font-label-lg text-on-surface-variant hover:text-on-surface underline underline-offset-4 disabled:opacity-50 transition-colors"
+                >
+                  No acepto
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
