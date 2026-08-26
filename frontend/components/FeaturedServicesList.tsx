@@ -26,8 +26,8 @@ export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
   // Sort services by percentage descending
   const sorted = [...services].sort((a, b) => (b.pct || 0) - (a.pct || 0));
   const topService = sorted[0];
-  const activePct = topService?.pct && topService.pct > 0 ? topService.pct : 68;
-  const displayTotal = totalCount !== undefined ? totalCount : 1260;
+  const activePct = topService?.pct && topService.pct > 0 ? topService.pct : 0;
+  const displayTotal = totalCount !== undefined ? totalCount : 0;
 
   // Donut SVG circumference calculation (r = 64)
   const radius = 64;
@@ -62,18 +62,20 @@ export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
           />
 
           {/* Active Arc Segment */}
-          <circle
-            cx="80"
-            cy="80"
-            r={radius}
-            stroke="var(--color-primary)"
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-            fill="none"
-            className="transition-all duration-1000 ease-out"
-          />
+          {activePct > 0 && (
+            <circle
+              cx="80"
+              cy="80"
+              r={radius}
+              stroke="var(--color-primary)"
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="none"
+              className="transition-all duration-1000 ease-out"
+            />
+          )}
         </svg>
 
         {/* Center Inner Label */}
@@ -89,12 +91,18 @@ export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
 
       {/* Bottom Footer Summary */}
       <div className="flex flex-col items-center gap-1">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-on-surface">
-          <span>Tendencia al alza del 5.2% este mes</span>
-          <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
-        </div>
+        {topService && topService.count && topService.count > 0 ? (
+          <div className="flex items-center gap-1.5 text-xs font-bold text-on-surface">
+            <span>Servicio más demandado: {topService.name} ({topService.pct}%)</span>
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant/70">
+            <span>Sin datos de citas para este período</span>
+          </div>
+        )}
         <p className="text-[11px] text-on-surface-variant/60 font-medium">
-          Mostrando servicios principales del negocio
+          Distribución de servicios solicitados
         </p>
       </div>
     </div>

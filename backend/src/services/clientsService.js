@@ -14,6 +14,16 @@ export const getClientsByBusiness = async (businessId) => {
 export const createClient = async (clientData) => {
   const { name, surname, email, phone, businessId } = clientData;
 
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+  });
+
+  if (!business) {
+    const error = new Error("El negocio especificado no existe o ha sido eliminado.");
+    error.status = 400;
+    throw error;
+  }
+
   const client = await prisma.client.create({
     data: {
       name,

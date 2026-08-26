@@ -29,7 +29,7 @@ COPY . .
 
 RUN groupadd --gid 1001 volta && \
     useradd --uid 1001 --gid volta --shell /bin/sh --create-home volta && \
-    mkdir -p /app/backend/.wwebjs_auth && \
+    mkdir -p /app/backend/.wwebjs_auth /app/frontend/.next && \
     chown -R volta:volta /app
 
 USER volta

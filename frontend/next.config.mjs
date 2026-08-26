@@ -10,7 +10,16 @@ const nextConfig = {
   },
   serverExternalPackages: ["backend", "whatsapp-web.js"],
   // Allow external origins to connect to the Next.js dev server HMR WebSocket.
-  allowedDevOrigins: ["*.trycloudflare.com", "192.168.*", "10.*", "172.*"],
+  allowedDevOrigins: [
+    "localhost",
+    "localhost:3000",
+    "127.0.0.1",
+    "127.0.0.1:3000",
+    "*.trycloudflare.com",
+    "192.168.*",
+    "10.*",
+    "172.*",
+  ],
   async headers() {
     return [
       {
@@ -22,12 +31,15 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               isDev
-                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-                : "script-src 'self' 'unsafe-inline'",
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.lemonsqueezy.com"
+                : "script-src 'self' 'unsafe-inline' https://assets.lemonsqueezy.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self'",
+              isDev
+                ? "connect-src * 'self' ws: wss: http: https:"
+                : "connect-src 'self' https://*.lemonsqueezy.com https://assets.lemonsqueezy.com ws: wss:",
+              "frame-src 'self' https://assets.lemonsqueezy.com https://*.lemonsqueezy.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

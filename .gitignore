@@ -47,13 +47,15 @@ pnpm-debug.log*
 .DS_Store
 *.pem
 
+# Build artifacts
+*.tsbuildinfo
+
 # Prisma
-# El patrón contiene una barra, así que Git lo ancla a la raíz del repo y no
-# cubre los workspaces. Se listan explícitamente para que el cliente generado
-# no vuelva a versionarse: es un artefacto de build (schema.prisma lo declara
-# como output) y versionarlo provoca bloqueos de fichero al cambiar de rama.
-src/generated/
-backend/src/generated/
+# El cliente generado es un artefacto de build (schema.prisma lo declara como
+# output) y versionarlo provoca bloqueos de fichero al cambiar de rama, sobre
+# todo en carpetas sincronizadas. El prefijo ** cubre todos los workspaces:
+# "src/generated/" a secas contiene una barra y Git lo ancla a la raíz del repo.
+**/src/generated/
 
 # WhatsApp Web JS
 .wwebjs_auth/

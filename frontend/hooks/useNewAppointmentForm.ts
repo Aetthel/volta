@@ -20,15 +20,6 @@ const normalizePhone = (phone: string) => {
   return digits;
 };
 
-const DEFAULT_SERVICES = [
-  { name: "Corte Caballero", price: 35 },
-  { name: "Corte Dama", price: 45 },
-  { name: "Coloración Premium", price: 85 },
-  { name: "Tratamiento Keratina", price: 50 },
-  { name: "Manicura", price: 20 },
-  { name: "Spa Facial", price: 40 },
-];
-
 export interface NewAppointmentFormData {
   clientName: string;
   clientPhone: string;
@@ -46,7 +37,7 @@ export function useNewAppointmentForm(
   onClose?: () => void
 ) {
   const { data: session } = useSession();
-  const businessId = session?.user?.businessId || "mock-business-id";
+  const businessId = session?.user?.businessId || "";
 
   const [bookingType, setBookingType] = useState<"INDIVIDUAL" | "GROUP">("INDIVIDUAL");
 
@@ -56,11 +47,11 @@ export function useNewAppointmentForm(
     service: "",
     date: "",
     time: "10:00",
-    stylist: "Volta",
+    stylist: "",
   });
 
   const [clientsList, setClientsList] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>(DEFAULT_SERVICES);
+  const [services, setServices] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showConsentToast, setShowConsentToast] = useState(false);
@@ -108,16 +99,16 @@ export function useNewAppointmentForm(
             service: data[0].name,
           }));
         } else {
-          setServices(DEFAULT_SERVICES);
+          setServices([]);
           setFormData((prev) => ({
             ...prev,
-            service: DEFAULT_SERVICES[0].name,
+            service: "",
           }));
         }
       })
       .catch((e) => {
         console.error("Error loading services:", e);
-        setServices(DEFAULT_SERVICES);
+        setServices([]);
       });
   }, [isOpen, businessId]);
 

@@ -28,6 +28,7 @@ export const getPublicBusinessData = async (req, res) => {
       description: true,
       themeColor: true,
       enablePublicBooking: true,
+      subscriptionStatus: true,
       hours: {
         orderBy: { dayOfWeek: "asc" },
       },
@@ -42,13 +43,18 @@ export const getPublicBusinessData = async (req, res) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
-  if (business.enablePublicBooking === false) {
+  if (
+    business.enablePublicBooking === false ||
+    business.subscriptionStatus === "EXPIRED" ||
+    business.subscriptionStatus === "CANCELLED"
+  ) {
     return res
       .status(403)
-      .json({ error: "Las reservas públicas están desactivadas para este negocio." });
+      .json({ error: "Las reservas públicas no están disponibles actualmente para este negocio." });
   }
 
-  return ApiResponse.success(res, business);
+  const { subscriptionStatus: _, ...publicData } = business;
+  return ApiResponse.success(res, publicData);
 };
 
 export const getAvailableSlots = async (req, res) => {
@@ -57,6 +63,20 @@ export const getAvailableSlots = async (req, res) => {
 
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(String(date))) {
     return res.status(400).json({ error: "Debe proporcionar una fecha válida (YYYY-MM-DD)." });
+  }
+
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { subscriptionStatus: true, enablePublicBooking: true },
+  });
+
+  if (
+    !business ||
+    business.enablePublicBooking === false ||
+    business.subscriptionStatus === "EXPIRED" ||
+    business.subscriptionStatus === "CANCELLED"
+  ) {
+    return res.status(403).json({ error: "Las reservas públicas no están disponibles." });
   }
 
   const businessHours = await prisma.businessHours.findMany({
@@ -123,10 +143,14 @@ export const createPublicBooking = async (req, res) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
-  if (business.enablePublicBooking === false) {
+  if (
+    business.enablePublicBooking === false ||
+    business.subscriptionStatus === "EXPIRED" ||
+    business.subscriptionStatus === "CANCELLED"
+  ) {
     return res
       .status(403)
-      .json({ error: "Las reservas públicas están desactivadas para este negocio." });
+      .json({ error: "Las reservas públicas no están disponibles actualmente para este negocio." });
   }
 
   const service = await prisma.service.findUnique({
@@ -150,7 +174,7 @@ export const createPublicBooking = async (req, res) => {
     }
   }
 
-  // 2. Slot Collision & Capacity Check
+  // 2. Slot Collision & Capacity Check in an atomic transaction
   const duration = service.duration || 30;
   const capacity = service.capacity || 1;
   const requestedStart = targetDate;
@@ -161,70 +185,82 @@ export const createPublicBooking = async (req, res) => {
   const dayEnd = new Date(targetDate);
   dayEnd.setHours(23, 59, 59, 999);
 
-  const existingAppointments = await prisma.appointment.findMany({
-    where: {
-      businessId,
-      status: { not: "ERROR" },
-      appointmentDate: {
-        gte: dayStart,
-        lte: dayEnd,
-      },
-    },
-    include: { service: true },
-  });
-
-  const overlappingCount = existingAppointments.filter((appt) => {
-    const apptStart = new Date(appt.appointmentDate);
-    const apptDuration = appt.service?.duration || 30;
-    const apptEnd = new Date(apptStart.getTime() + apptDuration * 60 * 1000);
-
-    return apptStart < requestedEnd && apptEnd > requestedStart;
-  }).length;
-
-  if (overlappingCount >= capacity) {
-    return res
-      .status(409)
-      .json({ error: "El horario seleccionado ya está ocupado o no tiene capacidad disponible." });
-  }
-
-  // Client recognition by phone number
   const cleanPhone = clientPhone.trim();
-  let client = await prisma.client.findFirst({
-    where: {
-      businessId,
-      phone: cleanPhone,
-    },
-  });
 
-  if (!client) {
-    client = await prisma.client.create({
-      data: {
-        name: clientName,
-        surname: "",
-        phone: cleanPhone,
-        email: clientEmail ? clientEmail.trim() : null,
-        businessId,
-        frequentService: service.name,
-      },
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const existingAppointments = await tx.appointment.findMany({
+        where: {
+          businessId,
+          status: { not: "ERROR" },
+          appointmentDate: {
+            gte: dayStart,
+            lte: dayEnd,
+          },
+        },
+        include: { service: true },
+      });
+
+      const overlappingCount = existingAppointments.filter((appt) => {
+        const apptStart = new Date(appt.appointmentDate);
+        const apptDuration = appt.service?.duration || 30;
+        const apptEnd = new Date(apptStart.getTime() + apptDuration * 60 * 1000);
+
+        return apptStart < requestedEnd && apptEnd > requestedStart;
+      }).length;
+
+      if (overlappingCount >= capacity) {
+        const error = new Error(
+          "El horario seleccionado ya está ocupado o no tiene capacidad disponible."
+        );
+        error.statusCode = 409;
+        throw error;
+      }
+
+      // Client recognition by phone number
+      let client = await tx.client.findFirst({
+        where: {
+          businessId,
+          phone: cleanPhone,
+        },
+      });
+
+      if (!client) {
+        client = await tx.client.create({
+          data: {
+            name: clientName,
+            surname: "",
+            phone: cleanPhone,
+            email: clientEmail ? clientEmail.trim() : null,
+            businessId,
+            frequentService: service.name,
+            lopdStatus: "Pendiente",
+            lastVisit: new Date(),
+          },
+        });
+      }
+
+      const appointment = await tx.appointment.create({
+        data: {
+          businessId,
+          serviceId,
+          clientId: client.id,
+          clientName: clientName,
+          clientPhone: cleanPhone,
+          serviceName: service.name,
+          appointmentDate: targetDate,
+          status: "PENDING",
+        },
+      });
+
+      return { appointment, client, service };
     });
+
+    return ApiResponse.created(res, result);
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    return res.status(500).json({ error: "Error al crear la reserva" });
   }
-
-  const appointment = await prisma.appointment.create({
-    data: {
-      businessId,
-      serviceId,
-      clientId: client.id,
-      clientName: clientName,
-      clientPhone: cleanPhone,
-      serviceName: service.name,
-      appointmentDate: targetDate,
-      status: "PENDING",
-    },
-  });
-
-  return ApiResponse.created(res, {
-    appointment,
-    client,
-    service,
-  });
 };

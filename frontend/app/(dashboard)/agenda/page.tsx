@@ -9,6 +9,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import { Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
+import TrialBanner from "@/components/TrialBanner";
 
 const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
   ssr: false,
@@ -17,25 +18,22 @@ const AddClientModal = dynamicImport(() => import("@/components/AddClientModal")
   ssr: false,
 });
 
-const serviceDurations: Record<string, number> = {
-  "Corte Caballero": 30,
-  "Corte Dama": 45,
-  "Coloración Premium": 90,
-  "Tratamiento Keratina": 60,
-  Manicura: 30,
-  "Spa Facial": 45,
-};
-
-const DEFAULT_SERVICE_COLORS: Record<string, string> = {
-  "Corte Caballero": "TEAL",
-  "Corte Dama": "ROSE",
-  "Coloración Premium": "PURPLE",
-  "Tratamiento Keratina": "AMBER",
-  Manicura: "EMERALD",
-  "Spa Facial": "SKY",
-};
-
 const VALID_COLORS = ["TEAL", "PURPLE", "ROSE", "AMBER", "INDIGO", "EMERALD", "SKY"];
+
+function getServiceDuration(app: any, servicesList: any[]): number {
+  if (app.service?.duration && typeof app.service.duration === "number") {
+    return app.service.duration;
+  }
+  if (app.duration && typeof app.duration === "number") {
+    return app.duration;
+  }
+  const sName = (app.serviceName || app.service?.name || "").trim().toLowerCase();
+  const dbService = servicesList.find(
+    (s) => s.name?.toLowerCase().trim() === sName
+  );
+  if (dbService?.duration) return dbService.duration;
+  return 30; // default 30 min duration
+}
 
 function getServiceColor(app: any, servicesList: any[]): string {
   if (app.service?.color && VALID_COLORS.includes(app.service.color.toUpperCase())) {
@@ -49,10 +47,6 @@ function getServiceColor(app: any, servicesList: any[]): string {
   );
   if (dbService?.color && VALID_COLORS.includes(dbService.color.toUpperCase())) {
     return dbService.color.toUpperCase();
-  }
-
-  if (DEFAULT_SERVICE_COLORS[serviceName]) {
-    return DEFAULT_SERVICE_COLORS[serviceName];
   }
 
   let hash = 0;
@@ -106,14 +100,19 @@ export default function AgendaPage() {
         .then((res) => res.json())
         .catch(() => []),
     ])
-      .then(([usersData, appsData, clientsData, servicesData]) => {
-        setWorkers(Array.isArray(usersData) ? usersData : []);
-        setRawDbAppointments(Array.isArray(appsData) ? appsData : []);
-        setClients(Array.isArray(clientsData) ? clientsData : []);
-        setServices(Array.isArray(servicesData) ? servicesData : []);
-      })
-      .catch((e) => {
-        console.error("Error fetching agenda data:", e);
+      .then(([usersData, appointmentsData, clientsData, servicesData]) => {
+        if (Array.isArray(appointmentsData)) {
+          setRawDbAppointments(appointmentsData);
+        }
+        if (Array.isArray(clientsData)) {
+          setClients(clientsData);
+        }
+        if (Array.isArray(servicesData)) {
+          setServices(servicesData);
+        }
+        if (Array.isArray(usersData)) {
+          setWorkers(usersData);
+        }
       })
       .finally(() => {
         setIsLoading(false);
@@ -133,8 +132,8 @@ export default function AgendaPage() {
   const events: Event[] = useMemo(() => {
     return rawDbAppointments.map((app) => {
       const startTime = new Date(app.appointmentDate);
-      const serviceName = app.serviceName || app.client?.frequentService || "Servicio General";
-      const durationMinutes = serviceDurations[serviceName] || app.duration || 45;
+      const serviceName = app.serviceName || app.client?.frequentService || app.service?.name || "Servicio General";
+      const durationMinutes = getServiceDuration(app, services);
       const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
 
       const color = getServiceColor(app, services);
@@ -154,10 +153,7 @@ export default function AgendaPage() {
   }, [rawDbAppointments, services]);
 
   const categories = useMemo(() => {
-    if (services.length > 0) {
-      return Array.from(new Set(services.map((s) => s.name)));
-    }
-    return ["Corte Caballero", "Corte Dama", "Coloración Premium", "Tratamiento Keratina", "Manicura", "Spa Facial"];
+    return Array.from(new Set(services.map((s) => s.name).filter(Boolean)));
   }, [services]);
 
   const availableTags = useMemo(() => {
@@ -244,7 +240,10 @@ export default function AgendaPage() {
 
   const handleOpenNewModalWithDate = (date?: Date) => {
     if (date) {
-      const dStr = date.toISOString().split("T")[0];
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const dStr = `${year}-${month}-${day}`;
       const hStr = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
       setPrefilledDate(dStr);
       setPrefilledTime(hStr);
@@ -261,6 +260,7 @@ export default function AgendaPage() {
       <BottomNav />
 
       <div className="md:ml-[240px] transition-all duration-300">
+        <TrialBanner />
         <main className="p-4 sm:p-6 space-y-6">
           {isLoading ? (
             <div className="space-y-4">

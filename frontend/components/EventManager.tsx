@@ -68,7 +68,7 @@ export function EventManager({
   onEventCreate,
   onEventUpdate,
   onEventDelete,
-  categories = ["Corte", "Coloración", "Tratamiento", "Manicura", "Spa"],
+  categories = [],
   colors = defaultColors,
   defaultView = "week",
   className,
@@ -264,6 +264,27 @@ export function EventManager({
       )
     }
   }
+
+  const handleSlotClick = useCallback(
+    (slotDate: Date) => {
+      if (onOpenNewModal) {
+        onOpenNewModal(slotDate);
+      } else {
+        setNewEvent({
+          title: "",
+          description: "",
+          startTime: slotDate,
+          endTime: new Date(slotDate.getTime() + 30 * 60000),
+          color: colors[0].value,
+          category: categories[0],
+          tags: [],
+        });
+        setIsCreating(true);
+        setIsDialogOpen(true);
+      }
+    },
+    [onOpenNewModal, colors, categories]
+  );
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
@@ -577,6 +598,7 @@ export function EventManager({
             setSelectedEvent(event)
             setIsDialogOpen(true)
           }}
+          onSlotClick={handleSlotClick}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDrop={handleDrop}
@@ -592,6 +614,7 @@ export function EventManager({
             setSelectedEvent(event)
             setIsDialogOpen(true)
           }}
+          onSlotClick={handleSlotClick}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDrop={handleDrop}
@@ -607,6 +630,7 @@ export function EventManager({
             setSelectedEvent(event)
             setIsDialogOpen(true)
           }}
+          onSlotClick={handleSlotClick}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDrop={handleDrop}
@@ -865,10 +889,13 @@ function EventCard({
         draggable
         onDragStart={() => onDragStart(event)}
         onDragEnd={onDragEnd}
-        onClick={() => onEventClick(event)}
+        onClick={(e) => {
+          e.stopPropagation()
+          onEventClick(event)
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="relative cursor-pointer"
+        className="relative cursor-pointer event-card"
       >
         <div
           className={cn(
@@ -922,11 +949,14 @@ function EventCard({
         draggable
         onDragStart={() => onDragStart(event)}
         onDragEnd={onDragEnd}
-        onClick={() => onEventClick(event)}
+        onClick={(e) => {
+          e.stopPropagation()
+          onEventClick(event)
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={cn(
-          "cursor-pointer rounded-lg p-3 transition-all duration-300",
+          "cursor-pointer rounded-lg p-3 transition-all duration-300 event-card",
           colorClasses.bg,
           "text-white animate-in fade-in slide-in-from-left-2",
           isHovered && "scale-[1.03] shadow-2xl ring-2 ring-white/50",
@@ -961,10 +991,13 @@ function EventCard({
       draggable
       onDragStart={() => onDragStart(event)}
       onDragEnd={onDragEnd}
-      onClick={() => onEventClick(event)}
+      onClick={(e) => {
+        e.stopPropagation()
+        onEventClick(event)
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative"
+      className="relative event-card"
     >
       <div
         className={cn(
@@ -1019,6 +1052,7 @@ function MonthView({
   currentDate,
   events,
   onEventClick,
+  onSlotClick,
   onDragStart,
   onDragEnd,
   onDrop,
@@ -1027,6 +1061,7 @@ function MonthView({
   currentDate: Date
   events: Event[]
   onEventClick: (event: Event) => void
+  onSlotClick: (date: Date) => void
   onDragStart: (event: Event) => void
   onDragEnd: () => void
   onDrop: (date: Date) => void
@@ -1075,10 +1110,15 @@ function MonthView({
             <div
               key={index}
               className={cn(
-                "min-h-20 border-b border-r border-outline-variant/40 p-1 transition-colors last:border-r-0 sm:min-h-24 sm:p-2",
+                "min-h-20 border-b border-r border-outline-variant/40 p-1 transition-colors last:border-r-0 sm:min-h-24 sm:p-2 cursor-pointer",
                 !isCurrentMonth && "bg-surface-container-low/40 opacity-60",
                 "hover:bg-surface-container-low",
               )}
+              onClick={() => {
+                const clickDate = new Date(day);
+                clickDate.setHours(9, 0, 0, 0);
+                onSlotClick(clickDate);
+              }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => onDrop(day)}
             >
@@ -1119,6 +1159,7 @@ function WeekView({
   currentDate,
   events,
   onEventClick,
+  onSlotClick,
   onDragStart,
   onDragEnd,
   onDrop,
@@ -1127,6 +1168,7 @@ function WeekView({
   currentDate: Date
   events: Event[]
   onEventClick: (event: Event) => void
+  onSlotClick: (date: Date) => void
   onDragStart: (event: Event) => void
   onDragEnd: () => void
   onDrop: (date: Date, hour: number) => void
@@ -1186,7 +1228,12 @@ function WeekView({
               return (
                 <div
                   key={`${day.toISOString()}-${hour}`}
-                  className="min-h-12 border-b border-r border-outline-variant/40 p-0.5 transition-colors hover:bg-surface-container-low/60 last:border-r-0 sm:min-h-16 sm:p-1"
+                  className="min-h-12 border-b border-r border-outline-variant/40 p-0.5 transition-colors hover:bg-surface-container-low/80 last:border-r-0 sm:min-h-16 sm:p-1 cursor-pointer"
+                  onClick={() => {
+                    const slotDate = new Date(day);
+                    slotDate.setHours(hour, 0, 0, 0);
+                    onSlotClick(slotDate);
+                  }}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => onDrop(day, hour)}
                 >
@@ -1218,6 +1265,7 @@ function DayView({
   currentDate,
   events,
   onEventClick,
+  onSlotClick,
   onDragStart,
   onDragEnd,
   onDrop,
@@ -1226,6 +1274,7 @@ function DayView({
   currentDate: Date
   events: Event[]
   onEventClick: (event: Event) => void
+  onSlotClick: (date: Date) => void
   onDragStart: (event: Event) => void
   onDragEnd: () => void
   onDrop: (date: Date, hour: number) => void
@@ -1261,7 +1310,14 @@ function DayView({
               <div className="w-14 flex-shrink-0 border-r border-outline-variant/40 p-2 text-xs text-on-surface-variant sm:w-20 sm:p-3 sm:text-sm">
                 {hour.toString().padStart(2, "0")}:00
               </div>
-              <div className="min-h-16 flex-1 p-1 transition-colors hover:bg-surface-container-low/60 sm:min-h-20 sm:p-2">
+              <div
+                className="min-h-16 flex-1 p-1 transition-colors hover:bg-surface-container-low/80 sm:min-h-20 sm:p-2 cursor-pointer"
+                onClick={() => {
+                  const slotDate = new Date(currentDate);
+                  slotDate.setHours(hour, 0, 0, 0);
+                  onSlotClick(slotDate);
+                }}
+              >
                 <div className="space-y-2">
                   {hourEvents.map((event) => (
                     <EventCard

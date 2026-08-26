@@ -125,7 +125,7 @@ export default function WelcomeModal() {
                   variant="primary"
                   size="md"
                   onClick={handleNext}
-                  className="group flex items-center gap-1.5 font-semibold shadow-sm px-4 cursor-pointer"
+                  className="group flex items-center gap-1.5 font-medium shadow-sm px-4 cursor-pointer"
                 >
                   Siguiente
                   <ArrowRight className="w-4 h-4 opacity-80 transition-transform group-hover:translate-x-0.5" />
@@ -136,7 +136,7 @@ export default function WelcomeModal() {
                   variant="primary"
                   size="md"
                   onClick={handleFinish}
-                  className="font-semibold shadow-sm px-4 cursor-pointer"
+                  className="font-medium shadow-sm px-4 cursor-pointer"
                 >
                   Entendido
                 </Button>
