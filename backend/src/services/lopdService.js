@@ -62,11 +62,33 @@ export const acceptConsent = async (id, metadata = {}) => {
     },
   });
 
-  for (const appt of futureAppointments) {
-    await sendWelcomeMessage(appt.id);
-  }
+  // Los envíos se lanzan en paralelo y NO se esperan antes de responder.
+  //
+  // sendWelcomeMessage encola en BullMQ, pero si Redis no responde cae a un
+  // envío directo que espera hasta 45 s al gateway de WhatsApp. En serie y
+  // dentro de la petición HTTP, un cliente con tres citas futuras podía
+  // quedarse más de dos minutos mirando el spinner —y acabar viendo un error—
+  // por un trabajo que ya no le concierne: su consentimiento quedó confirmado
+  // en la transacción anterior. Los envíos son consecuencia suya, no requisito.
+  //
+  // La promesa se devuelve en lugar de quedar suelta para que sea observable:
+  // los tests pueden esperarla y nadie tiene que adivinar que existe.
+  const dispatch = Promise.allSettled(
+    futureAppointments.map((appt) => sendWelcomeMessage(appt.id))
+  )
+    .then((results) => {
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length > 0) {
+        logger.error(
+          `[LOPD] ${failed.length} de ${results.length} mensajes de bienvenida fallaron tras aceptar el consentimiento del cliente ${id}`
+        );
+      }
+    })
+    .catch((err) => {
+      logger.error(`[LOPD] Error despachando mensajes de bienvenida:`, err);
+    });
 
-  return { updatedClient, futureAppointments, consentLog };
+  return { updatedClient, futureAppointments, consentLog, dispatch };
 };
 
 export const rejectConsent = async (id) => {

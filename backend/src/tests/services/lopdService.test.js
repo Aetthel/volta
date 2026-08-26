@@ -112,6 +112,32 @@ describe("lopdService", () => {
     });
   });
 
+  describe("welcome message dispatch", () => {
+    it("should return before the welcome messages have been sent", async () => {
+      const mockClient = { id: "client-1", businessId: "biz-123", lopdStatus: "Pendiente" };
+
+      jest.spyOn(prisma, "$transaction").mockImplementation(async (callback) => callback(prisma));
+      jest.spyOn(prisma.client, "findUnique").mockResolvedValue(mockClient);
+      jest.spyOn(prisma.client, "update").mockResolvedValue({
+        ...mockClient,
+        lopdStatus: "Aceptado",
+      });
+      jest.spyOn(prisma.lopdConsentLog, "create").mockResolvedValue({ id: "log-1" });
+      jest
+        .spyOn(prisma.appointment, "findMany")
+        .mockResolvedValue([{ id: "appt-1" }, { id: "appt-2" }]);
+
+      const result = await lopdService.acceptConsent("client-1");
+
+      // La aceptación resuelve con los envíos aún en curso: es lo que evita que
+      // el cliente espere al gateway de WhatsApp dentro de su petición HTTP.
+      expect(result.dispatch).toBeInstanceOf(Promise);
+      expect(result.updatedClient.lopdStatus).toBe("Aceptado");
+
+      await result.dispatch;
+    });
+  });
+
   describe("purgeExpiredConsentIdentifiers", () => {
     it("should purge only identifiers older than the retention period", async () => {
       const updateManySpy = jest
