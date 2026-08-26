@@ -73,10 +73,15 @@ export const acceptConsent = async (req, res) => {
 
 export const getConsentLogs = async (req, res) => {
   const { id: clientId } = req.params;
-  const businessId = req.user?.businessId || req.query.businessId;
+  const businessId = req.query.businessId || req.user?.businessId;
 
   if (!businessId) {
     return res.status(400).json({ error: "ID de negocio requerido." });
+  }
+
+  // Verify tenant isolation
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
   const logs = await lopdService.getConsentLogsByClient(clientId, businessId);

@@ -47,8 +47,12 @@ pnpm-debug.log*
 .DS_Store
 *.pem
 
+# Build artifacts
+*.tsbuildinfo
+
 # Prisma
-src/generated/
+**/src/generated/
+backend/src/generated/
 
 # WhatsApp Web JS
 .wwebjs_auth/

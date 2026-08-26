@@ -2,11 +2,15 @@
 
 import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
+import dynamic from "next/dynamic";
 import { AlertsProvider } from "@/lib/alerts";
 import ThemeInitializer from "@/components/ThemeInitializer";
 import TopProgressBar from "@/components/TopProgressBar";
-import WelcomeModal from "@/components/WelcomeModal";
 import SecurityGuard from "@/components/SecurityGuard";
+
+const WelcomeModal = dynamic(() => import("@/components/WelcomeModal"), {
+  ssr: false,
+});
 
 export default function Providers({
   session,

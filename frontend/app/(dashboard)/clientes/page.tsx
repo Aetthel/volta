@@ -23,13 +23,19 @@ import {
 import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 
+import dynamicImport from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import { formatDateTimeParts } from "@/lib/utils";
 import TrialBanner from "@/components/TrialBanner";
-import AddClientModal from "@/components/AddClientModal";
-import NewAppointmentModal from "@/components/NewAppointmentModal";
 import MetricCard from "@/components/MetricCard";
+
+const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
+  ssr: false,
+});
+const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
+  ssr: false,
+});
 import {
   Alert,
   Badge,
@@ -54,11 +60,13 @@ interface ClientItem {
   surname: string;
   email: string;
   phone: string;
-  lastVisit: string;
-  frequentService: string;
-  stylist: string;
-  avatarUrl: string;
+  lastVisit?: string;
+  frequentService?: string;
+  stylist?: string;
+  avatarUrl?: string;
   lopdStatus: "Aceptado" | "Pendiente";
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const normalizeString = (str: string) => {
@@ -273,22 +281,15 @@ export default function ClientesPage() {
       })
       .then(() => {
         fetchData();
+        setToastText("Cliente guardado correctamente");
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
       })
       .catch((err) => {
         console.error("Error saving client:", err);
-        const newClient: ClientItem = {
-          id: String(Date.now()),
-          name: data.name,
-          surname: data.surname,
-          email: data.email,
-          phone: data.phone,
-          lastVisit: "Hoy",
-          frequentService: "Primera visita",
-          stylist: "Sin asignar",
-          avatarUrl: "",
-          lopdStatus: "Pendiente",
-        };
-        setClients((prev) => [newClient, ...prev]);
+        setToastText("Error al guardar el cliente. Comprueba los datos o tu sesión.");
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 4000);
       });
   };
 
@@ -303,10 +304,15 @@ export default function ClientesPage() {
       })
       .then(() => {
         fetchData();
+        setToastText(`Cliente ${name} eliminado`);
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
       })
       .catch((err) => {
         console.error("Error deleting client:", err);
-        setClients((prev) => prev.filter((c) => c.id !== id));
+        setToastText("Error de conexión al eliminar el cliente.");
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
       });
   };
 
@@ -327,12 +333,9 @@ export default function ClientesPage() {
       })
       .catch((err) => {
         console.error("Error resending consent:", err);
-        // fallback
-        setToastPhone(client.phone);
-        setShowConsentToast(true);
-        setTimeout(() => {
-          setShowConsentToast(false);
-        }, 3000);
+        setToastText("No se pudo enviar el mensaje LOPD por WhatsApp.");
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
       });
   };
 
@@ -360,8 +363,7 @@ export default function ClientesPage() {
       })
       .catch((err) => {
         console.error("Error sending custom message:", err);
-        // fallback simulation
-        setToastText(`Mensaje enviado a ${client.name} (${client.phone})`);
+        setToastText(`Error al enviar mensaje a ${client.name}.`);
         setShowGeneralToast(true);
         setTimeout(() => setShowGeneralToast(false), 3000);
       });
@@ -376,6 +378,55 @@ export default function ClientesPage() {
     const appDate = new Date(app.appointmentDate);
     return appDate.getMonth() === currentMonth && appDate.getFullYear() === currentYear;
   }).length;
+
+  const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const visitsLastMonthCount = appointments.filter((app) => {
+    const appDate = new Date(app.appointmentDate);
+    return appDate.getMonth() === prevMonth && appDate.getFullYear() === prevYear;
+  }).length;
+
+  const visitsDiff = visitsThisMonthCount - visitsLastMonthCount;
+  const visitsChange =
+    visitsLastMonthCount > 0
+      ? `${visitsDiff >= 0 ? "+" : ""}${Math.round((visitsDiff / visitsLastMonthCount) * 100)}%`
+      : visitsThisMonthCount > 0
+        ? `+${visitsThisMonthCount}`
+        : undefined;
+  const visitsTrend = visitsDiff > 0 ? "up" : visitsDiff < 0 ? "down" : "neutral";
+
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toISOString().split("T")[0];
+  });
+
+  const clientsSparkline = last7Days.map((dateStr) => {
+    return clients.filter((c) => c.createdAt && c.createdAt.split("T")[0] === dateStr).length;
+  });
+
+  const visitsSparkline = last7Days.map((dateStr) => {
+    return appointments.filter(
+      (a) => a.appointmentDate && a.appointmentDate.split("T")[0] === dateStr
+    ).length;
+  });
+
+  const thisWeekClients = clientsSparkline.reduce((a, b) => a + b, 0);
+  const prevWeekClients = clients.filter((c) => {
+    if (!c.createdAt) return false;
+    const createdDate = new Date(c.createdAt);
+    const diffDays = Math.ceil(Math.abs(today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays > 7 && diffDays <= 14;
+  }).length;
+
+  const clientsDiff = thisWeekClients - prevWeekClients;
+  const clientsChange =
+    prevWeekClients > 0
+      ? `${clientsDiff >= 0 ? "+" : ""}${Math.round((clientsDiff / prevWeekClients) * 100)}%`
+      : thisWeekClients > 0
+        ? `+${thisWeekClients}`
+        : undefined;
+  const clientsTrend = clientsDiff > 0 ? "up" : clientsDiff < 0 ? "down" : "neutral";
 
   const pendingLopdCount = clients.filter((c) => c.lopdStatus === "Pendiente").length;
 
@@ -460,16 +511,20 @@ export default function ClientesPage() {
             <MetricCard
               title="Clientes Totales"
               value={clients.length}
-              change="+12%"
-              trend="up"
+              change={clientsChange}
+              trend={clientsTrend}
+              sparklineData={clientsSparkline}
+              caption="En tu base de datos"
               icon={<UsersIcon className="w-5 h-5" />}
               className="col-span-1"
             />
             <MetricCard
               title="Visitas este mes"
               value={visitsThisMonthCount}
-              change="+8%"
-              trend="up"
+              change={visitsChange}
+              trend={visitsTrend}
+              sparklineData={visitsSparkline}
+              caption="Citas agendadas este mes"
               icon={<CalendarCheck className="w-5 h-5" />}
               className="col-span-1"
             />

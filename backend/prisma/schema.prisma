@@ -43,12 +43,17 @@ model Business {
   subscriptionStatus SubscriptionStatus @default(TRIALING)
   trialExpiresAt     DateTime?
   sandboxExpiresAt   DateTime?
+  gracePeriodExpiresAt DateTime?
+  cancelAtPeriodEnd  Boolean            @default(false)
+  lemonSqueezyCustomerId     String?
+  lemonSqueezySubscriptionId String?
   appointments       Appointment[]
   clients            Client[]
   hours              BusinessHours[]
   services           Service[]
   users              User[]
   lopdConsentLogs    LopdConsentLog[]
+  invoices           Invoice[]
 }
 
 enum UserRole {
@@ -70,6 +75,7 @@ model User {
   alerts     Alert[]
 
   @@index([businessId])
+  @@index([businessId, role])
 }
 
 enum WhatsAppStatus {
@@ -96,6 +102,8 @@ model Client {
   updatedAt       DateTime         @updatedAt
 
   @@index([businessId, phone])
+  @@index([businessId, email])
+  @@index([businessId, lopdStatus])
   @@index([businessId])
 }
 
@@ -121,6 +129,8 @@ model Appointment {
 
   @@index([businessId, appointmentDate])
   @@index([businessId, status])
+  @@index([businessId, clientId])
+  @@index([businessId, serviceId])
   @@index([clientId])
   @@index([serviceId])
 }
@@ -161,6 +171,7 @@ model Service {
   updatedAt   DateTime      @updatedAt
 
   @@index([businessId])
+  @@index([businessId, isActive])
 }
 
 enum AlertType {
@@ -181,6 +192,7 @@ model Alert {
   updatedAt   DateTime  @updatedAt
 
   @@index([userId])
+  @@index([userId, isRead])
 }
 
 model LopdConsentLog {
@@ -196,4 +208,32 @@ model LopdConsentLog {
 
   @@index([clientId])
   @@index([businessId])
+  @@index([businessId, clientId])
 }
+
+enum InvoiceStatus {
+  PAID
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+model Invoice {
+  id                    String        @id @default(uuid())
+  businessId            String
+  business              Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  lemonSqueezyId        String?       @unique
+  invoiceNumber         String
+  amount                Decimal       @db.Decimal(10, 2)
+  currency              String        @default("EUR")
+  status                InvoiceStatus @default(PAID)
+  invoiceUrl            String?
+  billingReason         String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([businessId])
+  @@index([businessId, createdAt])
+  @@index([businessId, status])
+}
+

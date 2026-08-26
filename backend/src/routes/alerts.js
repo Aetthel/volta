@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, validateBody } from "../middleware/index.js";
+import { authenticate, requireRole, validateBody } from "../middleware/index.js";
 import { createAlertSchema } from "../validators/index.js";
 import * as alertsController from "../controllers/alertsController.js";
 import { asyncHandler } from "../utils/index.js";
@@ -13,6 +13,7 @@ router.get("/", authenticate, asyncHandler(alertsController.getAlerts));
 router.post(
   "/",
   authenticate,
+  requireRole(["ADMIN", "JEFE"]),
   validateBody(createAlertSchema),
   asyncHandler(alertsController.createAlert)
 );

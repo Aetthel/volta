@@ -21,7 +21,22 @@ import ProfileSection from "@/components/settings/ProfileSection";
 import MessagesSection from "@/components/settings/MessagesSection";
 import BusinessSection from "@/components/settings/BusinessSection";
 import PersonalizationSection from "@/components/settings/PersonalizationSection";
-import { Button, PageHeader } from "@/components/ui/volta-ui";
+import BillingSection from "@/components/settings/BillingSection";
+import {
+  Button,
+  PageHeader,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  FieldGroup,
+  Field,
+  FieldLabel,
+  FloatingInput,
+  Skeleton,
+} from "@/components/ui/volta-ui";
+import { User, Mail, Key, Save, Loader2 } from "lucide-react";
 
 const TAB_KEY = "volta-settings-active-tab";
 
@@ -32,6 +47,7 @@ const ALL_TABS = [
   { id: "perfil", label: "Perfil y Seguridad", roles: ["ADMIN", "JEFE", "EMPLEADO"] },
   { id: "mensajeria", label: "Mensajes y WhatsApp", roles: ["JEFE", "EMPLEADO"] },
   { id: "gestion", label: "Gestión del Negocio", roles: ["JEFE"] },
+  { id: "facturacion", label: "Facturación y Suscripción", roles: ["ADMIN", "JEFE"] },
   { id: "personalizacion", label: "Personalización", roles: ["JEFE"] },
 ];
 
@@ -57,14 +73,14 @@ export default function AjustesPage() {
 
   // Business profile state (shared across sections)
   const [profile, setProfile] = useState<BusinessProfile>({
-    name: "Estilo & Spa",
-    email: session?.user?.email || "contacto@volta.com",
-    phone: "+34 912 345 678",
-    address: "Calle de Velázquez, 45, Madrid",
+    name: session?.user?.name || "",
+    email: session?.user?.email || "",
+    phone: "",
+    address: "",
     logoUrl: "",
     coverUrl: "",
-    description: "Espacio de belleza profesional dedicado al estilismo y cuidado personal.",
-    ownerName: session?.user?.name || "Usuario Volta",
+    description: "",
+    ownerName: session?.user?.name || "",
     workerPhoto: DEFAULT_AVATAR,
     themeColor: (session?.user?.themeColor as any) || "TEAL",
     fontSizeLevel: (session?.user?.fontSizeLevel as any) || "MEDIUM",
@@ -186,6 +202,14 @@ export default function AjustesPage() {
               setToast={setToast}
             />
           )}
+          {activeTab === "facturacion" && (
+            <BillingSection
+              onShowToast={(text) => {
+                setToast({ show: true, text });
+                setTimeout(() => setToast({ show: false, text: "" }), 3000);
+              }}
+            />
+          )}
           {activeTab === "personalizacion" && (
             <PersonalizationSection
               profile={profile}
@@ -242,19 +266,6 @@ function AdminView({ toast, setToast }: { toast: ToastState; setToast: (t: Toast
       .catch((err) => alert(err.message))
       .finally(() => setSavingAdmin(false));
   };
-
-  const {
-    FloatingInput,
-    FieldGroup,
-    Field,
-    FieldLabel,
-    Card,
-    CardHeader,
-    CardTitle,
-    CardContent,
-    CardFooter,
-  } = require("@/components/ui/volta-ui");
-  const { User, Mail, Key, Save, Loader2, CheckCircle } = require("lucide-react");
 
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">

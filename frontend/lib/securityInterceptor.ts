@@ -16,7 +16,14 @@ export function setupSecurityInterceptor() {
 
     if (response.status === 403 || response.status === 401) {
       const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url || "";
-      if (url.includes("__nextjs") || url.includes("_next")) {
+      if (
+        url.includes("__nextjs") ||
+        url.includes("_next") ||
+        url.includes("/api/auth") ||
+        url.includes("/api/backend/users/register") ||
+        url.includes("/api/backend/demo") ||
+        url.includes("/api/backend/public")
+      ) {
         return response;
       }
 

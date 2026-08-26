@@ -22,12 +22,13 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               isDev
-                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-                : "script-src 'self' 'unsafe-inline'",
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://assets.lemonsqueezy.com"
+                : "script-src 'self' 'unsafe-inline' https://assets.lemonsqueezy.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self'",
+              "connect-src 'self' https://*.lemonsqueezy.com https://assets.lemonsqueezy.com ws: wss:",
+              "frame-src 'self' https://assets.lemonsqueezy.com https://*.lemonsqueezy.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
