@@ -768,24 +768,24 @@ export default function ClientesPage() {
                           {visibleColumns.has("lopd") && (
                             <TableCell className="py-4">
                               {client.lopdStatus === "Aceptado" ? (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                <div className="inline-flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 select-none">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                                   <span>Aceptado</span>
-                                </span>
+                                </div>
                               ) : client.lopdStatus === "Pendiente" ? (
-                                <span
-                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 cursor-pointer hover:bg-amber-500/20 transition-colors"
+                                <div
+                                  className="inline-flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400 cursor-pointer hover:underline select-none"
                                   onClick={() => handleSendWhatsAppConsent(client)}
                                   title="Haz clic para enviar consentimiento por WhatsApp"
                                 >
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse"></span>
                                   <span>Pendiente</span>
-                                </span>
+                                </div>
                               ) : (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-700 dark:text-rose-300">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+                                <div className="inline-flex items-center gap-2 text-xs font-medium text-rose-600 dark:text-rose-400 select-none">
+                                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
                                   <span>Rechazado</span>
-                                </span>
+                                </div>
                               )}
                             </TableCell>
                           )}
