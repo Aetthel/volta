@@ -293,7 +293,7 @@ export function EventManager({
       <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-bold capitalize text-on-surface tracking-tight">
+            <h1 className="font-display text-headline-lg text-on-surface font-semibold capitalize tracking-tight">
               {view === "month" &&
                 currentDate.toLocaleDateString("es-ES", {
                   month: "long",
@@ -313,7 +313,7 @@ export function EventManager({
                 })}
               {view === "list" && "Todas las Citas"}
             </h1>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8 rounded-lg bg-surface">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
