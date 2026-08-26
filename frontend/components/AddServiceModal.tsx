@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Sparkles, Pencil, Briefcase, Clock, User, Users } from "lucide-react";
+import { X, Pencil, Briefcase, Clock, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   FieldGroup,
@@ -80,7 +80,7 @@ export default function AddServiceModal({
             {isEditMode ? (
               <Pencil className="w-5 h-5 text-primary" />
             ) : (
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Briefcase className="w-5 h-5 text-primary" />
             )}
             <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
           </h3>

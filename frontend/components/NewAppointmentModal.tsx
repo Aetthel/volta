@@ -9,7 +9,7 @@ import {
   User,
   Users,
   Phone,
-  Sparkles,
+  Briefcase,
   Calendar as CalendarIcon,
 } from "lucide-react";
 import { Button, Alert, SegmentedControl } from "@/components/ui/volta-ui";
@@ -148,7 +148,7 @@ export default function NewAppointmentModal({
           {/* Servicio Selection */}
           <div>
             <label htmlFor="service" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
               <span>{bookingType === "GROUP" ? "Clase de Grupo" : "Servicio"} <span className="text-error">*</span></span>
             </label>
             <select

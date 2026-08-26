@@ -8,7 +8,7 @@ import {
   User,
   Phone,
   Mail,
-  Sparkles,
+  Repeat,
   FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
@@ -186,7 +186,7 @@ export default function AddClientModal({
           {/* Frecuencia Estimada */}
           <div>
             <label htmlFor="frequency" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <Repeat className="w-3.5 h-3.5 text-on-surface shrink-0" />
               <span>Frecuencia estimada de visita</span>
             </label>
             <select
