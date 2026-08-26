@@ -289,7 +289,7 @@ export function EventManager({
   return (
     <div className={cn("flex-1 flex flex-col w-full h-full min-h-full", className)}>
       {/* Header & Controls bar with standard top and lateral page margins */}
-      <div className="p-4 sm:p-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
+      <div className="p-gutter max-w-container-max w-full mx-auto pt-0 pb-4 flex flex-col gap-4 bg-surface shrink-0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             <h2 className="text-xl font-bold sm:text-2xl capitalize text-on-surface tracking-tight">
