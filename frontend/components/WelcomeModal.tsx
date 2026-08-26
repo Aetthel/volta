@@ -38,20 +38,23 @@ export default function WelcomeModal() {
 
   const handleCloseModal = () => {
     setIsDismissed(true);
+    emergentes.forEach((a) => markAsRead(a.id));
   };
 
   const handleNext = () => {
+    if (current) {
+      markAsRead(current.id);
+    }
     if (activeIndex < totalSteps - 1) {
       setActiveIndex((prev) => prev + 1);
     } else {
-      markAllAsRead();
       setIsDismissed(true);
     }
   };
 
   const handleFinish = () => {
-    markAllAsRead();
     setIsDismissed(true);
+    emergentes.forEach((a) => markAsRead(a.id));
   };
 
   return (
