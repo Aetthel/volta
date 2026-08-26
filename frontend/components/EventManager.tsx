@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Header from "@/components/Header"
 
 export interface Event {
   id: string
@@ -289,10 +290,10 @@ export function EventManager({
   return (
     <div className={cn("flex-1 flex flex-col w-full h-full min-h-full", className)}>
       {/* Header & Controls bar with standard top and lateral page margins */}
-      <div className="p-gutter max-w-container-max w-full mx-auto pt-0 pb-4 flex flex-col gap-4 bg-surface shrink-0">
+      <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <h2 className="text-xl font-bold sm:text-2xl capitalize text-on-surface tracking-tight">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold capitalize text-on-surface tracking-tight">
               {view === "month" &&
                 currentDate.toLocaleDateString("es-ES", {
                   month: "long",
@@ -311,21 +312,21 @@ export function EventManager({
                   year: "numeric",
                 })}
               {view === "list" && "Todas las Citas"}
-            </h2>
+            </h1>
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8 rounded-lg">
+              <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8 rounded-lg bg-surface">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="h-8 px-3 rounded-lg text-xs font-semibold">
+              <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="h-8 px-3 rounded-lg text-xs font-semibold bg-surface">
                 Hoy
               </Button>
-              <Button variant="outline" size="icon" onClick={() => navigateDate("next")} className="h-8 w-8 rounded-lg">
+              <Button variant="outline" size="icon" onClick={() => navigateDate("next")} className="h-8 w-8 rounded-lg bg-surface">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Mobile: Select dropdown */}
             <div className="sm:hidden">
               <Select value={view} onValueChange={(value: any) => setView(value)}>
@@ -410,11 +411,15 @@ export function EventManager({
                   setIsDialogOpen(true);
                 }
               }}
-              className="w-full sm:w-auto h-9 px-4 rounded-lg font-semibold text-xs shadow-sm"
+              className="h-9 px-4 rounded-lg font-semibold text-xs shadow-sm"
             >
               <Plus className="mr-1.5 h-4 w-4" />
               Nueva Cita
             </Button>
+
+            <div className="shrink-0 ml-1">
+              <Header />
+            </div>
           </div>
         </div>
 

@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import { Skeleton, PageHeader } from "@/components/ui/volta-ui";
+import { Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
 
@@ -264,16 +264,8 @@ export default function AgendaPage() {
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
         <main className="flex-1 flex flex-col w-full">
-          {/* Standard Hero / Header matching Inicio and Clientes */}
-          <div className="p-gutter max-w-container-max w-full mx-auto pb-0">
-            <PageHeader
-              title="Agenda"
-              description="Visualiza y gestiona las citas, reservas y disponibilidad de tu negocio."
-            />
-          </div>
-
           {isLoading ? (
-            <div className="p-gutter max-w-container-max w-full mx-auto space-y-4 flex-1">
+            <div className="p-gutter max-w-container-max w-full mx-auto pt-6 space-y-4 flex-1">
               <Skeleton className="h-12 w-full rounded-xl" />
               <Skeleton className="h-[600px] w-full rounded-2xl" />
             </div>
