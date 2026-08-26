@@ -53,6 +53,11 @@ export type Alert = $Result.DefaultSelection<Prisma.$AlertPayload>
  * 
  */
 export type LopdConsentLog = $Result.DefaultSelection<Prisma.$LopdConsentLogPayload>
+/**
+ * Model Invoice
+ * 
+ */
+export type Invoice = $Result.DefaultSelection<Prisma.$InvoicePayload>
 
 /**
  * Enums
@@ -121,6 +126,16 @@ export const AlertType: {
 
 export type AlertType = (typeof AlertType)[keyof typeof AlertType]
 
+
+export const InvoiceStatus: {
+  PAID: 'PAID',
+  PENDING: 'PENDING',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
+
+export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus]
+
 }
 
 export type SubscriptionPlan = $Enums.SubscriptionPlan
@@ -150,6 +165,10 @@ export const AppointmentStatus: typeof $Enums.AppointmentStatus
 export type AlertType = $Enums.AlertType
 
 export const AlertType: typeof $Enums.AlertType
+
+export type InvoiceStatus = $Enums.InvoiceStatus
+
+export const InvoiceStatus: typeof $Enums.InvoiceStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -351,6 +370,16 @@ export class PrismaClient<
     * ```
     */
   get lopdConsentLog(): Prisma.LopdConsentLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.invoice`: Exposes CRUD operations for the **Invoice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Invoices
+    * const invoices = await prisma.invoice.findMany()
+    * ```
+    */
+  get invoice(): Prisma.InvoiceDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -792,7 +821,8 @@ export namespace Prisma {
     BusinessHours: 'BusinessHours',
     Service: 'Service',
     Alert: 'Alert',
-    LopdConsentLog: 'LopdConsentLog'
+    LopdConsentLog: 'LopdConsentLog',
+    Invoice: 'Invoice'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -808,7 +838,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "business" | "user" | "client" | "appointment" | "businessHours" | "service" | "alert" | "lopdConsentLog"
+      modelProps: "business" | "user" | "client" | "appointment" | "businessHours" | "service" | "alert" | "lopdConsentLog" | "invoice"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1404,6 +1434,80 @@ export namespace Prisma {
           }
         }
       }
+      Invoice: {
+        payload: Prisma.$InvoicePayload<ExtArgs>
+        fields: Prisma.InvoiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InvoiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InvoiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          findFirst: {
+            args: Prisma.InvoiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InvoiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          findMany: {
+            args: Prisma.InvoiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          create: {
+            args: Prisma.InvoiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          createMany: {
+            args: Prisma.InvoiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InvoiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          delete: {
+            args: Prisma.InvoiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          update: {
+            args: Prisma.InvoiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          deleteMany: {
+            args: Prisma.InvoiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InvoiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InvoiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          upsert: {
+            args: Prisma.InvoiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          aggregate: {
+            args: Prisma.InvoiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInvoice>
+          }
+          groupBy: {
+            args: Prisma.InvoiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InvoiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InvoiceCountArgs<ExtArgs>
+            result: $Utils.Optional<InvoiceCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1520,6 +1624,7 @@ export namespace Prisma {
     service?: ServiceOmit
     alert?: AlertOmit
     lopdConsentLog?: LopdConsentLogOmit
+    invoice?: InvoiceOmit
   }
 
   /* Types for Logging */
@@ -1606,6 +1711,7 @@ export namespace Prisma {
     services: number
     users: number
     lopdConsentLogs: number
+    invoices: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1615,6 +1721,7 @@ export namespace Prisma {
     services?: boolean | BusinessCountOutputTypeCountServicesArgs
     users?: boolean | BusinessCountOutputTypeCountUsersArgs
     lopdConsentLogs?: boolean | BusinessCountOutputTypeCountLopdConsentLogsArgs
+    invoices?: boolean | BusinessCountOutputTypeCountInvoicesArgs
   }
 
   // Custom InputTypes
@@ -1668,6 +1775,13 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountLopdConsentLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LopdConsentLogWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
   }
 
 
@@ -1809,6 +1923,10 @@ export namespace Prisma {
     subscriptionStatus: $Enums.SubscriptionStatus | null
     trialExpiresAt: Date | null
     sandboxExpiresAt: Date | null
+    gracePeriodExpiresAt: Date | null
+    cancelAtPeriodEnd: boolean | null
+    lemonSqueezyCustomerId: string | null
+    lemonSqueezySubscriptionId: string | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -1833,6 +1951,10 @@ export namespace Prisma {
     subscriptionStatus: $Enums.SubscriptionStatus | null
     trialExpiresAt: Date | null
     sandboxExpiresAt: Date | null
+    gracePeriodExpiresAt: Date | null
+    cancelAtPeriodEnd: boolean | null
+    lemonSqueezyCustomerId: string | null
+    lemonSqueezySubscriptionId: string | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -1857,6 +1979,10 @@ export namespace Prisma {
     subscriptionStatus: number
     trialExpiresAt: number
     sandboxExpiresAt: number
+    gracePeriodExpiresAt: number
+    cancelAtPeriodEnd: number
+    lemonSqueezyCustomerId: number
+    lemonSqueezySubscriptionId: number
     _all: number
   }
 
@@ -1883,6 +2009,10 @@ export namespace Prisma {
     subscriptionStatus?: true
     trialExpiresAt?: true
     sandboxExpiresAt?: true
+    gracePeriodExpiresAt?: true
+    cancelAtPeriodEnd?: true
+    lemonSqueezyCustomerId?: true
+    lemonSqueezySubscriptionId?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -1907,6 +2037,10 @@ export namespace Prisma {
     subscriptionStatus?: true
     trialExpiresAt?: true
     sandboxExpiresAt?: true
+    gracePeriodExpiresAt?: true
+    cancelAtPeriodEnd?: true
+    lemonSqueezyCustomerId?: true
+    lemonSqueezySubscriptionId?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -1931,6 +2065,10 @@ export namespace Prisma {
     subscriptionStatus?: true
     trialExpiresAt?: true
     sandboxExpiresAt?: true
+    gracePeriodExpiresAt?: true
+    cancelAtPeriodEnd?: true
+    lemonSqueezyCustomerId?: true
+    lemonSqueezySubscriptionId?: true
     _all?: true
   }
 
@@ -2028,6 +2166,10 @@ export namespace Prisma {
     subscriptionStatus: $Enums.SubscriptionStatus
     trialExpiresAt: Date | null
     sandboxExpiresAt: Date | null
+    gracePeriodExpiresAt: Date | null
+    cancelAtPeriodEnd: boolean
+    lemonSqueezyCustomerId: string | null
+    lemonSqueezySubscriptionId: string | null
     _count: BusinessCountAggregateOutputType | null
     _min: BusinessMinAggregateOutputType | null
     _max: BusinessMaxAggregateOutputType | null
@@ -2069,12 +2211,17 @@ export namespace Prisma {
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
     sandboxExpiresAt?: boolean
+    gracePeriodExpiresAt?: boolean
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: boolean
+    lemonSqueezySubscriptionId?: boolean
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
     hours?: boolean | Business$hoursArgs<ExtArgs>
     services?: boolean | Business$servicesArgs<ExtArgs>
     users?: boolean | Business$usersArgs<ExtArgs>
     lopdConsentLogs?: boolean | Business$lopdConsentLogsArgs<ExtArgs>
+    invoices?: boolean | Business$invoicesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -2100,6 +2247,10 @@ export namespace Prisma {
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
     sandboxExpiresAt?: boolean
+    gracePeriodExpiresAt?: boolean
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: boolean
+    lemonSqueezySubscriptionId?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2124,6 +2275,10 @@ export namespace Prisma {
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
     sandboxExpiresAt?: boolean
+    gracePeriodExpiresAt?: boolean
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: boolean
+    lemonSqueezySubscriptionId?: boolean
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -2148,9 +2303,13 @@ export namespace Prisma {
     subscriptionStatus?: boolean
     trialExpiresAt?: boolean
     sandboxExpiresAt?: boolean
+    gracePeriodExpiresAt?: boolean
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: boolean
+    lemonSqueezySubscriptionId?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "businessType" | "enablePublicBooking" | "subscriptionPlan" | "subscriptionStatus" | "trialExpiresAt" | "sandboxExpiresAt", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "phone" | "email" | "address" | "logoUrl" | "coverUrl" | "description" | "welcomeMessage" | "reminderMessage" | "whatsappStatus" | "qrCode" | "themeColor" | "fontSizeLevel" | "borderRadiusLevel" | "businessType" | "enablePublicBooking" | "subscriptionPlan" | "subscriptionStatus" | "trialExpiresAt" | "sandboxExpiresAt" | "gracePeriodExpiresAt" | "cancelAtPeriodEnd" | "lemonSqueezyCustomerId" | "lemonSqueezySubscriptionId", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     appointments?: boolean | Business$appointmentsArgs<ExtArgs>
     clients?: boolean | Business$clientsArgs<ExtArgs>
@@ -2158,6 +2317,7 @@ export namespace Prisma {
     services?: boolean | Business$servicesArgs<ExtArgs>
     users?: boolean | Business$usersArgs<ExtArgs>
     lopdConsentLogs?: boolean | Business$lopdConsentLogsArgs<ExtArgs>
+    invoices?: boolean | Business$invoicesArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2172,6 +2332,7 @@ export namespace Prisma {
       services: Prisma.$ServicePayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
       lopdConsentLogs: Prisma.$LopdConsentLogPayload<ExtArgs>[]
+      invoices: Prisma.$InvoicePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2195,6 +2356,10 @@ export namespace Prisma {
       subscriptionStatus: $Enums.SubscriptionStatus
       trialExpiresAt: Date | null
       sandboxExpiresAt: Date | null
+      gracePeriodExpiresAt: Date | null
+      cancelAtPeriodEnd: boolean
+      lemonSqueezyCustomerId: string | null
+      lemonSqueezySubscriptionId: string | null
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -2595,6 +2760,7 @@ export namespace Prisma {
     services<T extends Business$servicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$servicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ServicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends Business$usersArgs<ExtArgs> = {}>(args?: Subset<T, Business$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     lopdConsentLogs<T extends Business$lopdConsentLogsArgs<ExtArgs> = {}>(args?: Subset<T, Business$lopdConsentLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LopdConsentLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invoices<T extends Business$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2645,6 +2811,10 @@ export namespace Prisma {
     readonly subscriptionStatus: FieldRef<"Business", 'SubscriptionStatus'>
     readonly trialExpiresAt: FieldRef<"Business", 'DateTime'>
     readonly sandboxExpiresAt: FieldRef<"Business", 'DateTime'>
+    readonly gracePeriodExpiresAt: FieldRef<"Business", 'DateTime'>
+    readonly cancelAtPeriodEnd: FieldRef<"Business", 'Boolean'>
+    readonly lemonSqueezyCustomerId: FieldRef<"Business", 'String'>
+    readonly lemonSqueezySubscriptionId: FieldRef<"Business", 'String'>
   }
     
 
@@ -3179,6 +3349,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: LopdConsentLogScalarFieldEnum | LopdConsentLogScalarFieldEnum[]
+  }
+
+  /**
+   * Business.invoices
+   */
+  export type Business$invoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    cursor?: InvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
   }
 
   /**
@@ -11281,6 +11475,1181 @@ export namespace Prisma {
 
 
   /**
+   * Model Invoice
+   */
+
+  export type AggregateInvoice = {
+    _count: InvoiceCountAggregateOutputType | null
+    _avg: InvoiceAvgAggregateOutputType | null
+    _sum: InvoiceSumAggregateOutputType | null
+    _min: InvoiceMinAggregateOutputType | null
+    _max: InvoiceMaxAggregateOutputType | null
+  }
+
+  export type InvoiceAvgAggregateOutputType = {
+    amount: Decimal | null
+  }
+
+  export type InvoiceSumAggregateOutputType = {
+    amount: Decimal | null
+  }
+
+  export type InvoiceMinAggregateOutputType = {
+    id: string | null
+    businessId: string | null
+    lemonSqueezyId: string | null
+    invoiceNumber: string | null
+    amount: Decimal | null
+    currency: string | null
+    status: $Enums.InvoiceStatus | null
+    invoiceUrl: string | null
+    billingReason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InvoiceMaxAggregateOutputType = {
+    id: string | null
+    businessId: string | null
+    lemonSqueezyId: string | null
+    invoiceNumber: string | null
+    amount: Decimal | null
+    currency: string | null
+    status: $Enums.InvoiceStatus | null
+    invoiceUrl: string | null
+    billingReason: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type InvoiceCountAggregateOutputType = {
+    id: number
+    businessId: number
+    lemonSqueezyId: number
+    invoiceNumber: number
+    amount: number
+    currency: number
+    status: number
+    invoiceUrl: number
+    billingReason: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type InvoiceAvgAggregateInputType = {
+    amount?: true
+  }
+
+  export type InvoiceSumAggregateInputType = {
+    amount?: true
+  }
+
+  export type InvoiceMinAggregateInputType = {
+    id?: true
+    businessId?: true
+    lemonSqueezyId?: true
+    invoiceNumber?: true
+    amount?: true
+    currency?: true
+    status?: true
+    invoiceUrl?: true
+    billingReason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InvoiceMaxAggregateInputType = {
+    id?: true
+    businessId?: true
+    lemonSqueezyId?: true
+    invoiceNumber?: true
+    amount?: true
+    currency?: true
+    status?: true
+    invoiceUrl?: true
+    billingReason?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type InvoiceCountAggregateInputType = {
+    id?: true
+    businessId?: true
+    lemonSqueezyId?: true
+    invoiceNumber?: true
+    amount?: true
+    currency?: true
+    status?: true
+    invoiceUrl?: true
+    billingReason?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type InvoiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Invoice to aggregate.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Invoices
+    **/
+    _count?: true | InvoiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InvoiceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InvoiceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InvoiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InvoiceMaxAggregateInputType
+  }
+
+  export type GetInvoiceAggregateType<T extends InvoiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateInvoice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInvoice[P]>
+      : GetScalarType<T[P], AggregateInvoice[P]>
+  }
+
+
+
+
+  export type InvoiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithAggregationInput | InvoiceOrderByWithAggregationInput[]
+    by: InvoiceScalarFieldEnum[] | InvoiceScalarFieldEnum
+    having?: InvoiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InvoiceCountAggregateInputType | true
+    _avg?: InvoiceAvgAggregateInputType
+    _sum?: InvoiceSumAggregateInputType
+    _min?: InvoiceMinAggregateInputType
+    _max?: InvoiceMaxAggregateInputType
+  }
+
+  export type InvoiceGroupByOutputType = {
+    id: string
+    businessId: string
+    lemonSqueezyId: string | null
+    invoiceNumber: string
+    amount: Decimal
+    currency: string
+    status: $Enums.InvoiceStatus
+    invoiceUrl: string | null
+    billingReason: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: InvoiceCountAggregateOutputType | null
+    _avg: InvoiceAvgAggregateOutputType | null
+    _sum: InvoiceSumAggregateOutputType | null
+    _min: InvoiceMinAggregateOutputType | null
+    _max: InvoiceMaxAggregateOutputType | null
+  }
+
+  type GetInvoiceGroupByPayload<T extends InvoiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InvoiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InvoiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InvoiceGroupByOutputType[P]>
+            : GetScalarType<T[P], InvoiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InvoiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    businessId?: boolean
+    lemonSqueezyId?: boolean
+    invoiceNumber?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    invoiceUrl?: boolean
+    billingReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    businessId?: boolean
+    lemonSqueezyId?: boolean
+    invoiceNumber?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    invoiceUrl?: boolean
+    billingReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    businessId?: boolean
+    lemonSqueezyId?: boolean
+    invoiceNumber?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    invoiceUrl?: boolean
+    billingReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectScalar = {
+    id?: boolean
+    businessId?: boolean
+    lemonSqueezyId?: boolean
+    invoiceNumber?: boolean
+    amount?: boolean
+    currency?: boolean
+    status?: boolean
+    invoiceUrl?: boolean
+    billingReason?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "lemonSqueezyId" | "invoiceNumber" | "amount" | "currency" | "status" | "invoiceUrl" | "billingReason" | "createdAt" | "updatedAt", ExtArgs["result"]["invoice"]>
+  export type InvoiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type InvoiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type InvoiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $InvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Invoice"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      businessId: string
+      lemonSqueezyId: string | null
+      invoiceNumber: string
+      amount: Prisma.Decimal
+      currency: string
+      status: $Enums.InvoiceStatus
+      invoiceUrl: string | null
+      billingReason: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["invoice"]>
+    composites: {}
+  }
+
+  type InvoiceGetPayload<S extends boolean | null | undefined | InvoiceDefaultArgs> = $Result.GetResult<Prisma.$InvoicePayload, S>
+
+  type InvoiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InvoiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InvoiceCountAggregateInputType | true
+    }
+
+  export interface InvoiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Invoice'], meta: { name: 'Invoice' } }
+    /**
+     * Find zero or one Invoice that matches the filter.
+     * @param {InvoiceFindUniqueArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InvoiceFindUniqueArgs>(args: SelectSubset<T, InvoiceFindUniqueArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Invoice that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InvoiceFindUniqueOrThrowArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InvoiceFindUniqueOrThrowArgs>(args: SelectSubset<T, InvoiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Invoice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindFirstArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InvoiceFindFirstArgs>(args?: SelectSubset<T, InvoiceFindFirstArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Invoice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindFirstOrThrowArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InvoiceFindFirstOrThrowArgs>(args?: SelectSubset<T, InvoiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Invoices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Invoices
+     * const invoices = await prisma.invoice.findMany()
+     * 
+     * // Get first 10 Invoices
+     * const invoices = await prisma.invoice.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InvoiceFindManyArgs>(args?: SelectSubset<T, InvoiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Invoice.
+     * @param {InvoiceCreateArgs} args - Arguments to create a Invoice.
+     * @example
+     * // Create one Invoice
+     * const Invoice = await prisma.invoice.create({
+     *   data: {
+     *     // ... data to create a Invoice
+     *   }
+     * })
+     * 
+     */
+    create<T extends InvoiceCreateArgs>(args: SelectSubset<T, InvoiceCreateArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Invoices.
+     * @param {InvoiceCreateManyArgs} args - Arguments to create many Invoices.
+     * @example
+     * // Create many Invoices
+     * const invoice = await prisma.invoice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InvoiceCreateManyArgs>(args?: SelectSubset<T, InvoiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Invoices and returns the data saved in the database.
+     * @param {InvoiceCreateManyAndReturnArgs} args - Arguments to create many Invoices.
+     * @example
+     * // Create many Invoices
+     * const invoice = await prisma.invoice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Invoices and only return the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InvoiceCreateManyAndReturnArgs>(args?: SelectSubset<T, InvoiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Invoice.
+     * @param {InvoiceDeleteArgs} args - Arguments to delete one Invoice.
+     * @example
+     * // Delete one Invoice
+     * const Invoice = await prisma.invoice.delete({
+     *   where: {
+     *     // ... filter to delete one Invoice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InvoiceDeleteArgs>(args: SelectSubset<T, InvoiceDeleteArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Invoice.
+     * @param {InvoiceUpdateArgs} args - Arguments to update one Invoice.
+     * @example
+     * // Update one Invoice
+     * const invoice = await prisma.invoice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InvoiceUpdateArgs>(args: SelectSubset<T, InvoiceUpdateArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Invoices.
+     * @param {InvoiceDeleteManyArgs} args - Arguments to filter Invoices to delete.
+     * @example
+     * // Delete a few Invoices
+     * const { count } = await prisma.invoice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InvoiceDeleteManyArgs>(args?: SelectSubset<T, InvoiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Invoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Invoices
+     * const invoice = await prisma.invoice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InvoiceUpdateManyArgs>(args: SelectSubset<T, InvoiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Invoices and returns the data updated in the database.
+     * @param {InvoiceUpdateManyAndReturnArgs} args - Arguments to update many Invoices.
+     * @example
+     * // Update many Invoices
+     * const invoice = await prisma.invoice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Invoices and only return the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InvoiceUpdateManyAndReturnArgs>(args: SelectSubset<T, InvoiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Invoice.
+     * @param {InvoiceUpsertArgs} args - Arguments to update or create a Invoice.
+     * @example
+     * // Update or create a Invoice
+     * const invoice = await prisma.invoice.upsert({
+     *   create: {
+     *     // ... data to create a Invoice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Invoice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InvoiceUpsertArgs>(args: SelectSubset<T, InvoiceUpsertArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Invoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceCountArgs} args - Arguments to filter Invoices to count.
+     * @example
+     * // Count the number of Invoices
+     * const count = await prisma.invoice.count({
+     *   where: {
+     *     // ... the filter for the Invoices we want to count
+     *   }
+     * })
+    **/
+    count<T extends InvoiceCountArgs>(
+      args?: Subset<T, InvoiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InvoiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Invoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InvoiceAggregateArgs>(args: Subset<T, InvoiceAggregateArgs>): Prisma.PrismaPromise<GetInvoiceAggregateType<T>>
+
+    /**
+     * Group by Invoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InvoiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InvoiceGroupByArgs['orderBy'] }
+        : { orderBy?: InvoiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InvoiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInvoiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Invoice model
+   */
+  readonly fields: InvoiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Invoice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InvoiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Invoice model
+   */
+  interface InvoiceFieldRefs {
+    readonly id: FieldRef<"Invoice", 'String'>
+    readonly businessId: FieldRef<"Invoice", 'String'>
+    readonly lemonSqueezyId: FieldRef<"Invoice", 'String'>
+    readonly invoiceNumber: FieldRef<"Invoice", 'String'>
+    readonly amount: FieldRef<"Invoice", 'Decimal'>
+    readonly currency: FieldRef<"Invoice", 'String'>
+    readonly status: FieldRef<"Invoice", 'InvoiceStatus'>
+    readonly invoiceUrl: FieldRef<"Invoice", 'String'>
+    readonly billingReason: FieldRef<"Invoice", 'String'>
+    readonly createdAt: FieldRef<"Invoice", 'DateTime'>
+    readonly updatedAt: FieldRef<"Invoice", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Invoice findUnique
+   */
+  export type InvoiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice findUniqueOrThrow
+   */
+  export type InvoiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice findFirst
+   */
+  export type InvoiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice findFirstOrThrow
+   */
+  export type InvoiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice findMany
+   */
+  export type InvoiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoices to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice create
+   */
+  export type InvoiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Invoice.
+     */
+    data: XOR<InvoiceCreateInput, InvoiceUncheckedCreateInput>
+  }
+
+  /**
+   * Invoice createMany
+   */
+  export type InvoiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Invoices.
+     */
+    data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Invoice createManyAndReturn
+   */
+  export type InvoiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many Invoices.
+     */
+    data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Invoice update
+   */
+  export type InvoiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Invoice.
+     */
+    data: XOR<InvoiceUpdateInput, InvoiceUncheckedUpdateInput>
+    /**
+     * Choose, which Invoice to update.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice updateMany
+   */
+  export type InvoiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Invoices.
+     */
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Invoices to update
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice updateManyAndReturn
+   */
+  export type InvoiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to update Invoices.
+     */
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Invoices to update
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Invoice upsert
+   */
+  export type InvoiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Invoice to update in case it exists.
+     */
+    where: InvoiceWhereUniqueInput
+    /**
+     * In case the Invoice found by the `where` argument doesn't exist, create a new Invoice with this data.
+     */
+    create: XOR<InvoiceCreateInput, InvoiceUncheckedCreateInput>
+    /**
+     * In case the Invoice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InvoiceUpdateInput, InvoiceUncheckedUpdateInput>
+  }
+
+  /**
+   * Invoice delete
+   */
+  export type InvoiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter which Invoice to delete.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice deleteMany
+   */
+  export type InvoiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Invoices to delete
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice without action
+   */
+  export type InvoiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -11315,7 +12684,11 @@ export namespace Prisma {
     subscriptionPlan: 'subscriptionPlan',
     subscriptionStatus: 'subscriptionStatus',
     trialExpiresAt: 'trialExpiresAt',
-    sandboxExpiresAt: 'sandboxExpiresAt'
+    sandboxExpiresAt: 'sandboxExpiresAt',
+    gracePeriodExpiresAt: 'gracePeriodExpiresAt',
+    cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+    lemonSqueezyCustomerId: 'lemonSqueezyCustomerId',
+    lemonSqueezySubscriptionId: 'lemonSqueezySubscriptionId'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -11424,6 +12797,23 @@ export namespace Prisma {
   };
 
   export type LopdConsentLogScalarFieldEnum = (typeof LopdConsentLogScalarFieldEnum)[keyof typeof LopdConsentLogScalarFieldEnum]
+
+
+  export const InvoiceScalarFieldEnum: {
+    id: 'id',
+    businessId: 'businessId',
+    lemonSqueezyId: 'lemonSqueezyId',
+    invoiceNumber: 'invoiceNumber',
+    amount: 'amount',
+    currency: 'currency',
+    status: 'status',
+    invoiceUrl: 'invoiceUrl',
+    billingReason: 'billingReason',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -11617,6 +13007,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'InvoiceStatus'
+   */
+  export type EnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'InvoiceStatus[]'
+   */
+  export type ListEnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -11658,12 +13062,17 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFilter<"Business"> | $Enums.SubscriptionStatus
     trialExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     sandboxExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    gracePeriodExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    cancelAtPeriodEnd?: BoolFilter<"Business"> | boolean
+    lemonSqueezyCustomerId?: StringNullableFilter<"Business"> | string | null
+    lemonSqueezySubscriptionId?: StringNullableFilter<"Business"> | string | null
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
     services?: ServiceListRelationFilter
     users?: UserListRelationFilter
     lopdConsentLogs?: LopdConsentLogListRelationFilter
+    invoices?: InvoiceListRelationFilter
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -11688,12 +13097,17 @@ export namespace Prisma {
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrderInput | SortOrder
     sandboxExpiresAt?: SortOrderInput | SortOrder
+    gracePeriodExpiresAt?: SortOrderInput | SortOrder
+    cancelAtPeriodEnd?: SortOrder
+    lemonSqueezyCustomerId?: SortOrderInput | SortOrder
+    lemonSqueezySubscriptionId?: SortOrderInput | SortOrder
     appointments?: AppointmentOrderByRelationAggregateInput
     clients?: ClientOrderByRelationAggregateInput
     hours?: BusinessHoursOrderByRelationAggregateInput
     services?: ServiceOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
     lopdConsentLogs?: LopdConsentLogOrderByRelationAggregateInput
+    invoices?: InvoiceOrderByRelationAggregateInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -11721,12 +13135,17 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFilter<"Business"> | $Enums.SubscriptionStatus
     trialExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
     sandboxExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    gracePeriodExpiresAt?: DateTimeNullableFilter<"Business"> | Date | string | null
+    cancelAtPeriodEnd?: BoolFilter<"Business"> | boolean
+    lemonSqueezyCustomerId?: StringNullableFilter<"Business"> | string | null
+    lemonSqueezySubscriptionId?: StringNullableFilter<"Business"> | string | null
     appointments?: AppointmentListRelationFilter
     clients?: ClientListRelationFilter
     hours?: BusinessHoursListRelationFilter
     services?: ServiceListRelationFilter
     users?: UserListRelationFilter
     lopdConsentLogs?: LopdConsentLogListRelationFilter
+    invoices?: InvoiceListRelationFilter
   }, "id">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -11751,6 +13170,10 @@ export namespace Prisma {
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrderInput | SortOrder
     sandboxExpiresAt?: SortOrderInput | SortOrder
+    gracePeriodExpiresAt?: SortOrderInput | SortOrder
+    cancelAtPeriodEnd?: SortOrder
+    lemonSqueezyCustomerId?: SortOrderInput | SortOrder
+    lemonSqueezySubscriptionId?: SortOrderInput | SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
     _min?: BusinessMinOrderByAggregateInput
@@ -11781,6 +13204,10 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusWithAggregatesFilter<"Business"> | $Enums.SubscriptionStatus
     trialExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
     sandboxExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    gracePeriodExpiresAt?: DateTimeNullableWithAggregatesFilter<"Business"> | Date | string | null
+    cancelAtPeriodEnd?: BoolWithAggregatesFilter<"Business"> | boolean
+    lemonSqueezyCustomerId?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    lemonSqueezySubscriptionId?: StringNullableWithAggregatesFilter<"Business"> | string | null
   }
 
   export type UserWhereInput = {
@@ -12334,6 +13761,93 @@ export namespace Prisma {
     policyVersion?: StringWithAggregatesFilter<"LopdConsentLog"> | string
   }
 
+  export type InvoiceWhereInput = {
+    AND?: InvoiceWhereInput | InvoiceWhereInput[]
+    OR?: InvoiceWhereInput[]
+    NOT?: InvoiceWhereInput | InvoiceWhereInput[]
+    id?: StringFilter<"Invoice"> | string
+    businessId?: StringFilter<"Invoice"> | string
+    lemonSqueezyId?: StringNullableFilter<"Invoice"> | string | null
+    invoiceNumber?: StringFilter<"Invoice"> | string
+    amount?: DecimalFilter<"Invoice"> | Decimal | DecimalJsLike | number | string
+    currency?: StringFilter<"Invoice"> | string
+    status?: EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+    invoiceUrl?: StringNullableFilter<"Invoice"> | string | null
+    billingReason?: StringNullableFilter<"Invoice"> | string | null
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type InvoiceOrderByWithRelationInput = {
+    id?: SortOrder
+    businessId?: SortOrder
+    lemonSqueezyId?: SortOrderInput | SortOrder
+    invoiceNumber?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    invoiceUrl?: SortOrderInput | SortOrder
+    billingReason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    lemonSqueezyId?: string
+    AND?: InvoiceWhereInput | InvoiceWhereInput[]
+    OR?: InvoiceWhereInput[]
+    NOT?: InvoiceWhereInput | InvoiceWhereInput[]
+    businessId?: StringFilter<"Invoice"> | string
+    invoiceNumber?: StringFilter<"Invoice"> | string
+    amount?: DecimalFilter<"Invoice"> | Decimal | DecimalJsLike | number | string
+    currency?: StringFilter<"Invoice"> | string
+    status?: EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+    invoiceUrl?: StringNullableFilter<"Invoice"> | string | null
+    billingReason?: StringNullableFilter<"Invoice"> | string | null
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "lemonSqueezyId">
+
+  export type InvoiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    businessId?: SortOrder
+    lemonSqueezyId?: SortOrderInput | SortOrder
+    invoiceNumber?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    invoiceUrl?: SortOrderInput | SortOrder
+    billingReason?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: InvoiceCountOrderByAggregateInput
+    _avg?: InvoiceAvgOrderByAggregateInput
+    _max?: InvoiceMaxOrderByAggregateInput
+    _min?: InvoiceMinOrderByAggregateInput
+    _sum?: InvoiceSumOrderByAggregateInput
+  }
+
+  export type InvoiceScalarWhereWithAggregatesInput = {
+    AND?: InvoiceScalarWhereWithAggregatesInput | InvoiceScalarWhereWithAggregatesInput[]
+    OR?: InvoiceScalarWhereWithAggregatesInput[]
+    NOT?: InvoiceScalarWhereWithAggregatesInput | InvoiceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Invoice"> | string
+    businessId?: StringWithAggregatesFilter<"Invoice"> | string
+    lemonSqueezyId?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    invoiceNumber?: StringWithAggregatesFilter<"Invoice"> | string
+    amount?: DecimalWithAggregatesFilter<"Invoice"> | Decimal | DecimalJsLike | number | string
+    currency?: StringWithAggregatesFilter<"Invoice"> | string
+    status?: EnumInvoiceStatusWithAggregatesFilter<"Invoice"> | $Enums.InvoiceStatus
+    invoiceUrl?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    billingReason?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Invoice"> | Date | string
+  }
+
   export type BusinessCreateInput = {
     id?: string
     name: string
@@ -12356,12 +13870,17 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -12386,12 +13905,17 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -12416,12 +13940,17 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -12446,12 +13975,17 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -12476,6 +14010,10 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -12500,6 +14038,10 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -12524,6 +14066,10 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserCreateInput = {
@@ -13120,6 +14666,103 @@ export namespace Prisma {
     policyVersion?: StringFieldUpdateOperationsInput | string
   }
 
+  export type InvoiceCreateInput = {
+    id?: string
+    lemonSqueezyId?: string | null
+    invoiceNumber: string
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    status?: $Enums.InvoiceStatus
+    invoiceUrl?: string | null
+    billingReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutInvoicesInput
+  }
+
+  export type InvoiceUncheckedCreateInput = {
+    id?: string
+    businessId: string
+    lemonSqueezyId?: string | null
+    invoiceNumber: string
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    status?: $Enums.InvoiceStatus
+    invoiceUrl?: string | null
+    billingReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceCreateManyInput = {
+    id?: string
+    businessId: string
+    lemonSqueezyId?: string | null
+    invoiceNumber: string
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    status?: $Enums.InvoiceStatus
+    invoiceUrl?: string | null
+    billingReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -13223,6 +14866,12 @@ export namespace Prisma {
     none?: LopdConsentLogWhereInput
   }
 
+  export type InvoiceListRelationFilter = {
+    every?: InvoiceWhereInput
+    some?: InvoiceWhereInput
+    none?: InvoiceWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -13252,6 +14901,10 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type InvoiceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type BusinessCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -13274,6 +14927,10 @@ export namespace Prisma {
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrder
     sandboxExpiresAt?: SortOrder
+    gracePeriodExpiresAt?: SortOrder
+    cancelAtPeriodEnd?: SortOrder
+    lemonSqueezyCustomerId?: SortOrder
+    lemonSqueezySubscriptionId?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -13298,6 +14955,10 @@ export namespace Prisma {
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrder
     sandboxExpiresAt?: SortOrder
+    gracePeriodExpiresAt?: SortOrder
+    cancelAtPeriodEnd?: SortOrder
+    lemonSqueezyCustomerId?: SortOrder
+    lemonSqueezySubscriptionId?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -13322,6 +14983,10 @@ export namespace Prisma {
     subscriptionStatus?: SortOrder
     trialExpiresAt?: SortOrder
     sandboxExpiresAt?: SortOrder
+    gracePeriodExpiresAt?: SortOrder
+    cancelAtPeriodEnd?: SortOrder
+    lemonSqueezyCustomerId?: SortOrder
+    lemonSqueezySubscriptionId?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -13876,6 +15541,73 @@ export namespace Prisma {
     policyVersion?: SortOrder
   }
 
+  export type EnumInvoiceStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusFilter<$PrismaModel> | $Enums.InvoiceStatus
+  }
+
+  export type InvoiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    businessId?: SortOrder
+    lemonSqueezyId?: SortOrder
+    invoiceNumber?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    invoiceUrl?: SortOrder
+    billingReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceAvgOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type InvoiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    businessId?: SortOrder
+    lemonSqueezyId?: SortOrder
+    invoiceNumber?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    invoiceUrl?: SortOrder
+    billingReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    businessId?: SortOrder
+    lemonSqueezyId?: SortOrder
+    invoiceNumber?: SortOrder
+    amount?: SortOrder
+    currency?: SortOrder
+    status?: SortOrder
+    invoiceUrl?: SortOrder
+    billingReason?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type InvoiceSumOrderByAggregateInput = {
+    amount?: SortOrder
+  }
+
+  export type EnumInvoiceStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+    _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+  }
+
   export type AppointmentCreateNestedManyWithoutBusinessInput = {
     create?: XOR<AppointmentCreateWithoutBusinessInput, AppointmentUncheckedCreateWithoutBusinessInput> | AppointmentCreateWithoutBusinessInput[] | AppointmentUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutBusinessInput | AppointmentCreateOrConnectWithoutBusinessInput[]
@@ -13918,6 +15650,13 @@ export namespace Prisma {
     connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
   }
 
+  export type InvoiceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
   export type AppointmentUncheckedCreateNestedManyWithoutBusinessInput = {
     create?: XOR<AppointmentCreateWithoutBusinessInput, AppointmentUncheckedCreateWithoutBusinessInput> | AppointmentCreateWithoutBusinessInput[] | AppointmentUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutBusinessInput | AppointmentCreateOrConnectWithoutBusinessInput[]
@@ -13958,6 +15697,13 @@ export namespace Prisma {
     connectOrCreate?: LopdConsentLogCreateOrConnectWithoutBusinessInput | LopdConsentLogCreateOrConnectWithoutBusinessInput[]
     createMany?: LopdConsentLogCreateManyBusinessInputEnvelope
     connect?: LopdConsentLogWhereUniqueInput | LopdConsentLogWhereUniqueInput[]
+  }
+
+  export type InvoiceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -14072,6 +15818,20 @@ export namespace Prisma {
     deleteMany?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
   }
 
+  export type InvoiceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
   export type AppointmentUncheckedUpdateManyWithoutBusinessNestedInput = {
     create?: XOR<AppointmentCreateWithoutBusinessInput, AppointmentUncheckedCreateWithoutBusinessInput> | AppointmentCreateWithoutBusinessInput[] | AppointmentUncheckedCreateWithoutBusinessInput[]
     connectOrCreate?: AppointmentCreateOrConnectWithoutBusinessInput | AppointmentCreateOrConnectWithoutBusinessInput[]
@@ -14154,6 +15914,20 @@ export namespace Prisma {
     update?: LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput | LopdConsentLogUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: LopdConsentLogUpdateManyWithWhereWithoutBusinessInput | LopdConsentLogUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: LopdConsentLogScalarWhereInput | LopdConsentLogScalarWhereInput[]
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutUsersInput = {
@@ -14506,6 +16280,24 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutLopdConsentLogsInput, BusinessUpdateWithoutLopdConsentLogsInput>, BusinessUncheckedUpdateWithoutLopdConsentLogsInput>
   }
 
+  export type BusinessCreateNestedOneWithoutInvoicesInput = {
+    create?: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInvoicesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type EnumInvoiceStatusFieldUpdateOperationsInput = {
+    set?: $Enums.InvoiceStatus
+  }
+
+  export type BusinessUpdateOneRequiredWithoutInvoicesNestedInput = {
+    create?: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInvoicesInput
+    upsert?: BusinessUpsertWithoutInvoicesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInvoicesInput, BusinessUpdateWithoutInvoicesInput>, BusinessUncheckedUpdateWithoutInvoicesInput>
+  }
+
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -14826,6 +16618,23 @@ export namespace Prisma {
     _max?: NestedEnumAlertTypeFilter<$PrismaModel>
   }
 
+  export type NestedEnumInvoiceStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusFilter<$PrismaModel> | $Enums.InvoiceStatus
+  }
+
+  export type NestedEnumInvoiceStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+    _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+  }
+
   export type AppointmentCreateWithoutBusinessInput = {
     id?: string
     clientName: string
@@ -15028,6 +16837,42 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type InvoiceCreateWithoutBusinessInput = {
+    id?: string
+    lemonSqueezyId?: string | null
+    invoiceNumber: string
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    status?: $Enums.InvoiceStatus
+    invoiceUrl?: string | null
+    billingReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    lemonSqueezyId?: string | null
+    invoiceNumber: string
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    status?: $Enums.InvoiceStatus
+    invoiceUrl?: string | null
+    billingReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type InvoiceCreateOrConnectWithoutBusinessInput = {
+    where: InvoiceWhereUniqueInput
+    create: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InvoiceCreateManyBusinessInputEnvelope = {
+    data: InvoiceCreateManyBusinessInput | InvoiceCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type AppointmentUpsertWithWhereUniqueWithoutBusinessInput = {
     where: AppointmentWhereUniqueInput
     update: XOR<AppointmentUpdateWithoutBusinessInput, AppointmentUncheckedUpdateWithoutBusinessInput>
@@ -15215,6 +17060,39 @@ export namespace Prisma {
     policyVersion?: StringFilter<"LopdConsentLog"> | string
   }
 
+  export type InvoiceUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: InvoiceWhereUniqueInput
+    update: XOR<InvoiceUpdateWithoutBusinessInput, InvoiceUncheckedUpdateWithoutBusinessInput>
+    create: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InvoiceUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: InvoiceWhereUniqueInput
+    data: XOR<InvoiceUpdateWithoutBusinessInput, InvoiceUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type InvoiceUpdateManyWithWhereWithoutBusinessInput = {
+    where: InvoiceScalarWhereInput
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type InvoiceScalarWhereInput = {
+    AND?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+    OR?: InvoiceScalarWhereInput[]
+    NOT?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+    id?: StringFilter<"Invoice"> | string
+    businessId?: StringFilter<"Invoice"> | string
+    lemonSqueezyId?: StringNullableFilter<"Invoice"> | string | null
+    invoiceNumber?: StringFilter<"Invoice"> | string
+    amount?: DecimalFilter<"Invoice"> | Decimal | DecimalJsLike | number | string
+    currency?: StringFilter<"Invoice"> | string
+    status?: EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+    invoiceUrl?: StringNullableFilter<"Invoice"> | string | null
+    billingReason?: StringNullableFilter<"Invoice"> | string | null
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+  }
+
   export type BusinessCreateWithoutUsersInput = {
     id?: string
     name: string
@@ -15237,11 +17115,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutUsersInput = {
@@ -15266,11 +17149,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutUsersInput = {
@@ -15341,11 +17229,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutUsersInput = {
@@ -15370,11 +17263,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AlertUpsertWithWhereUniqueWithoutUserInput = {
@@ -15429,11 +17327,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutClientsInput = {
@@ -15458,11 +17361,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutClientsInput = {
@@ -15565,11 +17473,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutClientsInput = {
@@ -15594,11 +17507,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AppointmentUpsertWithWhereUniqueWithoutClientInput = {
@@ -15655,11 +17573,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutAppointmentsInput = {
@@ -15684,11 +17607,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutAppointmentsInput = {
@@ -15801,11 +17729,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutAppointmentsInput = {
@@ -15830,11 +17763,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type ClientUpsertWithoutAppointmentsInput = {
@@ -15943,11 +17881,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutHoursInput = {
@@ -15972,11 +17915,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutHoursInput = {
@@ -16017,11 +17965,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutHoursInput = {
@@ -16046,11 +17999,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutServicesInput = {
@@ -16075,11 +18033,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutServicesInput = {
@@ -16104,11 +18067,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
     lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutServicesInput = {
@@ -16183,11 +18151,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutServicesInput = {
@@ -16212,11 +18185,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
     lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AppointmentUpsertWithWhereUniqueWithoutServiceInput = {
@@ -16354,11 +18332,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentCreateNestedManyWithoutBusinessInput
     clients?: ClientCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
     services?: ServiceCreateNestedManyWithoutBusinessInput
     users?: UserCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutLopdConsentLogsInput = {
@@ -16383,11 +18366,16 @@ export namespace Prisma {
     subscriptionStatus?: $Enums.SubscriptionStatus
     trialExpiresAt?: Date | string | null
     sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
     appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
     clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
     hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
     services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
     users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutLopdConsentLogsInput = {
@@ -16471,11 +18459,16 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
     clients?: ClientUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
     services?: ServiceUpdateManyWithoutBusinessNestedInput
     users?: UserUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutLopdConsentLogsInput = {
@@ -16500,11 +18493,168 @@ export namespace Prisma {
     subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
     trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
     appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
     clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
     hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
     services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
     users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessCreateWithoutInvoicesInput = {
+    id?: string
+    name: string
+    phone: string
+    email?: string | null
+    address?: string | null
+    logoUrl?: string | null
+    coverUrl?: string | null
+    description?: string | null
+    welcomeMessage?: string | null
+    reminderMessage?: string | null
+    whatsappStatus?: $Enums.WhatsAppStatus
+    qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
+    businessType?: string | null
+    enablePublicBooking?: boolean
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
+    appointments?: AppointmentCreateNestedManyWithoutBusinessInput
+    clients?: ClientCreateNestedManyWithoutBusinessInput
+    hours?: BusinessHoursCreateNestedManyWithoutBusinessInput
+    services?: ServiceCreateNestedManyWithoutBusinessInput
+    users?: UserCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutInvoicesInput = {
+    id?: string
+    name: string
+    phone: string
+    email?: string | null
+    address?: string | null
+    logoUrl?: string | null
+    coverUrl?: string | null
+    description?: string | null
+    welcomeMessage?: string | null
+    reminderMessage?: string | null
+    whatsappStatus?: $Enums.WhatsAppStatus
+    qrCode?: string | null
+    themeColor?: string
+    fontSizeLevel?: string
+    borderRadiusLevel?: string
+    businessType?: string | null
+    enablePublicBooking?: boolean
+    subscriptionPlan?: $Enums.SubscriptionPlan
+    subscriptionStatus?: $Enums.SubscriptionStatus
+    trialExpiresAt?: Date | string | null
+    sandboxExpiresAt?: Date | string | null
+    gracePeriodExpiresAt?: Date | string | null
+    cancelAtPeriodEnd?: boolean
+    lemonSqueezyCustomerId?: string | null
+    lemonSqueezySubscriptionId?: string | null
+    appointments?: AppointmentUncheckedCreateNestedManyWithoutBusinessInput
+    clients?: ClientUncheckedCreateNestedManyWithoutBusinessInput
+    hours?: BusinessHoursUncheckedCreateNestedManyWithoutBusinessInput
+    services?: ServiceUncheckedCreateNestedManyWithoutBusinessInput
+    users?: UserUncheckedCreateNestedManyWithoutBusinessInput
+    lopdConsentLogs?: LopdConsentLogUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutInvoicesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+  }
+
+  export type BusinessUpsertWithoutInvoicesInput = {
+    update: XOR<BusinessUpdateWithoutInvoicesInput, BusinessUncheckedUpdateWithoutInvoicesInput>
+    create: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutInvoicesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutInvoicesInput, BusinessUncheckedUpdateWithoutInvoicesInput>
+  }
+
+  export type BusinessUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    appointments?: AppointmentUpdateManyWithoutBusinessNestedInput
+    clients?: ClientUpdateManyWithoutBusinessNestedInput
+    hours?: BusinessHoursUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUpdateManyWithoutBusinessNestedInput
+    users?: UserUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    logoUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    coverUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    welcomeMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    reminderMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    whatsappStatus?: EnumWhatsAppStatusFieldUpdateOperationsInput | $Enums.WhatsAppStatus
+    qrCode?: NullableStringFieldUpdateOperationsInput | string | null
+    themeColor?: StringFieldUpdateOperationsInput | string
+    fontSizeLevel?: StringFieldUpdateOperationsInput | string
+    borderRadiusLevel?: StringFieldUpdateOperationsInput | string
+    businessType?: NullableStringFieldUpdateOperationsInput | string | null
+    enablePublicBooking?: BoolFieldUpdateOperationsInput | boolean
+    subscriptionPlan?: EnumSubscriptionPlanFieldUpdateOperationsInput | $Enums.SubscriptionPlan
+    subscriptionStatus?: EnumSubscriptionStatusFieldUpdateOperationsInput | $Enums.SubscriptionStatus
+    trialExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    sandboxExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    gracePeriodExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
+    lemonSqueezyCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSqueezySubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    appointments?: AppointmentUncheckedUpdateManyWithoutBusinessNestedInput
+    clients?: ClientUncheckedUpdateManyWithoutBusinessNestedInput
+    hours?: BusinessHoursUncheckedUpdateManyWithoutBusinessNestedInput
+    services?: ServiceUncheckedUpdateManyWithoutBusinessNestedInput
+    users?: UserUncheckedUpdateManyWithoutBusinessNestedInput
+    lopdConsentLogs?: LopdConsentLogUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type AppointmentCreateManyBusinessInput = {
@@ -16572,6 +18722,19 @@ export namespace Prisma {
     ipAddress: string
     userAgent: string
     policyVersion?: string
+  }
+
+  export type InvoiceCreateManyBusinessInput = {
+    id?: string
+    lemonSqueezyId?: string | null
+    invoiceNumber: string
+    amount: Decimal | DecimalJsLike | number | string
+    currency?: string
+    status?: $Enums.InvoiceStatus
+    invoiceUrl?: string | null
+    billingReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type AppointmentUpdateWithoutBusinessInput = {
@@ -16781,6 +18944,45 @@ export namespace Prisma {
     ipAddress?: StringFieldUpdateOperationsInput | string
     userAgent?: StringFieldUpdateOperationsInput | string
     policyVersion?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    lemonSqueezyId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    currency?: StringFieldUpdateOperationsInput | string
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    invoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    billingReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AlertCreateManyUserInput = {

@@ -141,7 +141,11 @@ exports.Prisma.BusinessScalarFieldEnum = {
   subscriptionPlan: 'subscriptionPlan',
   subscriptionStatus: 'subscriptionStatus',
   trialExpiresAt: 'trialExpiresAt',
-  sandboxExpiresAt: 'sandboxExpiresAt'
+  sandboxExpiresAt: 'sandboxExpiresAt',
+  gracePeriodExpiresAt: 'gracePeriodExpiresAt',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  lemonSqueezyCustomerId: 'lemonSqueezyCustomerId',
+  lemonSqueezySubscriptionId: 'lemonSqueezySubscriptionId'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -228,6 +232,20 @@ exports.Prisma.LopdConsentLogScalarFieldEnum = {
   policyVersion: 'policyVersion'
 };
 
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  businessId: 'businessId',
+  lemonSqueezyId: 'lemonSqueezyId',
+  invoiceNumber: 'invoiceNumber',
+  amount: 'amount',
+  currency: 'currency',
+  status: 'status',
+  invoiceUrl: 'invoiceUrl',
+  billingReason: 'billingReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -285,6 +303,13 @@ exports.AlertType = exports.$Enums.AlertType = {
   NOTIFICACION: 'NOTIFICACION'
 };
 
+exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
+  PAID: 'PAID',
+  PENDING: 'PENDING',
+  FAILED: 'FAILED',
+  REFUNDED: 'REFUNDED'
+};
+
 exports.Prisma.ModelName = {
   Business: 'Business',
   User: 'User',
@@ -293,7 +318,8 @@ exports.Prisma.ModelName = {
   BusinessHours: 'BusinessHours',
   Service: 'Service',
   Alert: 'Alert',
-  LopdConsentLog: 'LopdConsentLog'
+  LopdConsentLog: 'LopdConsentLog',
+  Invoice: 'Invoice'
 };
 
 /**
