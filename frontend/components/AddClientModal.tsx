@@ -72,8 +72,8 @@ export default function AddClientModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] pointer-events-auto transition-opacity" onClick={onClose} />
+      {/* Backdrop — transparent without blur or darkening */}
+      <div className="absolute inset-0 bg-transparent pointer-events-auto" onClick={onClose} />
 
       <div
         style={{
