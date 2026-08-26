@@ -842,7 +842,7 @@ export default function ClientesPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleSendCustomMessage(client)}
-                                    className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                                    className="p-1.5 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                                     title="Enviar WhatsApp"
                                   >
                                     <MessageCircle className="w-4 h-4" />
@@ -852,7 +852,7 @@ export default function ClientesPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleSendWhatsAppConsent(client)}
-                                    className="p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                                    className="p-1.5 text-on-surface-variant hover:text-amber-600 dark:hover:text-amber-400 transition-colors cursor-pointer"
                                     title="Enviar recordatorio LOPD por WhatsApp"
                                   >
                                     <ShieldAlert className="w-4 h-4" />
@@ -864,7 +864,7 @@ export default function ClientesPage() {
                                     setSelectedClientForAppointment(client);
                                     setIsAppointmentModalOpen(true);
                                   }}
-                                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                                   title="Agendar cita para este cliente"
                                 >
                                   <CalendarPlus className="w-4 h-4" />
@@ -875,7 +875,7 @@ export default function ClientesPage() {
                                     setEditingClient(client);
                                     setIsClientModalOpen(true);
                                   }}
-                                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
                                   title="Editar cliente"
                                 >
                                   <Edit3 className="w-4 h-4" />
@@ -885,7 +885,7 @@ export default function ClientesPage() {
                                   onClick={() =>
                                     handleDeleteClient(client.id, `${client.name} ${client.surname || ""}`)
                                   }
-                                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-error transition-colors cursor-pointer"
                                   title="Eliminar cliente"
                                 >
                                   <Trash2 className="w-4 h-4" />
