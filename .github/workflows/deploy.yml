@@ -31,11 +31,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        run: pnpm --filter backend prisma:generate
+
       - name: Lint frontend
         run: pnpm --filter frontend lint
 
       - name: Lint backend
         run: pnpm --filter backend lint
+
+      - name: Run frontend tests
+        run: pnpm --filter frontend test
 
       - name: Run backend tests
         run: pnpm --filter backend test

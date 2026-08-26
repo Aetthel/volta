@@ -16,6 +16,7 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "lint": "echo 'No linting configured for backend'",
+    "pretest": "prisma generate",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
     "test:load": "node src/tests/load/concurrencyTest.js"
   },
