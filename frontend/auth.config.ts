@@ -52,10 +52,16 @@ export const authConfig: NextAuthConfig = {
         const themeColor = session.themeColor || session.user?.themeColor;
         const fontSizeLevel = session.fontSizeLevel || session.user?.fontSizeLevel;
         const borderRadiusLevel = session.borderRadiusLevel || session.user?.borderRadiusLevel;
+        const subscriptionPlan = session.subscriptionPlan || session.user?.subscriptionPlan;
+        const subscriptionStatus = session.subscriptionStatus || session.user?.subscriptionStatus;
+        const trialExpiresAt = session.trialExpiresAt !== undefined ? session.trialExpiresAt : session.user?.trialExpiresAt;
 
         if (themeColor) token.themeColor = themeColor;
         if (fontSizeLevel) token.fontSizeLevel = fontSizeLevel;
         if (borderRadiusLevel) token.borderRadiusLevel = borderRadiusLevel;
+        if (subscriptionPlan) token.subscriptionPlan = subscriptionPlan;
+        if (subscriptionStatus) token.subscriptionStatus = subscriptionStatus;
+        if (trialExpiresAt !== undefined) token.trialExpiresAt = trialExpiresAt;
       }
       return token;
     },
