@@ -5,9 +5,10 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
+import { Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import { Skeleton } from "@/components/ui/volta-ui";
+import { Button, Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
 
@@ -196,15 +197,15 @@ export default function AgendaPage() {
         ? updatedEvent.startTime.toISOString()
         : existing.appointmentDate;
 
-      const res = await fetch("/api/backend/appointments", {
+      // El backend expone PUT /appointments/:id; sin el id en la ruta Express
+      // no encontraba handler y la reprogramación se perdía en silencio.
+      const res = await fetch(`/api/backend/appointments/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...existing,
           appointmentDate: newDate,
           clientName: updatedEvent.title?.split("-")[0]?.trim() || existing.clientName,
           serviceName: updatedEvent.category || existing.serviceName,
-          notes: updatedEvent.description !== undefined ? updatedEvent.description : existing.notes,
         }),
       });
 
@@ -222,7 +223,8 @@ export default function AgendaPage() {
 
   const handleEventDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/backend/appointments?id=${id}`, {
+      // Mismo motivo que en el update: el id va en la ruta, no en la query.
+      const res = await fetch(`/api/backend/appointments/${id}`, {
         method: "DELETE",
       });
 
@@ -256,9 +258,12 @@ export default function AgendaPage() {
 
   return (
     <div className="min-h-screen bg-surface text-on-surface flex flex-col md:flex-row pb-24 md:pb-0">
-      <Sidebar
-        onNewAppointmentClick={() => handleOpenNewModalWithDate()}
-      />
+      {/* onNewAppointmentClick es lo que hace que el Sidebar pinte su botón
+          "Nueva Cita" al pie. Se envuelve en una arrow para descartar el evento
+          de click: handleOpenNewModalWithDate espera una Date opcional y un
+          MouseEvent es truthy, así que pasarlo directo reventaría al leer
+          getFullYear(). */}
+      <Sidebar onNewAppointmentClick={() => handleOpenNewModalWithDate()} />
       <BottomNav />
 
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
@@ -285,32 +290,32 @@ export default function AgendaPage() {
         </main>
       </div>
 
+      {/* FAB solo en móvil, donde el Sidebar no se muestra. Mismas clases que
+          clientes, inicio y sedes. */}
+      <Button
+        variant="primary"
+        onClick={() => handleOpenNewModalWithDate()}
+        aria-label="Nueva cita"
+        className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg"
+      >
+        <Plus className="w-5 h-5" />
+      </Button>
+
       <NewAppointmentModal
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
         initialDate={prefilledDate}
         initialTime={prefilledTime}
-        onSave={async (appointmentData) => {
-          try {
-            const res = await fetch("/api/backend/appointments", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                ...appointmentData,
-                businessId,
-              }),
-            });
-            if (res.ok) {
-              showToast("Cita registrada exitosamente", "success");
-              setIsAppointmentModalOpen(false);
-              fetchDashboardData();
-            } else {
-              showToast("Error al guardar la cita", "error");
-            }
-          } catch (err) {
-            console.error("Error saving appointment from modal:", err);
-            showToast("Error de servidor al guardar la cita", "error");
-          }
+        /* El modal ya ha hecho el POST y solo llama aquí cuando el backend ha
+           confirmado la cita. Repetir el POST creaba una segunda cita en el
+           mismo hueco y el backend la rechazaba con 409, así que la reserva sí
+           existía pero la UI daba error y no refrescaba. */
+        onSave={() => {
+          showToast("Cita registrada exitosamente", "success");
+          // El propio modal se cierra (llama a onClose) cuando termina de
+          // mostrar el aviso de consentimiento LOPD; cerrarlo desde aquí lo
+          // desmontaba antes de que ese aviso llegara a verse.
+          fetchDashboardData();
         }}
       />
 

@@ -64,6 +64,8 @@ export default function NewAppointmentModal({
     setShowSuggestions,
     showConsentToast,
     toastPhone,
+    submitError,
+    isSubmitting,
     handleChange,
     handleNameChange,
     handleSelectSuggestion,
@@ -292,6 +294,14 @@ export default function NewAppointmentModal({
             </div>
           </div>
 
+          {/* Motivo real del backend: hueco ocupado, fuera de horario,
+              teléfono inválido, límite de plan alcanzado... */}
+          {submitError && (
+            <Alert variant="error" role="alert">
+              <p className="text-body-sm">{submitError}</p>
+            </Alert>
+          )}
+
           {/* Footer Actions */}
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/30 mt-1">
             <Button
@@ -307,9 +317,10 @@ export default function NewAppointmentModal({
               type="submit"
               variant="primary"
               size="md"
+              disabled={isSubmitting}
               className="px-5 text-xs font-semibold shadow-sm cursor-pointer"
             >
-              Reservar Cita
+              {isSubmitting ? "Guardando..." : "Reservar Cita"}
             </Button>
           </div>
         </form>

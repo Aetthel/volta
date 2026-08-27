@@ -22,12 +22,10 @@ import { Badge } from "@/components/ui/badge"
 import {
   ChevronLeft,
   ChevronRight,
-  Plus,
   Calendar,
   Clock,
   Grid3x3,
   List,
-  Search,
   Filter,
   X,
   User,
