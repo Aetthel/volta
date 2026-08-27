@@ -409,8 +409,8 @@ export function EventManager({
 
         {/* Row 2: View Switchers (Left) and Filters (Right) */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* View Switchers */}
-          <div className="flex items-center">
+          {/* View Switchers & Quota */}
+          <div className="flex items-center gap-2">
             {/* Mobile: Select dropdown */}
             <div className="sm:hidden w-full">
               <Select value={view} onValueChange={(value: any) => setView(value)}>
@@ -493,7 +493,7 @@ export function EventManager({
                 size="sm"
                 onClick={() => setIsQuotaUpgradeOpen(true)}
                 className={cn(
-                  "h-8 px-3 rounded-lg text-xs font-normal bg-surface border-outline-variant/60 text-on-surface hover:bg-surface-variant transition-colors shrink-0",
+                  "h-[42px] px-3.5 rounded-lg text-xs font-normal bg-surface border-outline-variant/60 text-on-surface hover:bg-surface-variant transition-colors shrink-0",
                   isQuotaExceeded && "border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
                   isQuotaWarning && "border-amber-500/50 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
                 )}
