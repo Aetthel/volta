@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import dynamic from "next/dynamic";
 import {
@@ -22,7 +22,6 @@ import {
   Command,
   X,
   Lock,
-  Sparkles,
   Store,
   BarChart3,
 } from "lucide-react";
@@ -75,21 +74,21 @@ function WorkspaceSwitcher({
     <div className="relative">
       <div
         onClick={() => !isCollapsed && setIsOpen(!isOpen)}
-        className={`flex items-center justify-between px-2 py-2 mb-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors select-none group ${
+        className={`flex items-center justify-between px-2 py-2 mb-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors select-none group ${
           isCollapsed ? "justify-center" : ""
         }`}
         title={businessName}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-[6px] bg-primary text-primary-foreground flex items-center justify-center font-semibold text-[13px] shadow-sm shrink-0">
+          <div className="w-8 h-8 rounded-[6px] bg-primary text-white flex items-center justify-center font-semibold text-[13px] shadow-xs shrink-0">
             {initial}
           </div>
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden min-w-0">
-              <span className="text-[13px] font-medium leading-none mb-1 text-foreground truncate max-w-[130px]">
+              <span className="text-[13px] font-semibold leading-none mb-1 text-zinc-900 dark:text-zinc-100 truncate max-w-[130px]">
                 {businessName}
               </span>
-              <span className="text-[11px] text-muted-foreground leading-none">
+              <span className="text-[11px] font-normal text-zinc-500 dark:text-zinc-400 leading-none">
                 {planLabel}
               </span>
             </div>
@@ -97,7 +96,7 @@ function WorkspaceSwitcher({
         </div>
         {!isCollapsed && (
           <ChevronDown
-            className="w-4 h-4 text-muted-foreground/50 group-hover:text-foreground/70 transition-colors shrink-0"
+            className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors shrink-0"
             strokeWidth={1.5}
           />
         )}
@@ -106,15 +105,15 @@ function WorkspaceSwitcher({
       {isOpen && !isCollapsed && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-[52px] left-0 w-full bg-white border border-border/50 rounded-lg shadow-xl z-50 py-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100">
+          <div className="absolute top-[52px] left-0 w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 py-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100">
             <div className="px-3 py-2 mx-1 text-[13px] rounded-md bg-primary/10 text-primary font-medium">
               {businessName} ({planLabel})
             </div>
-            <div className="h-px bg-border/50 my-1 mx-2" />
+            <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-1 mx-2" />
             <Link
               href="/ajustes"
               onClick={() => setIsOpen(false)}
-              className="px-3 py-2 mx-1 text-[13px] text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-md cursor-pointer flex items-center gap-2 transition-colors"
+              className="px-3 py-2 mx-1 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md cursor-pointer flex items-center gap-2 transition-colors"
             >
               <Settings className="w-3.5 h-3.5" />
               <span>Ajustes de Cuenta</span>
@@ -178,10 +177,10 @@ function NavItem({
         isCollapsed ? "justify-center px-1" : ""
       } ${
         isActive && !isLocked
-          ? "bg-black/5 dark:bg-white/10 text-foreground font-medium"
+          ? "bg-zinc-200/70 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium"
           : isLocked
-            ? "text-muted-foreground/60 hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground/80"
-            : "text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground/90"
+            ? "text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-700 dark:hover:text-zinc-300"
+            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
       }`}
       style={{ paddingLeft: !isCollapsed ? `${level * 12 + 10}px` : undefined }}
       onClick={handleClick}
@@ -198,8 +197,8 @@ function NavItem({
           <item.icon
             className={`w-[16px] h-[16px] transition-colors ${
               isActive && !isLocked
-                ? "text-foreground"
-                : "text-muted-foreground/70 group-hover:text-foreground/70"
+                ? "text-zinc-900 dark:text-zinc-100"
+                : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200"
             }`}
             strokeWidth={1.5}
           />
@@ -208,7 +207,7 @@ function NavItem({
           )}
         </div>
         {!isCollapsed && (
-          <span className="text-[13px] tracking-wide truncate">
+          <span className="text-[13px] tracking-normal truncate">
             {item.title}
           </span>
         )}
@@ -217,7 +216,7 @@ function NavItem({
       {!isCollapsed && (
         <div className="flex items-center gap-1.5 shrink-0">
           {item.shortcut && (
-            <kbd className="hidden group-hover:inline-flex items-center justify-center h-5 px-1.5 text-[10px] font-medium font-mono text-muted-foreground/60 bg-background/50 border border-border/50 rounded-[4px] shadow-xs">
+            <kbd className="hidden group-hover:inline-flex items-center justify-center h-5 px-1.5 text-[10px] font-medium font-mono text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-[4px] shadow-2xs">
               {item.shortcut}
             </kbd>
           )}
@@ -234,7 +233,7 @@ function NavItem({
           )}
           {hasChildren && (
             <ChevronRight
-              className={`w-3.5 h-3.5 text-muted-foreground/50 transition-transform duration-200 ${
+              className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
                 isOpen ? "rotate-90" : ""
               }`}
               strokeWidth={2}
@@ -263,7 +262,7 @@ function NavItem({
         >
           <div className="overflow-hidden min-h-0 relative flex flex-col gap-0.5 mt-0.5">
             <div
-              className="absolute top-0 bottom-0 border-l border-black/5 dark:border-white/5"
+              className="absolute top-0 bottom-0 border-l border-zinc-200 dark:border-zinc-800"
               style={{ left: `${level * 12 + 17.5}px` }}
             />
             {item.children!.map((child) => (
@@ -467,7 +466,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     <>
       <aside
         style={{ width: "var(--sidebar-width)" }}
-        className={`h-full hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant/60 p-3 z-50 select-none ${
+        className={`h-full hidden md:flex flex-col fixed left-0 top-0 bg-[#fafafa] dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 p-3 z-50 select-none font-sans ${
           isResizing ? "transition-none" : "transition-all duration-300"
         }`}
       >
@@ -483,7 +482,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           {navGroups.map((group, idx) => (
             <div key={idx} className="flex flex-col gap-0.5">
               {group.heading && !displayCollapsed && (
-                <span className="px-2.5 mb-1 text-[11px] font-semibold tracking-wider text-muted-foreground/50 uppercase">
+                <span className="px-2.5 mb-1 text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
                   {group.heading}
                 </span>
               )}
@@ -504,13 +503,13 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         </div>
 
         {/* Bottom Area with Action CTA, Settings & Log out */}
-        <div className="mt-auto pt-4 border-t border-outline-variant/50 flex flex-col gap-0.5">
+        <div className="mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-0.5">
           {/* Action CTA: Nueva Cita Button */}
           {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
             <div className="mb-2 px-1">
               <button
                 onClick={onNewAppointmentClick}
-                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[6px] text-[13px] font-medium bg-primary text-primary-foreground hover:opacity-90 active:scale-[0.98] shadow-xs transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[6px] text-[13px] font-medium bg-primary text-white hover:opacity-90 active:scale-[0.98] shadow-xs transition-all cursor-pointer ${
                   displayCollapsed ? "!p-2 !w-8 !h-8 !rounded-full mx-auto" : ""
                 }`}
                 title="Nueva Cita"
@@ -527,18 +526,18 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
                 <button
                   key={item.id}
                   onClick={() => signOut({ callbackUrl: "/login" })}
-                  className={`group flex items-center justify-between px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-error border-none bg-transparent w-full text-left ${
+                  className={`group flex items-center justify-between px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-red-600 dark:hover:text-red-400 border-none bg-transparent w-full text-left ${
                     displayCollapsed ? "justify-center px-1" : ""
                   }`}
                   title={displayCollapsed ? "Log out" : undefined}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <LogOut
-                      className="w-[16px] h-[16px] text-muted-foreground/70 group-hover:text-error shrink-0 transition-colors"
+                      className="w-[16px] h-[16px] text-zinc-500 group-hover:text-red-600 shrink-0 transition-colors"
                       strokeWidth={1.5}
                     />
                     {!displayCollapsed && (
-                      <span className="text-[13px] tracking-wide truncate">
+                      <span className="text-[13px] tracking-normal truncate">
                         Log out
                       </span>
                     )}
@@ -580,38 +579,38 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
             className="absolute inset-0"
             onClick={() => setIsSearchOpen(false)}
           />
-          <div className="relative w-full max-w-xl bg-white border border-outline-variant/60 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="flex items-center px-4 border-b border-outline-variant/40">
+          <div className="relative w-full max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="flex items-center px-4 border-b border-zinc-200 dark:border-zinc-800">
               <Search
-                className="w-[18px] h-[18px] text-muted-foreground mr-3 shrink-0"
+                className="w-[18px] h-[18px] text-zinc-500 mr-3 shrink-0"
                 strokeWidth={1.5}
               />
               <input
                 autoFocus
                 value={searchInputVal}
                 onChange={(e) => setSearchInputVal(e.target.value)}
-                className="flex-1 bg-transparent py-4 outline-none text-[14px] text-foreground placeholder:text-muted-foreground/50"
+                className="flex-1 bg-transparent py-4 outline-none text-[14px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
                 placeholder="Buscar clientes, servicios o citas..."
               />
               <kbd
                 onClick={() => setIsSearchOpen(false)}
-                className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 ml-2 text-[10px] font-medium font-mono text-muted-foreground/70 bg-black/5 border border-black/10 rounded-[4px] cursor-pointer hover:text-foreground hover:bg-black/10 transition-colors"
+                className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 ml-2 text-[10px] font-medium font-mono text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-[4px] cursor-pointer hover:text-zinc-900 transition-colors"
               >
                 ESC
               </kbd>
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="ml-3 p-1 rounded-md text-muted-foreground hover:bg-black/5 hover:text-foreground transition-colors cursor-pointer"
+                className="ml-3 p-1 rounded-md text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 transition-colors cursor-pointer"
               >
                 <X className="w-[18px] h-[18px]" strokeWidth={1.5} />
               </button>
             </div>
             <div className="p-2 py-8 flex flex-col items-center justify-center">
               <Command
-                className="w-6 h-6 text-muted-foreground/30 mb-2"
+                className="w-6 h-6 text-zinc-300 dark:text-zinc-600 mb-2"
                 strokeWidth={1.5}
               />
-              <p className="text-[13px] text-muted-foreground font-medium">
+              <p className="text-[13px] text-zinc-500 font-medium">
                 Escribe para buscar en Volta...
               </p>
             </div>
