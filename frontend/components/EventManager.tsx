@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react"
 import { createPortal } from "react-dom"
+import { useSession } from "next-auth/react"
+import dynamic from "next/dynamic"
 import { useDraggableModal } from "@/lib/useDraggableModal"
 import { Button as VoltaButton } from "@/components/ui/volta-ui"
 import { Button } from "@/components/ui/button"
@@ -36,8 +38,14 @@ import {
   Tag,
   FileText,
   Trash2,
+  Lock,
+  Sparkles,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
+  ssr: false,
+})
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,6 +124,29 @@ export function EventManager({
     modalWidth: 480,
     modalHeight: 580,
   })
+
+  const { data: session } = useSession()
+  const subscriptionPlan = session?.user?.subscriptionPlan || "BASIC"
+  const subscriptionStatus = session?.user?.subscriptionStatus || "ACTIVE"
+  const isBasicActive = subscriptionPlan === "BASIC" && subscriptionStatus !== "TRIALING"
+
+  const [isQuotaUpgradeOpen, setIsQuotaUpgradeOpen] = useState(false)
+
+  const currentMonthApps = useMemo(() => {
+    const now = new Date()
+    return events.filter((e) => {
+      const d = e.startTime instanceof Date ? e.startTime : new Date(e.startTime)
+      return (
+        !isNaN(d.getTime()) &&
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear()
+      )
+    }).length
+  }, [events])
+
+  const quotaPct = Math.min(100, Math.round((currentMonthApps / 100) * 100))
+  const isQuotaWarning = currentMonthApps >= 80 && currentMonthApps < 100
+  const isQuotaExceeded = currentMonthApps >= 100
 
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
@@ -454,6 +485,46 @@ export function EventManager({
                 <span className="ml-1">Lista</span>
               </Button>
             </div>
+
+            {/* Basic Plan Quota Pill */}
+            {isBasicActive && (
+              <button
+                type="button"
+                onClick={() => setIsQuotaUpgradeOpen(true)}
+                className={cn(
+                  "inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all hover:shadow-xs cursor-pointer select-none",
+                  isQuotaExceeded
+                    ? "bg-rose-500/10 border-rose-500/30 text-rose-700 hover:bg-rose-500/15"
+                    : isQuotaWarning
+                      ? "bg-amber-500/10 border-amber-500/30 text-amber-800 hover:bg-amber-500/15"
+                      : "bg-surface-container-low/70 border-outline-variant/60 text-on-surface hover:bg-surface-container-high"
+                )}
+                title="Cupo mensual de citas en Plan Básico. Pulsa para pasar a Pro con citas ilimitadas."
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-on-surface-variant font-medium">Cupo:</span>
+                  <span className="font-bold text-on-surface">
+                    {currentMonthApps}/100 citas este mes
+                  </span>
+                </div>
+                <div className="w-12 h-1.5 bg-outline-variant/40 rounded-full overflow-hidden shrink-0">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-500",
+                      isQuotaExceeded
+                        ? "bg-rose-500"
+                        : isQuotaWarning
+                          ? "bg-amber-500"
+                          : "bg-primary"
+                    )}
+                    style={{ width: `${quotaPct}%` }}
+                  />
+                </div>
+                <span className="ml-0.5 text-[10px] uppercase font-bold text-primary flex items-center gap-0.5">
+                  <Lock className="w-2.5 h-2.5" /> PRO
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Filters */}
@@ -964,6 +1035,14 @@ export function EventManager({
         </div>,
         document.body
       )}
+
+      {/* Upgrade Pro Modal for Quota */}
+      <UpgradeProModal
+        isOpen={isQuotaUpgradeOpen}
+        onClose={() => setIsQuotaUpgradeOpen(false)}
+        title="Citas Ilimitadas con Plan Pro"
+        description={`Has utilizado ${currentMonthApps} de tus 100 citas del mes en el Plan Básico. Actualiza al Plan Pro (40€/mes) para disfrutar de citas ilimitadas sin restricciones de cupo.`}
+      />
     </div>
   )
 }
