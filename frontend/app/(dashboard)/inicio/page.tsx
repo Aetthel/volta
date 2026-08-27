@@ -669,16 +669,6 @@ export default function DashboardPage() {
 
           {/* Upcoming Appointments section */}
           <section>
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-xl text-on-surface">Próximas Citas</h3>
-              <Link
-                href="/agenda"
-                className="text-body-sm font-bold text-primary hover:text-primary/80 hover:underline transition-colors"
-              >
-                Ver todas
-              </Link>
-            </div>
-
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
                 {[...Array(3)].map((_, i) => (
