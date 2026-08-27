@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import { Sparkles, AlertTriangle, Clock, ArrowRight, X } from "lucide-react";
+import { AlertTriangle, Clock, ArrowRight, X } from "lucide-react";
 
 const SubscriptionCheckoutModal = dynamic(() => import("./SubscriptionCheckoutModal"), {
   ssr: false,
@@ -41,7 +41,7 @@ function TrialBannerContent() {
         <div className="w-full py-2 text-body-sm font-medium border-b transition-colors z-20 shrink-0 select-none bg-primary/10 text-primary border-primary/20">
           <div className="max-w-container-max mx-auto px-gutter w-full flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 min-w-0">
-              <Sparkles className="w-4 h-4 text-primary shrink-0" />
+              <Clock className="w-4 h-4 text-primary shrink-0" />
               <div className="truncate">
                 <span>
                   <strong>Modo de Prueba:</strong> Te quedan <strong>{minsLeft} min</strong> de
@@ -106,14 +106,14 @@ function TrialBannerContent() {
             ) : isUrgent ? (
               <Clock className="w-4 h-4 text-amber-600 shrink-0" />
             ) : (
-              <Sparkles className="w-4 h-4 text-primary shrink-0" />
+              <Clock className="w-4 h-4 text-primary shrink-0" />
             )}
 
             <div className="truncate">
               {isExpired ? (
                 <span>
                   <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Básico
-                  18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
+                  30€/mes o Plan Pro 40€/mes) para continuar usando todas las funciones.
                 </span>
               ) : isUrgent ? (
                 <span>
@@ -121,12 +121,12 @@ function TrialBannerContent() {
                   <strong>
                     {daysLeft} día{daysLeft === 1 ? "" : "s"}
                   </strong>{" "}
-                  de prueba gratuita en Plan Pro (25€/mes).
+                  de prueba gratuita en Plan Pro (40€/mes).
                 </span>
               ) : (
                 <span>
                   Estás disfrutando de{" "}
-                  <strong>14 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
+                  <strong>14 días de prueba gratuita del Plan Pro (40€/mes)</strong>. Te quedan{" "}
                   <strong>
                     {daysLeft} día{daysLeft === 1 ? "" : "s"}
                   </strong>

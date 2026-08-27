@@ -1,25 +1,20 @@
 "use client";
 
-import { X, Pencil, Briefcase, Clock, User, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useDraggableModal } from "@/lib/useDraggableModal";
 import {
-  FieldGroup,
-  Field,
-  FloatingInput,
-  Button,
-  FloatingTextarea,
-  SegmentedControl,
-} from "@/components/ui/volta-ui";
+  X,
+  Briefcase,
+  Clock,
+  Euro,
+  Users,
+  User,
+  FileText,
+  Palette,
+} from "lucide-react";
+import { Button } from "@/components/ui/volta-ui";
 import { useAddServiceForm, ServiceToEdit } from "@/hooks/useAddServiceForm";
-
-const EuroIcon = ({ className }: { className?: string }) => (
-  <span
-    className={cn("font-semibold text-on-surface-variant/70 text-body-lg", className)}
-    style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
-  >
-    €
-  </span>
-);
 
 interface AddServiceModalProps {
   isOpen: boolean;
@@ -35,16 +30,24 @@ interface AddServiceModalProps {
     color?: string;
   }) => void;
   serviceToEdit?: ServiceToEdit | null;
+  triggerRect?: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null;
 }
 
 const COLOR_OPTIONS = [
-  { id: "TEAL", bg: "bg-[#377E7F]", label: "Teal Volta" },
-  { id: "PURPLE", bg: "bg-purple-600", label: "Púrpura" },
-  { id: "ROSE", bg: "bg-rose-500", label: "Rosa" },
-  { id: "AMBER", bg: "bg-amber-500", label: "Ámbar" },
-  { id: "INDIGO", bg: "bg-indigo-600", label: "Índigo" },
-  { id: "EMERALD", bg: "bg-emerald-500", label: "Esmeralda" },
-  { id: "SKY", bg: "bg-sky-500", label: "Azul Cielo" },
+  { id: "TEAL", bg: "bg-[#377E7F]", ring: "ring-[#377E7F]", label: "Teal Volta" },
+  { id: "PURPLE", bg: "bg-purple-600", ring: "ring-purple-600", label: "Púrpura" },
+  { id: "ROSE", bg: "bg-rose-500", ring: "ring-rose-500", label: "Rosa" },
+  { id: "AMBER", bg: "bg-amber-500", ring: "ring-amber-500", label: "Ámbar" },
+  { id: "INDIGO", bg: "bg-indigo-600", ring: "ring-indigo-600", label: "Índigo" },
+  { id: "EMERALD", bg: "bg-emerald-500", ring: "ring-emerald-500", label: "Esmeralda" },
+  { id: "SKY", bg: "bg-sky-500", ring: "ring-sky-500", label: "Azul Cielo" },
 ];
 
 export default function AddServiceModal({
@@ -52,6 +55,7 @@ export default function AddServiceModal({
   onClose,
   onSave,
   serviceToEdit,
+  triggerRect,
 }: AddServiceModalProps) {
   const {
     formData,
@@ -62,169 +66,241 @@ export default function AddServiceModal({
     handleSubmit,
   } = useAddServiceForm(isOpen, serviceToEdit, onSave, onClose);
 
-  if (!isOpen) return null;
+  const { position, handleMouseDown } = useDraggableModal({
+    isOpen,
+    triggerRect,
+    modalWidth: 550,
+    modalHeight: 560,
+  });
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] pointer-events-none">
+      {/* Backdrop — transparent without blur or darkening */}
+      <div className="absolute inset-0 bg-transparent pointer-events-auto" onClick={onClose} />
+
       <div
-        className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal Content Card */}
-      <div className="relative bg-surface-container-lowest rounded-md shadow-xl border border-outline-variant max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scrollbar z-10 animate-in fade-in zoom-in-95 duration-200">
+        style={{
+          position: "fixed",
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          width: "550px",
+          maxWidth: "calc(100vw - 32px)",
+          transition: "none",
+        }}
+        className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 overflow-hidden z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col"
+      >
         {/* Header */}
-        <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-          <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-3">
-            {isEditMode ? (
-              <Pencil className="w-5 h-5 text-primary" />
-            ) : (
+        <div
+          onMouseDown={handleMouseDown}
+          className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none"
+        >
+          <div className="flex flex-col">
+            <h2 className="text-xl font-bold text-on-surface tracking-tight flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-primary" />
-            )}
-            <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
-          </h3>
-          <Button
-            variant="ghost"
+              <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
+            </h2>
+            <p className="text-sm text-on-surface-variant mt-0.5">
+              {isEditMode
+                ? "Modifica los datos, duración y precio del servicio"
+                : "Define las características de este servicio para tu agenda"}
+            </p>
+          </div>
+          <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface w-8 h-8 active:scale-95 shadow-none"
+            className="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer -mr-1"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <FieldGroup className="gap-5">
-            {/* Service Type Toggle (Individual vs Group) */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-on-surface-variant">
-                Tipo de Servicio
-              </label>
-              <SegmentedControl
-                value={formData.type}
-                onChange={handleTypeChange}
-                options={[
-                  { value: "INDIVIDUAL", label: "Cita Individual (1 a 1)", icon: User },
-                  { value: "GROUP", label: "Clase de Grupo (Yoga / Gym)", icon: Users },
-                ]}
-              />
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+          {/* Tipo de Servicio Toggle */}
+          <div>
+            <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider block mb-1.5">
+              Tipo de Servicio
+            </label>
+            <div className="grid grid-cols-2 gap-2 p-1 bg-surface-container-low/80 rounded-xl border border-outline-variant/50">
+              <button
+                type="button"
+                onClick={() => handleTypeChange("INDIVIDUAL")}
+                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  formData.type === "INDIVIDUAL"
+                    ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/40"
+                    : "text-on-surface-variant/70 hover:text-on-surface"
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Cita Individual (1 a 1)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTypeChange("GROUP")}
+                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  formData.type === "GROUP"
+                    ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/40"
+                    : "text-on-surface-variant/70 hover:text-on-surface"
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>Clase Grupal (Aforo)</span>
+              </button>
             </div>
+          </div>
 
-            {/* Service Name */}
-            <Field>
-              <FloatingInput
-                id="name"
-                label="Nombre del Servicio"
-                type="text"
-                required
-                icon={Briefcase}
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </Field>
+          {/* Nombre del Servicio */}
+          <div>
+            <label htmlFor="name" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <span>Nombre del Servicio <span className="text-error">*</span></span>
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              placeholder="Ej. Corte de Cabello + Lavado"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+            />
+          </div>
 
-            {/* Color Palette Selector */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-on-surface-variant">
-                Color de Tarjeta en Agenda
-              </label>
-              <div className="flex items-center gap-2.5">
-                {COLOR_OPTIONS.map((c) => (
+          {/* Color de Tarjeta en Agenda */}
+          <div>
+            <label className="text-sm font-medium text-on-surface mb-2 flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <span>Color en Agenda</span>
+            </label>
+            <div className="flex items-center gap-2.5">
+              {COLOR_OPTIONS.map((c) => {
+                const isSelected = formData.color === c.id;
+                return (
                   <button
                     key={c.id}
                     type="button"
                     title={c.label}
                     onClick={() => handleColorSelect(c.id)}
-                    className={`w-7 h-7 rounded-full ${c.bg} transition-all duration-150 flex items-center justify-center ${
-                      formData.color === c.id
-                        ? "ring-2 ring-offset-2 ring-primary scale-110 shadow-md"
-                        : "opacity-80 hover:opacity-100 hover:scale-105"
+                    className={`w-7 h-7 rounded-full ${c.bg} cursor-pointer transition-transform hover:scale-110 flex items-center justify-center ${
+                      isSelected ? "ring-2 ring-offset-2 ring-primary scale-110" : "opacity-80 hover:opacity-100"
                     }`}
                   >
-                    {formData.color === c.id && (
-                      <span className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                    {isSelected && (
+                      <span className="w-2 h-2 rounded-full bg-white block shadow-xs" />
                     )}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {/* Duration (minutes) */}
-              <Field>
-                <FloatingInput
-                  id="duration"
-                  label="Duración (min)"
-                  type="number"
-                  min="1"
-                  required
-                  icon={Clock}
-                  value={formData.duration}
-                  onChange={handleChange}
-                />
-              </Field>
-
-              {/* Price (Euros) */}
-              <Field>
-                <FloatingInput
-                  id="price"
-                  label="Precio (€)"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  icon={EuroIcon}
-                  value={formData.price}
-                  onChange={handleChange}
-                />
-              </Field>
-
-              {/* Capacity */}
-              <Field>
-                <FloatingInput
-                  id="capacity"
-                  label={formData.type === "GROUP" ? "Aforo Alumnos" : "Aforo Máx."}
-                  type="number"
-                  min="1"
-                  required
-                  disabled={formData.type === "INDIVIDUAL"}
-                  icon={formData.type === "GROUP" ? Users : Briefcase}
-                  value={formData.capacity}
-                  onChange={handleChange}
-                />
-              </Field>
-            </div>
-
-            {/* Description */}
-            <Field>
-              <FloatingTextarea
-                id="description"
-                label="Descripción (opcional)"
-                rows={3}
-                value={formData.description}
+          {/* Duración, Precio y Aforo Máx (3 Columns) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label htmlFor="duration" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
+                <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span className="whitespace-nowrap">Duración (min) <span className="text-error">*</span></span>
+              </label>
+              <input
+                id="duration"
+                type="number"
+                min="5"
+                step="5"
+                required
+                placeholder="45"
+                value={formData.duration}
                 onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
               />
-            </Field>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-outline-variant/50">
-              <Button
-                type="button"
-                onClick={onClose}
-                variant="outline"
-                size="lg"
-                className="text-on-surface"
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary" size="lg">
-                {isEditMode ? "Guardar Cambios" : "Añadir Servicio"}
-              </Button>
             </div>
-          </FieldGroup>
+
+            <div>
+              <label htmlFor="price" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
+                <Euro className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span className="whitespace-nowrap">Precio (€) <span className="text-error">*</span></span>
+              </label>
+              <input
+                id="price"
+                type="number"
+                min="0"
+                step="0.5"
+                required
+                placeholder="25.00"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="capacity" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
+                <Users className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span className="whitespace-nowrap">Aforo Máx.</span>
+              </label>
+              <input
+                id="capacity"
+                type="number"
+                min="1"
+                disabled={formData.type === "INDIVIDUAL"}
+                value={formData.type === "INDIVIDUAL" ? "1" : formData.capacity}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 text-sm border rounded-lg transition-all ${
+                  formData.type === "INDIVIDUAL"
+                    ? "bg-surface-container-low/30 border-outline-variant/40 text-on-surface-variant/50 cursor-not-allowed"
+                    : "bg-surface-container-low/60 border-outline-variant/70 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest"
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Descripción (opcional) */}
+          <div>
+            <label htmlFor="description" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <span>Descripción (opcional)</span>
+            </label>
+            <textarea
+              id="description"
+              rows={2}
+              placeholder="Detalles sobre el procedimiento, productos incluidos..."
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all resize-none"
+            />
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/30">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              size="md"
+              className="px-4 text-xs font-medium cursor-pointer"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              className="px-5 text-xs font-semibold shadow-sm cursor-pointer"
+            >
+              {isEditMode ? "Guardar cambios" : "Guardar Servicio"}
+            </Button>
+          </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
