@@ -25,7 +25,6 @@ import {
   Search,
   Briefcase,
   X,
-  Sparkles,
   ChevronLeft,
   ArrowRight,
 } from "lucide-react";

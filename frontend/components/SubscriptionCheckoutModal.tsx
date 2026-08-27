@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import {
   X,
   Check,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
   CreditCard,
@@ -17,6 +16,7 @@ import {
   Users,
   Plus,
   Minus,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 import { calculatePlanPrice, PLAN_CONFIGS } from "@/lib/permissions";
@@ -206,7 +206,7 @@ export default function SubscriptionCheckoutModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="checkout-modal-title"
@@ -257,7 +257,7 @@ export default function SubscriptionCheckoutModal({
             {/* Trial notice */}
             {isTrialing && daysLeftInTrial > 0 && (
               <div className="p-3.5 bg-primary/10 rounded-xl border border-primary/20 flex items-center gap-3 text-xs text-primary">
-                <Sparkles className="w-5 h-5 shrink-0" />
+                <Clock className="w-5 h-5 shrink-0" />
                 <span>
                   <strong>¡Prueba Gratuita Activa!</strong> Te quedan{" "}
                   <strong>{daysLeftInTrial} días</strong> de prueba. Hoy no se te cobrará nada; tu
@@ -351,8 +351,8 @@ export default function SubscriptionCheckoutModal({
                   <li className="flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Multi-calendario / Sedes / Salas
                   </li>
-                  <li className="flex items-center gap-1.5 text-primary">
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" /> WhatsApp bidireccional
+                  <li className="flex items-center gap-1.5 text-on-surface font-medium">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Recordatorios WhatsApp bidireccional
                   </li>
                   <li className="flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Pagos online (señas y depósitos)

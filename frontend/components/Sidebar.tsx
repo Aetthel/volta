@@ -24,6 +24,7 @@ import {
   Lock,
   Store,
   BarChart3,
+  UserCheck,
 } from "lucide-react";
 import { hasFeatureAccess, PlanFeature } from "@/lib/permissions";
 
@@ -491,7 +492,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       heading: "Gestión",
       items: [
         { id: "calendar", title: "Agenda", href: "/agenda", icon: Calendar },
-        { id: "customers", title: "Clientes", href: "/clientes", icon: Globe },
+        { id: "customers", title: "Clientes", href: "/clientes", icon: UserCheck },
         {
           id: "team",
           title: "Equipo",

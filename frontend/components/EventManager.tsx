@@ -39,7 +39,6 @@ import {
   FileText,
   Trash2,
   Lock,
-  Sparkles,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 

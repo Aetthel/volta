@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
   CreditCard,
-  Sparkles,
   CheckCircle2,
   AlertTriangle,
   Download,

@@ -19,7 +19,6 @@ import {
   User,
   Globe,
   CreditCard,
-  Sparkles,
   Copy,
   Check,
   ExternalLink,
@@ -749,7 +748,7 @@ export default function BusinessSection({
             </CardTitle>
 
             <span className="px-2.5 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-semibold flex items-center gap-1 border border-outline-variant/40">
-              <Sparkles className="w-3.5 h-3.5 text-primary" /> Plan PRO
+              Plan PRO
             </span>
           </CardHeader>
 

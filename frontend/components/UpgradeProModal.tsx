@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { X, Sparkles, Check, ArrowRight } from "lucide-react";
+import { X, Lock, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
 const SubscriptionCheckoutModal = dynamic(() => import("./SubscriptionCheckoutModal"), {
@@ -29,7 +29,7 @@ export default function UpgradeProModal({
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-surface rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-outline-variant/30 relative flex flex-col gap-6 select-none">
             {/* Close button */}
             <button
@@ -43,7 +43,7 @@ export default function UpgradeProModal({
             {/* Badge & Icon */}
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                <Sparkles className="w-7 h-7" />
+                <Lock className="w-7 h-7" />
               </div>
               <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
                 Ventaja Exclusiva Pro

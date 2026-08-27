@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import { MessageSquare, Send, Loader2, Save, Lock, Sparkles } from "lucide-react";
+import { MessageSquare, Send, Loader2, Save, Lock } from "lucide-react";
 import type { MessageTemplates, ToastState } from "@/types/settings";
 import {
   Card,
@@ -322,7 +322,7 @@ export default function MessagesSection({
                 onClick={() => setIsUpgradeOpen(true)}
                 className="w-full py-3 flex items-center justify-center gap-2 font-medium cursor-pointer shadow-sm"
               >
-                <Sparkles className="w-4 h-4" />
+                <Lock className="w-4 h-4" />
                 <span>Desbloquear WhatsApp con Plan Pro</span>
               </Button>
             ) : whatsappStatus === "CONNECTED" ? (
