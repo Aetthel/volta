@@ -54,9 +54,9 @@ interface SidebarProps {
 }
 
 const MIN_WIDTH = 80;
-const MAX_WIDTH = 320;
+const MAX_WIDTH = 340;
 const SNAP_THRESHOLD = 120;
-const DEFAULT_WIDTH = 240;
+const DEFAULT_WIDTH = 260;
 
 function WorkspaceSwitcher({
   businessName,
@@ -74,21 +74,21 @@ function WorkspaceSwitcher({
     <div className="relative">
       <div
         onClick={() => !isCollapsed && setIsOpen(!isOpen)}
-        className={`flex items-center justify-between px-2 py-2 mb-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors select-none group ${
+        className={`flex items-center justify-between px-2.5 py-2.5 mb-2 rounded-xl hover:bg-primary/5 cursor-pointer transition-colors select-none group ${
           isCollapsed ? "justify-center" : ""
         }`}
         title={businessName}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-[6px] bg-primary text-white flex items-center justify-center font-semibold text-[13px] shadow-xs shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
             {initial}
           </div>
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden min-w-0">
-              <span className="text-[13px] font-semibold leading-none mb-1 text-zinc-900 dark:text-zinc-100 truncate max-w-[130px]">
+              <span className="text-sm font-semibold leading-tight text-on-surface truncate max-w-[140px]">
                 {businessName}
               </span>
-              <span className="text-[11px] font-normal text-zinc-500 dark:text-zinc-400 leading-none">
+              <span className="text-xs font-medium text-on-surface-variant/80 leading-tight mt-0.5">
                 {planLabel}
               </span>
             </div>
@@ -96,8 +96,8 @@ function WorkspaceSwitcher({
         </div>
         {!isCollapsed && (
           <ChevronDown
-            className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 dark:text-zinc-500 dark:group-hover:text-zinc-300 transition-colors shrink-0"
-            strokeWidth={1.5}
+            className="w-4 h-4 text-on-surface-variant/60 group-hover:text-primary transition-colors shrink-0"
+            strokeWidth={1.75}
           />
         )}
       </div>
@@ -105,17 +105,17 @@ function WorkspaceSwitcher({
       {isOpen && !isCollapsed && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-[52px] left-0 w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 py-1 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100">
-            <div className="px-3 py-2 mx-1 text-[13px] rounded-md bg-primary/10 text-primary font-medium">
+          <div className="absolute top-[58px] left-0 w-full bg-white border border-outline-variant/60 rounded-xl shadow-xl z-50 py-1.5 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-100">
+            <div className="px-3.5 py-2 mx-1 text-sm rounded-lg bg-primary/10 text-primary font-semibold">
               {businessName} ({planLabel})
             </div>
-            <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-1 mx-2" />
+            <div className="h-px bg-outline-variant/40 my-1 mx-2" />
             <Link
               href="/ajustes"
               onClick={() => setIsOpen(false)}
-              className="px-3 py-2 mx-1 text-[13px] text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md cursor-pointer flex items-center gap-2 transition-colors"
+              className="px-3.5 py-2 mx-1 text-sm text-on-surface-variant hover:bg-primary/5 hover:text-primary rounded-lg cursor-pointer flex items-center gap-2 transition-colors font-medium"
             >
-              <Settings className="w-3.5 h-3.5" />
+              <Settings className="w-4 h-4" />
               <span>Ajustes de Cuenta</span>
             </Link>
           </div>
@@ -173,16 +173,16 @@ function NavItem({
 
   const content = (
     <div
-      className={`group flex items-center justify-between px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none ${
-        isCollapsed ? "justify-center px-1" : ""
+      className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 select-none ${
+        isCollapsed ? "justify-center px-1.5" : ""
       } ${
         isActive && !isLocked
-          ? "bg-zinc-200/70 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium"
+          ? "bg-primary/10 text-primary font-semibold shadow-2xs"
           : isLocked
-            ? "text-zinc-400 dark:text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:text-zinc-700 dark:hover:text-zinc-300"
-            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+            ? "text-on-surface-variant/60 hover:bg-primary/5 hover:text-on-surface"
+            : "text-on-surface-variant hover:bg-primary/5 hover:text-primary"
       }`}
-      style={{ paddingLeft: !isCollapsed ? `${level * 12 + 10}px` : undefined }}
+      style={{ paddingLeft: !isCollapsed ? `${level * 12 + 12}px` : undefined }}
       onClick={handleClick}
       title={
         isCollapsed
@@ -192,22 +192,22 @@ function NavItem({
           : undefined
       }
     >
-      <div className="flex items-center gap-2.5 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
         <div className="relative flex items-center justify-center shrink-0">
           <item.icon
-            className={`w-[16px] h-[16px] transition-colors ${
+            className={`w-[18px] h-[18px] transition-colors ${
               isActive && !isLocked
-                ? "text-zinc-900 dark:text-zinc-100"
-                : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200"
+                ? "text-primary"
+                : "text-on-surface-variant/80 group-hover:text-primary"
             }`}
-            strokeWidth={1.5}
+            strokeWidth={isActive ? 2 : 1.75}
           />
           {isCollapsed && isLocked && (
             <Lock className="w-2.5 h-2.5 text-primary absolute -top-1 -right-1" />
           )}
         </div>
         {!isCollapsed && (
-          <span className="text-[13px] tracking-normal truncate">
+          <span className="text-sm font-medium tracking-normal truncate">
             {item.title}
           </span>
         )}
@@ -216,24 +216,24 @@ function NavItem({
       {!isCollapsed && (
         <div className="flex items-center gap-1.5 shrink-0">
           {item.shortcut && (
-            <kbd className="hidden group-hover:inline-flex items-center justify-center h-5 px-1.5 text-[10px] font-medium font-mono text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-[4px] shadow-2xs">
+            <kbd className="hidden group-hover:inline-flex items-center justify-center h-5 px-1.5 text-[10px] font-medium font-mono text-on-surface-variant/70 bg-white border border-outline-variant/60 rounded shadow-2xs">
               {item.shortcut}
             </kbd>
           )}
           {item.badge !== undefined && (
-            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary">
+            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-primary/15 text-primary">
               {item.badge}
             </span>
           )}
           {isLocked && (
-            <span className="flex items-center gap-0.5 px-1.5 py-0.2 text-[9px] font-bold rounded bg-primary/10 text-primary border border-primary/20">
+            <span className="flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded bg-primary/10 text-primary border border-primary/20">
               <Lock className="w-2.5 h-2.5" />
               <span>PRO</span>
             </span>
           )}
           {hasChildren && (
             <ChevronRight
-              className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
+              className={`w-4 h-4 text-on-surface-variant/60 group-hover:text-primary transition-transform duration-200 ${
                 isOpen ? "rotate-90" : ""
               }`}
               strokeWidth={2}
@@ -262,8 +262,8 @@ function NavItem({
         >
           <div className="overflow-hidden min-h-0 relative flex flex-col gap-0.5 mt-0.5">
             <div
-              className="absolute top-0 bottom-0 border-l border-zinc-200 dark:border-zinc-800"
-              style={{ left: `${level * 12 + 17.5}px` }}
+              className="absolute top-0 bottom-0 border-l border-outline-variant/40"
+              style={{ left: `${level * 12 + 20}px` }}
             />
             {item.children!.map((child) => (
               <NavItem
@@ -466,7 +466,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     <>
       <aside
         style={{ width: "var(--sidebar-width)" }}
-        className={`h-full hidden md:flex flex-col fixed left-0 top-0 bg-[#fafafa] dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 p-3 z-50 select-none font-sans ${
+        className={`h-full hidden md:flex flex-col fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant/60 p-3.5 z-50 select-none font-sans ${
           isResizing ? "transition-none" : "transition-all duration-300"
         }`}
       >
@@ -480,9 +480,9 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         {/* Navigation Items List */}
         <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col gap-4 mt-2">
           {navGroups.map((group, idx) => (
-            <div key={idx} className="flex flex-col gap-0.5">
+            <div key={idx} className="flex flex-col gap-1">
               {group.heading && !displayCollapsed && (
-                <span className="px-2.5 mb-1 text-[11px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
+                <span className="px-3 mb-1 text-[11px] font-bold tracking-wider text-on-surface-variant/60 uppercase">
                   {group.heading}
                 </span>
               )}
@@ -503,18 +503,18 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         </div>
 
         {/* Bottom Area with Action CTA, Settings & Log out */}
-        <div className="mt-auto pt-4 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-0.5">
+        <div className="mt-auto pt-3.5 border-t border-outline-variant/50 flex flex-col gap-1">
           {/* Action CTA: Nueva Cita Button */}
           {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
-            <div className="mb-2 px-1">
+            <div className="mb-2 px-0.5">
               <button
                 onClick={onNewAppointmentClick}
-                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-[6px] text-[13px] font-medium bg-primary text-white hover:opacity-90 active:scale-[0.98] shadow-xs transition-all cursor-pointer ${
-                  displayCollapsed ? "!p-2 !w-8 !h-8 !rounded-full mx-auto" : ""
+                className={`w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary/90 active:scale-[0.98] shadow-xs transition-all cursor-pointer ${
+                  displayCollapsed ? "!p-2.5 !w-10 !h-10 !rounded-full mx-auto" : ""
                 }`}
                 title="Nueva Cita"
               >
-                <Plus className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+                <Plus className="w-4 h-4 shrink-0" strokeWidth={2} />
                 {!displayCollapsed && <span>Nueva Cita</span>}
               </button>
             </div>
@@ -526,18 +526,18 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
                 <button
                   key={item.id}
                   onClick={() => signOut({ callbackUrl: "/login" })}
-                  className={`group flex items-center justify-between px-2.5 py-[7px] rounded-[6px] cursor-pointer transition-all duration-200 select-none text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-red-600 dark:hover:text-red-400 border-none bg-transparent w-full text-left ${
-                    displayCollapsed ? "justify-center px-1" : ""
+                  className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 select-none text-on-surface-variant hover:bg-error/10 hover:text-error border-none bg-transparent w-full text-left ${
+                    displayCollapsed ? "justify-center px-1.5" : ""
                   }`}
                   title={displayCollapsed ? "Log out" : undefined}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     <LogOut
-                      className="w-[16px] h-[16px] text-zinc-500 group-hover:text-red-600 shrink-0 transition-colors"
-                      strokeWidth={1.5}
+                      className="w-[18px] h-[18px] text-on-surface-variant/80 group-hover:text-error shrink-0 transition-colors"
+                      strokeWidth={1.75}
                     />
                     {!displayCollapsed && (
-                      <span className="text-[13px] tracking-normal truncate">
+                      <span className="text-sm font-medium tracking-normal truncate">
                         Log out
                       </span>
                     )}
@@ -579,38 +579,38 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
             className="absolute inset-0"
             onClick={() => setIsSearchOpen(false)}
           />
-          <div className="relative w-full max-w-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="flex items-center px-4 border-b border-zinc-200 dark:border-zinc-800">
+          <div className="relative w-full max-w-xl bg-white border border-outline-variant/60 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="flex items-center px-5 border-b border-outline-variant/40">
               <Search
-                className="w-[18px] h-[18px] text-zinc-500 mr-3 shrink-0"
-                strokeWidth={1.5}
+                className="w-5 h-5 text-primary mr-3 shrink-0"
+                strokeWidth={2}
               />
               <input
                 autoFocus
                 value={searchInputVal}
                 onChange={(e) => setSearchInputVal(e.target.value)}
-                className="flex-1 bg-transparent py-4 outline-none text-[14px] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+                className="flex-1 bg-transparent py-4 outline-none text-sm text-on-surface placeholder:text-on-surface-variant/50 font-medium"
                 placeholder="Buscar clientes, servicios o citas..."
               />
               <kbd
                 onClick={() => setIsSearchOpen(false)}
-                className="hidden sm:inline-flex items-center justify-center h-5 px-1.5 ml-2 text-[10px] font-medium font-mono text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-[4px] cursor-pointer hover:text-zinc-900 transition-colors"
+                className="hidden sm:inline-flex items-center justify-center h-6 px-2 ml-2 text-xs font-semibold font-mono text-on-surface-variant/70 bg-primary/5 border border-outline-variant/60 rounded cursor-pointer hover:text-primary transition-colors"
               >
                 ESC
               </kbd>
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="ml-3 p-1 rounded-md text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 transition-colors cursor-pointer"
+                className="ml-3 p-1.5 rounded-lg text-on-surface-variant/70 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
               >
-                <X className="w-[18px] h-[18px]" strokeWidth={1.5} />
+                <X className="w-5 h-5" strokeWidth={2} />
               </button>
             </div>
-            <div className="p-2 py-8 flex flex-col items-center justify-center">
+            <div className="p-4 py-10 flex flex-col items-center justify-center">
               <Command
-                className="w-6 h-6 text-zinc-300 dark:text-zinc-600 mb-2"
-                strokeWidth={1.5}
+                className="w-8 h-8 text-primary/40 mb-3"
+                strokeWidth={1.75}
               />
-              <p className="text-[13px] text-zinc-500 font-medium">
+              <p className="text-sm text-on-surface-variant font-medium">
                 Escribe para buscar en Volta...
               </p>
             </div>
