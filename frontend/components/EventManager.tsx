@@ -486,44 +486,21 @@ export function EventManager({
               </Button>
             </div>
 
-            {/* Basic Plan Quota Pill */}
+            {/* Basic Plan Quota Button */}
             {isBasicActive && (
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsQuotaUpgradeOpen(true)}
                 className={cn(
-                  "inline-flex items-center gap-2.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all hover:shadow-xs cursor-pointer select-none",
-                  isQuotaExceeded
-                    ? "bg-rose-500/10 border-rose-500/30 text-rose-700 hover:bg-rose-500/15"
-                    : isQuotaWarning
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-800 hover:bg-amber-500/15"
-                      : "bg-surface-container-low/70 border-outline-variant/60 text-on-surface hover:bg-surface-container-high"
+                  "h-8 px-3 rounded-lg text-xs font-normal bg-surface border-outline-variant/60 text-on-surface hover:bg-surface-variant transition-colors shrink-0",
+                  isQuotaExceeded && "border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
+                  isQuotaWarning && "border-amber-500/50 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
                 )}
-                title="Cupo mensual de citas en Plan Básico. Pulsa para pasar a Pro con citas ilimitadas."
+                title="Citas realizadas este mes. Pulsa para pasar a Plan Pro con citas ilimitadas."
               >
-                <div className="flex items-center gap-1.5">
-                  <span className="text-on-surface-variant font-medium">Cupo:</span>
-                  <span className="font-bold text-on-surface">
-                    {currentMonthApps}/100 citas este mes
-                  </span>
-                </div>
-                <div className="w-12 h-1.5 bg-outline-variant/40 rounded-full overflow-hidden shrink-0">
-                  <div
-                    className={cn(
-                      "h-full rounded-full transition-all duration-500",
-                      isQuotaExceeded
-                        ? "bg-rose-500"
-                        : isQuotaWarning
-                          ? "bg-amber-500"
-                          : "bg-primary"
-                    )}
-                    style={{ width: `${quotaPct}%` }}
-                  />
-                </div>
-                <span className="ml-0.5 text-[10px] uppercase font-bold text-primary flex items-center gap-0.5">
-                  <Lock className="w-2.5 h-2.5" /> PRO
-                </span>
-              </button>
+                <span>{currentMonthApps}/100 citas este mes</span>
+              </Button>
             )}
           </div>
 
