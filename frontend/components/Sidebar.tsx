@@ -526,8 +526,8 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
         {
           id: "reports",
-          title: "Informes",
-          href: "/informes",
+          title: "Reportes",
+          href: "/reportes",
           icon: FileText,
           badge: "Próximamente",
           badgeVariant: "amber",

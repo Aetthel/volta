@@ -7,7 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import { FileText, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export default function InformesPage() {
+export default function ReportesPage() {
   return (
     <div className="flex h-screen w-full bg-surface-container-lowest text-on-surface overflow-hidden">
       <Sidebar />
@@ -23,7 +23,7 @@ export default function InformesPage() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface mb-3">
-            Módulo de Informes y Reportes
+            Módulo de Reportes
           </h1>
 
           <p className="text-sm text-on-surface-variant leading-relaxed mb-8">
