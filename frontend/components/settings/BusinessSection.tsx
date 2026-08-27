@@ -34,6 +34,9 @@ const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
 const WorkerModal = dynamic(() => import("@/components/settings/WorkerModal"), {
   ssr: false,
 });
+const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
+  ssr: false,
+});
 import {
   Card,
   CardHeader,
@@ -80,6 +83,8 @@ export default function BusinessSection({
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [showWorkers, setShowWorkers] = useState(false);
   const [isWorkerModalOpen, setIsWorkerModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [upgradeInfo, setUpgradeInfo] = useState({ title: "", description: "" });
   const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
   const [workerFormData, setWorkerFormData] = useState({
     name: "",
@@ -908,12 +913,26 @@ export default function BusinessSection({
               variant="primary"
               size="md"
               onClick={() => {
+                const plan = session?.user?.subscriptionPlan || "BASIC";
+                const status = session?.user?.subscriptionStatus || "ACTIVE";
+                const isTrial = status === "TRIALING";
+
+                if (!isTrial && plan === "BASIC" && workers.length >= 1) {
+                  setUpgradeInfo({
+                    title: "Límite de Trabajadores",
+                    description:
+                      "El Plan Básico incluye 1 trabajador. Para ampliar tu equipo, añade trabajadores adicionales por +5€/mes o actualiza al Plan Pro (40€/mes con 2 incluidos).",
+                  });
+                  setIsUpgradeModalOpen(true);
+                  return;
+                }
+
                 setEditingWorker(null);
                 setWorkerFormData({ name: "", email: "", password: "", role: "EMPLEADO" });
                 setWorkerErrorMsg("");
                 setIsWorkerModalOpen(true);
               }}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 active:scale-95 font-medium"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 active:scale-95 font-medium cursor-pointer"
             >
               <UserPlus />
               <span>Añadir Empleado</span>
@@ -994,6 +1013,12 @@ export default function BusinessSection({
         setFormData={setWorkerFormData}
         errorMsg={workerErrorMsg}
         isEditing={!!editingWorker}
+      />
+      <UpgradeProModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        title={upgradeInfo.title}
+        description={upgradeInfo.description}
       />
     </div>
   );
