@@ -77,6 +77,14 @@ export default function BusinessSection({
   const [loadingServices, setLoadingServices] = useState(false);
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
   const [serviceToEdit, setServiceToEdit] = useState<Service | null>(null);
+  const [serviceTriggerRect, setServiceTriggerRect] = useState<{
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [workers, setWorkers] = useState<Worker[]>([]);
@@ -738,78 +746,6 @@ export default function BusinessSection({
         </CardFooter>
       </Card>
 
-      {/* Row 2: Subscriptions & Plan Dedicated Card Container */}
-      <Card className="col-span-1 sm:col-span-2 lg:col-span-6 flex flex-col justify-between">
-        <div>
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-primary" />
-              <span>Suscripción y Plan</span>
-            </CardTitle>
-
-            <span className="px-2.5 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-semibold flex items-center gap-1 border border-outline-variant/40">
-              Plan PRO
-            </span>
-          </CardHeader>
-
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex items-center justify-between p-3.5 bg-surface-container-low border border-outline-variant/60 rounded-xl">
-              <div>
-                <span className="font-semibold text-body-md text-on-surface block">
-                  Plan Pro Anual
-                </span>
-                <span className="text-body-xs text-on-surface-variant">
-                  25,00 € / mes · Facturación anual
-                </span>
-              </div>
-              <span className="px-2.5 py-1 bg-primary/10 text-primary text-body-xs font-bold rounded-lg border border-primary/20">
-                Activo
-              </span>
-            </div>
-
-            <div className="text-body-xs text-on-surface-variant space-y-1.5">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Gestión ilimitada de citas y servicios con aforo</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Integración oficial de WhatsApp y Avisos LOPD</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Soporte prioritario y portal público personalizado</span>
-              </div>
-            </div>
-          </CardContent>
-        </div>
-
-        <CardFooter className="pt-4 border-t border-outline-variant/35 flex justify-end gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setToast({ show: true, text: "Gestión de facturación disponible próximamente" });
-              setTimeout(() => setToast({ show: false, text: "" }), 3000);
-            }}
-            className="text-xs font-semibold rounded-xl active:scale-[0.98]"
-          >
-            Ver Facturas
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              setToast({ show: true, text: "Cambio de plan disponible próximamente" });
-              setTimeout(() => setToast({ show: false, text: "" }), 3000);
-            }}
-            className="text-xs font-semibold rounded-xl active:scale-[0.98]"
-          >
-            Cambiar Plan
-          </Button>
-        </CardFooter>
-      </Card>
-
       {/* Services Card */}
       <Card className="col-span-1 sm:col-span-2 lg:col-span-12 flex flex-col justify-between">
         <div>
@@ -861,7 +797,9 @@ export default function BusinessSection({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setServiceTriggerRect(rect);
                           setServiceToEdit(service);
                           setIsAddServiceModalOpen(true);
                         }}
@@ -883,7 +821,9 @@ export default function BusinessSection({
                   </div>
                 ))}
                 <div
-                  onClick={() => {
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setServiceTriggerRect(rect);
                     setServiceToEdit(null);
                     setIsAddServiceModalOpen(true);
                   }}
@@ -1000,9 +940,11 @@ export default function BusinessSection({
         onClose={() => {
           setIsAddServiceModalOpen(false);
           setServiceToEdit(null);
+          setServiceTriggerRect(null);
         }}
         onSave={handleSaveService}
         serviceToEdit={serviceToEdit}
+        triggerRect={serviceTriggerRect}
       />
       <WorkerModal
         isOpen={isWorkerModalOpen}
