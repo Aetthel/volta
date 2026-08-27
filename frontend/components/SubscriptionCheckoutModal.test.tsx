@@ -34,9 +34,9 @@ describe("SubscriptionCheckoutModal", () => {
   it("renders Step 1 with plan options and trial notice when open", () => {
     render(<SubscriptionCheckoutModal isOpen={true} onClose={vi.fn()} initialPlan="PRO" />);
 
-    expect(screen.getByText("Elige tu Plan de Inversión")).toBeInTheDocument();
-    expect(screen.getByText("Plan Básico")).toBeInTheDocument();
-    expect(screen.getByText("Plan Pro")).toBeInTheDocument();
+    expect(screen.getByText("Elige tu Plan de Suscripción")).toBeInTheDocument();
+    expect(screen.getByText("Básico")).toBeInTheDocument();
+    expect(screen.getByText("Pro")).toBeInTheDocument();
     expect(screen.getByText(/Prueba Gratuita Activa/i)).toBeInTheDocument();
   });
 

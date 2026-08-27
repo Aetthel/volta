@@ -113,7 +113,7 @@ function TrialBannerContent() {
               {isExpired ? (
                 <span>
                   <strong>Período de prueba finalizado:</strong> Elige tu suscripción (Plan Básico
-                  18€/mes o Plan Pro 25€/mes) para continuar usando todas las funciones.
+                  30€/mes o Plan Pro 40€/mes) para continuar usando todas las funciones.
                 </span>
               ) : isUrgent ? (
                 <span>
@@ -121,12 +121,12 @@ function TrialBannerContent() {
                   <strong>
                     {daysLeft} día{daysLeft === 1 ? "" : "s"}
                   </strong>{" "}
-                  de prueba gratuita en Plan Pro (25€/mes).
+                  de prueba gratuita en Plan Pro (40€/mes).
                 </span>
               ) : (
                 <span>
                   Estás disfrutando de{" "}
-                  <strong>14 días de prueba gratuita del Plan Pro (25€/mes)</strong>. Te quedan{" "}
+                  <strong>14 días de prueba gratuita del Plan Pro (40€/mes)</strong>. Te quedan{" "}
                   <strong>
                     {daysLeft} día{daysLeft === 1 ? "" : "s"}
                   </strong>

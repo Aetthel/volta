@@ -136,8 +136,8 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
             </div>
             <p className="text-sm text-on-surface-variant max-w-xl">
               {currentPlan === "BASIC"
-                ? "1 Sede, hasta 3 trabajadores, citas y agenda ilimitadas."
-                : "Multisede ilimitada, trabajadores ilimitados y vinculación automática de WhatsApp."}
+                ? "1 Sede/calendario, 1 trabajador incluido (+5€ extra), hasta 100 reservas online/mes y recordatorios Email/SMS."
+                : "Multi-calendario, sedes/salas ilimitadas, 2 trabajadores incluidos (+5€ extra), WhatsApp bidireccional, pagos online y analítica completa."}
             </p>
           </div>
 
@@ -170,7 +170,7 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
           <div className="space-y-1">
             <span className="text-on-surface-variant block font-medium">Cuota Mensual</span>
             <span className="text-base font-bold text-on-surface">
-              {currentPlan === "BASIC" ? "18,00€" : "25,00€"} <span className="text-xs font-normal text-on-surface-variant">+ IVA / mes</span>
+              {currentPlan === "BASIC" ? "30,00€" : "40,00€"} <span className="text-xs font-normal text-on-surface-variant">+ IVA / mes</span>
             </span>
           </div>
 

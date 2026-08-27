@@ -14,8 +14,12 @@ import {
   CheckCircle2,
   Loader2,
   Zap,
+  Users,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
+import { calculatePlanPrice, PLAN_CONFIGS } from "@/lib/permissions";
 
 interface SubscriptionCheckoutModalProps {
   isOpen: boolean;
@@ -48,6 +52,7 @@ export default function SubscriptionCheckoutModal({
   const { data: session, update: updateSession } = useSession();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedPlan, setSelectedPlan] = useState<"BASIC" | "PRO">(initialPlan);
+  const [totalWorkers, setTotalWorkers] = useState<number>(initialPlan === "BASIC" ? 1 : 2);
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [discountPercent, setDiscountPercent] = useState(0);
@@ -59,7 +64,6 @@ export default function SubscriptionCheckoutModal({
   const [billingEmail, setBillingEmail] = useState(session?.user?.email || "");
 
   // Loading and error states
-  // Loading and error states
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -70,7 +74,6 @@ export default function SubscriptionCheckoutModal({
 
   const handleCheckoutSuccess = useCallback(async () => {
     setStep(4);
-    // Refresh NextAuth session reactively
     try {
       await updateSession({
         subscriptionPlan: selectedPlan,
@@ -87,6 +90,7 @@ export default function SubscriptionCheckoutModal({
     if (isOpen) {
       setStep(1);
       setSelectedPlan(initialPlan);
+      setTotalWorkers(initialPlan === "BASIC" ? 1 : 2);
       setErrorMessage("");
       setCouponError("");
       if (session?.user?.name) setLegalName(session.user.name);
@@ -107,6 +111,15 @@ export default function SubscriptionCheckoutModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialPlan]);
 
+  // Adjust totalWorkers minimum when plan toggles
+  const handleSelectPlan = (plan: "BASIC" | "PRO") => {
+    setSelectedPlan(plan);
+    const minWorkers = plan === "BASIC" ? 1 : 2;
+    if (totalWorkers < minWorkers) {
+      setTotalWorkers(minWorkers);
+    }
+  };
+
   if (!isOpen) return null;
 
   const isTrialing = session?.user?.subscriptionStatus === "TRIALING";
@@ -115,12 +128,10 @@ export default function SubscriptionCheckoutModal({
     ? Math.max(0, Math.ceil((new Date(trialExpiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
 
-  // Price calculations
-  const basePrice = selectedPlan === "BASIC" ? 18.0 : 25.0;
-  const discountAmount = couponApplied ? (basePrice * discountPercent) / 100 : 0;
-  const priceAfterDiscount = basePrice - discountAmount;
-  const vatAmount = priceAfterDiscount * 0.21;
-  const totalAmount = priceAfterDiscount + vatAmount;
+  // Price calculations from centralized permissions helper
+  const pricing = calculatePlanPrice(selectedPlan, totalWorkers, couponApplied ? discountPercent : 0);
+  const vatAmount = (pricing.total * 0.21);
+  const totalWithVat = pricing.total + vatAmount;
 
   const handleApplyCoupon = () => {
     setCouponError("");
@@ -153,7 +164,10 @@ export default function SubscriptionCheckoutModal({
       const response = await fetch("/api/backend/subscription/checkout-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selectedPlan }),
+        body: JSON.stringify({
+          plan: selectedPlan,
+          totalWorkers,
+        }),
       });
 
       const data = await response.json();
@@ -228,12 +242,12 @@ export default function SubscriptionCheckoutModal({
           </div>
         )}
 
-        {/* STEP 1: Plan Selection & Coupon */}
+        {/* STEP 1: Plan Selection & Worker Counter */}
         {step === 1 && (
           <div className="flex flex-col gap-5 animate-in fade-in duration-200">
             <div className="text-center">
               <h3 id="checkout-modal-title" className="text-2xl font-bold text-on-surface">
-                Elige tu Plan de Inversión
+                Elige tu Plan de Suscripción
               </h3>
               <p className="text-sm text-on-surface-variant mt-1">
                 Facturación mensual transparente con IVA gestionado por Lemon Squeezy (MoR).
@@ -254,9 +268,9 @@ export default function SubscriptionCheckoutModal({
 
             {/* Plan Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {/* Basic */}
+              {/* Basic Plan (30€/mes) */}
               <div
-                onClick={() => setSelectedPlan("BASIC")}
+                onClick={() => handleSelectPlan("BASIC")}
                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
                   selectedPlan === "BASIC"
                     ? "border-primary bg-primary/5 shadow-sm"
@@ -266,7 +280,7 @@ export default function SubscriptionCheckoutModal({
                 <div>
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                      Plan Básico
+                      Básico
                     </span>
                     {selectedPlan === "BASIC" && (
                       <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center">
@@ -275,28 +289,34 @@ export default function SubscriptionCheckoutModal({
                     )}
                   </div>
                   <div className="text-2xl font-bold text-on-surface mb-1">
-                    18€<span className="text-xs font-normal text-on-surface-variant">/mes</span>
+                    30€<span className="text-xs font-normal text-on-surface-variant">/mes</span>
                   </div>
-                  <p className="text-xs text-on-surface-variant">
-                    Para autónomos y negocios de 1 sede.
+                  <p className="text-xs text-on-surface-variant font-medium">
+                    Para empezar sin complicaciones.
                   </p>
                 </div>
                 <ul className="mt-3 text-xs space-y-1.5 text-on-surface">
                   <li className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> 1 Sede activa
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> 1 trabajador incluido (+5€ extra)
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Hasta 3 profesionales
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> 1 calendario
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Agenda y citas ilimitadas
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Reserva online (100/mes)
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Recordatorios Email/SMS
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Soporte por email
                   </li>
                 </ul>
               </div>
 
-              {/* Pro */}
+              {/* Pro Plan (40€/mes) */}
               <div
-                onClick={() => setSelectedPlan("PRO")}
+                onClick={() => handleSelectPlan("PRO")}
                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between relative ${
                   selectedPlan === "PRO"
                     ? "border-primary bg-primary/5 shadow-md ring-1 ring-primary"
@@ -309,7 +329,7 @@ export default function SubscriptionCheckoutModal({
                 <div>
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                      Plan Pro
+                      Pro
                     </span>
                     {selectedPlan === "PRO" && (
                       <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center">
@@ -318,23 +338,70 @@ export default function SubscriptionCheckoutModal({
                     )}
                   </div>
                   <div className="text-2xl font-bold text-on-surface mb-1">
-                    25€<span className="text-xs font-normal text-on-surface-variant">/mes</span>
+                    40€<span className="text-xs font-normal text-on-surface-variant">/mes</span>
                   </div>
-                  <p className="text-xs text-on-surface-variant">
-                    Automatización completa y multisede.
+                  <p className="text-xs text-on-surface-variant font-medium">
+                    Para negocios que quieren crecer.
                   </p>
                 </div>
                 <ul className="mt-3 text-xs space-y-1.5 text-on-surface font-medium">
                   <li className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Multisede ilimitada
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> 2 trabajadores incluidos (+5€ extra)
                   </li>
                   <li className="flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Equipo ilimitado
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Multi-calendario / Sedes / Salas
                   </li>
                   <li className="flex items-center gap-1.5 text-primary">
-                    <Sparkles className="w-3.5 h-3.5 shrink-0" /> WhatsApp Web Automático
+                    <Sparkles className="w-3.5 h-3.5 shrink-0" /> WhatsApp bidireccional
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Pagos online (señas y depósitos)
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Gestión completa de clientes
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Analítica de negocio
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-primary shrink-0" /> Soporte prioritario por chat
                   </li>
                 </ul>
+              </div>
+            </div>
+
+            {/* Workers Count Selector */}
+            <div className="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/20 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Users className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-xs font-bold text-on-surface">Número de Trabajadores</p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    {pricing.includedWorkers} incluido(s) en {PLAN_CONFIGS[selectedPlan].name} · +5€/mes por trabajador adicional
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 bg-surface px-2 py-1 rounded-lg border border-outline-variant/40">
+                <button
+                  type="button"
+                  onClick={() => setTotalWorkers((prev) => Math.max(1, prev - 1))}
+                  disabled={totalWorkers <= 1}
+                  className="p-1 text-on-surface-variant hover:text-on-surface disabled:opacity-30 cursor-pointer"
+                  aria-label="Disminuir trabajadores"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-xs font-bold text-on-surface min-w-5 text-center">
+                  {totalWorkers}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setTotalWorkers((prev) => prev + 1)}
+                  className="p-1 text-on-surface-variant hover:text-on-surface cursor-pointer"
+                  aria-label="Aumentar trabajadores"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
 
@@ -378,13 +445,19 @@ export default function SubscriptionCheckoutModal({
             {/* Price Breakdown */}
             <div className="bg-surface-container rounded-xl p-3.5 text-xs flex flex-col gap-1.5">
               <div className="flex justify-between text-on-surface-variant">
-                <span>Base mensual (Plan {selectedPlan})</span>
-                <span>{basePrice.toFixed(2)}€</span>
+                <span>Base mensual (Plan {PLAN_CONFIGS[selectedPlan].name})</span>
+                <span>{pricing.basePrice.toFixed(2)}€</span>
               </div>
+              {pricing.extraWorkers > 0 && (
+                <div className="flex justify-between text-on-surface-variant">
+                  <span>{pricing.extraWorkers} trabajador(es) adicional(es) (+5€/mes c/u)</span>
+                  <span>+{pricing.extraWorkersCost.toFixed(2)}€</span>
+                </div>
+              )}
               {couponApplied && (
                 <div className="flex justify-between text-emerald-600 font-medium">
                   <span>Descuento ({discountPercent}%)</span>
-                  <span>-{discountAmount.toFixed(2)}€</span>
+                  <span>-{pricing.discountAmount.toFixed(2)}€</span>
                 </div>
               )}
               <div className="flex justify-between text-on-surface-variant">
@@ -393,7 +466,7 @@ export default function SubscriptionCheckoutModal({
               </div>
               <div className="border-t border-outline-variant/30 pt-1.5 flex justify-between font-bold text-sm text-on-surface">
                 <span>Total a facturar</span>
-                <span>{totalAmount.toFixed(2)}€/mes</span>
+                <span>{totalWithVat.toFixed(2)}€/mes</span>
               </div>
             </div>
 
@@ -554,7 +627,7 @@ export default function SubscriptionCheckoutModal({
                 ) : (
                   <>
                     <Zap className="w-4 h-4" />
-                    <span>Pagar {totalAmount.toFixed(2)}€/mes</span>
+                    <span>Pagar {totalWithVat.toFixed(2)}€/mes</span>
                   </>
                 )}
               </Button>
@@ -574,7 +647,7 @@ export default function SubscriptionCheckoutModal({
                 ¡Plan Activado!
               </span>
               <h3 className="text-2xl font-bold text-on-surface mt-2">
-                Bienvenido a Volta Plan {selectedPlan}
+                Bienvenido a Volta Plan {PLAN_CONFIGS[selectedPlan].name}
               </h3>
               <p className="text-sm text-on-surface-variant mt-1.5 max-w-md">
                 Tu suscripción ha sido procesada con éxito. Ya tienes acceso completo a todas las
@@ -585,7 +658,11 @@ export default function SubscriptionCheckoutModal({
             <div className="w-full bg-surface-container rounded-xl p-4 text-xs flex flex-col gap-2 border border-outline-variant/30 text-left">
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">Plan contratado:</span>
-                <span className="font-bold text-on-surface">Volta {selectedPlan} (Mensual)</span>
+                <span className="font-bold text-on-surface">Volta {PLAN_CONFIGS[selectedPlan].name} (Mensual)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-on-surface-variant">Trabajadores:</span>
+                <span className="font-bold text-on-surface">{totalWorkers}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-on-surface-variant">Estado:</span>

@@ -20,7 +20,7 @@ export default function UpgradeProModal({
   isOpen,
   onClose,
   title = "Desbloquea el Plan Pro",
-  description = "Para acceder a esta función (multisede, miembros ilimitados o recordatorios por WhatsApp), actualiza tu cuenta a Plan Pro (25€/mes).",
+  description = "Para acceder a esta función (multi-calendario/sedes, WhatsApp bidireccional, pagos online o analítica), actualiza tu cuenta a Plan Pro (40€/mes).",
 }: UpgradeProModalProps) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
@@ -56,15 +56,23 @@ export default function UpgradeProModal({
             <div className="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2.5 border border-outline-variant/20">
               <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
                 <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Trabajadores y agendas ilimitadas</span>
+                <span>Multi-calendario, varias sedes y salas</span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
                 <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Automatización de WhatsApp 2 vías</span>
+                <span>2 trabajadores incluidos (+5€ extra)</span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
                 <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Gestión multisede y analítica avanzada</span>
+                <span>Recordatorios WhatsApp bidireccional</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>Pagos online (señas y depósitos)</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
+                <Check className="w-4 h-4 text-primary shrink-0" />
+                <span>Analítica de negocio y soporte prioritario por chat</span>
               </div>
             </div>
 
@@ -79,7 +87,7 @@ export default function UpgradeProModal({
                   setIsCheckoutOpen(true);
                 }}
               >
-                <span>Actualizar a Plan Pro (25€/mes)</span>
+                <span>Actualizar a Plan Pro (40€/mes)</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
               <button
