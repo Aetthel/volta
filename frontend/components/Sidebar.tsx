@@ -575,44 +575,56 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
 
       {/* Quick Search Modal Overlay */}
       {mounted && isSearchOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-black/50 backdrop-blur-md px-4 animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 sm:pt-28 p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-150 overflow-y-auto">
           <div
-            className="absolute inset-0"
+            className="fixed inset-0"
             onClick={() => setIsSearchOpen(false)}
           />
-          <div className="relative w-full max-w-xl bg-white border border-outline-variant/60 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-            <div className="flex items-center px-5 border-b border-outline-variant/40">
+          <div className="relative w-full max-w-xl bg-surface border border-outline-variant/60 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150 select-none">
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-outline-variant/40 bg-surface">
               <Search
-                className="w-5 h-5 text-primary mr-3 shrink-0"
+                className="w-5 h-5 text-primary shrink-0"
                 strokeWidth={2}
               />
               <input
                 autoFocus
+                type="text"
                 value={searchInputVal}
                 onChange={(e) => setSearchInputVal(e.target.value)}
-                className="flex-1 bg-transparent py-4 outline-none text-sm text-on-surface placeholder:text-on-surface-variant/50 font-medium"
+                className="flex-1 bg-transparent border-0 outline-none text-sm text-on-surface placeholder:text-on-surface-variant/60 font-medium min-w-0"
                 placeholder="Buscar clientes, servicios o citas..."
               />
+              {searchInputVal && (
+                <button
+                  onClick={() => setSearchInputVal("")}
+                  className="p-1 rounded-md text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container transition-colors text-xs font-medium cursor-pointer"
+                >
+                  Borrar
+                </button>
+              )}
               <kbd
                 onClick={() => setIsSearchOpen(false)}
-                className="hidden sm:inline-flex items-center justify-center h-6 px-2 ml-2 text-xs font-semibold font-mono text-on-surface-variant/70 bg-primary/5 border border-outline-variant/60 rounded cursor-pointer hover:text-primary transition-colors"
+                className="hidden sm:inline-flex items-center justify-center h-6 px-2 text-[11px] font-semibold font-mono text-on-surface-variant/70 bg-surface-container-high border border-outline-variant/60 rounded cursor-pointer hover:text-primary transition-colors"
               >
                 ESC
               </kbd>
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="ml-3 p-1.5 rounded-lg text-on-surface-variant/70 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-on-surface-variant/70 hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                aria-label="Cerrar búsqueda"
               >
                 <X className="w-5 h-5" strokeWidth={2} />
               </button>
             </div>
-            <div className="p-4 py-10 flex flex-col items-center justify-center">
-              <Command
-                className="w-8 h-8 text-primary/40 mb-3"
-                strokeWidth={1.75}
-              />
-              <p className="text-sm text-on-surface-variant font-medium">
-                Escribe para buscar en Volta...
+            <div className="p-6 py-10 flex flex-col items-center justify-center text-center">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-3 shadow-inner">
+                <Command className="w-6 h-6" strokeWidth={1.75} />
+              </div>
+              <p className="text-sm font-semibold text-on-surface mb-1">
+                Búsqueda rápida en Volta
+              </p>
+              <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed">
+                Escribe el nombre de un cliente, servicio, cita o comando rápido.
               </p>
             </div>
           </div>
