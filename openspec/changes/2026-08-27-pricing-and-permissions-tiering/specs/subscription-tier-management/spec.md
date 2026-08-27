@@ -1,9 +1,7 @@
-# subscription-tier-management Specification
-
 ## Purpose
 Establece las reglas funcionales, escenarios de prueba y restricciones asociadas a los planes de suscripción (Básico 30€/mes vs Pro 40€/mes), cuotas de trabajadores (+5€ extra), límites de sedes/reservas y la matriz de permisos por rol de usuario (`ADMIN`, `JEFE`, `EMPLEADO`).
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Tarifas de Planes y Add-ons de Trabajadores
 El sistema SHALL configurar el Plan Básico a 30,00 €/mes con 1 trabajador incluido (+5,00 €/mes por trabajador adicional) y el Plan Pro a 40,00 €/mes con 2 trabajadores incluidos (+5,00 €/mes por trabajador adicional).
