@@ -631,11 +631,11 @@ export default function ClientesPage() {
           </div>
 
           {/* Main Table Container: Edge-to-Edge with full width and height */}
-          <div className="w-full flex-1 overflow-auto bg-surface-container-lowest border-t border-outline-variant/30 flex flex-col justify-between">
+          <div className="w-full flex-1 overflow-auto border-t border-outline-variant/30 flex flex-col justify-between">
             <div className="relative w-full overflow-x-auto flex-1">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-surface-container-low/40 hover:bg-surface-container-low/40 border-b border-outline-variant/30">
+                  <TableRow className="border-b border-outline-variant/30">
                     {visibleColumns.has("cliente") && (
                       <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5 pl-6">
                         Cliente
@@ -853,7 +853,7 @@ export default function ClientesPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleSendCustomMessage(client)}
-                                    className="p-1.5 text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-200 transition-colors duration-150 cursor-pointer"
+                                    className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                     title="Enviar WhatsApp"
                                   >
                                     <MessageCircle className="w-4 h-4" />
@@ -863,7 +863,7 @@ export default function ClientesPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleSendWhatsAppConsent(client)}
-                                    className="p-1.5 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 transition-colors duration-150 cursor-pointer"
+                                    className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                     title="Enviar recordatorio LOPD por WhatsApp"
                                   >
                                     <ShieldAlert className="w-4 h-4" />
@@ -896,7 +896,7 @@ export default function ClientesPage() {
                                   onClick={() =>
                                     handleDeleteClient(client.id, `${client.name} ${client.surname || ""}`)
                                   }
-                                  className="p-1.5 text-rose-500 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-200 transition-colors duration-150 cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                   title="Eliminar cliente"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -936,7 +936,7 @@ export default function ClientesPage() {
 
             {/* Pagination Footer */}
             {!isLoading && filteredClients.length > 0 && (
-              <div className="w-full border-t border-outline-variant/30 bg-surface-container-lowest py-3.5 px-6 flex items-center justify-between mt-auto">
+              <div className="w-full border-t border-outline-variant/30 py-3.5 px-6 flex items-center justify-between mt-auto">
                 <span className="text-xs text-on-surface-variant">
                   Mostrando <strong className="text-on-surface">{startItem}–{endItem}</strong> de{" "}
                   <strong className="text-on-surface">{filteredClients.length}</strong> clientes

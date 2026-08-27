@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useCallback, useMemo, useEffect } from "react"
+import { createPortal } from "react-dom"
+import { useDraggableModal } from "@/lib/useDraggableModal"
+import { Button as VoltaButton } from "@/components/ui/volta-ui"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,7 +19,24 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, Grid3x3, List, Search, Filter, X } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Calendar,
+  Clock,
+  Grid3x3,
+  List,
+  Search,
+  Filter,
+  X,
+  User,
+  Briefcase,
+  Palette,
+  Tag,
+  FileText,
+  Trash2,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -90,6 +110,30 @@ export function EventManager({
     category: categories[0],
     tags: [],
   })
+
+  const { position, handleMouseDown } = useDraggableModal({
+    isOpen: isDialogOpen,
+    modalWidth: 480,
+    modalHeight: 580,
+  })
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const formatDateForInput = (d?: Date | string) => {
+    if (!d) return ""
+    const dateObj = d instanceof Date ? d : new Date(d)
+    if (isNaN(dateObj.getTime())) return ""
+    const pad = (n: number) => String(n).padStart(2, "0")
+    const year = dateObj.getFullYear()
+    const month = pad(dateObj.getMonth() + 1)
+    const day = pad(dateObj.getDate())
+    const hours = pad(dateObj.getHours())
+    const minutes = pad(dateObj.getMinutes())
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
 
   // Sync state if initialEvents changes from parent API updates
   useEffect(() => {
@@ -626,200 +670,300 @@ export function EventManager({
         )}
       </div>
 
-      {/* Event Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isCreating ? "Crear Cita" : "Detalles de la Cita"}</DialogTitle>
-            <DialogDescription>
-              {isCreating ? "Añadir una nueva cita al calendario" : "Ver y editar detalles de la cita"}
-            </DialogDescription>
-          </DialogHeader>
+      {/* Event Modal — Volta Draggable Modal */}
+      {isDialogOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[100] pointer-events-none">
+          {/* Backdrop — transparent without blur or darkening */}
+          <div
+            className="absolute inset-0 bg-transparent pointer-events-auto"
+            onClick={() => {
+              setIsDialogOpen(false)
+              setIsCreating(false)
+              setSelectedEvent(null)
+            }}
+          />
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título / Cliente</Label>
-              <Input
-                id="title"
-                value={isCreating ? newEvent.title : selectedEvent?.title}
-                onChange={(e) =>
-                  isCreating
-                    ? setNewEvent((prev) => ({ ...prev, title: e.target.value }))
-                    : setSelectedEvent((prev) => (prev ? { ...prev, title: e.target.value } : null))
-                }
-                placeholder="Nombre del cliente y servicio"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción / Notas</Label>
-              <Textarea
-                id="description"
-                value={isCreating ? newEvent.description : selectedEvent?.description}
-                onChange={(e) =>
-                  isCreating
-                    ? setNewEvent((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    : setSelectedEvent((prev) => (prev ? { ...prev, description: e.target.value } : null))
-                }
-                placeholder="Notas adicionales de la cita"
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startTime">Hora Inicio</Label>
-                <Input
-                  id="startTime"
-                  type="datetime-local"
-                  value={
-                    isCreating
-                      ? newEvent.startTime
-                        ? new Date(newEvent.startTime.getTime() - newEvent.startTime.getTimezoneOffset() * 60000)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                      : selectedEvent
-                        ? new Date(
-                            selectedEvent.startTime.getTime() - selectedEvent.startTime.getTimezoneOffset() * 60000,
-                          )
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                  }
-                  onChange={(e) => {
-                    const date = new Date(e.target.value)
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, startTime: date }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, startTime: date } : null))
-                  }}
-                />
+          {/* Modal Content Card */}
+          <div
+            style={{
+              position: "fixed",
+              left: `${position.x}px`,
+              top: `${position.y}px`,
+              width: "480px",
+              maxWidth: "calc(100vw - 32px)",
+              transition: "none",
+            }}
+            className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 overflow-hidden z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col"
+          >
+            {/* Header */}
+            <div
+              onMouseDown={handleMouseDown}
+              className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none"
+            >
+              <div className="flex flex-col">
+                <h2 className="text-xl font-bold text-on-surface tracking-tight">
+                  {isCreating ? "Agendar Cita" : "Editar Cita"}
+                </h2>
+                <p className="text-sm text-on-surface-variant mt-0.5">
+                  {isCreating
+                    ? "Añade una nueva cita al calendario"
+                    : "Modifica los datos del cliente, servicio u horario"}
+                </p>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endTime">Hora Fin</Label>
-                <Input
-                  id="endTime"
-                  type="datetime-local"
-                  value={
-                    isCreating
-                      ? newEvent.endTime
-                        ? new Date(newEvent.endTime.getTime() - newEvent.endTime.getTimezoneOffset() * 60000)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                      : selectedEvent
-                        ? new Date(selectedEvent.endTime.getTime() - selectedEvent.endTime.getTimezoneOffset() * 60000)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                  }
-                  onChange={(e) => {
-                    const date = new Date(e.target.value)
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, endTime: date }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, endTime: date } : null))
-                  }}
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDialogOpen(false)
+                  setIsCreating(false)
+                  setSelectedEvent(null)
+                }}
+                className="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer -mr-1"
+                aria-label="Cerrar modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoría</Label>
-                <Select
-                  value={isCreating ? newEvent.category : selectedEvent?.category}
-                  onValueChange={(value) =>
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, category: value }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, category: value } : null))
-                  }
+            {/* Form Body */}
+            <div className="p-6 flex flex-col gap-4 max-h-[calc(90vh-140px)] overflow-y-auto custom-scrollbar">
+              {/* Título / Cliente */}
+              <div>
+                <label
+                  htmlFor="modal-event-title"
+                  className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
                 >
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
+                  <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Cliente / Título <span className="text-error">*</span></span>
+                </label>
+                <input
+                  id="modal-event-title"
+                  type="text"
+                  value={isCreating ? newEvent.title : selectedEvent?.title || ""}
+                  onChange={(e) =>
+                    isCreating
+                      ? setNewEvent((prev) => ({ ...prev, title: e.target.value }))
+                      : setSelectedEvent((prev) => (prev ? { ...prev, title: e.target.value } : null))
+                  }
+                  placeholder="Nombre del cliente y servicio"
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+                />
+              </div>
+
+              {/* Hora Inicio & Fin (2 Columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label
+                    htmlFor="modal-event-startTime"
+                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Hora Inicio</span>
+                  </label>
+                  <input
+                    id="modal-event-startTime"
+                    type="datetime-local"
+                    value={
+                      isCreating
+                        ? formatDateForInput(newEvent.startTime)
+                        : formatDateForInput(selectedEvent?.startTime)
+                    }
+                    onChange={(e) => {
+                      const date = new Date(e.target.value)
+                      if (!isNaN(date.getTime())) {
+                        isCreating
+                          ? setNewEvent((prev) => ({ ...prev, startTime: date }))
+                          : setSelectedEvent((prev) => (prev ? { ...prev, startTime: date } : null))
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="modal-event-endTime"
+                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Hora Fin</span>
+                  </label>
+                  <input
+                    id="modal-event-endTime"
+                    type="datetime-local"
+                    value={
+                      isCreating
+                        ? formatDateForInput(newEvent.endTime)
+                        : formatDateForInput(selectedEvent?.endTime)
+                    }
+                    onChange={(e) => {
+                      const date = new Date(e.target.value)
+                      if (!isNaN(date.getTime())) {
+                        isCreating
+                          ? setNewEvent((prev) => ({ ...prev, endTime: date }))
+                          : setSelectedEvent((prev) => (prev ? { ...prev, endTime: date } : null))
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Categoría y Color (2 Columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label
+                    htmlFor="modal-event-category"
+                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                  >
+                    <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Categoría / Servicio</span>
+                  </label>
+                  <select
+                    id="modal-event-category"
+                    value={isCreating ? newEvent.category : selectedEvent?.category || ""}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      isCreating
+                        ? setNewEvent((prev) => ({ ...prev, category: val }))
+                        : setSelectedEvent((prev) => (prev ? { ...prev, category: val } : null))
+                    }}
+                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
+                  >
                     {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
+                      <option key={cat} value={cat}>
                         {cat}
-                      </SelectItem>
+                      </option>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="modal-event-color"
+                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                  >
+                    <Palette className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Color</span>
+                  </label>
+                  <select
+                    id="modal-event-color"
+                    value={isCreating ? newEvent.color : selectedEvent?.color || ""}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      isCreating
+                        ? setNewEvent((prev) => ({ ...prev, color: val }))
+                        : setSelectedEvent((prev) => (prev ? { ...prev, color: val } : null))
+                    }}
+                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
+                  >
+                    {colors.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
-                <Select
-                  value={isCreating ? newEvent.color : selectedEvent?.color}
-                  onValueChange={(value) =>
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, color: value }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, color: value } : null))
-                  }
+              {/* Descripción / Notas */}
+              <div>
+                <label
+                  htmlFor="modal-event-description"
+                  className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
                 >
-                  <SelectTrigger id="color">
-                    <SelectValue placeholder="Seleccionar color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colors.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
-                        <div className="flex items-center gap-2">
-                          <div className={cn("h-4 w-4 rounded", color.bg)} />
-                          {color.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <FileText className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Notas / Observaciones</span>
+                </label>
+                <textarea
+                  id="modal-event-description"
+                  rows={3}
+                  value={isCreating ? newEvent.description : selectedEvent?.description || ""}
+                  onChange={(e) =>
+                    isCreating
+                      ? setNewEvent((prev) => ({ ...prev, description: e.target.value }))
+                      : setSelectedEvent((prev) => (prev ? { ...prev, description: e.target.value } : null))
+                  }
+                  placeholder="Notas o detalles adicionales..."
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all resize-none"
+                />
               </div>
+
+              {/* Etiquetas */}
+              {availableTags.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Etiquetas</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableTags.map((tag) => {
+                      const isSelected = isCreating
+                        ? newEvent.tags?.includes(tag)
+                        : selectedEvent?.tags?.includes(tag)
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag, isCreating)}
+                          className={cn(
+                            "px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer select-none",
+                            isSelected
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-surface-container-low/60 border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-high"
+                          )}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <Label>Etiquetas</Label>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => {
-                  const isSelected = isCreating ? newEvent.tags?.includes(tag) : selectedEvent?.tags?.includes(tag)
-                  return (
-                    <Badge
-                      key={tag}
-                      variant={isSelected ? "default" : "outline"}
-                      className="cursor-pointer transition-all hover:scale-105"
-                      onClick={() => toggleTag(tag, isCreating)}
-                    >
-                      {tag}
-                    </Badge>
-                  )
-                })}
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-outline-variant/30 bg-surface-container-low/20 flex items-center justify-between">
+              {!isCreating && selectedEvent ? (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteEvent(selectedEvent.id)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Eliminar</span>
+                </button>
+              ) : (
+                <div />
+              )}
+              <div className="flex items-center gap-2.5">
+                <VoltaButton
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={() => {
+                    setIsDialogOpen(false)
+                    setIsCreating(false)
+                    setSelectedEvent(null)
+                  }}
+                  className="cursor-pointer font-medium"
+                >
+                  Cancelar
+                </VoltaButton>
+                <VoltaButton
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={isCreating ? handleCreateEvent : handleUpdateEvent}
+                  className="cursor-pointer font-semibold shadow-xs"
+                >
+                  {isCreating ? "Crear Cita" : "Guardar Cambios"}
+                </VoltaButton>
               </div>
             </div>
           </div>
-
-          <DialogFooter>
-            {!isCreating && (
-              <Button variant="destructive" onClick={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}>
-                Eliminar
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsDialogOpen(false)
-                setIsCreating(false)
-                setSelectedEvent(null)
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={isCreating ? handleCreateEvent : handleUpdateEvent}>
-              {isCreating ? "Crear" : "Guardar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>,
+        document.body
+      )}
     </div>
   )
 }

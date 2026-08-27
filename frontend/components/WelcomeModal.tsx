@@ -16,7 +16,7 @@ import FaceIcon from "@/components/FaceIcon";
 import { X, ArrowRight } from "lucide-react";
 
 export default function WelcomeModal() {
-  const { alerts, markAllAsRead } = useAlerts();
+  const { alerts, markAsRead, markAllAsRead } = useAlerts();
   const { data: session } = useSession();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDismissed, setIsDismissed] = useState(false);
