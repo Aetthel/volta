@@ -228,9 +228,6 @@ function NavItem({
             }`}
             strokeWidth={isActive ? 2 : 1.75}
           />
-          {isCollapsed && isLocked && (
-            <Lock className="w-2.5 h-2.5 text-primary absolute -top-1 -right-1" />
-          )}
         </div>
         {!isCollapsed && (
           <span className="text-sm font-medium tracking-normal truncate">
@@ -247,11 +244,6 @@ function NavItem({
             </kbd>
           )}
           {renderBadge(item.badge)}
-          {isLocked && (
-            <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs whitespace-nowrap leading-tight">
-              Pro
-            </span>
-          )}
           {hasChildren && (
             <ChevronRight
               className={`w-4 h-4 text-on-surface-variant/60 group-hover:text-primary transition-transform duration-200 ${
@@ -479,7 +471,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     // Grupo único continuo
     navGroups.push({
       items: [
-        { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
+        { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K", badge: "Nuevo" },
         { id: "home", title: "Inicio", href: "/inicio", icon: LayoutDashboard },
         {
           id: "inbox",
