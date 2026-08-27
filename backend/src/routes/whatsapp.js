@@ -1,5 +1,5 @@
 import express from "express";
-import { authenticate, requireRole, validateId, validateBody } from "../middleware/index.js";
+import { authenticate, requireRole, validateId, validateBody, checkSubscriptionLimits } from "../middleware/index.js";
 import { templateSchema } from "../validators/index.js";
 import * as whatsappController from "../controllers/whatsappController.js";
 import { asyncHandler } from "../utils/index.js";
@@ -11,6 +11,7 @@ router.post(
   authenticate,
   requireRole(["ADMIN", "JEFE"]),
   validateId("businessId"),
+  checkSubscriptionLimits("WHATSAPP_CONNECT"),
   asyncHandler(whatsappController.initClient)
 );
 
