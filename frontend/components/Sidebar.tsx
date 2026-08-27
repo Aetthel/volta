@@ -142,6 +142,71 @@ function WorkspaceSwitcher({
   );
 }
 
+function renderBadge(
+  badge?: number | string,
+  badgeVariant?: "amber" | "blue" | "emerald" | "primary" | "gray" | "default"
+) {
+  if (badge === undefined || badge === null) return null;
+
+  if (typeof badge === "number") {
+    return (
+      <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-primary/15 text-primary">
+        {badge}
+      </span>
+    );
+  }
+
+  const str = String(badge).trim();
+  const lower = str.toLowerCase();
+
+  // Coming Soon / Próximamente (Yellow/Amber Pill)
+  if (
+    badgeVariant === "amber" ||
+    lower.includes("próximamente") ||
+    lower.includes("proximamente") ||
+    lower.includes("coming soon")
+  ) {
+    return (
+      <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-[#FEF3C7] text-[#92400E] border border-amber-200/60 shadow-2xs whitespace-nowrap leading-tight">
+        {str}
+      </span>
+    );
+  }
+
+  // Updated / Actualizado (Blue Pill)
+  if (
+    badgeVariant === "blue" ||
+    lower.includes("actualizado") ||
+    lower.includes("updated")
+  ) {
+    return (
+      <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-[#DBEAFE] text-[#1D4ED8] border border-blue-200/60 shadow-2xs whitespace-nowrap leading-tight">
+        {str}
+      </span>
+    );
+  }
+
+  // New / Nuevo (Emerald Pill)
+  if (
+    badgeVariant === "emerald" ||
+    lower.includes("nuevo") ||
+    lower.includes("new")
+  ) {
+    return (
+      <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-[#D1FAE5] text-[#065F46] border border-emerald-200/60 shadow-2xs whitespace-nowrap leading-tight">
+        {str}
+      </span>
+    );
+  }
+
+  // Default Volta Primary Pill
+  return (
+    <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs whitespace-nowrap leading-tight">
+      {str}
+    </span>
+  );
+}
+
 function NavItem({
   item,
   activeHref,
@@ -237,29 +302,9 @@ function NavItem({
               {item.shortcut}
             </kbd>
           )}
-          {item.badge !== undefined && (
-            item.badgeVariant === "amber" ||
-            item.badge === "Coming Soon" ||
-            item.badge === "Próximamente" ? (
-              <span className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-[#FEF3C7] text-[#92400E] border border-amber-200/80 shadow-2xs whitespace-nowrap">
-                {item.badge}
-              </span>
-            ) : item.badgeVariant === "emerald" || item.badge === "Nuevo" ? (
-              <span className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs whitespace-nowrap">
-                {item.badge}
-              </span>
-            ) : typeof item.badge === "number" ? (
-              <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-primary/15 text-primary">
-                {item.badge}
-              </span>
-            ) : (
-              <span className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs whitespace-nowrap">
-                {item.badge}
-              </span>
-            )
-          )}
+          {renderBadge(item.badge, item.badgeVariant)}
           {isLocked && (
-            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs leading-tight">
               <Lock className="w-2.5 h-2.5" />
               <span>PRO</span>
             </span>
