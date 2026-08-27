@@ -69,7 +69,7 @@ export default function AddServiceModal({
   const { position, handleMouseDown } = useDraggableModal({
     isOpen,
     triggerRect,
-    modalWidth: 500,
+    modalWidth: 550,
     modalHeight: 560,
   });
 
@@ -90,7 +90,7 @@ export default function AddServiceModal({
           position: "fixed",
           left: `${position.x}px`,
           top: `${position.y}px`,
-          width: "500px",
+          width: "550px",
           maxWidth: "calc(100vw - 32px)",
           transition: "none",
         }}
@@ -204,11 +204,11 @@ export default function AddServiceModal({
           </div>
 
           {/* Duración, Precio y Aforo Máx (3 Columns) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label htmlFor="duration" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <label htmlFor="duration" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
                 <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span>Duración (min) <span className="text-error">*</span></span>
+                <span className="whitespace-nowrap">Duración (min) <span className="text-error">*</span></span>
               </label>
               <input
                 id="duration"
@@ -224,9 +224,9 @@ export default function AddServiceModal({
             </div>
 
             <div>
-              <label htmlFor="price" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <label htmlFor="price" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
                 <Euro className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span>Precio (€) <span className="text-error">*</span></span>
+                <span className="whitespace-nowrap">Precio (€) <span className="text-error">*</span></span>
               </label>
               <input
                 id="price"
@@ -242,9 +242,9 @@ export default function AddServiceModal({
             </div>
 
             <div>
-              <label htmlFor="capacity" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <label htmlFor="capacity" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
                 <Users className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span>Aforo Máx.</span>
+                <span className="whitespace-nowrap">Aforo Máx.</span>
               </label>
               <input
                 id="capacity"
