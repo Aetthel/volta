@@ -177,7 +177,13 @@ function NavItem({
   const hasChildren = !!item.children;
   const [isOpen, setIsOpen] = useState(false);
 
+  const isClickable = !!item.href || isLocked || item.id === "search" || hasChildren;
+
   const handleClick = (e: React.MouseEvent) => {
+    if (!isClickable) {
+      e.preventDefault();
+      return;
+    }
     if (item.id === "search") {
       e.preventDefault();
       onOpenSearch();
@@ -199,14 +205,18 @@ function NavItem({
 
   const content = (
     <div
-      className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 select-none ${
+      className={`group flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-150 select-none ${
+        isClickable ? "cursor-pointer" : "cursor-default"
+      } ${
         isCollapsed ? "justify-center px-1.5" : ""
       } ${
         isActive && !isLocked
           ? "bg-primary/10 text-primary font-semibold shadow-2xs"
           : isLocked
             ? "text-on-surface-variant/60 hover:bg-primary/5 hover:text-on-surface"
-            : "text-on-surface-variant hover:bg-primary/5 hover:text-primary"
+            : isClickable
+              ? "text-on-surface-variant hover:bg-primary/5 hover:text-primary"
+              : "text-on-surface-variant/70 hover:bg-primary/5"
       }`}
       style={{ paddingLeft: !isCollapsed ? `${level * 12 + 12}px` : undefined }}
       onClick={handleClick}
@@ -483,7 +493,6 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         {
           id: "inbox",
           title: "Inbox",
-          href: "/inbox",
           icon: Inbox,
           badge: "Próximamente",
         },
@@ -527,7 +536,6 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         {
           id: "reports",
           title: "Reportes",
-          href: "/reportes",
           icon: FileText,
           badge: "Próximamente",
         },
