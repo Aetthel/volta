@@ -460,16 +460,23 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
 
   if (role === "ADMIN") {
     navGroups.push({
+      heading: "Principal",
       items: [
-        { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
+        { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K", badge: "Nuevo" },
         { id: "admin", title: "Control Global", href: "/admin", icon: BarChart3 },
         { id: "sedes", title: "Locales", href: "/sedes", icon: Store },
+      ],
+    });
+    navGroups.push({
+      heading: "Ajustes",
+      items: [
         { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
       ],
     });
   } else {
-    // Grupo único continuo
+    // 1. Categoría: Principal
     navGroups.push({
+      heading: "Principal",
       items: [
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K", badge: "Nuevo" },
         { id: "home", title: "Inicio", href: "/inicio", icon: LayoutDashboard },
@@ -490,6 +497,13 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           lockedDescription:
             "Visualiza informes detallados de ingresos, retención de clientes y rendimiento de tu negocio actualizando a Plan Pro (40€/mes).",
         },
+      ],
+    });
+
+    // 2. Categoría: General
+    navGroups.push({
+      heading: "General",
+      items: [
         { id: "calendar", title: "Agenda", href: "/agenda", icon: Calendar },
         { id: "customers", title: "Clientes", href: "/clientes", icon: UserCheck },
         {
@@ -502,6 +516,13 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           lockedDescription:
             "Organiza múltiples trabajadores, turnos y calendarios independientes actualizando a Plan Pro (40€/mes).",
         },
+      ],
+    });
+
+    // 3. Categoría: Ajustes
+    navGroups.push({
+      heading: "Ajustes",
+      items: [
         { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
         {
           id: "reports",
