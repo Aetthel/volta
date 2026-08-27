@@ -58,6 +58,12 @@ services:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
+      # El .env local trae un REDIS_URL apuntando a 127.0.0.1 (correcto solo si
+      # el backend corre en el host). Dentro del contenedor, 127.0.0.1 es el
+      # propio contenedor, y config/redis.js da prioridad a REDIS_URL sobre
+      # REDIS_HOST, así que nunca llegaba al servicio `redis`. Vaciarla aquí
+      # (environment gana a env_file) hace que se use el bloque REDIS_HOST.
+      - REDIS_URL=
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}

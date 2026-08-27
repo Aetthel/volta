@@ -20,6 +20,23 @@ const normalizePhone = (phone: string) => {
   return digits;
 };
 
+// El backend responde siempre { error: string, details?: [{ field, message }] }.
+// Sin desenvolverlo, el usuario solo veía "Failed to save appointment" y se
+// perdía el motivo real (hueco ocupado, fuera de horario, teléfono inválido...).
+const extractErrorMessage = (payload: unknown, fallback: string) => {
+  if (!payload || typeof payload !== "object") return fallback;
+  const body = payload as { error?: unknown; details?: unknown };
+
+  if (Array.isArray(body.details) && body.details.length > 0) {
+    const messages = body.details
+      .map((d) => (d && typeof d === "object" ? (d as { message?: string }).message : null))
+      .filter((m): m is string => typeof m === "string" && m.length > 0);
+    if (messages.length > 0) return messages.join(". ");
+  }
+
+  return typeof body.error === "string" && body.error.length > 0 ? body.error : fallback;
+};
+
 export interface NewAppointmentFormData {
   clientName: string;
   clientPhone: string;
@@ -56,11 +73,15 @@ export function useNewAppointmentForm(
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showConsentToast, setShowConsentToast] = useState(false);
   const [toastPhone, setToastPhone] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Prefill date and time when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
+    setSubmitError(null);
+    setIsSubmitting(false);
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -161,8 +182,11 @@ export function useNewAppointmentForm(
     onClose?.();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setSubmitError(null);
 
     const [h, m] = (formData.time || "10:00").split(":");
     const cleanH = (h || "10").padStart(2, "0");
@@ -171,66 +195,77 @@ export function useNewAppointmentForm(
 
     const localDate = new Date(`${formData.date}T${formattedTime}:00`);
     if (isNaN(localDate.getTime())) {
-      console.error("Invalid appointment date/time calculated");
+      setSubmitError("La fecha o la hora de la cita no son válidas.");
+      return;
+    }
+    if (!businessId) {
+      setSubmitError("No se ha podido identificar el negocio. Vuelve a iniciar sesión.");
       return;
     }
     const appointmentDateStr = localDate.toISOString();
 
-    fetch("/api/backend/appointments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        clientName: formData.clientName,
-        clientPhone: formData.clientPhone,
-        appointmentDate: appointmentDateStr,
-        businessId: businessId,
-        service: formData.service,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to save appointment");
-        return res.json();
-      })
-      .then((savedApp) => {
-        onSave?.({
-          ...savedApp,
-          service: formData.service,
-        });
-
-        const exist = clientsList.some((c) => {
-          const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
-          const inputName = normalizeString(formData.clientName);
-          const existingPhone = normalizePhone(c.phone);
-          const inputPhone = normalizePhone(formData.clientPhone);
-
-          return existingName === inputName || existingPhone === inputPhone;
-        });
-
-        if (!exist && formData.clientName.trim().length > 0) {
-          setToastPhone(formData.clientPhone);
-          setShowConsentToast(true);
-          setTimeout(() => {
-            setShowConsentToast(false);
-            resetFormAndClose();
-          }, 2500);
-        } else {
-          resetFormAndClose();
-        }
-      })
-      .catch((err) => {
-        console.error("Error saving appointment:", err);
-        onSave?.({
-          id: String(Date.now()),
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/backend/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
           clientName: formData.clientName,
           clientPhone: formData.clientPhone,
+          appointmentDate: appointmentDateStr,
+          businessId: businessId,
           service: formData.service,
-          date: formData.date,
-          time: formData.time,
-        });
-        resetFormAndClose();
+        }),
       });
+
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(extractErrorMessage(payload, "No se ha podido guardar la cita."));
+      }
+
+      // Esta petición ya ha persistido la cita: `onSave` es solo notificación
+      // para que la vista refresque. Si vuelve a hacer POST, el segundo intento
+      // choca con la cita recién creada y el backend responde 409.
+      onSave?.({
+        ...payload,
+        service: formData.service,
+      });
+
+      const exist = clientsList.some((c) => {
+        const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
+        const inputName = normalizeString(formData.clientName);
+        const existingPhone = normalizePhone(c.phone);
+        const inputPhone = normalizePhone(formData.clientPhone);
+
+        return existingName === inputName || existingPhone === inputPhone;
+      });
+
+      if (!exist && formData.clientName.trim().length > 0) {
+        setToastPhone(formData.clientPhone);
+        setShowConsentToast(true);
+        setTimeout(() => {
+          setShowConsentToast(false);
+          resetFormAndClose();
+        }, 2500);
+      } else {
+        resetFormAndClose();
+      }
+    } catch (err) {
+      // El modal permanece abierto con los datos intactos: la cita NO se ha
+      // guardado y fingir lo contrario dejaba una cita fantasma en el calendario
+      // que desaparecía al recargar.
+      console.error("Error saving appointment:", err);
+      setSubmitError(
+        err instanceof Error && err.message
+          ? err.message
+          : "No se ha podido conectar con el servidor."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleHourChange = (value: string) => {
@@ -303,6 +338,8 @@ export function useNewAppointmentForm(
     setShowSuggestions,
     showConsentToast,
     toastPhone,
+    submitError,
+    isSubmitting,
     handleChange,
     handleNameChange,
     handleSelectSuggestion,
