@@ -662,7 +662,7 @@ export default function DashboardPage() {
 
               {/* Featured Services Radial Donut Chart */}
               <Card className="col-span-12 lg:col-span-4 p-6 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-                <FeaturedServicesList services={displayServiceShares} totalCount={appointments.length || 1260} />
+                <FeaturedServicesList services={displayServiceShares} totalCount={appointments.length} />
               </Card>
             </section>
           )}

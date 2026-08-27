@@ -84,7 +84,7 @@ export const FeaturedServicesList: React.FC<FeaturedServicesListProps> = ({
             {displayTotal.toLocaleString("es-ES")}
           </span>
           <span className="text-xs font-medium text-on-surface-variant/70 mt-0.5">
-            Citas
+            Citas totales
           </span>
         </div>
       </div>
