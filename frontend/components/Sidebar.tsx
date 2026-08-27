@@ -461,46 +461,50 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   if (role === "ADMIN") {
     navGroups.push({
       items: [
-        { id: "search", title: "Search", icon: Search, shortcut: "⌘K" },
+        { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
         { id: "admin", title: "Control Global", href: "/admin", icon: BarChart3 },
         { id: "sedes", title: "Locales", href: "/sedes", icon: Store },
       ],
     });
   } else {
-    // Primary Group
+    // Grupo Principal
     navGroups.push({
       items: [
-        { id: "search", title: "Search", icon: Search, shortcut: "⌘K" },
-        { id: "home", title: "Home", href: "/inicio", icon: LayoutDashboard },
+        { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
+        { id: "home", title: "Inicio", href: "/inicio", icon: LayoutDashboard },
         { id: "inbox", title: "Inbox", href: "/inbox", icon: Inbox, badge: 12 },
         {
           id: "analytics",
-          title: "Analytics",
+          title: "Analítica",
           href: "/analitica",
           icon: Activity,
           requiresFeature: "businessAnalytics",
           lockedTitle: "Analítica de Negocio",
           lockedDescription:
-            "Visualiza informes detallados de ingresos, retención de clientes y crecimiento actualizando al Plan Pro (40€/mes).",
+            "Visualiza informes detallados de ingresos, retención de clientes y rendimiento de tu negocio actualizando a Plan Pro (40€/mes).",
         },
       ],
     });
 
-    // Workspace / Management Group
+    // Grupo de Gestión / Workspace
     navGroups.push({
-      heading: "Workspace",
+      heading: "Gestión",
       items: [
-        { id: "calendar", title: "Calendar", href: "/agenda", icon: Calendar },
-        { id: "team", title: "Team", href: "/equipo", icon: Users },
-        { id: "customers", title: "Customers", href: "/clientes", icon: Globe },
+        { id: "calendar", title: "Agenda", href: "/agenda", icon: Calendar },
+        { id: "customers", title: "Clientes", href: "/clientes", icon: Globe },
+        {
+          id: "team",
+          title: "Equipo",
+          href: "/equipo",
+          icon: Users,
+          requiresFeature: "multiCalendar",
+          lockedTitle: "Gestión de Equipo Multi-Calendario",
+          lockedDescription:
+            "Organiza múltiples trabajadores, turnos y calendarios independientes actualizando a Plan Pro (40€/mes).",
+        },
       ],
     });
   }
-
-  const bottomItems: NavItemData[] = [
-    { id: "settings", title: "Settings", href: "/ajustes", icon: Settings, shortcut: "⌘," },
-    { id: "logout", title: "Log out", icon: LogOut },
-  ];
 
   const displayCollapsed = mounted ? isCollapsed : false;
 
@@ -545,64 +549,21 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           ))}
         </div>
 
-        {/* Bottom Area with Action CTA, Settings & Log out */}
-        <div className="mt-auto pt-3.5 border-t border-outline-variant/50 flex flex-col gap-1">
-          {/* Action CTA: Nueva Cita Button */}
-          {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
-            <div className="mb-2 px-0.5">
-              <button
-                onClick={onNewAppointmentClick}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary/90 active:scale-[0.98] shadow-xs transition-all cursor-pointer ${
-                  displayCollapsed ? "!p-2.5 !w-10 !h-10 !rounded-full mx-auto" : ""
-                }`}
-                title="Nueva Cita"
-              >
-                <Plus className="w-4 h-4 shrink-0" strokeWidth={2} />
-                {!displayCollapsed && <span>Nueva Cita</span>}
-              </button>
-            </div>
-          )}
-
-          {bottomItems.map((item) => {
-            if (item.id === "logout") {
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 select-none text-on-surface-variant hover:bg-error/10 hover:text-error border-none bg-transparent w-full text-left ${
-                    displayCollapsed ? "justify-center px-1.5" : ""
-                  }`}
-                  title={displayCollapsed ? "Log out" : undefined}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <LogOut
-                      className="w-[18px] h-[18px] text-on-surface-variant/80 group-hover:text-error shrink-0 transition-colors"
-                      strokeWidth={1.75}
-                    />
-                    {!displayCollapsed && (
-                      <span className="text-sm font-medium tracking-normal truncate">
-                        Log out
-                      </span>
-                    )}
-                  </div>
-                </button>
-              );
-            }
-
-            return (
-              <NavItem
-                key={item.id}
-                item={item}
-                activeHref={pathname}
-                isCollapsed={displayCollapsed}
-                subscriptionPlan={subscriptionPlan}
-                subscriptionStatus={subscriptionStatus}
-                onOpenUpgrade={(info) => setUpgradeModalInfo({ open: true, ...info })}
-                onOpenSearch={() => setIsSearchOpen(true)}
-              />
-            );
-          })}
-        </div>
+        {/* Bottom Action CTA: Nueva Cita Button */}
+        {(role === "JEFE" || role === "EMPLEADO") && onNewAppointmentClick && (
+          <div className="mt-auto pt-3.5 border-t border-outline-variant/50 px-0.5">
+            <button
+              onClick={onNewAppointmentClick}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 px-3.5 rounded-lg text-sm font-semibold bg-primary text-white hover:bg-primary/90 active:scale-[0.98] shadow-xs transition-all cursor-pointer ${
+                displayCollapsed ? "!p-2.5 !w-10 !h-10 !rounded-full mx-auto" : ""
+              }`}
+              title="Nueva Cita"
+            >
+              <Plus className="w-4 h-4 shrink-0" strokeWidth={2} />
+              {!displayCollapsed && <span>Nueva Cita</span>}
+            </button>
+          </div>
+        )}
 
         {/* Resize Handle */}
         {!displayCollapsed && (
