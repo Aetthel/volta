@@ -447,41 +447,41 @@ export function EventManager({
             </div>
 
             {/* Desktop: Button group */}
-            <div className="hidden sm:flex items-center gap-1 rounded-lg border border-outline-variant/60 bg-surface p-1">
+            <div className="hidden sm:flex items-center gap-0.5 rounded-lg border border-outline-variant bg-surface p-0.5">
               <Button
                 variant={view === "month" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setView("month")}
-                className="h-8"
+                className="h-7 px-2.5 text-xs font-medium"
               >
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-3.5 w-3.5" />
                 <span className="ml-1">Mes</span>
               </Button>
               <Button
                 variant={view === "week" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setView("week")}
-                className="h-8"
+                className="h-7 px-2.5 text-xs font-medium"
               >
-                <Grid3x3 className="h-4 w-4" />
+                <Grid3x3 className="h-3.5 w-3.5" />
                 <span className="ml-1">Semana</span>
               </Button>
               <Button
                 variant={view === "day" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setView("day")}
-                className="h-8"
+                className="h-7 px-2.5 text-xs font-medium"
               >
-                <Clock className="h-4 w-4" />
+                <Clock className="h-3.5 w-3.5" />
                 <span className="ml-1">Día</span>
               </Button>
               <Button
                 variant={view === "list" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setView("list")}
-                className="h-8"
+                className="h-7 px-2.5 text-xs font-medium"
               >
-                <List className="h-4 w-4" />
+                <List className="h-3.5 w-3.5" />
                 <span className="ml-1">Lista</span>
               </Button>
             </div>
@@ -493,7 +493,7 @@ export function EventManager({
                 size="sm"
                 onClick={() => setIsQuotaUpgradeOpen(true)}
                 className={cn(
-                  "h-[42px] px-3.5 rounded-lg text-xs font-normal bg-surface border-outline-variant/60 text-on-surface hover:bg-surface-variant transition-colors shrink-0",
+                  "whitespace-nowrap shrink-0 bg-surface",
                   isQuotaExceeded && "border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
                   isQuotaWarning && "border-amber-500/50 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
                 )}
