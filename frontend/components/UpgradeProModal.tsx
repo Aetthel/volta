@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { X, Lock, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
@@ -23,14 +24,25 @@ export default function UpgradeProModal({
   description = "Para acceder a esta función (multi-calendario/sedes, WhatsApp bidireccional, pagos online o analítica), actualiza tu cuenta a Plan Pro (40€/mes).",
 }: UpgradeProModalProps) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
   if (!isOpen && !isCheckoutOpen) return null;
 
-  return (
+  return createPortal(
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-surface rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-outline-variant/30 relative flex flex-col gap-6 select-none">
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onClose();
+          }}
+        >
+          <div className="bg-surface rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-outline-variant/30 relative flex flex-col gap-6 select-none animate-in zoom-in-95 duration-150">
             {/* Close button */}
             <button
               onClick={onClose}
@@ -110,6 +122,7 @@ export default function UpgradeProModal({
           setIsCheckoutOpen(false);
         }}
       />
-    </>
+    </>,
+    document.body
   );
 }

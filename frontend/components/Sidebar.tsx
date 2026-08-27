@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -465,10 +466,11 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
         { id: "admin", title: "Control Global", href: "/admin", icon: BarChart3 },
         { id: "sedes", title: "Locales", href: "/sedes", icon: Store },
+        { id: "settings", title: "Ajustes", href: "/ajustes", icon: Settings },
       ],
     });
   } else {
-    // Grupo Principal
+    // Grupo único continuo
     navGroups.push({
       items: [
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
@@ -484,13 +486,6 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           lockedDescription:
             "Visualiza informes detallados de ingresos, retención de clientes y rendimiento de tu negocio actualizando a Plan Pro (40€/mes).",
         },
-      ],
-    });
-
-    // Grupo de Gestión / Workspace
-    navGroups.push({
-      heading: "Gestión",
-      items: [
         { id: "calendar", title: "Agenda", href: "/agenda", icon: Calendar },
         { id: "customers", title: "Clientes", href: "/clientes", icon: UserCheck },
         {
@@ -503,6 +498,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           lockedDescription:
             "Organiza múltiples trabajadores, turnos y calendarios independientes actualizando a Plan Pro (40€/mes).",
         },
+        { id: "settings", title: "Ajustes", href: "/ajustes", icon: Settings },
       ],
     });
   }
@@ -578,8 +574,8 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       </aside>
 
       {/* Quick Search Modal Overlay */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/40 backdrop-blur-xs px-4 animate-in fade-in duration-150">
+      {mounted && isSearchOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-black/50 backdrop-blur-md px-4 animate-in fade-in duration-150">
           <div
             className="absolute inset-0"
             onClick={() => setIsSearchOpen(false)}
@@ -620,7 +616,8 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Embedded Upgrade Modal for Pro features */}
