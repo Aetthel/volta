@@ -26,6 +26,7 @@ import {
   Store,
   BarChart3,
   UserCheck,
+  FileText,
 } from "lucide-react";
 import { hasFeatureAccess, PlanFeature } from "@/lib/permissions";
 
@@ -39,6 +40,7 @@ export type NavItemData = {
   href?: string;
   icon: React.ElementType;
   badge?: number | string;
+  badgeVariant?: "amber" | "primary" | "emerald" | "default";
   shortcut?: string;
   requiresFeature?: PlanFeature;
   lockedTitle?: string;
@@ -236,12 +238,28 @@ function NavItem({
             </kbd>
           )}
           {item.badge !== undefined && (
-            <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-primary/15 text-primary">
-              {item.badge}
-            </span>
+            item.badgeVariant === "amber" ||
+            item.badge === "Coming Soon" ||
+            item.badge === "Próximamente" ? (
+              <span className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-[#FEF3C7] text-[#92400E] border border-amber-200/80 shadow-2xs whitespace-nowrap">
+                {item.badge}
+              </span>
+            ) : item.badgeVariant === "emerald" || item.badge === "Nuevo" ? (
+              <span className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs whitespace-nowrap">
+                {item.badge}
+              </span>
+            ) : typeof item.badge === "number" ? (
+              <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-semibold rounded-full bg-primary/15 text-primary">
+                {item.badge}
+              </span>
+            ) : (
+              <span className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs whitespace-nowrap">
+                {item.badge}
+              </span>
+            )
           )}
           {isLocked && (
-            <span className="flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold rounded bg-primary/10 text-primary border border-primary/20">
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs">
               <Lock className="w-2.5 h-2.5" />
               <span>PRO</span>
             </span>
@@ -466,7 +484,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
         { id: "admin", title: "Control Global", href: "/admin", icon: BarChart3 },
         { id: "sedes", title: "Locales", href: "/sedes", icon: Store },
-        { id: "settings", title: "Ajustes", href: "/ajustes", icon: Settings },
+        { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
       ],
     });
   } else {
@@ -475,7 +493,14 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       items: [
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K" },
         { id: "home", title: "Inicio", href: "/inicio", icon: LayoutDashboard },
-        { id: "inbox", title: "Inbox", href: "/inbox", icon: Inbox, badge: 12 },
+        {
+          id: "inbox",
+          title: "Inbox",
+          href: "/inbox",
+          icon: Inbox,
+          badge: "Próximamente",
+          badgeVariant: "amber",
+        },
         {
           id: "analytics",
           title: "Analítica",
@@ -498,7 +523,15 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
           lockedDescription:
             "Organiza múltiples trabajadores, turnos y calendarios independientes actualizando a Plan Pro (40€/mes).",
         },
-        { id: "settings", title: "Ajustes", href: "/ajustes", icon: Settings },
+        { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
+        {
+          id: "reports",
+          title: "Informes",
+          href: "/informes",
+          icon: FileText,
+          badge: "Próximamente",
+          badgeVariant: "amber",
+        },
       ],
     });
   }
