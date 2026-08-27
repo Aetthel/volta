@@ -60,15 +60,17 @@ const DEFAULT_WIDTH = 260;
 
 function WorkspaceSwitcher({
   businessName,
+  businessLogo,
   planLabel,
   isCollapsed,
 }: {
   businessName: string;
+  businessLogo?: string | null;
   planLabel: string;
   isCollapsed: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const initial = businessName.trim().charAt(0).toUpperCase() || "V";
+  const initial = businessName.trim().charAt(0).toUpperCase() || "B";
 
   return (
     <div className="relative">
@@ -80,8 +82,19 @@ function WorkspaceSwitcher({
         title={businessName}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-            {initial}
+          <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 overflow-hidden">
+            {businessLogo ? (
+              <img
+                src={businessLogo}
+                alt={businessName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <span>{initial}</span>
+            )}
           </div>
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden min-w-0">
@@ -292,8 +305,37 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const role = session?.user?.role || "EMPLEADO";
   const subscriptionPlan = session?.user?.subscriptionPlan || "BASIC";
   const subscriptionStatus = session?.user?.subscriptionStatus || "ACTIVE";
-  const businessName = session?.user?.name || "Volta";
   const planLabel = subscriptionPlan === "BASIC" ? "Plan Básico" : "Plan Pro";
+
+  const [businessData, setBusinessData] = useState<{
+    name?: string;
+    logoUrl?: string | null;
+  }>({});
+
+  useEffect(() => {
+    const businessId = (session?.user as any)?.businessId;
+    if (!businessId || businessId === "mock-business-id") return;
+    fetch(`/api/backend/business/${businessId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setBusinessData({
+            name: data.name,
+            logoUrl: data.logoUrl,
+          });
+        }
+      })
+      .catch((err) => console.error("Error loading business in sidebar:", err));
+  }, [(session?.user as any)?.businessId]);
+
+  const businessName =
+    businessData.name ||
+    (session?.user as any)?.businessName ||
+    "Mi Negocio";
+  const businessLogo =
+    businessData.logoUrl ||
+    (session?.user as any)?.businessLogoUrl ||
+    null;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
@@ -473,6 +515,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         {/* Workspace Switcher */}
         <WorkspaceSwitcher
           businessName={businessName}
+          businessLogo={businessLogo}
           planLabel={planLabel}
           isCollapsed={displayCollapsed}
         />

@@ -39,6 +39,8 @@ export const authConfig: NextAuthConfig = {
         token.role = (user as any).role;
         token.id = (user as any).id;
         token.businessId = (user as any).businessId;
+        token.businessName = (user as any).businessName || null;
+        token.businessLogoUrl = (user as any).businessLogoUrl || null;
         token.subscriptionStatus = (user as any).subscriptionStatus || "TRIALING";
         token.trialExpiresAt = (user as any).trialExpiresAt || null;
         token.sandboxExpiresAt = (user as any).sandboxExpiresAt || null;
@@ -55,6 +57,8 @@ export const authConfig: NextAuthConfig = {
         const subscriptionPlan = session.subscriptionPlan || session.user?.subscriptionPlan;
         const subscriptionStatus = session.subscriptionStatus || session.user?.subscriptionStatus;
         const trialExpiresAt = session.trialExpiresAt !== undefined ? session.trialExpiresAt : session.user?.trialExpiresAt;
+        const businessName = session.businessName || session.user?.businessName;
+        const businessLogoUrl = session.businessLogoUrl || session.user?.businessLogoUrl;
 
         if (themeColor) token.themeColor = themeColor;
         if (fontSizeLevel) token.fontSizeLevel = fontSizeLevel;
@@ -62,6 +66,8 @@ export const authConfig: NextAuthConfig = {
         if (subscriptionPlan) token.subscriptionPlan = subscriptionPlan;
         if (subscriptionStatus) token.subscriptionStatus = subscriptionStatus;
         if (trialExpiresAt !== undefined) token.trialExpiresAt = trialExpiresAt;
+        if (businessName) token.businessName = businessName;
+        if (businessLogoUrl !== undefined) token.businessLogoUrl = businessLogoUrl;
       }
       return token;
     },
@@ -70,6 +76,8 @@ export const authConfig: NextAuthConfig = {
         (session.user as any).role = token.role;
         (session.user as any).id = token.id;
         (session.user as any).businessId = token.businessId;
+        (session.user as any).businessName = token.businessName || null;
+        (session.user as any).businessLogoUrl = token.businessLogoUrl || null;
         (session.user as any).subscriptionStatus = token.subscriptionStatus || "TRIALING";
         (session.user as any).trialExpiresAt = token.trialExpiresAt || null;
         (session.user as any).sandboxExpiresAt = token.sandboxExpiresAt || null;
