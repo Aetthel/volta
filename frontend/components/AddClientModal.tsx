@@ -8,18 +8,10 @@ import {
   User,
   Phone,
   Mail,
-  Sparkles,
-  GripHorizontal,
-  AlignLeft,
+  Repeat,
+  FileText,
 } from "lucide-react";
-import {
-  FieldGroup,
-  Field,
-  FloatingInput,
-  Button,
-  FloatingTextarea,
-  InlineSelect,
-} from "@/components/ui/volta-ui";
+import { Button } from "@/components/ui/volta-ui";
 import { useAddClientForm, ClientToEdit } from "@/hooks/useAddClientForm";
 
 interface AddClientModalProps {
@@ -47,6 +39,7 @@ interface AddClientModalProps {
 }
 
 const FREQUENCY_OPTIONS = [
+  { value: "", label: "Seleccionar frecuencia..." },
   { value: "Mensual", label: "Mensual" },
   { value: "Cada 2 meses", label: "Cada 2 meses" },
   { value: "Ocasional", label: "Ocasional" },
@@ -66,8 +59,8 @@ export default function AddClientModal({
   const { position, handleMouseDown } = useDraggableModal({
     isOpen,
     triggerRect,
-    modalWidth: 448,
-    modalHeight: 450,
+    modalWidth: 480,
+    modalHeight: 520,
   });
 
   const [mounted, setMounted] = useState(false);
@@ -79,7 +72,7 @@ export default function AddClientModal({
 
   return createPortal(
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* Backdrop */}
+      {/* Backdrop — transparent without blur or darkening */}
       <div className="absolute inset-0 bg-transparent pointer-events-auto" onClick={onClose} />
 
       <div
@@ -87,142 +80,164 @@ export default function AddClientModal({
           position: "fixed",
           left: `${position.x}px`,
           top: `${position.y}px`,
-          width: "448px",
+          width: "480px",
           maxWidth: "calc(100vw - 32px)",
           transition: "none",
         }}
-        className="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant overflow-visible z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150"
+        className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 overflow-hidden z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col"
       >
         {/* Header */}
         <div
           onMouseDown={handleMouseDown}
-          className="px-5 pt-5 pb-1 flex justify-between items-center bg-transparent cursor-grab active:cursor-grabbing select-none"
+          className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none"
         >
-          <GripHorizontal className="w-5 h-5 text-on-surface-variant/40 pointer-events-none" />
-          <Button
-            variant="ghost"
+          <div className="flex flex-col">
+            <h2 className="text-xl font-bold text-on-surface tracking-tight">
+              {isEditMode ? "Editar Cliente" : "Añadir Nuevo Cliente"}
+            </h2>
+            <p className="text-sm text-on-surface-variant mt-0.5">
+              {isEditMode
+                ? "Modifica los datos personales y de contacto"
+                : "Completa la ficha para registrar al cliente"}
+            </p>
+          </div>
+          <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full text-on-surface-variant hover:text-on-surface w-8 h-8 active:scale-95 shadow-none"
+            className="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer -mr-1"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Title */}
-        <div className="px-5 pb-1">
-          <h2 className="text-2xl font-medium text-on-surface">
-            {isEditMode ? "Editar Cliente" : "Añadir Cliente"}
-          </h2>
+          </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5">
-          <FieldGroup className="flex flex-col gap-5">
-            {/* Name */}
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <User className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <Field>
-                  <FloatingInput
-                    id="name"
-                    label="Nombre Completo"
-                    type="text"
-                    required
-                    variant="borderless"
-                    className="text-body-lg font-normal !py-2"
-                    value={formData.name}
-                    onChange={handleChange}
-                  />
-                </Field>
-              </div>
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+          {/* Nombre y Apellidos (2 Columns) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label htmlFor="name" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span>Nombre <span className="text-error">*</span></span>
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                placeholder="Ej. Ana"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
             </div>
+            <div>
+              <label htmlFor="surname" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span>Apellidos</span>
+              </label>
+              <input
+                id="surname"
+                name="surname"
+                type="text"
+                placeholder="Ej. García López"
+                value={formData.surname}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
+            </div>
+          </div>
 
-            {/* Phone */}
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <Phone className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <Field>
-                  <FloatingInput
-                    id="phone"
-                    label="Teléfono"
-                    type="tel"
-                    required
-                    variant="borderless"
-                    value={formData.phone}
-                    onChange={handleChange}
-                  />
-                </Field>
-              </div>
+          {/* Teléfono y Email (2 Columns) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label htmlFor="phone" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span>Teléfono <span className="text-error">*</span></span>
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                required
+                placeholder="612 34 56 78"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
             </div>
+            <div>
+              <label htmlFor="email" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span>Correo electrónico</span>
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="cliente@ejemplo.com"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
+            </div>
+          </div>
 
-            {/* Email */}
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <Field>
-                  <FloatingInput
-                    id="email"
-                    label="Correo electrónico"
-                    type="email"
-                    variant="borderless"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </Field>
-              </div>
-            </div>
+          {/* Frecuencia Estimada */}
+          <div>
+            <label htmlFor="frequency" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <Repeat className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <span>Frecuencia estimada de visita</span>
+            </label>
+            <select
+              id="frequency"
+              name="frequency"
+              value={formData.frequency}
+              onChange={(e) => handleFrequencyChange(e.target.value)}
+              className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
+            >
+              {FREQUENCY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            {/* Frequency Preference */}
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <Field>
-                  <InlineSelect
-                    id="frequency"
-                    label="Frecuencia estimada"
-                    value={formData.frequency}
-                    onChange={handleFrequencyChange}
-                    options={FREQUENCY_OPTIONS}
-                    variant="borderless"
-                  />
-                </Field>
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-10 flex items-center justify-center text-on-surface-variant/40 shrink-0">
-                <AlignLeft className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <Field>
-                  <FloatingTextarea
-                    id="notes"
-                    label="Notas de estilo y alergias"
-                    rows={3}
-                    variant="borderless"
-                    value={formData.notes}
-                    onChange={handleChange}
-                  />
-                </Field>
-              </div>
-            </div>
-          </FieldGroup>
+          {/* Notas y Alergias */}
+          <div>
+            <label htmlFor="notes" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-on-surface shrink-0" />
+              <span>Notas, preferencias y alergias</span>
+            </label>
+            <textarea
+              id="notes"
+              name="notes"
+              rows={2}
+              placeholder="Preferencias de corte, fórmulas de tinte, alergias a productos..."
+              value={formData.notes}
+              onChange={handleChange}
+              className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all resize-none"
+            />
+          </div>
 
           {/* Footer Actions */}
-          <div className="flex justify-end gap-4 pt-4">
-            <Button type="button" onClick={onClose} variant="outline" size="lg">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/30">
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              size="md"
+              className="px-4 text-xs font-medium cursor-pointer"
+            >
               Cancelar
             </Button>
-            <Button type="submit" variant="primary" size="lg">
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              className="px-5 text-xs font-semibold shadow-sm cursor-pointer"
+            >
               {isEditMode ? "Guardar cambios" : "Guardar Cliente"}
             </Button>
           </div>

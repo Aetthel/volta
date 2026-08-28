@@ -32,34 +32,38 @@ export const checkSubscriptionLimits = (action) => {
         });
       }
 
-      // If user is on TRIALING or PRO or ENTERPRISE, features are unlimited
-      if (
-        business.subscriptionStatus === "TRIALING" ||
-        business.subscriptionPlan === "PRO" ||
-        business.subscriptionPlan === "ENTERPRISE"
-      ) {
+      // If user is on TRIALING or ENTERPRISE, features are unlimited during trial
+      if (business.subscriptionStatus === "TRIALING" || business.subscriptionPlan === "ENTERPRISE") {
         return next();
       }
 
-      // Plan BASIC Limits (18€/mes)
+      // Plan PRO Limits (40€/mes)
+      if (business.subscriptionPlan === "PRO") {
+        // Pro includes unlimited locations, unlimited appointments, whatsapp 2-way, payments, etc.
+        // Worker limits for Pro (2 included, extra workers allowed)
+        return next();
+      }
+
+      // Plan BASIC Limits (30€/mes)
       if (business.subscriptionPlan === "BASIC") {
         if (action === "CREATE_LOCATION") {
           return res.status(403).json({
             error:
-              "El Plan Básico (18€/mes) permite 1 sola sede. Actualiza a Plan Pro para sedes ilimitadas.",
+              "El Plan Básico (30€/mes) permite 1 sola sede o calendario. Actualiza a Plan Pro para sedes y multi-calendario ilimitado.",
             requiresUpgrade: true,
             currentLimit: 1,
           });
         }
 
-        if (action === "INVITE_MEMBER") {
+        if (action === "INVITE_MEMBER" || action === "INVITE_WORKER") {
           const userCount = business._count?.users || 0;
-          if (userCount >= 3) {
+          if (userCount >= 1) {
             return res.status(403).json({
               error:
-                "El Plan Básico permite hasta 3 miembros en el equipo. Actualiza a Plan Pro para miembros ilimitados.",
+                "El Plan Básico (30€/mes) incluye 1 trabajador. Añade trabajadores adicionales (+5€/mes) o actualiza al Plan Pro (40€/mes).",
               requiresUpgrade: true,
-              currentLimit: 3,
+              currentLimit: 1,
+              extraWorkerPrice: 5,
             });
           }
         }
@@ -67,12 +71,20 @@ export const checkSubscriptionLimits = (action) => {
         if (action === "WHATSAPP_CONNECT") {
           return res.status(403).json({
             error:
-              "La automatización de mensajes por WhatsApp 2 vías requiere el Plan Pro (25€/mes).",
+              "La automatización y el bot interactivo de WhatsApp 2 vías requiere el Plan Pro (40€/mes).",
             requiresUpgrade: true,
           });
         }
 
-        if (action === "CREATE_APPOINTMENT") {
+        if (action === "ONLINE_PAYMENTS") {
+          return res.status(403).json({
+            error:
+              "El cobro de señas y depósitos online requiere el Plan Pro (40€/mes).",
+            requiresUpgrade: true,
+          });
+        }
+
+        if (action === "CREATE_APPOINTMENT" || action === "CREATE_PUBLIC_BOOKING") {
           const startOfMonth = new Date();
           startOfMonth.setDate(1);
           startOfMonth.setHours(0, 0, 0, 0);
@@ -84,12 +96,12 @@ export const checkSubscriptionLimits = (action) => {
             },
           });
 
-          if (monthlyAppointmentsCount >= 40) {
+          if (monthlyAppointmentsCount >= 100) {
             return res.status(403).json({
               error:
-                "Has alcanzado el límite de 40 citas este mes del Plan Básico (18€/mes). Actualiza a Plan Pro para citas ilimitadas.",
+                "Has alcanzado el límite de 100 reservas este mes del Plan Básico (30€/mes). Actualiza a Plan Pro para reservas ilimitadas.",
               requiresUpgrade: true,
-              currentLimit: 40,
+              currentLimit: 100,
             });
           }
         }

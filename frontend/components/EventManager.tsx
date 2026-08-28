@@ -1,6 +1,11 @@
 "use client"
 
 import { useState, useCallback, useMemo, useEffect } from "react"
+import { createPortal } from "react-dom"
+import { useSession } from "next-auth/react"
+import dynamic from "next/dynamic"
+import { useDraggableModal } from "@/lib/useDraggableModal"
+import { Button as VoltaButton } from "@/components/ui/volta-ui"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,8 +21,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, Grid3x3, List, Search, Filter, X } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Clock,
+  Grid3x3,
+  List,
+  Filter,
+  X,
+  User,
+  Briefcase,
+  Palette,
+  Tag,
+  FileText,
+  Trash2,
+  Lock,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
+
+const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
+  ssr: false,
+})
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,10 +51,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Header from "@/components/Header"
 
 export interface Event {
   id: string
   title: string
+  clientName?: string
   description?: string
   startTime: Date
   endTime: Date
@@ -55,13 +82,19 @@ export interface EventManagerProps {
 
 const defaultColors = [
   { name: "Teal Volta", value: "TEAL", bg: "bg-[#377E7F]", text: "text-white" },
-  { name: "Púrpura", value: "PURPLE", bg: "bg-purple-600", text: "text-white" },
-  { name: "Rosa", value: "ROSE", bg: "bg-rose-500", text: "text-white" },
-  { name: "Ámbar", value: "AMBER", bg: "bg-amber-500", text: "text-white" },
-  { name: "Índigo", value: "INDIGO", bg: "bg-indigo-600", text: "text-white" },
-  { name: "Esmeralda", value: "EMERALD", bg: "bg-emerald-500", text: "text-white" },
-  { name: "Azul Cielo", value: "SKY", bg: "bg-sky-500", text: "text-white" },
+  { name: "Teal Intenso", value: "DEEP_TEAL", bg: "bg-[#285F60]", text: "text-white" },
+  { name: "Mineral", value: "SAGE", bg: "bg-[#4A8B8C]", text: "text-white" },
+  { name: "Pizarra", value: "SLATE", bg: "bg-[#3B6E8C]", text: "text-white" },
+  { name: "Bosque", value: "FOREST", bg: "bg-[#2E6554]", text: "text-white" },
+  { name: "Petróleo", value: "PETROL", bg: "bg-[#2F5359]", text: "text-white" },
 ]
+
+function formatTime(date: Date) {
+  return date.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
 
 export function EventManager({
   events: initialEvents = [],
@@ -72,7 +105,7 @@ export function EventManager({
   colors = defaultColors,
   defaultView = "week",
   className,
-  availableTags = ["Confirmada", "Pendiente", "Completada"],
+  availableTags = ["Confirmada", "Pendiente", "Completada", "Cancelada"],
   onOpenNewModal,
 }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents)
@@ -89,6 +122,53 @@ export function EventManager({
     category: categories[0],
     tags: [],
   })
+
+  const { position, handleMouseDown } = useDraggableModal({
+    isOpen: isDialogOpen,
+    modalWidth: 480,
+    modalHeight: 580,
+  })
+
+  const { data: session } = useSession()
+  const subscriptionPlan = session?.user?.subscriptionPlan || "BASIC"
+  const subscriptionStatus = session?.user?.subscriptionStatus || "ACTIVE"
+  const isBasicActive = subscriptionPlan === "BASIC" && subscriptionStatus !== "TRIALING"
+
+  const [isQuotaUpgradeOpen, setIsQuotaUpgradeOpen] = useState(false)
+
+  const currentMonthApps = useMemo(() => {
+    const now = new Date()
+    return events.filter((e) => {
+      const d = e.startTime instanceof Date ? e.startTime : new Date(e.startTime)
+      return (
+        !isNaN(d.getTime()) &&
+        d.getMonth() === now.getMonth() &&
+        d.getFullYear() === now.getFullYear()
+      )
+    }).length
+  }, [events])
+
+  const quotaPct = Math.min(100, Math.round((currentMonthApps / 100) * 100))
+  const isQuotaWarning = currentMonthApps >= 80 && currentMonthApps < 100
+  const isQuotaExceeded = currentMonthApps >= 100
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const formatDateForInput = (d?: Date | string) => {
+    if (!d) return ""
+    const dateObj = d instanceof Date ? d : new Date(d)
+    if (isNaN(dateObj.getTime())) return ""
+    const pad = (n: number) => String(n).padStart(2, "0")
+    const year = dateObj.getFullYear()
+    const month = pad(dateObj.getMonth() + 1)
+    const day = pad(dateObj.getDate())
+    const hours = pad(dateObj.getHours())
+    const minutes = pad(dateObj.getMinutes())
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  }
 
   // Sync state if initialEvents changes from parent API updates
   useEffect(() => {
@@ -287,562 +367,634 @@ export function EventManager({
   );
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      {/* Header */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <h2 className="text-xl font-semibold sm:text-2xl capitalize">
-            {view === "month" &&
-              currentDate.toLocaleDateString("es-ES", {
-                month: "long",
-                year: "numeric",
-              })}
-            {view === "week" &&
-              `Semana del ${currentDate.toLocaleDateString("es-ES", {
-                month: "short",
-                day: "numeric",
-              })}`}
-            {view === "day" &&
-              currentDate.toLocaleDateString("es-ES", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            {view === "list" && "Todas las Citas"}
-          </h2>
+    <div className={cn("flex-1 flex flex-col w-full h-full min-h-full", className)}>
+      {/* Header & Controls bar with standard top and lateral page margins */}
+      <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
+        {/* Row 1: Title + Date Navigation & Header Profile/Notifications */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-headline-lg text-on-surface font-semibold capitalize tracking-tight">
+              {view === "month" &&
+                currentDate.toLocaleDateString("es-ES", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              {view === "week" &&
+                `Semana del ${currentDate.toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "numeric",
+                })}`}
+              {view === "day" &&
+                currentDate.toLocaleDateString("es-ES", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              {view === "list" && "Todas las Citas"}
+            </h1>
+            <div className="flex items-center gap-1.5">
+              <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8 rounded-lg bg-surface">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())} className="h-8 px-3 rounded-lg text-xs font-semibold bg-surface">
+                Hoy
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => navigateDate("next")} className="h-8 w-8 rounded-lg bg-surface">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="shrink-0">
+            <Header />
+          </div>
+        </div>
+
+        {/* Row 2: View Switchers (Left) and Filters (Right) */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* View Switchers & Quota */}
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigateDate("prev")} className="h-8 w-8">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>
-              Hoy
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => navigateDate("next")} className="h-8 w-8">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            {/* Mobile: Select dropdown */}
+            <div className="sm:hidden w-full">
+              <Select value={view} onValueChange={(value: any) => setView(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Vista Mes
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="week">
+                    <div className="flex items-center gap-2">
+                      <Grid3x3 className="h-4 w-4" />
+                      Vista Semana
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="day">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Vista Día
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="list">
+                    <div className="flex items-center gap-2">
+                      <List className="h-4 w-4" />
+                      Vista Lista
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Desktop: Button group */}
+            <div className="hidden sm:flex items-center gap-0.5 rounded-lg border border-outline-variant bg-surface p-0.5">
+              <Button
+                variant={view === "month" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("month")}
+                className="h-7 px-2.5 text-xs font-medium"
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                <span className="ml-1">Mes</span>
+              </Button>
+              <Button
+                variant={view === "week" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("week")}
+                className="h-7 px-2.5 text-xs font-medium"
+              >
+                <Grid3x3 className="h-3.5 w-3.5" />
+                <span className="ml-1">Semana</span>
+              </Button>
+              <Button
+                variant={view === "day" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("day")}
+                className="h-7 px-2.5 text-xs font-medium"
+              >
+                <Clock className="h-3.5 w-3.5" />
+                <span className="ml-1">Día</span>
+              </Button>
+              <Button
+                variant={view === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView("list")}
+                className="h-7 px-2.5 text-xs font-medium"
+              >
+                <List className="h-3.5 w-3.5" />
+                <span className="ml-1">Lista</span>
+              </Button>
+            </div>
+
+            {/* Basic Plan Quota Button */}
+            {isBasicActive && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsQuotaUpgradeOpen(true)}
+                className={cn(
+                  "whitespace-nowrap shrink-0 bg-surface",
+                  isQuotaExceeded && "border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
+                  isQuotaWarning && "border-amber-500/50 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
+                )}
+                title="Citas realizadas este mes. Pulsa para pasar a Plan Pro con citas ilimitadas."
+              >
+                <span>{currentMonthApps}/100 citas este mes</span>
+              </Button>
+            )}
+          </div>
+
+          {/* Filters */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            {/* Color Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+                  <Filter className="h-4 w-4" />
+                  Colores
+                  {selectedColors.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedColors.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrar por Color</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {colors.map((color) => (
+                  <DropdownMenuCheckboxItem
+                    key={color.value}
+                    checked={selectedColors.includes(color.value)}
+                    onCheckedChange={(checked) => {
+                      setSelectedColors((prev) =>
+                        checked ? [...prev, color.value] : prev.filter((c) => c !== color.value),
+                      )
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={cn("h-3 w-3 rounded", color.bg)} />
+                      {color.name}
+                    </div>
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Tag Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+                  <Filter className="h-4 w-4" />
+                  Etiquetas
+                  {selectedTags.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedTags.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrar por Etiqueta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {availableTags.map((tag) => (
+                  <DropdownMenuCheckboxItem
+                    key={tag}
+                    checked={selectedTags.includes(tag)}
+                    onCheckedChange={(checked) => {
+                      setSelectedTags((prev) => (checked ? [...prev, tag] : prev.filter((t) => t !== tag)))
+                    }}
+                  >
+                    {tag}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Category Filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+                  <Filter className="h-4 w-4" />
+                  Categorías
+                  {selectedCategories.length > 0 && (
+                    <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                      {selectedCategories.length}
+                    </Badge>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Filtrar por Categoría</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {categories.map((category) => (
+                  <DropdownMenuCheckboxItem
+                    key={category}
+                    checked={selectedCategories.includes(category)}
+                    onCheckedChange={(checked) => {
+                      setSelectedCategories((prev) =>
+                        checked ? [...prev, category] : prev.filter((c) => c !== category),
+                      )
+                    }}
+                  >
+                    {category}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {hasActiveFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 whitespace-nowrap shrink-0">
+                <X className="h-4 w-4" />
+                Limpiar
+              </Button>
+            )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {/* Mobile: Select dropdown */}
-          <div className="sm:hidden">
-            <Select value={view} onValueChange={(value: any) => setView(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Vista Mes
-                  </div>
-                </SelectItem>
-                <SelectItem value="week">
-                  <div className="flex items-center gap-2">
-                    <Grid3x3 className="h-4 w-4" />
-                    Vista Semana
-                  </div>
-                </SelectItem>
-                <SelectItem value="day">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Vista Día
-                  </div>
-                </SelectItem>
-                <SelectItem value="list">
-                  <div className="flex items-center gap-2">
-                    <List className="h-4 w-4" />
-                    Vista Lista
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Desktop: Button group */}
-          <div className="hidden sm:flex items-center gap-1 rounded-lg border border-outline-variant/60 bg-surface p-1">
-            <Button
-              variant={view === "month" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("month")}
-              className="h-8"
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="ml-1">Mes</span>
-            </Button>
-            <Button
-              variant={view === "week" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("week")}
-              className="h-8"
-            >
-              <Grid3x3 className="h-4 w-4" />
-              <span className="ml-1">Semana</span>
-            </Button>
-            <Button
-              variant={view === "day" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("day")}
-              className="h-8"
-            >
-              <Clock className="h-4 w-4" />
-              <span className="ml-1">Día</span>
-            </Button>
-            <Button
-              variant={view === "list" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setView("list")}
-              className="h-8"
-            >
-              <List className="h-4 w-4" />
-              <span className="ml-1">Lista</span>
-            </Button>
-          </div>
-
-          <Button
-            onClick={() => {
-              if (onOpenNewModal) {
-                onOpenNewModal(currentDate);
-              } else {
-                setIsCreating(true);
-                setIsDialogOpen(true);
-              }
-            }}
-            className="w-full sm:w-auto"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nueva Cita
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant/60" />
-          <Input
-            placeholder="Buscar por cliente, servicio o etiqueta..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
-              onClick={() => setSearchQuery("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-
-        {/* Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          {/* Color Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
-                <Filter className="h-4 w-4" />
-                Colores
-                {selectedColors.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                    {selectedColors.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Filtrar por Color</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {colors.map((color) => (
-                <DropdownMenuCheckboxItem
-                  key={color.value}
-                  checked={selectedColors.includes(color.value)}
-                  onCheckedChange={(checked) => {
-                    setSelectedColors((prev) =>
-                      checked ? [...prev, color.value] : prev.filter((c) => c !== color.value),
-                    )
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={cn("h-3 w-3 rounded", color.bg)} />
-                    {color.name}
-                  </div>
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Tag Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
-                <Filter className="h-4 w-4" />
-                Etiquetas
-                {selectedTags.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                    {selectedTags.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Filtrar por Etiqueta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {availableTags.map((tag) => (
-                <DropdownMenuCheckboxItem
-                  key={tag}
-                  checked={selectedTags.includes(tag)}
-                  onCheckedChange={(checked) => {
-                    setSelectedTags((prev) => (checked ? [...prev, tag] : prev.filter((t) => t !== tag)))
-                  }}
-                >
-                  {tag}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Category Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
-                <Filter className="h-4 w-4" />
-                Categorías
-                {selectedCategories.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                    {selectedCategories.length}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Filtrar por Categoría</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {categories.map((category) => (
-                <DropdownMenuCheckboxItem
-                  key={category}
-                  checked={selectedCategories.includes(category)}
-                  onCheckedChange={(checked) => {
-                    setSelectedCategories((prev) =>
-                      checked ? [...prev, category] : prev.filter((c) => c !== category),
-                    )
-                  }}
-                >
-                  {category}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 whitespace-nowrap shrink-0">
-              <X className="h-4 w-4" />
-              Limpiar
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-on-surface-variant">Filtros activos:</span>
-          {selectedColors.map((colorValue) => {
-            const color = getColorClasses(colorValue)
-            return (
-              <Badge key={colorValue} variant="secondary" className="gap-1">
-                <div className={cn("h-2 w-2 rounded-full", color.bg)} />
-                {color.name}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-on-surface-variant">Filtros activos:</span>
+            {selectedColors.map((colorValue) => {
+              const color = getColorClasses(colorValue)
+              return (
+                <Badge key={colorValue} variant="secondary" className="gap-1">
+                  <div className={cn("h-2 w-2 rounded-full", color.bg)} />
+                  {color.name}
+                  <button
+                    onClick={() => setSelectedColors((prev) => prev.filter((c) => c !== colorValue))}
+                    className="ml-1 hover:text-on-surface"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )
+            })}
+            {selectedTags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="gap-1">
+                {tag}
                 <button
-                  onClick={() => setSelectedColors((prev) => prev.filter((c) => c !== colorValue))}
+                  onClick={() => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
                   className="ml-1 hover:text-on-surface"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
-            )
-          })}
-          {selectedTags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1">
-              {tag}
+            ))}
+            {selectedCategories.map((category) => (
+              <Badge key={category} variant="secondary" className="gap-1">
+                {category}
+                <button
+                  onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== category))}
+                  className="ml-1 hover:text-on-surface"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Calendar Views Container — Full Height & Edge-to-Edge */}
+      <div className="flex-1 w-full overflow-auto bg-surface-container-lowest flex flex-col border-t border-outline-variant/30">
+        {view === "month" && (
+          <MonthView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            onSlotClick={handleSlotClick}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            getColorClasses={getColorClasses}
+          />
+        )}
+
+        {view === "week" && (
+          <WeekView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            onSlotClick={handleSlotClick}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            getColorClasses={getColorClasses}
+          />
+        )}
+
+        {view === "day" && (
+          <DayView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            onSlotClick={handleSlotClick}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDrop={handleDrop}
+            getColorClasses={getColorClasses}
+          />
+        )}
+
+        {view === "list" && (
+          <ListView
+            events={filteredEvents}
+            onEventClick={(event) => {
+              setSelectedEvent(event)
+              setIsDialogOpen(true)
+            }}
+            getColorClasses={getColorClasses}
+          />
+        )}
+      </div>
+
+      {/* Event Modal — Volta Draggable Modal */}
+      {isDialogOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[100] pointer-events-none">
+          {/* Backdrop — transparent without blur or darkening */}
+          <div
+            className="absolute inset-0 bg-transparent pointer-events-auto"
+            onClick={() => {
+              setIsDialogOpen(false)
+              setIsCreating(false)
+              setSelectedEvent(null)
+            }}
+          />
+
+          {/* Modal Content Card */}
+          <div
+            style={{
+              position: "fixed",
+              left: `${position.x}px`,
+              top: `${position.y}px`,
+              width: "480px",
+              maxWidth: "calc(100vw - 32px)",
+              transition: "none",
+            }}
+            className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 overflow-hidden z-10 pointer-events-auto animate-in fade-in zoom-in-95 duration-150 flex flex-col"
+          >
+            {/* Header */}
+            <div
+              onMouseDown={handleMouseDown}
+              className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none"
+            >
+              <div className="flex flex-col">
+                <h2 className="text-xl font-bold text-on-surface tracking-tight">
+                  {isCreating ? "Agendar Cita" : "Editar Cita"}
+                </h2>
+                <p className="text-sm text-on-surface-variant mt-0.5">
+                  {isCreating
+                    ? "Añade una nueva cita al calendario"
+                    : "Modifica los datos del cliente, servicio u horario"}
+                </p>
+              </div>
               <button
-                onClick={() => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
-                className="ml-1 hover:text-on-surface"
+                type="button"
+                onClick={() => {
+                  setIsDialogOpen(false)
+                  setIsCreating(false)
+                  setSelectedEvent(null)
+                }}
+                className="p-1.5 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer -mr-1"
+                aria-label="Cerrar modal"
               >
-                <X className="h-3 w-3" />
+                <X className="w-5 h-5" />
               </button>
-            </Badge>
-          ))}
-          {selectedCategories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1">
-              {category}
-              <button
-                onClick={() => setSelectedCategories((prev) => prev.filter((c) => c !== category))}
-                className="ml-1 hover:text-on-surface"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-
-      {/* Calendar Views */}
-      {view === "month" && (
-        <MonthView
-          currentDate={currentDate}
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          onSlotClick={handleSlotClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          getColorClasses={getColorClasses}
-        />
-      )}
-
-      {view === "week" && (
-        <WeekView
-          currentDate={currentDate}
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          onSlotClick={handleSlotClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          getColorClasses={getColorClasses}
-        />
-      )}
-
-      {view === "day" && (
-        <DayView
-          currentDate={currentDate}
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          onSlotClick={handleSlotClick}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
-          getColorClasses={getColorClasses}
-        />
-      )}
-
-      {view === "list" && (
-        <ListView
-          events={filteredEvents}
-          onEventClick={(event) => {
-            setSelectedEvent(event)
-            setIsDialogOpen(true)
-          }}
-          getColorClasses={getColorClasses}
-        />
-      )}
-
-      {/* Event Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{isCreating ? "Crear Cita" : "Detalles de la Cita"}</DialogTitle>
-            <DialogDescription>
-              {isCreating ? "Añadir una nueva cita al calendario" : "Ver y editar detalles de la cita"}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Título / Cliente</Label>
-              <Input
-                id="title"
-                value={isCreating ? newEvent.title : selectedEvent?.title}
-                onChange={(e) =>
-                  isCreating
-                    ? setNewEvent((prev) => ({ ...prev, title: e.target.value }))
-                    : setSelectedEvent((prev) => (prev ? { ...prev, title: e.target.value } : null))
-                }
-                placeholder="Nombre del cliente y servicio"
-              />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción / Notas</Label>
-              <Textarea
-                id="description"
-                value={isCreating ? newEvent.description : selectedEvent?.description}
-                onChange={(e) =>
-                  isCreating
-                    ? setNewEvent((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    : setSelectedEvent((prev) => (prev ? { ...prev, description: e.target.value } : null))
-                }
-                placeholder="Notas adicionales de la cita"
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="startTime">Hora Inicio</Label>
-                <Input
-                  id="startTime"
-                  type="datetime-local"
-                  value={
+            {/* Form Body */}
+            <div className="p-6 flex flex-col gap-4 max-h-[calc(90vh-140px)] overflow-y-auto custom-scrollbar">
+              {/* Título / Cliente */}
+              <div>
+                <label
+                  htmlFor="modal-event-title"
+                  className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                >
+                  <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Cliente / Título <span className="text-error">*</span></span>
+                </label>
+                <input
+                  id="modal-event-title"
+                  type="text"
+                  value={isCreating ? newEvent.title : selectedEvent?.title || ""}
+                  onChange={(e) =>
                     isCreating
-                      ? newEvent.startTime
-                        ? new Date(newEvent.startTime.getTime() - newEvent.startTime.getTimezoneOffset() * 60000)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                      : selectedEvent
-                        ? new Date(
-                            selectedEvent.startTime.getTime() - selectedEvent.startTime.getTimezoneOffset() * 60000,
-                          )
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
+                      ? setNewEvent((prev) => ({ ...prev, title: e.target.value }))
+                      : setSelectedEvent((prev) => (prev ? { ...prev, title: e.target.value } : null))
                   }
-                  onChange={(e) => {
-                    const date = new Date(e.target.value)
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, startTime: date }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, startTime: date } : null))
-                  }}
+                  placeholder="Nombre del cliente y servicio"
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="endTime">Hora Fin</Label>
-                <Input
-                  id="endTime"
-                  type="datetime-local"
-                  value={
-                    isCreating
-                      ? newEvent.endTime
-                        ? new Date(newEvent.endTime.getTime() - newEvent.endTime.getTimezoneOffset() * 60000)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                      : selectedEvent
-                        ? new Date(selectedEvent.endTime.getTime() - selectedEvent.endTime.getTimezoneOffset() * 60000)
-                            .toISOString()
-                            .slice(0, 16)
-                        : ""
-                  }
+              {/* Hora Inicio & Fin (2 Columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label
+                    htmlFor="modal-event-startTime"
+                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Hora Inicio</span>
+                  </label>
+                  <input
+                    id="modal-event-startTime"
+                    type="datetime-local"
+                    value={
+                      isCreating
+                        ? formatDateForInput(newEvent.startTime)
+                        : formatDateForInput(selectedEvent?.startTime)
+                    }
+                    onChange={(e) => {
+                      const date = new Date(e.target.value)
+                      if (!isNaN(date.getTime())) {
+                        isCreating
+                          ? setNewEvent((prev) => ({ ...prev, startTime: date }))
+                          : setSelectedEvent((prev) => (prev ? { ...prev, startTime: date } : null))
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="modal-event-endTime"
+                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Hora Fin</span>
+                  </label>
+                  <input
+                    id="modal-event-endTime"
+                    type="datetime-local"
+                    value={
+                      isCreating
+                        ? formatDateForInput(newEvent.endTime)
+                        : formatDateForInput(selectedEvent?.endTime)
+                    }
+                    onChange={(e) => {
+                      const date = new Date(e.target.value)
+                      if (!isNaN(date.getTime())) {
+                        isCreating
+                          ? setNewEvent((prev) => ({ ...prev, endTime: date }))
+                          : setSelectedEvent((prev) => (prev ? { ...prev, endTime: date } : null))
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Categoría / Servicio */}
+              <div>
+                <label
+                  htmlFor="modal-event-category"
+                  className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                >
+                  <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Categoría / Servicio</span>
+                </label>
+                <select
+                  id="modal-event-category"
+                  value={isCreating ? newEvent.category : selectedEvent?.category || ""}
                   onChange={(e) => {
-                    const date = new Date(e.target.value)
+                    const val = e.target.value
                     isCreating
-                      ? setNewEvent((prev) => ({ ...prev, endTime: date }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, endTime: date } : null))
+                      ? setNewEvent((prev) => ({ ...prev, category: val }))
+                      : setSelectedEvent((prev) => (prev ? { ...prev, category: val } : null))
                   }}
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Descripción / Notas */}
+              <div>
+                <label
+                  htmlFor="modal-event-description"
+                  className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                >
+                  <FileText className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Notas / Observaciones</span>
+                </label>
+                <textarea
+                  id="modal-event-description"
+                  rows={3}
+                  value={isCreating ? newEvent.description : selectedEvent?.description || ""}
+                  onChange={(e) =>
+                    isCreating
+                      ? setNewEvent((prev) => ({ ...prev, description: e.target.value }))
+                      : setSelectedEvent((prev) => (prev ? { ...prev, description: e.target.value } : null))
+                  }
+                  placeholder="Notas o detalles adicionales..."
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all resize-none"
                 />
               </div>
+
+              {/* Etiquetas */}
+              {availableTags.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                    <span>Etiquetas</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableTags.map((tag) => {
+                      const isSelected = isCreating
+                        ? newEvent.tags?.includes(tag)
+                        : selectedEvent?.tags?.includes(tag)
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag, isCreating)}
+                          className={cn(
+                            "px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all cursor-pointer select-none",
+                            isSelected
+                              ? "bg-primary text-white border-primary shadow-xs"
+                              : "bg-surface-container-low/60 border-outline-variant/60 text-on-surface-variant hover:bg-surface-container-high"
+                          )}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Categoría</Label>
-                <Select
-                  value={isCreating ? newEvent.category : selectedEvent?.category}
-                  onValueChange={(value) =>
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, category: value }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, category: value } : null))
-                  }
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-outline-variant/30 bg-surface-container-low/20 flex items-center justify-between">
+              {!isCreating && selectedEvent ? (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteEvent(selectedEvent.id)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                 >
-                  <SelectTrigger id="category">
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
-                <Select
-                  value={isCreating ? newEvent.color : selectedEvent?.color}
-                  onValueChange={(value) =>
-                    isCreating
-                      ? setNewEvent((prev) => ({ ...prev, color: value }))
-                      : setSelectedEvent((prev) => (prev ? { ...prev, color: value } : null))
-                  }
+                  <Trash2 className="w-4 h-4" />
+                  <span>Eliminar</span>
+                </button>
+              ) : (
+                <div />
+              )}
+              <div className="flex items-center gap-2.5">
+                <VoltaButton
+                  type="button"
+                  variant="outline"
+                  size="md"
+                  onClick={() => {
+                    setIsDialogOpen(false)
+                    setIsCreating(false)
+                    setSelectedEvent(null)
+                  }}
+                  className="cursor-pointer font-medium"
                 >
-                  <SelectTrigger id="color">
-                    <SelectValue placeholder="Seleccionar color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colors.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
-                        <div className="flex items-center gap-2">
-                          <div className={cn("h-4 w-4 rounded", color.bg)} />
-                          {color.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Etiquetas</Label>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => {
-                  const isSelected = isCreating ? newEvent.tags?.includes(tag) : selectedEvent?.tags?.includes(tag)
-                  return (
-                    <Badge
-                      key={tag}
-                      variant={isSelected ? "default" : "outline"}
-                      className="cursor-pointer transition-all hover:scale-105"
-                      onClick={() => toggleTag(tag, isCreating)}
-                    >
-                      {tag}
-                    </Badge>
-                  )
-                })}
+                  Cancelar
+                </VoltaButton>
+                <VoltaButton
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={isCreating ? handleCreateEvent : handleUpdateEvent}
+                  className="cursor-pointer font-semibold shadow-xs"
+                >
+                  {isCreating ? "Crear Cita" : "Guardar Cambios"}
+                </VoltaButton>
               </div>
             </div>
           </div>
+        </div>,
+        document.body
+      )}
 
-          <DialogFooter>
-            {!isCreating && (
-              <Button variant="destructive" onClick={() => selectedEvent && handleDeleteEvent(selectedEvent.id)}>
-                Eliminar
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsDialogOpen(false)
-                setIsCreating(false)
-                setSelectedEvent(null)
-              }}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={isCreating ? handleCreateEvent : handleUpdateEvent}>
-              {isCreating ? "Crear" : "Guardar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Upgrade Pro Modal for Quota */}
+      <UpgradeProModal
+        isOpen={isQuotaUpgradeOpen}
+        onClose={() => setIsQuotaUpgradeOpen(false)}
+        title="Citas Ilimitadas con Plan Pro"
+        description={`Has utilizado ${currentMonthApps} de tus 100 citas del mes en el Plan Básico. Actualiza al Plan Pro (40€/mes) para disfrutar de citas ilimitadas sin restricciones de cupo.`}
+      />
     </div>
   )
 }
@@ -913,7 +1065,6 @@ function EventCard({
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="font-semibold text-sm leading-tight">{event.title}</h4>
-                  <div className={cn("h-3 w-3 rounded-full flex-shrink-0", colorClasses.bg)} />
                 </div>
                 {event.description && <p className="text-xs text-on-surface-variant line-clamp-2">{event.description}</p>}
                 <div className="flex items-center gap-1 text-xs text-on-surface-variant">
@@ -1015,7 +1166,6 @@ function EventCard({
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <h4 className="font-semibold leading-tight">{event.title}</h4>
-                <div className={cn("h-4 w-4 rounded-full flex-shrink-0", colorClasses.bg)} />
               </div>
               {event.description && <p className="text-sm text-on-surface-variant">{event.description}</p>}
               <div className="space-y-1.5">
@@ -1091,16 +1241,16 @@ function MonthView({
   }
 
   return (
-    <Card className="overflow-hidden">
-      <div className="grid grid-cols-7 border-b border-outline-variant/40">
+    <div className="w-full h-full flex flex-col min-w-[700px]">
+      <div className="grid grid-cols-7 border-b border-outline-variant/30 bg-surface-container-low/50 sticky top-0 z-20">
         {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((day) => (
-          <div key={day} className="border-r border-outline-variant/40 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm">
+          <div key={day} className="border-r border-outline-variant/30 p-2.5 text-center text-xs font-semibold text-on-surface-variant last:border-r-0 sm:text-sm">
             <span className="hidden sm:inline">{day}</span>
             <span className="sm:hidden">{day.charAt(0)}</span>
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 flex-1">
         {days.map((day, index) => {
           const dayEvents = getEventsForDay(day)
           const isCurrentMonth = day.getMonth() === currentDate.getMonth()
@@ -1110,9 +1260,9 @@ function MonthView({
             <div
               key={index}
               className={cn(
-                "min-h-20 border-b border-r border-outline-variant/40 p-1 transition-colors last:border-r-0 sm:min-h-24 sm:p-2 cursor-pointer",
-                !isCurrentMonth && "bg-surface-container-low/40 opacity-60",
-                "hover:bg-surface-container-low",
+                "min-h-24 border-b border-r border-outline-variant/30 p-1.5 transition-colors last:border-r-0 sm:min-h-28 sm:p-2 cursor-pointer",
+                !isCurrentMonth && "bg-surface-container-low/30 opacity-60",
+                "hover:bg-surface-container-low/60",
               )}
               onClick={() => {
                 const clickDate = new Date(day);
@@ -1124,14 +1274,14 @@ function MonthView({
             >
               <div
                 className={cn(
-                  "mb-1 flex h-5 w-5 items-center justify-center rounded-full text-xs sm:h-6 sm:w-6 sm:text-sm",
-                  isToday && "bg-primary text-on-primary font-semibold",
+                  "mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs sm:text-sm font-semibold",
+                  isToday ? "bg-primary text-on-primary" : "text-on-surface",
                 )}
               >
                 {day.getDate()}
               </div>
               <div className="space-y-1">
-                {dayEvents.slice(0, 3).map((event) => (
+                {dayEvents.slice(0, 4).map((event) => (
                   <EventCard
                     key={event.id}
                     event={event}
@@ -1142,19 +1292,224 @@ function MonthView({
                     variant="compact"
                   />
                 ))}
-                {dayEvents.length > 3 && (
-                  <div className="text-[10px] text-on-surface-variant sm:text-xs">+{dayEvents.length - 3} más</div>
+                {dayEvents.length > 4 && (
+                  <div className="text-[10px] text-on-surface-variant font-medium sm:text-xs">+{dayEvents.length - 4} más</div>
                 )}
               </div>
             </div>
           )
         })}
       </div>
-    </Card>
+    </div>
   )
 }
 
 // Week View Component
+interface TimeGridEventCardProps {
+  event: Event
+  top: number
+  height: number
+  onEventClick: (event: Event) => void
+  onDragStart: (event: Event) => void
+  onDragEnd: () => void
+  getColorClasses: (color: string) => { bg: string; text: string }
+  leftOffsetPercent?: number
+  widthPercent?: number
+}
+
+function TimeGridEventCard({
+  event,
+  top,
+  height,
+  onEventClick,
+  onDragStart,
+  onDragEnd,
+  getColorClasses,
+  leftOffsetPercent = 0,
+  widthPercent = 100,
+}: TimeGridEventCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+  const colorClasses = getColorClasses(event.color)
+
+  const getDuration = () => {
+    const diff = event.endTime.getTime() - event.startTime.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`
+    }
+    return `${minutes}m`
+  }
+
+  const isShort = height < 38
+  const isMedium = height >= 38 && height < 60
+
+  return (
+    <div
+      draggable
+      onDragStart={() => onDragStart(event)}
+      onDragEnd={onDragEnd}
+      onClick={(e) => {
+        e.stopPropagation()
+        onEventClick(event)
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        top: `${top}px`,
+        height: `${height}px`,
+        left: `calc(${leftOffsetPercent}% + 2px)`,
+        width: `calc(${widthPercent}% - 4px)`,
+      }}
+      className={cn(
+        "absolute z-10 cursor-pointer rounded-md p-1.5 transition-all duration-150 overflow-hidden shadow-sm flex flex-col justify-start select-none",
+        colorClasses.bg,
+        "text-white",
+        isHovered && "z-30 ring-2 ring-white/80 shadow-md brightness-105"
+      )}
+    >
+      {/* Card Content based on available height */}
+      {isShort ? (
+        <div className="flex items-center gap-1.5 leading-tight truncate text-[11px]">
+          <span className="font-bold truncate">{event.title}</span>
+          {event.clientName && (
+            <span className="opacity-90 text-[10px] truncate">· {event.clientName}</span>
+          )}
+          <span className="opacity-80 text-[10px] shrink-0 font-medium ml-auto">
+            {formatTime(event.startTime)}
+          </span>
+        </div>
+      ) : isMedium ? (
+        <div className="flex flex-col h-full justify-between leading-tight overflow-hidden">
+          <div>
+            <div className="font-bold text-xs truncate">{event.title}</div>
+            {event.clientName && (
+              <div className="text-[11px] opacity-90 truncate font-medium">{event.clientName}</div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-1 text-[10px] opacity-80 truncate">
+            <span>
+              {formatTime(event.startTime)} - {formatTime(event.endTime)}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col h-full justify-between overflow-hidden">
+          <div>
+            <div className="font-bold text-xs truncate">{event.title}</div>
+            {event.clientName && (
+              <div className="text-[11px] opacity-95 truncate font-medium mt-0.5">
+                {event.clientName}
+              </div>
+            )}
+            <div className="flex items-center gap-1 text-[10px] opacity-85 mt-1">
+              <Clock className="w-3 h-3 shrink-0 opacity-80" />
+              <span>
+                {formatTime(event.startTime)} - {formatTime(event.endTime)}
+              </span>
+              <span className="opacity-75">({getDuration()})</span>
+            </div>
+          </div>
+          {event.tags && event.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-auto pt-1">
+              {event.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-1.5 py-0.5 text-[9px] font-semibold rounded bg-white/20 text-white backdrop-blur-xs"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Hover Card / Tooltip Popup */}
+      {isHovered && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-64 animate-in fade-in slide-in-from-top-2 duration-150 pointer-events-none">
+          <Card className="border border-outline-variant p-3 shadow-xl bg-surface-container-lowest text-on-surface">
+            <div className="space-y-1.5">
+              <h4 className="font-bold text-sm leading-tight text-on-surface">{event.title}</h4>
+              {event.clientName && (
+                <p className="text-xs font-semibold text-primary">{event.clientName}</p>
+              )}
+              {event.description && (
+                <p className="text-xs text-on-surface-variant line-clamp-2">{event.description}</p>
+              )}
+              <div className="flex items-center gap-1 text-xs text-on-surface-variant font-medium">
+                <Clock className="h-3 w-3" />
+                <span>
+                  {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                </span>
+                <span className="text-[10px] text-on-surface-variant/75">({getDuration()})</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {event.category && (
+                  <Badge variant="secondary" className="text-[10px] h-5">
+                    {event.category}
+                  </Badge>
+                )}
+                {event.tags?.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-[10px] h-5">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function layoutDayEvents(events: Event[]) {
+  const START_HOUR = 8
+  const HOUR_HEIGHT = 64
+
+  const sorted = [...events].sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+
+  const items = sorted.map((event) => {
+    const startHour = event.startTime.getHours()
+    const startMin = event.startTime.getMinutes()
+
+    const startTotalMins = (startHour - START_HOUR) * 60 + startMin
+    const durationMins = Math.max(15, Math.round((event.endTime.getTime() - event.startTime.getTime()) / 60000))
+    const endTotalMins = startTotalMins + durationMins
+
+    const top = Math.max(0, (startTotalMins / 60) * HOUR_HEIGHT)
+    const height = Math.max(22, (durationMins / 60) * HOUR_HEIGHT - 2)
+
+    return {
+      event,
+      top,
+      height,
+      startTotalMins,
+      endTotalMins,
+      leftOffsetPercent: 0,
+      widthPercent: 100,
+    }
+  })
+
+  // Calculate overlapping clusters
+  for (let i = 0; i < items.length; i++) {
+    const curr = items[i]
+    const overlaps = items.filter(
+      (other, j) => i !== j && curr.startTotalMins < other.endTotalMins && curr.endTotalMins > other.startTotalMins
+    )
+    if (overlaps.length > 0) {
+      const allCluster = [curr, ...overlaps].sort((a, b) => a.startTotalMins - b.startTotalMins)
+      const totalColumns = allCluster.length
+      const indexInCluster = allCluster.findIndex((item) => item.event.id === curr.event.id)
+      curr.widthPercent = Math.floor(100 / totalColumns)
+      curr.leftOffsetPercent = curr.widthPercent * indexInCluster
+    }
+  }
+
+  return items
+}
+
 function WeekView({
   currentDate,
   events,
@@ -1184,79 +1539,112 @@ function WeekView({
     return day
   })
 
-  // Hours 08:00 to 21:00 for salon business hours
-  const hours = Array.from({ length: 14 }, (_, i) => i + 8)
-
-  const getEventsForDayAndHour = (date: Date, hour: number) => {
-    return events.filter((event) => {
-      const eventDate = new Date(event.startTime)
-      const eventHour = eventDate.getHours()
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear() &&
-        eventHour === hour
-      )
-    })
-  }
+  // Hours 08:00 to 21:00 (14 hours total, each 64px high)
+  const START_HOUR = 8
+  const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR)
+  const HOUR_HEIGHT = 64
+  const TOTAL_GRID_HEIGHT = hours.length * HOUR_HEIGHT
 
   return (
-    <Card className="overflow-auto">
-      <div className="grid grid-cols-8 border-b border-outline-variant/40 min-w-[700px]">
-        <div className="border-r border-outline-variant/40 p-2 text-center text-xs font-medium sm:text-sm">Hora</div>
-        {weekDays.map((day) => (
-          <div
-            key={day.toISOString()}
-            className="border-r border-outline-variant/40 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm"
-          >
-            <div className="hidden sm:block capitalize">{day.toLocaleDateString("es-ES", { weekday: "short" })}</div>
-            <div className="sm:hidden capitalize">{day.toLocaleDateString("es-ES", { weekday: "narrow" })}</div>
-            <div className="text-[10px] text-on-surface-variant sm:text-xs">
-              {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
-            </div>
-          </div>
-        ))}
+    <div className="w-full h-full overflow-auto">
+      {/* Sticky Day Header */}
+      <div className="flex border-b border-outline-variant/30 bg-surface-container-low/50 min-w-[750px] sticky top-0 z-20">
+        <div className="w-14 sm:w-16 flex-shrink-0 border-r border-outline-variant/30 p-2.5 text-center text-xs font-semibold text-on-surface-variant sm:text-sm">
+          Hora
+        </div>
+        <div className="grid grid-cols-7 flex-1">
+          {weekDays.map((day) => {
+            const isToday = day.toDateString() === new Date().toDateString()
+            return (
+              <div
+                key={day.toISOString()}
+                className="border-r border-outline-variant/30 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm"
+              >
+                <div className={cn("hidden sm:block capitalize", isToday ? "text-primary font-bold" : "text-on-surface font-semibold")}>
+                  {day.toLocaleDateString("es-ES", { weekday: "short" })}
+                </div>
+                <div className="sm:hidden capitalize font-semibold">{day.toLocaleDateString("es-ES", { weekday: "narrow" })}</div>
+                <div className={cn("text-[11px]", isToday ? "text-primary font-bold" : "text-on-surface-variant")}>
+                  {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
-      <div className="grid grid-cols-8 min-w-[700px]">
-        {hours.map((hour) => (
-          <div key={`row-${hour}`} className="contents">
-            <div className="border-b border-r border-outline-variant/40 p-1 text-[10px] text-on-surface-variant sm:p-2 sm:text-xs">
+
+      {/* Time Grid Body */}
+      <div className="flex min-w-[750px] relative">
+        {/* Time Column */}
+        <div className="w-14 sm:w-16 flex-shrink-0 border-r border-outline-variant/30 select-none bg-surface-container-lowest/40">
+          {hours.map((hour) => (
+            <div
+              key={hour}
+              style={{ height: `${HOUR_HEIGHT}px` }}
+              className="border-b border-outline-variant/30 p-1 text-[11px] font-medium text-on-surface-variant/70 text-center flex items-start justify-center pt-1"
+            >
               {hour.toString().padStart(2, "0")}:00
             </div>
-            {weekDays.map((day) => {
-              const dayEvents = getEventsForDayAndHour(day, hour)
+          ))}
+        </div>
+
+        {/* 7 Day Columns */}
+        <div className="grid grid-cols-7 flex-1">
+          {weekDays.map((day) => {
+            const dayEvents = events.filter((event) => {
+              const eventDate = new Date(event.startTime)
               return (
-                <div
-                  key={`${day.toISOString()}-${hour}`}
-                  className="min-h-12 border-b border-r border-outline-variant/40 p-0.5 transition-colors hover:bg-surface-container-low/80 last:border-r-0 sm:min-h-16 sm:p-1 cursor-pointer"
-                  onClick={() => {
-                    const slotDate = new Date(day);
-                    slotDate.setHours(hour, 0, 0, 0);
-                    onSlotClick(slotDate);
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => onDrop(day, hour)}
-                >
-                  <div className="space-y-1">
-                    {dayEvents.map((event) => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        onEventClick={onEventClick}
-                        onDragStart={onDragStart}
-                        onDragEnd={onDragEnd}
-                        getColorClasses={getColorClasses}
-                        variant="default"
-                      />
-                    ))}
-                  </div>
-                </div>
+                eventDate.getDate() === day.getDate() &&
+                eventDate.getMonth() === day.getMonth() &&
+                eventDate.getFullYear() === day.getFullYear()
               )
-            })}
-          </div>
-        ))}
+            })
+
+            const laidOutEvents = layoutDayEvents(dayEvents)
+
+            return (
+              <div
+                key={day.toISOString()}
+                className="relative border-r border-outline-variant/30 last:border-r-0"
+                style={{ height: `${TOTAL_GRID_HEIGHT}px` }}
+              >
+                {/* Background Hour Slots (for clicking / creating appointments) */}
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    style={{ height: `${HOUR_HEIGHT}px` }}
+                    className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      const slotDate = new Date(day)
+                      slotDate.setHours(hour, 0, 0, 0)
+                      onSlotClick(slotDate)
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => onDrop(day, hour)}
+                  />
+                ))}
+
+                {/* Proportional Height Event Cards */}
+                {laidOutEvents.map(({ event, top, height, leftOffsetPercent, widthPercent }) => (
+                  <TimeGridEventCard
+                    key={event.id}
+                    event={event}
+                    top={top}
+                    height={height}
+                    leftOffsetPercent={leftOffsetPercent}
+                    widthPercent={widthPercent}
+                    onEventClick={onEventClick}
+                    onDragStart={onDragStart}
+                    onDragEnd={onDragEnd}
+                    getColorClasses={getColorClasses}
+                  />
+                ))}
+              </div>
+            )
+          })}
+        </div>
       </div>
-    </Card>
+    </div>
   )
 }
 
@@ -1280,63 +1668,77 @@ function DayView({
   onDrop: (date: Date, hour: number) => void
   getColorClasses: (color: string) => { bg: string; text: string }
 }) {
-  const hours = Array.from({ length: 14 }, (_, i) => i + 8)
+  const START_HOUR = 8
+  const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR)
+  const HOUR_HEIGHT = 64
+  const TOTAL_GRID_HEIGHT = hours.length * HOUR_HEIGHT
 
-  const getEventsForHour = (hour: number) => {
-    return events.filter((event) => {
-      const eventDate = new Date(event.startTime)
-      const eventHour = eventDate.getHours()
-      return (
-        eventDate.getDate() === currentDate.getDate() &&
-        eventDate.getMonth() === currentDate.getMonth() &&
-        eventDate.getFullYear() === currentDate.getFullYear() &&
-        eventHour === hour
-      )
-    })
-  }
+  const dayEvents = events.filter((event) => {
+    const eventDate = new Date(event.startTime)
+    return (
+      eventDate.getDate() === currentDate.getDate() &&
+      eventDate.getMonth() === currentDate.getMonth() &&
+      eventDate.getFullYear() === currentDate.getFullYear()
+    )
+  })
+
+  const laidOutEvents = layoutDayEvents(dayEvents)
 
   return (
-    <Card className="overflow-auto">
-      <div className="space-y-0">
-        {hours.map((hour) => {
-          const hourEvents = getEventsForHour(hour)
-          return (
+    <div className="w-full h-full overflow-auto">
+      <div className="flex min-w-[500px] relative">
+        {/* Time Column */}
+        <div className="w-16 sm:w-24 flex-shrink-0 border-r border-outline-variant/30 select-none bg-surface-container-lowest/40">
+          {hours.map((hour) => (
             <div
               key={hour}
-              className="flex border-b border-outline-variant/40 last:border-b-0"
+              style={{ height: `${HOUR_HEIGHT}px` }}
+              className="border-b border-outline-variant/30 p-2 text-xs font-semibold text-on-surface-variant text-center flex items-start justify-center pt-1.5"
+            >
+              {hour.toString().padStart(2, "0")}:00
+            </div>
+          ))}
+        </div>
+
+        {/* Day Column */}
+        <div
+          className="flex-1 relative"
+          style={{ height: `${TOTAL_GRID_HEIGHT}px` }}
+        >
+          {/* Background Hour Slots */}
+          {hours.map((hour) => (
+            <div
+              key={hour}
+              style={{ height: `${HOUR_HEIGHT}px` }}
+              className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
+              onClick={() => {
+                const slotDate = new Date(currentDate)
+                slotDate.setHours(hour, 0, 0, 0)
+                onSlotClick(slotDate)
+              }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => onDrop(currentDate, hour)}
-            >
-              <div className="w-14 flex-shrink-0 border-r border-outline-variant/40 p-2 text-xs text-on-surface-variant sm:w-20 sm:p-3 sm:text-sm">
-                {hour.toString().padStart(2, "0")}:00
-              </div>
-              <div
-                className="min-h-16 flex-1 p-1 transition-colors hover:bg-surface-container-low/80 sm:min-h-20 sm:p-2 cursor-pointer"
-                onClick={() => {
-                  const slotDate = new Date(currentDate);
-                  slotDate.setHours(hour, 0, 0, 0);
-                  onSlotClick(slotDate);
-                }}
-              >
-                <div className="space-y-2">
-                  {hourEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onEventClick={onEventClick}
-                      onDragStart={onDragStart}
-                      onDragEnd={onDragEnd}
-                      getColorClasses={getColorClasses}
-                      variant="detailed"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )
-        })}
+            />
+          ))}
+
+          {/* Proportional Height Event Cards */}
+          {laidOutEvents.map(({ event, top, height, leftOffsetPercent, widthPercent }) => (
+            <TimeGridEventCard
+              key={event.id}
+              event={event}
+              top={top}
+              height={height}
+              leftOffsetPercent={leftOffsetPercent}
+              widthPercent={widthPercent}
+              onEventClick={onEventClick}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              getColorClasses={getColorClasses}
+            />
+          ))}
+        </div>
       </div>
-    </Card>
+    </div>
   )
 }
 
@@ -1370,8 +1772,8 @@ function ListView({
   )
 
   return (
-    <Card className="p-3 sm:p-4">
-      <div className="space-y-6">
+    <div className="w-full h-full overflow-auto p-4 sm:p-6">
+      <div className="space-y-6 max-w-4xl mx-auto">
         {Object.entries(groupedEvents).map(([date, dateEvents]) => (
           <div key={date} className="space-y-3">
             <h3 className="text-xs font-semibold text-on-surface-variant sm:text-sm capitalize">{date}</h3>
@@ -1441,6 +1843,6 @@ function ListView({
           <div className="py-12 text-center text-sm text-on-surface-variant sm:text-base">No hay citas registradas</div>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

@@ -13,7 +13,6 @@ import {
   Trash2,
   Mail,
   Lock,
-  Sparkles,
   Pencil,
   Users,
   UserPlus,
@@ -513,7 +512,7 @@ export default function SedesPage() {
             {/* Header */}
             <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
               <h3 className="font-title-lg text-title-lg text-on-surface font-semibold flex items-center gap-2">
-                <Sparkles data-icon="sparkles" className="text-primary" />
+                <Store className="text-primary w-5 h-5" />
                 <span>{editingBusiness ? "Editar Local" : "Añadir Nuevo Local"}</span>
               </h3>
               <Button

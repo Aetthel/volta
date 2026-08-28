@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 
 const normalizeString = (str: string) => {
@@ -18,6 +18,23 @@ const normalizePhone = (phone: string) => {
     return digits.slice(2);
   }
   return digits;
+};
+
+// El backend responde siempre { error: string, details?: [{ field, message }] }.
+// Sin desenvolverlo, el usuario solo veía "Failed to save appointment" y se
+// perdía el motivo real (hueco ocupado, fuera de horario, teléfono inválido...).
+const extractErrorMessage = (payload: unknown, fallback: string) => {
+  if (!payload || typeof payload !== "object") return fallback;
+  const body = payload as { error?: unknown; details?: unknown };
+
+  if (Array.isArray(body.details) && body.details.length > 0) {
+    const messages = body.details
+      .map((d) => (d && typeof d === "object" ? (d as { message?: string }).message : null))
+      .filter((m): m is string => typeof m === "string" && m.length > 0);
+    if (messages.length > 0) return messages.join(". ");
+  }
+
+  return typeof body.error === "string" && body.error.length > 0 ? body.error : fallback;
 };
 
 export interface NewAppointmentFormData {
@@ -52,15 +69,21 @@ export function useNewAppointmentForm(
 
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
+  const [groupClients, setGroupClients] = useState<Array<{ id?: string; name: string; phone?: string }>>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showConsentToast, setShowConsentToast] = useState(false);
   const [toastPhone, setToastPhone] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Prefill date and time when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
+    setSubmitError(null);
+    setIsSubmitting(false);
+    setGroupClients([]);
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -94,16 +117,8 @@ export function useNewAppointmentForm(
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setServices(data);
-          setFormData((prev) => ({
-            ...prev,
-            service: data[0].name,
-          }));
         } else {
           setServices([]);
-          setFormData((prev) => ({
-            ...prev,
-            service: "",
-          }));
         }
       })
       .catch((e) => {
@@ -139,17 +154,41 @@ export function useNewAppointmentForm(
     setShowSuggestions(filtered.length > 0);
   };
 
-  const handleSelectSuggestion = (client: { name: string; surname?: string; phone: string }) => {
+  const handleSelectSuggestion = (client: { id?: string; name: string; surname?: string; phone: string }) => {
     const fullName = `${client.name} ${client.surname || ""}`.trim();
-    setFormData((prev) => ({
-      ...prev,
-      clientName: fullName,
-      clientPhone: client.phone,
-    }));
+    if (bookingType === "GROUP") {
+      setGroupClients((prev) => {
+        if (prev.some((c) => c.name.toLowerCase() === fullName.toLowerCase())) return prev;
+        return [...prev, { id: client.id, name: fullName, phone: client.phone }];
+      });
+      setFormData((prev) => ({ ...prev, clientName: "" }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        clientName: fullName,
+        clientPhone: client.phone,
+      }));
+    }
     setShowSuggestions(false);
   };
 
+  const handleAddManualGroupClient = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setGroupClients((prev) => {
+      if (prev.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return prev;
+      return [...prev, { name: trimmed }];
+    });
+    setFormData((prev) => ({ ...prev, clientName: "" }));
+    setShowSuggestions(false);
+  };
+
+  const handleRemoveGroupClient = (index: number) => {
+    setGroupClients((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const resetFormAndClose = () => {
+    setGroupClients([]);
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -161,8 +200,11 @@ export function useNewAppointmentForm(
     onClose?.();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setSubmitError(null);
 
     const [h, m] = (formData.time || "10:00").split(":");
     const cleanH = (h || "10").padStart(2, "0");
@@ -171,34 +213,52 @@ export function useNewAppointmentForm(
 
     const localDate = new Date(`${formData.date}T${formattedTime}:00`);
     if (isNaN(localDate.getTime())) {
-      console.error("Invalid appointment date/time calculated");
+      setSubmitError("La fecha o la hora de la cita no son válidas.");
+      return;
+    }
+    if (!businessId) {
+      setSubmitError("No se ha podido identificar el negocio. Vuelve a iniciar sesión.");
       return;
     }
     const appointmentDateStr = localDate.toISOString();
 
-    fetch("/api/backend/appointments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        clientName: formData.clientName,
-        clientPhone: formData.clientPhone,
-        appointmentDate: appointmentDateStr,
-        businessId: businessId,
-        service: formData.service,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to save appointment");
-        return res.json();
-      })
-      .then((savedApp) => {
-        onSave?.({
-          ...savedApp,
-          service: formData.service,
-        });
+    const isGroup = bookingType === "GROUP";
+    const groupNames = groupClients.map((c) => c.name).join(", ");
+    const finalClientName = isGroup
+      ? (groupNames || (formData.clientName.trim() ? formData.clientName.trim() : formData.service || "Clase de Grupo"))
+      : formData.clientName;
+    const finalClientPhone = isGroup
+      ? (groupClients.find((c) => c.phone)?.phone || "")
+      : formData.clientPhone;
 
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/backend/appointments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clientName: finalClientName,
+          clientPhone: finalClientPhone,
+          appointmentDate: appointmentDateStr,
+          businessId: businessId,
+          service: formData.service,
+        }),
+      });
+
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(extractErrorMessage(payload, "No se ha podido guardar la cita."));
+      }
+
+      onSave?.({
+        ...payload,
+        service: formData.service,
+      });
+
+      if (!isGroup) {
         const exist = clientsList.some((c) => {
           const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
           const inputName = normalizeString(formData.clientName);
@@ -215,22 +275,21 @@ export function useNewAppointmentForm(
             setShowConsentToast(false);
             resetFormAndClose();
           }, 2500);
-        } else {
-          resetFormAndClose();
+          return;
         }
-      })
-      .catch((err) => {
-        console.error("Error saving appointment:", err);
-        onSave?.({
-          id: String(Date.now()),
-          clientName: formData.clientName,
-          clientPhone: formData.clientPhone,
-          service: formData.service,
-          date: formData.date,
-          time: formData.time,
-        });
-        resetFormAndClose();
-      });
+      }
+
+      resetFormAndClose();
+    } catch (err) {
+      console.error("Error saving appointment:", err);
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Error inesperado al guardar la cita."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleHourChange = (value: string) => {
@@ -248,10 +307,19 @@ export function useNewAppointmentForm(
 
   const handleHourBlur = () => {
     const [h, m] = (formData.time || "10:00").split(":");
-    const paddedH = h.padStart(2, "0") || "10";
+    if (!h) {
+      setFormData((prev) => ({ ...prev, time: `10:${m || "00"}` }));
+      return;
+    }
+    const num = parseInt(h, 10);
+    // Smart afternoon conversion: Single digit 1-7 (without leading 0) maps to 13:00 - 19:00
+    let finalH = h.padStart(2, "0");
+    if (!h.startsWith("0") && num >= 1 && num <= 7) {
+      finalH = String(num + 12);
+    }
     setFormData((prev) => ({
       ...prev,
-      time: `${paddedH}:${m}`,
+      time: `${finalH}:${m || "00"}`,
     }));
   };
 
@@ -277,12 +345,25 @@ export function useNewAppointmentForm(
     }));
   };
 
-  const filteredServices = services.filter((srv) => {
-    if (bookingType === "GROUP") {
-      return srv.type === "GROUP" || (srv.capacity && srv.capacity > 1);
+  const filteredServices = useMemo(() => {
+    return services.filter((srv) => {
+      if (bookingType === "GROUP") {
+        return srv.type === "GROUP" || (srv.capacity && srv.capacity > 1);
+      }
+      return srv.type === "INDIVIDUAL" || !srv.type || srv.capacity === 1;
+    });
+  }, [services, bookingType]);
+
+  useEffect(() => {
+    if (filteredServices.length > 0) {
+      const exists = filteredServices.some((s) => s.name === formData.service);
+      if (!exists) {
+        setFormData((prev) => ({ ...prev, service: filteredServices[0].name }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, service: "" }));
     }
-    return srv.type === "INDIVIDUAL" || !srv.type || srv.capacity === 1;
-  });
+  }, [filteredServices, formData.service]);
 
   const serviceOptions = filteredServices.map((srv) => ({
     value: srv.name,
@@ -298,11 +379,16 @@ export function useNewAppointmentForm(
     setBookingType,
     formData,
     setFormData,
+    groupClients,
+    handleAddManualGroupClient,
+    handleRemoveGroupClient,
     suggestions,
     showSuggestions,
     setShowSuggestions,
     showConsentToast,
     toastPhone,
+    submitError,
+    isSubmitting,
     handleChange,
     handleNameChange,
     handleSelectSuggestion,

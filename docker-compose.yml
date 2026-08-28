@@ -58,10 +58,20 @@ services:
       - CI=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
+      # El .env local trae un REDIS_URL apuntando a 127.0.0.1 (correcto solo si
+      # el backend corre en el host). Dentro del contenedor, 127.0.0.1 es el
+      # propio contenedor, y config/redis.js da prioridad a REDIS_URL sobre
+      # REDIS_HOST, así que nunca llegaba al servicio `redis`. Vaciarla aquí
+      # (environment gana a env_file) hace que se use el bloque REDIS_HOST.
+      - REDIS_URL=
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
       - PORT=3001
+      - EVOLUTION_API_URL=http://evolution-api:8080
+      - EVOLUTION_API_KEY=${EVOLUTION_API_KEY:-volta_dev_evolution_key_2026}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
     healthcheck:
       test: ["CMD-SHELL", "node -e 'fetch(\"http://localhost:3001/health\").then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))'"]
       interval: 10s
@@ -75,7 +85,6 @@ services:
       - /app/node_modules
       - /app/frontend/node_modules
       - /app/backend/node_modules
-      - wwebjs-auth:/app/backend/.wwebjs_auth
     ports:
       - "3001:3001"
     command: sh -c "cd /app/backend && pnpm prisma:push && cd /app && pnpm --filter backend dev"
@@ -84,6 +93,55 @@ services:
         limits:
           cpus: "2.0"
           memory: 2048M
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    container_name: volta-evolution-api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_URL=http://localhost:8080
+      - DOCKER_ENV=true
+      - LOG_LEVEL=ERROR,WARN,INFO,DEBUG
+      - LOG_COLOR=true
+      - LOG_BAILEYS=debug
+      - CORS_ORIGIN=*
+      - CORS_METHODS=GET,POST,PUT,DELETE
+      - CORS_CREDENTIALS=true
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY:-volta_dev_evolution_key_2026}
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=evolution
+      - DATABASE_CONNECTION_CLIENT_NAME=evolution_exchange
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+      - DEL_INSTANCE=false
+      - CACHE_REDIS_ENABLED=false
+      - QRCODE_LIMIT=30
+      - CONFIG_SESSION_PHONE_CLIENT=Volta
+      - CONFIG_SESSION_PHONE_NAME=Chrome
+      - WEBHOOK_GLOBAL_ENABLED=true
+      - WEBHOOK_GLOBAL_URL=http://backend:3001/api/webhooks/whatsapp
+      - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=true
+      - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+      - WEBHOOK_EVENTS_CONNECTION_UPDATE=true
+      - WEBHOOK_EVENTS_QRCODE_UPDATED=true
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - evolution_instances:/evolution/instances
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
   frontend:
     build:
@@ -123,4 +181,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  wwebjs-auth:
+  evolution_instances:

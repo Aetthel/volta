@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { MessageSquare, Send, Loader2, Save } from "lucide-react";
+import dynamic from "next/dynamic";
+import { MessageSquare, Send, Loader2, Save, Lock } from "lucide-react";
 import type { MessageTemplates, ToastState } from "@/types/settings";
 import {
   Card,
@@ -18,6 +19,11 @@ import {
   FieldLabel,
   Skeleton,
 } from "@/components/ui/volta-ui";
+import { hasFeatureAccess } from "@/lib/permissions";
+
+const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
+  ssr: false,
+});
 
 interface MessagesSectionProps {
   businessId: string;
@@ -30,6 +36,12 @@ export default function MessagesSection({
   profileName,
   setToast,
 }: MessagesSectionProps) {
+  const { data: session } = useSession();
+  const subscriptionPlan = session?.user?.subscriptionPlan || "BASIC";
+  const subscriptionStatus = session?.user?.subscriptionStatus || "ACTIVE";
+  const hasWhatsApp = hasFeatureAccess(subscriptionPlan, subscriptionStatus, "whatsappTwoWayBot");
+
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [whatsappStatus, setWhatsappStatus] = useState("DISCONNECTED");
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [loadingQr, setLoadingQr] = useState(false);
@@ -43,7 +55,7 @@ export default function MessagesSection({
   const [savingTemplates, setSavingTemplates] = useState(false);
 
   const fetchWhatsappStatus = useCallback(() => {
-    if (!businessId || businessId === "mock-business-id") return;
+    if (!businessId || businessId === "mock-business-id" || !hasWhatsApp) return;
     fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -54,7 +66,7 @@ export default function MessagesSection({
         }
       })
       .catch(() => {});
-  }, [businessId]);
+  }, [businessId, hasWhatsApp]);
 
   const fetchTemplates = useCallback(() => {
     if (!businessId || businessId === "mock-business-id") return;
@@ -62,14 +74,16 @@ export default function MessagesSection({
       .then((res) => res.json())
       .then((data) => {
         if (data && !data.error) {
+          const defaultWelcome = `Hola {nombre}, bienvenido/a a ${profileName || "nuestro negocio"}. Por favor confirma la política de privacidad en: {link_lopd}`;
+          const defaultReminder = `Hola {nombre}, te recordamos tu cita de {servicio} para mañana a las {hora}. ¡Te esperamos en ${profileName || "nuestro negocio"}!`;
           setTemplates({
-            welcomeMessage: data.welcomeMessage || "",
-            reminderMessage: data.reminderMessage || "",
+            welcomeMessage: data.welcomeMessage || defaultWelcome,
+            reminderMessage: data.reminderMessage || defaultReminder,
           });
         }
       })
       .catch(() => {});
-  }, [businessId]);
+  }, [businessId, profileName]);
 
   useEffect(() => {
     fetchWhatsappStatus();
@@ -77,7 +91,7 @@ export default function MessagesSection({
   }, [fetchWhatsappStatus, fetchTemplates]);
 
   useEffect(() => {
-    if (!pollingActive || !businessId) return;
+    if (!pollingActive || !businessId || !hasWhatsApp) return;
     const interval = setInterval(() => {
       fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
         .then((res) => res.json())
@@ -94,9 +108,13 @@ export default function MessagesSection({
         .catch(() => {});
     }, 5000);
     return () => clearInterval(interval);
-  }, [pollingActive, businessId]);
+  }, [pollingActive, businessId, hasWhatsApp]);
 
   const handleConnectWhatsapp = () => {
+    if (!hasWhatsApp) {
+      setIsUpgradeOpen(true);
+      return;
+    }
     setLoadingQr(true);
     fetch("/api/backend/whatsapp/init", {
       method: "POST",
@@ -157,289 +175,330 @@ export default function MessagesSection({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter animate-in fade-in duration-200">
-      {/* WhatsApp Connection Card */}
-      <Card className="sm:col-span-2 lg:col-span-5 flex flex-col justify-between min-h-0 sm:min-h-[420px]">
-        <div>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <MessageSquare />
-              <span>Canal de WhatsApp</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-4 sm:gap-6">
-              <div className="flex items-center gap-3 bg-surface-container-low p-4 rounded-md border border-outline-variant/50">
-                {whatsappStatus === "CONNECTED" ? (
-                  <>
-                    <div className="relative flex h-3 w-3 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/70 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
-                    </div>
-                    <div>
-                      <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                        Conectado
-                      </p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">
-                        Mensajería activa
-                      </p>
-                    </div>
-                  </>
-                ) : whatsappStatus === "WAITING_QR" ? (
-                  <>
-                    <div className="relative flex h-3 w-3 shrink-0">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error-container/70 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
-                    </div>
-                    <div>
-                      <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                        Esperando escaneo
-                      </p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">
-                        Escanea el código QR
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-gutter animate-in fade-in duration-200">
+        {/* WhatsApp Connection Card */}
+        <Card className="sm:col-span-2 lg:col-span-5 flex flex-col justify-between min-h-0 sm:min-h-[420px]">
+          <div>
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-primary flex items-center gap-2">
+                  <MessageSquare />
+                  <span>Canal de WhatsApp</span>
+                </CardTitle>
+                {!hasWhatsApp && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 flex items-center gap-1">
+                    <Lock className="w-2.5 h-2.5" />
+                    <span>PRO</span>
+                  </span>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-4 sm:gap-6">
+                {!hasWhatsApp ? (
+                  <div className="flex flex-col gap-3 py-2">
+                    <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 flex flex-col gap-2 text-xs">
+                      <div className="flex items-center gap-2 font-bold text-primary">
+                        <Lock className="w-4 h-4" />
+                        <span>Función Exclusiva del Plan Pro (40€/mes)</span>
+                      </div>
+                      <p className="text-on-surface-variant leading-relaxed">
+                        La automatización y recordatorios interactivos por WhatsApp 2 vías están disponibles en el Plan Pro. En tu Plan Básico actual, las notificaciones y recordatorios se gestionan por Email y SMS.
                       </p>
                     </div>
-                  </>
+                    <div className="flex items-center gap-3 bg-surface-container-low p-4 rounded-md border border-outline-variant/50 opacity-60">
+                      <div className="h-3 w-3 rounded-full bg-on-surface-variant/40 shrink-0"></div>
+                      <div>
+                        <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                          Desconectado
+                        </p>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant">
+                          Requiere Plan Pro
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <>
-                    <div className="h-3 w-3 rounded-full bg-on-surface-variant/40 shrink-0"></div>
-                    <div>
-                      <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                        Desconectado
-                      </p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">
-                        Sin vinculación activa
-                      </p>
+                    <div className="flex items-center gap-3 bg-surface-container-low p-4 rounded-md border border-outline-variant/50">
+                      {whatsappStatus === "CONNECTED" ? (
+                        <>
+                          <div className="relative flex h-3 w-3 shrink-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/70 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                          </div>
+                          <div>
+                            <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                              Conectado
+                            </p>
+                            <p className="font-body-sm text-body-sm text-on-surface-variant">
+                              Mensajería activa
+                            </p>
+                          </div>
+                        </>
+                      ) : whatsappStatus === "WAITING_QR" ? (
+                        <>
+                          <div className="relative flex h-3 w-3 shrink-0">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error-container/70 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-error"></span>
+                          </div>
+                          <div>
+                            <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                              Esperando escaneo
+                            </p>
+                            <p className="font-body-sm text-body-sm text-on-surface-variant">
+                              Escanea el código QR
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="h-3 w-3 rounded-full bg-on-surface-variant/40 shrink-0"></div>
+                          <div>
+                            <p className="font-body-lg text-body-lg font-semibold text-on-surface">
+                              Desconectado
+                            </p>
+                            <p className="font-body-sm text-body-sm text-on-surface-variant">
+                              Sin vinculación activa
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
+
+                    {whatsappStatus === "WAITING_QR" ? (
+                      <div className="flex flex-col items-center justify-center py-2 animate-in fade-in duration-200">
+                        {qrCode ? (
+                          <div className="flex flex-col items-center bg-white p-4 rounded-md border border-outline-variant shadow-sm max-w-[240px]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={
+                                qrCode.startsWith("data:")
+                                  ? qrCode
+                                  : `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`
+                              }
+                              alt="WhatsApp QR Code"
+                              className="w-[180px] h-[180px]"
+                            />
+                            <span className="text-[11px] font-medium text-on-surface-variant mt-2 text-center">
+                              Código QR de sincronización
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center bg-white p-4 rounded-md border border-outline-variant shadow-sm w-[212px] h-[224px]">
+                            <Skeleton className="w-[180px] h-[180px] rounded" />
+                            <span className="text-[11px] font-medium text-on-surface-variant mt-2 text-center animate-pulse">
+                              Generando QR...
+                            </span>
+                          </div>
+                        )}
+                        <div className="mt-4 text-center">
+                          <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed max-w-[260px] mx-auto">
+                            Abre WhatsApp en tu teléfono, ve a <strong>Dispositivos vinculados</strong> y
+                            escanea el código QR.
+                          </p>
+                        </div>
+                      </div>
+                    ) : whatsappStatus === "CONNECTED" ? (
+                      <div className="flex flex-col justify-center py-4 text-center">
+                        <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[280px] mx-auto mb-4">
+                          Tu cuenta de WhatsApp se encuentra vinculada correctamente. Las confirmaciones
+                          de citas y recordatorios se enviarán de forma automática a tus clientes.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col justify-center py-4 text-center">
+                        <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[280px] mx-auto mb-4">
+                          Vincula tu número de WhatsApp para poder enviar confirmaciones inmediatas al
+                          agendar citas y recordatorios automáticos 24 horas antes del servicio.
+                        </p>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
-
-              {whatsappStatus === "WAITING_QR" ? (
-                <div className="flex flex-col items-center justify-center py-2 animate-in fade-in duration-200">
-                  {qrCode ? (
-                    <div className="flex flex-col items-center bg-white p-4 rounded-md border border-outline-variant shadow-sm max-w-[240px]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`}
-                        alt="WhatsApp QR Code"
-                        className="w-[180px] h-[180px]"
-                      />
-                      <span className="text-[11px] font-medium text-on-surface-variant mt-2 text-center">
-                        Código QR de sincronización
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center bg-white p-4 rounded-md border border-outline-variant shadow-sm w-[212px] h-[224px]">
-                      <Skeleton className="w-[180px] h-[180px] rounded" />
-                      <span className="text-[11px] font-medium text-on-surface-variant mt-2 text-center animate-pulse">
-                        Generando QR...
-                      </span>
-                    </div>
-                  )}
-                  <div className="mt-4 text-center">
-                    <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed max-w-[260px] mx-auto">
-                      Abre WhatsApp en tu teléfono, ve a <strong>Dispositivos vinculados</strong> y
-                      escanea el código QR.
-                    </p>
-                  </div>
-                </div>
-              ) : whatsappStatus === "CONNECTED" ? (
-                <div className="flex flex-col justify-center py-4 text-center">
-                  <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[280px] mx-auto mb-4">
-                    Tu cuenta de WhatsApp se encuentra vinculada correctamente. Las confirmaciones
-                    de citas y recordatorios se enviarán de forma automática a tus clientes.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col justify-center py-4 text-center">
-                  <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed max-w-[280px] mx-auto mb-4">
-                    Vincula tu número de WhatsApp para poder enviar confirmaciones inmediatas al
-                    agendar citas y recordatorios automáticos 24 horas antes del servicio.
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </div>
-        <CardFooter className="pt-0">
-          {whatsappStatus === "CONNECTED" ? (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleDisconnectWhatsapp}
-              className="w-full py-3 border-error text-error hover:bg-error-container/20 shadow-none font-medium"
-            >
-              Desconectar cuenta
-            </Button>
-          ) : whatsappStatus === "WAITING_QR" ? (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleDisconnectWhatsapp}
-              className="w-full py-3 text-on-surface-variant hover:bg-surface-container shadow-none font-medium"
-            >
-              Cancelar vinculación
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={handleConnectWhatsapp}
-              disabled={loadingQr}
-              className="w-full py-3 flex items-center justify-center gap-2 active:scale-[0.98] font-medium"
-            >
-              {loadingQr ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  <span>Iniciando...</span>
-                </>
-              ) : (
-                <span>Vincular WhatsApp</span>
-              )}
-            </Button>
-          )}
-        </CardFooter>
-      </Card>
-
-      {/* Message Templates Editor Card */}
-      <Card className="sm:col-span-2 lg:col-span-7 flex flex-col justify-between">
-        <div>
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <Send />
-              <span>Plantillas de Mensajería</span>
-            </CardTitle>
-            {!isEditingTemplates ? (
+            </CardContent>
+          </div>
+          <CardFooter className="pt-0">
+            {!hasWhatsApp ? (
               <Button
-                variant="ghost"
-                onClick={() => setIsEditingTemplates(true)}
-                className="text-primary hover:text-primary-container font-label-lg text-label-lg transition-all hover:underline p-0 shadow-none active:scale-100 font-medium"
+                variant="primary"
+                size="lg"
+                onClick={() => setIsUpgradeOpen(true)}
+                className="w-full py-3 flex items-center justify-center gap-2 font-medium cursor-pointer shadow-sm"
               >
-                Editar plantillas
+                <Lock className="w-4 h-4" />
+                <span>Desbloquear WhatsApp con Plan Pro</span>
+              </Button>
+            ) : whatsappStatus === "CONNECTED" ? (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleDisconnectWhatsapp}
+                className="w-full py-3 border-error text-error hover:bg-error-container/20 shadow-none font-medium"
+              >
+                Desconectar cuenta
+              </Button>
+            ) : whatsappStatus === "WAITING_QR" ? (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handleDisconnectWhatsapp}
+                className="w-full py-3 text-on-surface-variant hover:bg-surface-container shadow-none font-medium"
+              >
+                Cancelar vinculación
               </Button>
             ) : (
-              <div className="flex gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setIsEditingTemplates(false);
-                    fetchTemplates();
-                  }}
-                  className="text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all hover:underline px-0 shadow-none active:scale-100 font-medium"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={handleSaveTemplates}
-                  disabled={savingTemplates}
-                  className="flex items-center gap-1 px-4 py-2 font-medium"
-                >
-                  {savingTemplates ? <Loader2 className="animate-spin" /> : <Save />}
-                  <span>Guardar</span>
-                </Button>
-              </div>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleConnectWhatsapp}
+                disabled={loadingQr}
+                className="w-full py-3 flex items-center justify-center gap-2 active:scale-[0.98] font-medium cursor-pointer"
+              >
+                {loadingQr ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    <span>Iniciando...</span>
+                  </>
+                ) : (
+                  <span>Vincular WhatsApp</span>
+                )}
+              </Button>
             )}
-          </CardHeader>
-          <CardContent>
-            <form className="flex flex-col gap-4 sm:gap-6">
-              <FieldGroup className="gap-4 sm:gap-6">
-                <Field>
-                  <div className="flex justify-between items-center w-full">
-                    <FieldLabel>Mensaje de Bienvenida / Confirmación</FieldLabel>
-                    <Badge variant="secondary">Inmediato</Badge>
-                  </div>
-                  <textarea
-                    disabled={!isEditingTemplates}
-                    rows={3}
-                    value={templates.welcomeMessage}
-                    onChange={(e) =>
-                      setTemplates((prev) => ({ ...prev, welcomeMessage: e.target.value }))
-                    }
-                    className="w-full border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface disabled:opacity-75 disabled:cursor-not-allowed resize-none custom-scrollbar"
-                    placeholder="Escribe el mensaje de confirmación..."
-                  />
-                </Field>
-                <Field>
-                  <div className="flex justify-between items-center w-full">
-                    <FieldLabel>Mensaje de Recordatorio</FieldLabel>
-                    <Badge variant="secondary">Sentinel (24h antes)</Badge>
-                  </div>
-                  <textarea
-                    disabled={!isEditingTemplates}
-                    rows={3}
-                    value={templates.reminderMessage}
-                    onChange={(e) =>
-                      setTemplates((prev) => ({ ...prev, reminderMessage: e.target.value }))
-                    }
-                    className="w-full border border-outline-variant rounded-lg px-4 py-3 text-body-md focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none transition-all bg-surface disabled:opacity-75 disabled:cursor-not-allowed resize-none custom-scrollbar"
-                    placeholder="Escribe el mensaje de recordatorio..."
-                  />
-                </Field>
-              </FieldGroup>
+          </CardFooter>
+        </Card>
 
-              <div className="bg-surface-container-low p-4 rounded-md border border-outline-variant/50">
-                <p className="font-label-md text-label-md text-on-surface font-semibold mb-2">
-                  Variables dinámicas disponibles:
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    "{{clientName}}",
-                    "{{appointmentDate}}",
-                    "{{appointmentTime}}",
-                    "{{businessName}}",
-                  ].map((v) => (
-                    <span
-                      key={v}
-                      className="bg-surface-container-lowest border border-outline-variant text-[11px] px-2 py-1 rounded font-mono select-all cursor-pointer"
-                      title={
-                        v === "{{clientName}}"
-                          ? "Nombre del cliente"
-                          : v === "{{appointmentDate}}"
-                            ? "Fecha de la cita"
-                            : v === "{{appointmentTime}}"
-                              ? "Hora de la cita"
-                              : "Nombre comercial"
-                      }
-                    >
-                      {v}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <span className="font-label-md text-label-md text-on-surface-variant font-semibold uppercase tracking-wider block mb-2">
-                  Vista previa del mensaje de bienvenida:
-                </span>
-                <div className="bg-[#efeae2] p-4 rounded-md border border-outline-variant font-sans relative">
-                  <div className="bg-white rounded-lg p-3 shadow-sm text-body-md text-on-surface max-w-[85%] relative border border-outline-variant/20">
-                    <p className="whitespace-pre-wrap text-[13px] leading-relaxed">
-                      {templates.welcomeMessage ? (
-                        templates.welcomeMessage
-                          .replace(/{{clientName}}/g, "Ana García")
-                          .replace(/{{appointmentDate}}/g, "lunes 8 de junio")
-                          .replace(/{{appointmentTime}}/g, "10:00")
-                          .replace(/{{businessName}}/g, profileName || "Glow")
-                      ) : (
-                        <span className="text-on-surface-variant italic">
-                          No hay plantilla configurada para bienvenida.
-                        </span>
-                      )}
+        {/* Templates Configuration Card */}
+        <Card className="sm:col-span-2 lg:col-span-7 flex flex-col justify-between">
+          <div>
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <CardTitle className="text-on-surface flex items-center gap-2">
+                <Send />
+                <span>Plantillas de Notificación</span>
+              </CardTitle>
+              {!isEditingTemplates ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditingTemplates(true)}
+                  className="font-medium"
+                >
+                  Editar plantillas
+                </Button>
+              ) : null}
+            </CardHeader>
+            <CardContent>
+              <form id="templates-form" onSubmit={handleSaveTemplates}>
+                <FieldGroup className="gap-6">
+                  {/* Bienvenida */}
+                  <Field>
+                    <FieldLabel htmlFor="welcome-msg">Mensaje de Bienvenida y Consentimiento LOPD</FieldLabel>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mb-2">
+                      Se enviará cuando des de alta a un cliente nuevo. Usa variables como{" "}
+                      <Badge variant="secondary" className="font-mono text-[10px] mx-1">
+                        {"{nombre}"}
+                      </Badge>{" "}
+                      o{" "}
+                      <Badge variant="secondary" className="font-mono text-[10px] mx-1">
+                        {"{link_lopd}"}
+                      </Badge>
+                      .
                     </p>
-                    <span className="text-[10px] text-on-surface-variant float-right mt-1">
-                      12:00
-                    </span>
-                    <div className="clear-both" />
-                  </div>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-        </div>
-      </Card>
-    </div>
+                    <textarea
+                      id="welcome-msg"
+                      rows={3}
+                      disabled={!isEditingTemplates}
+                      value={templates.welcomeMessage}
+                      onChange={(e) =>
+                        setTemplates((prev) => ({ ...prev, welcomeMessage: e.target.value }))
+                      }
+                      placeholder={`Hola {nombre}, bienvenido/a a ${profileName}. Por favor confirma la política de privacidad en: {link_lopd}`}
+                      className="w-full rounded-md border border-outline-variant bg-surface p-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-surface-container-low disabled:text-on-surface-variant"
+                    />
+                  </Field>
+
+                  {/* Recordatorio */}
+                  <Field>
+                    <FieldLabel htmlFor="reminder-msg">Mensaje de Recordatorio de Cita</FieldLabel>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mb-2">
+                      Se enviará 24 horas antes de la cita. Usa variables como{" "}
+                      <Badge variant="secondary" className="font-mono text-[10px] mx-1">
+                        {"{nombre}"}
+                      </Badge>
+                      ,{" "}
+                      <Badge variant="secondary" className="font-mono text-[10px] mx-1">
+                        {"{fecha}"}
+                      </Badge>
+                      ,{" "}
+                      <Badge variant="secondary" className="font-mono text-[10px] mx-1">
+                        {"{hora}"}
+                      </Badge>{" "}
+                      o{" "}
+                      <Badge variant="secondary" className="font-mono text-[10px] mx-1">
+                        {"{servicio}"}
+                      </Badge>
+                      .
+                    </p>
+                    <textarea
+                      id="reminder-msg"
+                      rows={3}
+                      disabled={!isEditingTemplates}
+                      value={templates.reminderMessage}
+                      onChange={(e) =>
+                        setTemplates((prev) => ({ ...prev, reminderMessage: e.target.value }))
+                      }
+                      placeholder={`Hola {nombre}, te recordamos tu cita de {servicio} para mañana a las {hora}. ¡Te esperamos en ${profileName}!`}
+                      className="w-full rounded-md border border-outline-variant bg-surface p-3 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/40 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-surface-container-low disabled:text-on-surface-variant"
+                    />
+                  </Field>
+                </FieldGroup>
+              </form>
+            </CardContent>
+          </div>
+          {isEditingTemplates && (
+            <CardFooter className="flex justify-end gap-3 border-t border-outline-variant/30 pt-4">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setIsEditingTemplates(false)}
+                disabled={savingTemplates}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                type="submit"
+                form="templates-form"
+                disabled={savingTemplates}
+                className="flex items-center gap-2"
+              >
+                {savingTemplates ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Guardando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    <span>Guardar cambios</span>
+                  </>
+                )}
+              </Button>
+            </CardFooter>
+          )}
+        </Card>
+      </div>
+
+      {/* Upgrade Pro Modal */}
+      <UpgradeProModal
+        isOpen={isUpgradeOpen}
+        onClose={() => setIsUpgradeOpen(false)}
+        title="Automatización de WhatsApp"
+        description="Conecta el bot interactivo de WhatsApp 2 vías y envía confirmaciones inmediatas y recordatorios automáticos actualizando al Plan Pro (40€/mes)."
+      />
+    </>
   );
 }

@@ -52,7 +52,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Alert, Empty, Skeleton, PageHeader } from "@/components/ui/volta-ui";
+import Header from "@/components/Header";
+import { Alert, Empty, Skeleton } from "@/components/ui/volta-ui";
 
 const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
   ssr: false,
@@ -462,40 +463,22 @@ export default function ClientesPage() {
       {/* Main Content Canvas */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1">
-          <PageHeader
-            title="Gestión de Clientes"
-            description="Administra tu base de datos, estados de consentimiento LOPD y fidelización."
-            actions={
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleExportCSV}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  <span className="hidden sm:inline">Exportar CSV</span>
-                </Button>
-                <Button
-                  onClick={(e) => {
-                    setEditingClient(null);
-                    setClientModalTriggerRect(e.currentTarget.getBoundingClientRect());
-                    setIsClientModalOpen(true);
-                  }}
-                  variant="default"
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Nuevo Cliente</span>
-                </Button>
-              </div>
-            }
-          />
+        <main className="flex-1 flex flex-col w-full p-0">
+          {/* Top Header & Controls bar with standard top and lateral page margins */}
+          <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
+            {/* Row 1: Title & Header Profile/Notifications */}
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="font-display text-headline-lg text-on-surface font-semibold capitalize tracking-tight">
+                Gestión de Clientes
+              </h1>
 
-          {/* Main Table Container */}
-          <div className="rounded-2xl border border-outline-variant/60 bg-surface-container-lowest shadow-sm overflow-hidden mt-2">
-            {/* Filter Toolbar */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-between p-4 bg-surface-container-low/40 border-b border-outline-variant/40">
+              <div className="shrink-0">
+                <Header />
+              </div>
+            </div>
+
+            {/* Row 2: Filter Toolbar and Actions */}
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex flex-1 flex-wrap items-center gap-3">
                 {/* Search input */}
                 <div className="relative w-full sm:max-w-xs">
@@ -596,37 +579,65 @@ export default function ClientesPage() {
                 </div>
               </div>
 
-              {/* Column selector toggle */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2 bg-surface shrink-0">
-                    <Columns className="w-4 h-4 text-on-surface-variant" />
-                    <span>Columnas</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Personalizar Columnas</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {ALL_COLUMNS.map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.key}
-                      checked={visibleColumns.has(column.key)}
-                      onCheckedChange={() => toggleColumn(column.key)}
-                    >
-                      {column.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Column selector toggle */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2 bg-surface shrink-0">
+                      <Columns className="w-4 h-4 text-on-surface-variant" />
+                      <span className="hidden sm:inline">Columnas</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Personalizar Columnas</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {ALL_COLUMNS.map((column) => (
+                      <DropdownMenuCheckboxItem
+                        key={column.key}
+                        checked={visibleColumns.has(column.key)}
+                        onCheckedChange={() => toggleColumn(column.key)}
+                      >
+                        {column.label}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-            {/* Table Area */}
-            <div className="relative w-full overflow-auto">
+                {/* Export CSV button */}
+                <Button
+                  variant="outline"
+                  onClick={handleExportCSV}
+                  className="flex items-center gap-2 bg-surface"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">Exportar CSV</span>
+                </Button>
+
+                {/* Nuevo Cliente button */}
+                <Button
+                  onClick={(e) => {
+                    setEditingClient(null);
+                    setClientModalTriggerRect(e.currentTarget.getBoundingClientRect());
+                    setIsClientModalOpen(true);
+                  }}
+                  variant="default"
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Nuevo Cliente</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Table Container: Edge-to-Edge with full width and height */}
+          <div className="w-full flex-1 overflow-auto border-t border-outline-variant/30 flex flex-col justify-between">
+            <div className="relative w-full overflow-x-auto flex-1">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-surface-container-low/40 hover:bg-surface-container-low/40 border-b border-outline-variant/30">
+                  <TableRow className="border-b border-outline-variant/30">
                     {visibleColumns.has("cliente") && (
-                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                      <TableHead className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5 pl-6">
                         Cliente
                       </TableHead>
                     )}
@@ -656,7 +667,7 @@ export default function ClientesPage() {
                       </TableHead>
                     )}
                     {visibleColumns.has("acciones") && (
-                      <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5">
+                      <TableHead className="text-right text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 py-3.5 pr-6">
                         Acciones
                       </TableHead>
                     )}
@@ -667,7 +678,7 @@ export default function ClientesPage() {
                     [...Array(6)].map((_, i) => (
                       <TableRow key={i} className="animate-pulse border-b border-outline-variant/20">
                         {visibleColumns.has("cliente") && (
-                          <TableCell className="py-4">
+                          <TableCell className="py-4 pl-6">
                             <div className="flex items-center gap-3">
                               <Skeleton className="w-10 h-10 rounded-full shrink-0" />
                               <div className="flex flex-col gap-1.5">
@@ -706,7 +717,7 @@ export default function ClientesPage() {
                           </TableCell>
                         )}
                         {visibleColumns.has("acciones") && (
-                          <TableCell className="text-right py-4">
+                          <TableCell className="text-right py-4 pr-6">
                             <Skeleton className="w-8 h-8 rounded-lg ml-auto" />
                           </TableCell>
                         )}
@@ -728,7 +739,7 @@ export default function ClientesPage() {
                         >
                           {/* Cliente Column */}
                           {visibleColumns.has("cliente") && (
-                            <TableCell className="py-4 font-medium">
+                            <TableCell className="py-4 pl-6 font-medium">
                               <div className="flex items-center gap-3">
                                 <UserAvatar
                                   name={client.name}
@@ -768,24 +779,24 @@ export default function ClientesPage() {
                           {visibleColumns.has("lopd") && (
                             <TableCell className="py-4">
                               {client.lopdStatus === "Aceptado" ? (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                                <div className="inline-flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 select-none">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                                   <span>Aceptado</span>
-                                </span>
+                                </div>
                               ) : client.lopdStatus === "Pendiente" ? (
-                                <span
-                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-300 cursor-pointer hover:bg-amber-500/20 transition-colors"
+                                <div
+                                  className="inline-flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400 cursor-pointer hover:underline select-none"
                                   onClick={() => handleSendWhatsAppConsent(client)}
                                   title="Haz clic para enviar consentimiento por WhatsApp"
                                 >
-                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 animate-pulse"></span>
                                   <span>Pendiente</span>
-                                </span>
+                                </div>
                               ) : (
-                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-700 dark:text-rose-300">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+                                <div className="inline-flex items-center gap-2 text-xs font-medium text-rose-600 dark:text-rose-400 select-none">
+                                  <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
                                   <span>Rechazado</span>
-                                </span>
+                                </div>
                               )}
                             </TableCell>
                           )}
@@ -836,13 +847,13 @@ export default function ClientesPage() {
 
                           {/* Acciones Column */}
                           {visibleColumns.has("acciones") && (
-                            <TableCell className="text-right py-4">
+                            <TableCell className="text-right py-4 pr-6">
                               <div className="flex items-center justify-end gap-1">
                                 {client.lopdStatus === "Aceptado" && (
                                   <button
                                     type="button"
                                     onClick={() => handleSendCustomMessage(client)}
-                                    className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                                    className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                     title="Enviar WhatsApp"
                                   >
                                     <MessageCircle className="w-4 h-4" />
@@ -852,7 +863,7 @@ export default function ClientesPage() {
                                   <button
                                     type="button"
                                     onClick={() => handleSendWhatsAppConsent(client)}
-                                    className="p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                                    className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                     title="Enviar recordatorio LOPD por WhatsApp"
                                   >
                                     <ShieldAlert className="w-4 h-4" />
@@ -864,7 +875,7 @@ export default function ClientesPage() {
                                     setSelectedClientForAppointment(client);
                                     setIsAppointmentModalOpen(true);
                                   }}
-                                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                   title="Agendar cita para este cliente"
                                 >
                                   <CalendarPlus className="w-4 h-4" />
@@ -875,7 +886,7 @@ export default function ClientesPage() {
                                     setEditingClient(client);
                                     setIsClientModalOpen(true);
                                   }}
-                                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                   title="Editar cliente"
                                 >
                                   <Edit3 className="w-4 h-4" />
@@ -885,7 +896,7 @@ export default function ClientesPage() {
                                   onClick={() =>
                                     handleDeleteClient(client.id, `${client.name} ${client.surname || ""}`)
                                   }
-                                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
                                   title="Eliminar cliente"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -925,7 +936,7 @@ export default function ClientesPage() {
 
             {/* Pagination Footer */}
             {!isLoading && filteredClients.length > 0 && (
-              <div className="flex items-center justify-between px-6 py-3 border-t border-outline-variant/40 bg-surface-container-low/20">
+              <div className="w-full border-t border-outline-variant/30 py-3.5 px-6 flex items-center justify-between mt-auto">
                 <span className="text-xs text-on-surface-variant">
                   Mostrando <strong className="text-on-surface">{startItem}–{endItem}</strong> de{" "}
                   <strong className="text-on-surface">{filteredClients.length}</strong> clientes
