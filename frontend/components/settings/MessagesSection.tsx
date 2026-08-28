@@ -271,7 +271,11 @@ export default function MessagesSection({
                           <div className="flex flex-col items-center bg-white p-4 rounded-md border border-outline-variant shadow-sm max-w-[240px]">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`}
+                              src={
+                                qrCode.startsWith("data:")
+                                  ? qrCode
+                                  : `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCode)}`
+                              }
                               alt="WhatsApp QR Code"
                               className="w-[180px] h-[180px]"
                             />

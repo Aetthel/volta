@@ -56,8 +56,13 @@ class WhatsAppManager {
       if (state?.state === "open") {
         await this.updateStatus(businessId, "CONNECTED", null);
       } else {
-        const qrData = await evolutionApiClient.getConnectQr(businessId).catch(() => null);
-        const qrCodeString = qrData?.base64 || qrData?.code || null;
+        let qrCodeString = null;
+        for (let i = 0; i < 4; i++) {
+          const qrData = await evolutionApiClient.getConnectQr(businessId).catch(() => null);
+          qrCodeString = qrData?.base64 || qrData?.code || null;
+          if (qrCodeString) break;
+          await new Promise((res) => setTimeout(res, 600));
+        }
         await this.updateStatus(businessId, "WAITING_QR", qrCodeString);
       }
 
@@ -66,6 +71,20 @@ class WhatsAppManager {
       logger.error(`[WhatsApp] Failed to initialize Evolution instance for ${businessId}:`, err.message);
       await this.updateStatus(businessId, "DISCONNECTED", null);
       throw err;
+    }
+  }
+
+  async getQr(businessId) {
+    try {
+      const qrData = await evolutionApiClient.getConnectQr(businessId);
+      const qrCodeString = qrData?.base64 || qrData?.code || null;
+      if (qrCodeString) {
+        await this.updateStatus(businessId, "WAITING_QR", qrCodeString);
+      }
+      return qrCodeString;
+    } catch (err) {
+      logger.warn(`[WhatsApp] Failed to fetch connect QR for ${businessId}:`, err.message);
+      return null;
     }
   }
 

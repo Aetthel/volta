@@ -23,10 +23,17 @@ export const getStatus = async (req, res) => {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
-  const business = await businessService.getBusinessWhatsApp(businessId);
+  let business = await businessService.getBusinessWhatsApp(businessId);
 
   if (!business) {
     return res.status(404).json({ error: "Negocio no encontrado" });
+  }
+
+  if (business.whatsappStatus === "WAITING_QR" && !business.qrCode) {
+    const qrData = await whatsappManager.getQr(businessId);
+    if (qrData) {
+      business.qrCode = qrData;
+    }
   }
 
   return ApiResponse.success(res, {
