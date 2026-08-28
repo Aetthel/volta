@@ -59,6 +59,9 @@ export default function NewAppointmentModal({
     setBookingType,
     formData,
     setFormData,
+    groupClients,
+    handleAddManualGroupClient,
+    handleRemoveGroupClient,
     suggestions,
     showSuggestions,
     setShowSuggestions,
@@ -175,27 +178,77 @@ export default function NewAppointmentModal({
             </select>
           </div>
 
-          {/* Cliente (with Autocomplete) */}
+          {/* Cliente(s) Selection */}
           <div className="relative">
-            <label htmlFor="clientName" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
-              <span>{bookingType === "GROUP" ? "Nombre del Alumno (opcional)" : "Cliente"} {bookingType === "INDIVIDUAL" && <span className="text-error">*</span>}</span>
+            <label htmlFor="clientName" className="text-sm font-medium text-on-surface mb-1.5 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span>{bookingType === "GROUP" ? "Clientes (opcional)" : "Cliente"} {bookingType === "INDIVIDUAL" && <span className="text-error">*</span>}</span>
+              </span>
+              {bookingType === "GROUP" && groupClients.length > 0 && (
+                <span className="text-xs text-primary font-medium">
+                  {groupClients.length} {groupClients.length === 1 ? "cliente añadido" : "clientes añadidos"}
+                </span>
+              )}
             </label>
-            <input
-              id="clientName"
-              name="clientName"
-              type="text"
-              required={bookingType === "INDIVIDUAL"}
-              placeholder="Buscar por nombre o teléfono..."
-              value={formData.clientName}
-              onChange={handleNameChange}
-              onFocus={() => {
-                if (formData.clientName.trim().length > 1 && suggestions.length > 0) {
-                  setShowSuggestions(true);
-                }
-              }}
-              className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
-            />
+
+            {/* Chips de clientes añadidos en Clase de Grupo */}
+            {bookingType === "GROUP" && groupClients.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {groupClients.map((client, idx) => (
+                  <span
+                    key={`${client.name}-${idx}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-high border border-outline-variant/60 text-xs font-medium text-on-surface"
+                  >
+                    <span>{client.name}</span>
+                    {client.phone && <span className="text-[10px] text-on-surface-variant">({client.phone})</span>}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGroupClient(idx)}
+                      className="hover:text-error transition-colors p-0.5 rounded cursor-pointer"
+                      title="Quitar cliente"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <input
+                id="clientName"
+                name="clientName"
+                type="text"
+                required={bookingType === "INDIVIDUAL"}
+                placeholder={bookingType === "GROUP" ? "Añadir cliente por nombre o teléfono..." : "Buscar por nombre o teléfono..."}
+                value={formData.clientName}
+                onChange={handleNameChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && bookingType === "GROUP" && formData.clientName.trim()) {
+                    e.preventDefault();
+                    handleAddManualGroupClient(formData.clientName);
+                  }
+                }}
+                onFocus={() => {
+                  if (formData.clientName.trim().length > 1 && suggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
+              {bookingType === "GROUP" && formData.clientName.trim() && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleAddManualGroupClient(formData.clientName)}
+                  className="shrink-0 text-xs font-medium cursor-pointer"
+                >
+                  Añadir
+                </Button>
+              )}
+            </div>
 
             {/* Suggestions dropdown */}
             {showSuggestions && (

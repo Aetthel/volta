@@ -69,6 +69,7 @@ export function useNewAppointmentForm(
 
   const [clientsList, setClientsList] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
+  const [groupClients, setGroupClients] = useState<Array<{ id?: string; name: string; phone?: string }>>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showConsentToast, setShowConsentToast] = useState(false);
@@ -82,6 +83,7 @@ export function useNewAppointmentForm(
 
     setSubmitError(null);
     setIsSubmitting(false);
+    setGroupClients([]);
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -115,16 +117,8 @@ export function useNewAppointmentForm(
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
           setServices(data);
-          setFormData((prev) => ({
-            ...prev,
-            service: data[0].name,
-          }));
         } else {
           setServices([]);
-          setFormData((prev) => ({
-            ...prev,
-            service: "",
-          }));
         }
       })
       .catch((e) => {
@@ -160,17 +154,41 @@ export function useNewAppointmentForm(
     setShowSuggestions(filtered.length > 0);
   };
 
-  const handleSelectSuggestion = (client: { name: string; surname?: string; phone: string }) => {
+  const handleSelectSuggestion = (client: { id?: string; name: string; surname?: string; phone: string }) => {
     const fullName = `${client.name} ${client.surname || ""}`.trim();
-    setFormData((prev) => ({
-      ...prev,
-      clientName: fullName,
-      clientPhone: client.phone,
-    }));
+    if (bookingType === "GROUP") {
+      setGroupClients((prev) => {
+        if (prev.some((c) => c.name.toLowerCase() === fullName.toLowerCase())) return prev;
+        return [...prev, { id: client.id, name: fullName, phone: client.phone }];
+      });
+      setFormData((prev) => ({ ...prev, clientName: "" }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        clientName: fullName,
+        clientPhone: client.phone,
+      }));
+    }
     setShowSuggestions(false);
   };
 
+  const handleAddManualGroupClient = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setGroupClients((prev) => {
+      if (prev.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return prev;
+      return [...prev, { name: trimmed }];
+    });
+    setFormData((prev) => ({ ...prev, clientName: "" }));
+    setShowSuggestions(false);
+  };
+
+  const handleRemoveGroupClient = (index: number) => {
+    setGroupClients((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const resetFormAndClose = () => {
+    setGroupClients([]);
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -204,6 +222,15 @@ export function useNewAppointmentForm(
     }
     const appointmentDateStr = localDate.toISOString();
 
+    const isGroup = bookingType === "GROUP";
+    const groupNames = groupClients.map((c) => c.name).join(", ");
+    const finalClientName = isGroup
+      ? (groupNames || (formData.clientName.trim() ? formData.clientName.trim() : formData.service || "Clase de Grupo"))
+      : formData.clientName;
+    const finalClientPhone = isGroup
+      ? (groupClients.find((c) => c.phone)?.phone || "")
+      : formData.clientPhone;
+
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/backend/appointments", {
@@ -212,8 +239,8 @@ export function useNewAppointmentForm(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          clientName: formData.clientName,
-          clientPhone: formData.clientPhone,
+          clientName: finalClientName,
+          clientPhone: finalClientPhone,
           appointmentDate: appointmentDateStr,
           businessId: businessId,
           service: formData.service,
@@ -226,42 +253,39 @@ export function useNewAppointmentForm(
         throw new Error(extractErrorMessage(payload, "No se ha podido guardar la cita."));
       }
 
-      // Esta petición ya ha persistido la cita: `onSave` es solo notificación
-      // para que la vista refresque. Si vuelve a hacer POST, el segundo intento
-      // choca con la cita recién creada y el backend responde 409.
       onSave?.({
         ...payload,
         service: formData.service,
       });
 
-      const exist = clientsList.some((c) => {
-        const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
-        const inputName = normalizeString(formData.clientName);
-        const existingPhone = normalizePhone(c.phone);
-        const inputPhone = normalizePhone(formData.clientPhone);
+      if (!isGroup) {
+        const exist = clientsList.some((c) => {
+          const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
+          const inputName = normalizeString(formData.clientName);
+          const existingPhone = normalizePhone(c.phone);
+          const inputPhone = normalizePhone(formData.clientPhone);
 
-        return existingName === inputName || existingPhone === inputPhone;
-      });
+          return existingName === inputName || existingPhone === inputPhone;
+        });
 
-      if (!exist && formData.clientName.trim().length > 0) {
-        setToastPhone(formData.clientPhone);
-        setShowConsentToast(true);
-        setTimeout(() => {
-          setShowConsentToast(false);
-          resetFormAndClose();
-        }, 2500);
-      } else {
-        resetFormAndClose();
+        if (!exist && formData.clientName.trim().length > 0) {
+          setToastPhone(formData.clientPhone);
+          setShowConsentToast(true);
+          setTimeout(() => {
+            setShowConsentToast(false);
+            resetFormAndClose();
+          }, 2500);
+          return;
+        }
       }
+
+      resetFormAndClose();
     } catch (err) {
-      // El modal permanece abierto con los datos intactos: la cita NO se ha
-      // guardado y fingir lo contrario dejaba una cita fantasma en el calendario
-      // que desaparecía al recargar.
       console.error("Error saving appointment:", err);
       setSubmitError(
-        err instanceof Error && err.message
+        err instanceof Error
           ? err.message
-          : "No se ha podido conectar con el servidor."
+          : "Error inesperado al guardar la cita."
       );
     } finally {
       setIsSubmitting(false);
@@ -355,6 +379,9 @@ export function useNewAppointmentForm(
     setBookingType,
     formData,
     setFormData,
+    groupClients,
+    handleAddManualGroupClient,
+    handleRemoveGroupClient,
     suggestions,
     showSuggestions,
     setShowSuggestions,
