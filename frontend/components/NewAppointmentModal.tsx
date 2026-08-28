@@ -233,23 +233,25 @@ export default function NewAppointmentModal({
             )}
           </div>
 
-          {/* Teléfono */}
-          <div>
-            <label htmlFor="clientPhone" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-on-surface shrink-0" />
-              <span>Teléfono de contacto {bookingType === "INDIVIDUAL" && <span className="text-error">*</span>}</span>
-            </label>
-            <input
-              id="clientPhone"
-              name="clientPhone"
-              type="tel"
-              required={bookingType === "INDIVIDUAL"}
-              placeholder="612 34 56 78"
-              value={formData.clientPhone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
-            />
-          </div>
+          {/* Teléfono (Solo para Cita Individual) */}
+          {bookingType === "INDIVIDUAL" && (
+            <div>
+              <label htmlFor="clientPhone" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                <span>Teléfono de contacto <span className="text-error">*</span></span>
+              </label>
+              <input
+                id="clientPhone"
+                name="clientPhone"
+                type="tel"
+                required
+                placeholder="612 34 56 78"
+                value={formData.clientPhone}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+              />
+            </div>
+          )}
 
           {/* Fecha y Hora (2 Columns) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
