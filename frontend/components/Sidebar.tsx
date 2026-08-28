@@ -499,12 +499,8 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         {
           id: "analytics",
           title: "Analítica",
-          href: "/analitica",
           icon: Activity,
-          requiresFeature: "businessAnalytics",
-          lockedTitle: "Analítica de Negocio",
-          lockedDescription:
-            "Visualiza informes detallados de ingresos, retención de clientes y rendimiento de tu negocio actualizando a Plan Pro (40€/mes).",
+          badge: "Próximamente",
         },
       ],
     });
