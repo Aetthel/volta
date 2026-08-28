@@ -2,20 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import {
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  XCircle,
-  Bell,
-  Lock,
-  Sparkles,
-  ChevronDown,
-  Building2,
-  ArrowRight,
-} from "lucide-react";
+import { ShieldCheck, CheckCircle2, AlertCircle, Loader2, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/volta-ui";
 
+// La política llega servida por el backend, que es quien registra qué versión
+// aceptó el cliente. Mantenerla aquí como JSX permitiría editar el texto sin
+// que cambiara la versión firmada en el registro de auditoría.
 type PolicyDocument = {
   version: string;
   effectiveDate: string;
@@ -45,7 +37,6 @@ export default function LOPDConsentClient() {
   });
   const [accepted, setAccepted] = useState(false);
   const [rejected, setRejected] = useState(false);
-  const [showLegalDetails, setShowLegalDetails] = useState(false);
   const [confirmingReject, setConfirmingReject] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -58,6 +49,7 @@ export default function LOPDConsentClient() {
     if (urlToken && urlExp) {
       sessionStorage.setItem("lopd_token", urlToken);
       sessionStorage.setItem("lopd_exp", urlExp);
+      // Clean URL to remove token from address bar / history
       window.history.replaceState({}, "", `/lopd/${clientId}`);
     }
 
@@ -65,7 +57,7 @@ export default function LOPDConsentClient() {
     const exp = sessionStorage.getItem("lopd_exp");
 
     if (!token || !exp) {
-      setError("El enlace de verificación no es válido o ha caducado.");
+      setError("Enlace de consentimiento inválido o expirado.");
       setLoading(false);
       return;
     }
@@ -94,6 +86,9 @@ export default function LOPDConsentClient() {
       });
   }, [clientId, searchParams]);
 
+  // Aceptar y rechazar son la misma operación con distinto destino: una decisión
+  // del cliente que el backend registra. Comparten flujo para que ninguna de las
+  // dos quede como el "camino secundario" con menos garantías que la otra.
   const submitDecision = (action: "accept" | "reject") => {
     setSubmitting(true);
     const token = sessionStorage.getItem("lopd_token");
@@ -106,6 +101,8 @@ export default function LOPDConsentClient() {
         "x-lopd-token": token || "",
         "x-lopd-exp": exp || "",
       },
+      // Se devuelve la versión que esta página tiene renderizada, para que el
+      // registro refleje el texto que el cliente vio y no el vigente al pulsar.
       body: JSON.stringify({ policyVersion: data.policy?.version }),
     })
       .then((res) => {
@@ -126,26 +123,28 @@ export default function LOPDConsentClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-6 selection:bg-teal-100">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full border-2 border-teal-600 border-t-transparent animate-spin" />
-          <p className="text-sm font-medium text-zinc-500">Cargando verificación...</p>
-        </div>
+      <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+        <p className="font-body-lg text-body-lg text-on-surface-variant font-medium">
+          Cargando política de privacidad...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-6 selection:bg-red-100">
-        <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-sm border border-zinc-200/80 text-center flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <h2 className="text-lg font-semibold text-zinc-900 mb-2">Enlace no válido</h2>
-          <p className="text-sm text-zinc-600 mb-6 leading-relaxed">{error}</p>
-          <p className="text-xs text-zinc-400">
-            Asegúrate de acceder desde el enlace original enviado a tu WhatsApp.
+      <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
+        <div className="max-w-md w-full bg-surface-container-lowest rounded-md p-8 shadow-sm border border-outline-variant text-center flex flex-col items-center">
+          <AlertCircle className="w-16 h-16 text-error mb-4" />
+          <h2 className="font-title-lg text-title-lg text-on-surface font-semibold mb-2">
+            Enlace no válido
+          </h2>
+          <p className="font-body-md text-body-md text-on-surface-variant mb-6 leading-relaxed">
+            {error}
+          </p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            Por favor, asegúrate de utilizar el enlace completo enviado a tu número de WhatsApp.
           </p>
         </div>
       </div>
@@ -153,241 +152,158 @@ export default function LOPDConsentClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-teal-100 font-sans antialiased">
-      <main className="max-w-lg w-full bg-white rounded-3xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-zinc-100 relative transition-all duration-300">
-        {/* State 1: Accepted Confirmation */}
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
+      <div className="max-w-xl w-full bg-surface-container-lowest rounded-md p-8 md:p-10 shadow-md border border-outline-variant relative overflow-hidden">
+        {/* Decorative Top Accent Bar */}
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-primary" />
+
         {accepted ? (
-          <div className="text-center py-6 flex flex-col items-center animate-in fade-in duration-300">
-            <div className="w-16 h-16 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center mb-5 shadow-inner">
-              <CheckCircle2 className="w-8 h-8 stroke-[2.2]" />
-            </div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold uppercase tracking-wider mb-2">
-              Verificado
-            </span>
-            <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-2">
-              ¡Todo listo, {data.clientName}!
-            </h1>
-            <p className="text-sm text-zinc-600 max-w-sm mx-auto leading-relaxed mb-6">
-              Has autorizado el envío de recordatorios de citas por WhatsApp para{" "}
-              <strong className="text-zinc-900">{data.businessName}</strong>.
+          <div className="text-center py-6 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+            <CheckCircle2 className="w-20 h-20 text-primary mb-6" />
+            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-3">
+              ¡Muchas gracias, {data.clientName}!
+            </h2>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed mb-6">
+              Has aceptado correctamente la política de privacidad de{" "}
+              <strong>{data.businessName}</strong>.
             </p>
-
-            <div className="w-full bg-zinc-50 rounded-2xl p-4 border border-zinc-100 text-left text-xs text-zinc-600 flex items-start gap-3 mb-6">
-              <ShieldCheck className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
-              <p className="leading-relaxed">
-                Tus datos quedan protegidos conforme a la normativa RGPD y LOPD-GDD. Podrás cancelar
-                esta suscripción en cualquier momento respondiendo a los mensajes.
-              </p>
-            </div>
-
-            <p className="text-xs text-zinc-400">Ya puedes cerrar esta ventana con seguridad.</p>
+            <p className="font-body-md text-body-md text-on-surface-variant bg-secondary-container/30 px-6 py-4 rounded-lg border border-outline-variant/50 max-w-sm">
+              A partir de ahora recibirás confirmaciones de tus citas y recordatorios automáticos
+              directamente por WhatsApp.
+            </p>
           </div>
         ) : rejected ? (
-          /* State 2: Rejected Confirmation */
-          <div className="text-center py-6 flex flex-col items-center animate-in fade-in duration-300">
-            <div className="w-16 h-16 rounded-2xl bg-zinc-100 text-zinc-600 flex items-center justify-center mb-5">
-              <XCircle className="w-8 h-8 stroke-[2.2]" />
-            </div>
-            <h1 className="text-2xl font-bold text-zinc-900 tracking-tight mb-2">
-              Preferencia guardada
-            </h1>
-            <p className="text-sm text-zinc-600 max-w-sm mx-auto leading-relaxed mb-6">
-              No recibirás recordatorios automáticos por WhatsApp por parte de{" "}
-              <strong className="text-zinc-900">{data.businessName}</strong>.
+          <div className="text-center py-6 flex flex-col items-center animate-in fade-in zoom-in duration-300">
+            <XCircle className="w-20 h-20 text-on-surface-variant mb-6" />
+            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-3">
+              Entendido, {data.clientName}
+            </h2>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed mb-6">
+              Hemos registrado que <strong>no autorizas</strong> el envío de mensajes automáticos
+              por parte de <strong>{data.businessName}</strong>.
             </p>
-            <div className="w-full bg-zinc-50 rounded-2xl p-4 border border-zinc-100 text-left text-xs text-zinc-600 mb-6">
-              <p className="leading-relaxed">
-                Tus citas y reservas siguen activas en el centro. Si cambias de opinión en el
-                futuro, puedes volver a abrir este enlace para activarlos.
-              </p>
-            </div>
-            <p className="text-xs text-zinc-400">Ya puedes cerrar esta ventana.</p>
+            <p className="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-6 py-4 rounded-lg border border-outline-variant/50 max-w-sm">
+              No recibirás confirmaciones ni recordatorios por WhatsApp. Tus citas siguen siendo
+              válidas: el salón te atenderá con normalidad. Si cambias de opinión, puedes volver a
+              abrir este mismo enlace.
+            </p>
           </div>
         ) : (
-          /* State 3: Main Consent Form */
           <div className="flex flex-col">
-            {/* Business Header Pill */}
-            <div className="flex items-center justify-between pb-6 mb-6 border-b border-zinc-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100/80 flex items-center justify-center text-teal-700">
-                  <Building2 className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs text-zinc-400 font-medium leading-none mb-1">Negocio</p>
-                  <p className="text-sm font-semibold text-zinc-900 leading-none">
-                    {data.businessName}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6" />
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-200/60 text-[11px] font-medium text-zinc-600">
-                <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-                <span>RGPD Seguro</span>
-              </div>
-            </div>
-
-            {/* Title & Greeting */}
-            <div className="mb-6">
-              <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight mb-2">
-                Avisos y recordatorios de cita
-              </h1>
-              <p className="text-sm text-zinc-600 leading-relaxed">
-                Hola <strong className="text-zinc-900">{data.clientName}</strong>, confirma si
-                deseas recibir avisos y recordatorios de tus próximas reservas por WhatsApp.
-              </p>
-            </div>
-
-            {/* 3 Key Benefits Cards */}
-            <div className="space-y-3 mb-6">
-              <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-zinc-50/70 border border-zinc-100">
-                <div className="w-8 h-8 rounded-xl bg-white text-teal-700 flex items-center justify-center shrink-0 shadow-xs border border-zinc-100">
-                  <Bell className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-semibold text-zinc-900 mb-0.5">
-                    Recordatorios automáticos
-                  </h2>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    Te notificaremos 24 horas antes para que nunca olvides una cita reservada.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-zinc-50/70 border border-zinc-100">
-                <div className="w-8 h-8 rounded-xl bg-white text-teal-700 flex items-center justify-center shrink-0 shadow-xs border border-zinc-100">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-semibold text-zinc-900 mb-0.5">
-                    Privacidad y protección (RGPD)
-                  </h2>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    Tu teléfono solo se utiliza para gestionar tus servicios en {data.businessName}.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-zinc-50/70 border border-zinc-100">
-                <div className="w-8 h-8 rounded-xl bg-white text-teal-700 flex items-center justify-center shrink-0 shadow-xs border border-zinc-100">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <h2 className="text-xs font-semibold text-zinc-900 mb-0.5">
-                    Cero spam, control total
-                  </h2>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
-                    Sin publicidad molesta. Puedes darte de baja en cualquier momento con un mensaje.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Legal Terms Expandable Section */}
-            <div className="mb-6 border-t border-zinc-100 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowLegalDetails(!showLegalDetails)}
-                className="w-full flex items-center justify-between text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors py-1 cursor-pointer"
-              >
-                <span>Ver política legal completa (Art. 13 RGPD)</span>
-                <ChevronDown
-                  className={`w-4 h-4 text-zinc-400 transition-transform duration-200 ${
-                    showLegalDetails ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {showLegalDetails && (
-                <div className="mt-3 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/70 text-xs text-zinc-600 leading-relaxed max-h-56 overflow-y-auto space-y-2.5 animate-in fade-in duration-200">
-                  <h3 className="font-semibold text-zinc-900">{data.policy?.title}</h3>
-                  {data.policy?.sections.map((sec) => (
-                    <div key={sec.heading}>
-                      <strong className="text-zinc-800">{sec.heading}:</strong> {sec.body}
-                    </div>
-                  ))}
-                  {data.policy && (
-                    <p className="text-[10px] text-zinc-400 pt-2 border-t border-zinc-200/50 text-right">
-                      Versión {data.policy.version} · En vigor desde{" "}
-                      {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            {confirmingReject ? (
-              <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-200/80 animate-in fade-in duration-200">
-                <p className="text-xs text-zinc-700 text-center font-medium mb-3">
-                  Si no aceptas, no podremos avisarte de tus citas por WhatsApp. ¿Deseas continuar?
+              <div>
+                <h1 className="font-title-lg text-title-lg text-primary font-semibold">
+                  Consentimiento de Notificaciones
+                </h1>
+                <p className="text-label-md font-label-md text-on-surface-variant">
+                  Ley Orgánica de Protección de Datos (LOPD)
                 </p>
-                <div className="flex gap-2.5">
-                  <button
+              </div>
+            </div>
+
+            <p className="font-body-lg text-body-lg text-on-surface mb-6 leading-relaxed">
+              Hola <strong>{data.clientName}</strong>, para poder gestionar tus citas y enviarte
+              recordatorios automatizados de tus reservas a través de WhatsApp, necesitamos que nos
+              autorices a procesar tus datos de contacto.
+            </p>
+
+            {/* h-64: la política del Art. 13 son siete secciones. Con la altura
+                anterior se veían dos y el resto quedaba enterrado en el scroll,
+                que es justo lo contrario de "información previa y accesible". */}
+            <div className="bg-surface-container-low rounded-md p-6 mb-3 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-64 overflow-y-auto custom-scrollbar">
+              <h3 className="font-semibold text-on-surface mb-2">{data.policy?.title}</h3>
+              {data.policy?.sections.map((section) => (
+                <p key={section.heading} className="mb-3 last:mb-0">
+                  <strong>{section.heading}:</strong> {section.body}
+                </p>
+              ))}
+            </div>
+
+            {/* La versión aceptada queda registrada en el log de auditoría, así que
+                el cliente debe poder ver cuál es la que está aceptando. */}
+            {data.policy && (
+              <p className="text-label-sm font-label-sm text-on-surface-variant mb-8 text-right">
+                Versión {data.policy.version} · en vigor desde{" "}
+                {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+
+            {confirmingReject ? (
+              <div className="flex flex-col gap-3 animate-in fade-in duration-200">
+                <p className="font-body-md text-body-md text-on-surface text-center leading-relaxed">
+                  Si no aceptas, <strong>no recibirás recordatorios de tus citas</strong> por
+                  WhatsApp. ¿Confirmas?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="lg"
                     onClick={() => setConfirmingReject(false)}
                     disabled={submitting}
-                    className="flex-1 py-3 px-4 rounded-xl bg-white border border-zinc-200 text-zinc-700 text-xs font-semibold hover:bg-zinc-50 cursor-pointer transition-all"
+                    className="flex-1 py-4 font-medium"
                   >
                     Volver
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="primary"
+                    size="lg"
                     onClick={() => submitDecision("reject")}
                     disabled={submitting}
-                    className="flex-1 py-3 px-4 rounded-xl bg-zinc-900 text-white text-xs font-semibold hover:bg-black cursor-pointer transition-all flex items-center justify-center gap-2"
+                    className="flex-1 py-4 flex items-center justify-center gap-2 font-medium"
                   >
                     {submitting ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Procesando...</span>
+                      </>
                     ) : (
-                      <span>Confirmar rechazo</span>
+                      <span>Sí, no acepto</span>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5">
-                <button
+              <div className="flex flex-col gap-3">
+                <Button
                   type="button"
+                  variant="primary"
+                  size="lg"
                   onClick={() => submitDecision("accept")}
                   disabled={submitting}
-                  className="w-full py-3.5 px-5 rounded-2xl bg-teal-700 hover:bg-teal-800 active:scale-[0.99] text-white text-sm font-semibold shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                       <span>Procesando...</span>
                     </>
                   ) : (
-                    <>
-                      <span>Aceptar y permitir recordatorios</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </>
+                    <span>Aceptar y permitir recordatorios</span>
                   )}
-                </button>
+                </Button>
 
                 <button
                   type="button"
                   onClick={() => setConfirmingReject(true)}
                   disabled={submitting}
-                  className="w-full py-2.5 text-xs text-zinc-400 hover:text-zinc-700 cursor-pointer transition-colors text-center"
+                  className="w-full py-3 text-label-lg font-label-lg text-on-surface-variant hover:text-on-surface underline underline-offset-4 disabled:opacity-50 transition-colors"
                 >
-                  No deseo recibir avisos
+                  No acepto
                 </button>
               </div>
             )}
           </div>
         )}
-      </main>
-
-      {/* Modern Footer Note */}
-      <footer className="mt-6 text-center text-xs text-zinc-400 flex items-center gap-1.5">
-        <Lock className="w-3 h-3 text-zinc-400" />
-        <span>Garantía de privacidad · Cumplimiento RGPD & LOPD-GDD</span>
-      </footer>
+      </div>
     </div>
   );
 }
-
