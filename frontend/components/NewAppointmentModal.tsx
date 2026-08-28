@@ -263,36 +263,19 @@ export default function NewAppointmentModal({
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+              <label htmlFor="time" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
                 <span>Hora <span className="text-error">*</span></span>
               </label>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low/60 border border-outline-variant/70 rounded-lg focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
-                <input
-                  type="text"
-                  pattern="[0-9]*"
-                  maxLength={2}
-                  value={selectedHour}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => handleHourChange(e.target.value)}
-                  onBlur={handleHourBlur}
-                  className="w-8 bg-transparent text-sm font-semibold text-on-surface text-center outline-none"
-                  placeholder="10"
-                />
-                <span className="text-on-surface-variant/60 font-bold">:</span>
-                <input
-                  type="text"
-                  pattern="[0-9]*"
-                  maxLength={2}
-                  value={selectedMin}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => handleMinChange(e.target.value)}
-                  onBlur={handleMinBlur}
-                  className="w-8 bg-transparent text-sm font-semibold text-on-surface text-center outline-none"
-                  placeholder="00"
-                />
-                <span className="text-xs text-on-surface-variant ml-auto font-medium">hrs</span>
-              </div>
+              <input
+                id="time"
+                name="time"
+                type="time"
+                required
+                value={formData.time}
+                onChange={(e) => setFormData((prev) => ({ ...prev, time: e.target.value }))}
+                className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
+              />
             </div>
           </div>
 

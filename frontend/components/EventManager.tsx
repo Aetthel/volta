@@ -105,7 +105,7 @@ export function EventManager({
   colors = defaultColors,
   defaultView = "week",
   className,
-  availableTags = ["Confirmada", "Pendiente", "Completada"],
+  availableTags = ["Confirmada", "Pendiente", "Completada", "Cancelada"],
   onOpenNewModal,
 }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents)
@@ -860,61 +860,32 @@ export function EventManager({
                 </div>
               </div>
 
-              {/* Categoría y Color (2 Columns) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label
-                    htmlFor="modal-event-category"
-                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
-                  >
-                    <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                    <span>Categoría / Servicio</span>
-                  </label>
-                  <select
-                    id="modal-event-category"
-                    value={isCreating ? newEvent.category : selectedEvent?.category || ""}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      isCreating
-                        ? setNewEvent((prev) => ({ ...prev, category: val }))
-                        : setSelectedEvent((prev) => (prev ? { ...prev, category: val } : null))
-                    }}
-                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="modal-event-color"
-                    className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
-                  >
-                    <Palette className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                    <span>Color</span>
-                  </label>
-                  <select
-                    id="modal-event-color"
-                    value={isCreating ? newEvent.color : selectedEvent?.color || ""}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      isCreating
-                        ? setNewEvent((prev) => ({ ...prev, color: val }))
-                        : setSelectedEvent((prev) => (prev ? { ...prev, color: val } : null))
-                    }}
-                    className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
-                  >
-                    {colors.map((c) => (
-                      <option key={c.value} value={c.value}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Categoría / Servicio */}
+              <div>
+                <label
+                  htmlFor="modal-event-category"
+                  className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5"
+                >
+                  <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Categoría / Servicio</span>
+                </label>
+                <select
+                  id="modal-event-category"
+                  value={isCreating ? newEvent.category : selectedEvent?.category || ""}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    isCreating
+                      ? setNewEvent((prev) => ({ ...prev, category: val }))
+                      : setSelectedEvent((prev) => (prev ? { ...prev, category: val } : null))
+                  }}
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Descripción / Notas */}
