@@ -81,12 +81,11 @@ export interface EventManagerProps {
 
 const defaultColors = [
   { name: "Teal Volta", value: "TEAL", bg: "bg-[#377E7F]", text: "text-white" },
-  { name: "Púrpura", value: "PURPLE", bg: "bg-purple-600", text: "text-white" },
-  { name: "Rosa", value: "ROSE", bg: "bg-rose-500", text: "text-white" },
-  { name: "Ámbar", value: "AMBER", bg: "bg-amber-500", text: "text-white" },
-  { name: "Índigo", value: "INDIGO", bg: "bg-indigo-600", text: "text-white" },
-  { name: "Esmeralda", value: "EMERALD", bg: "bg-emerald-500", text: "text-white" },
-  { name: "Azul Cielo", value: "SKY", bg: "bg-sky-500", text: "text-white" },
+  { name: "Teal Intenso", value: "DEEP_TEAL", bg: "bg-[#285F60]", text: "text-white" },
+  { name: "Mineral", value: "SAGE", bg: "bg-[#4A8B8C]", text: "text-white" },
+  { name: "Pizarra", value: "SLATE", bg: "bg-[#3B6E8C]", text: "text-white" },
+  { name: "Bosque", value: "FOREST", bg: "bg-[#2E6554]", text: "text-white" },
+  { name: "Petróleo", value: "PETROL", bg: "bg-[#2F5359]", text: "text-white" },
 ]
 
 function formatTime(date: Date) {

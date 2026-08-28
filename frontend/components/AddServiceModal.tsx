@@ -11,10 +11,10 @@ import {
   Users,
   User,
   FileText,
-  Palette,
 } from "lucide-react";
-import { Button } from "@/components/ui/volta-ui";
+import { Button, SegmentedControl } from "@/components/ui/volta-ui";
 import { useAddServiceForm, ServiceToEdit } from "@/hooks/useAddServiceForm";
+import { cn } from "@/lib/utils";
 
 interface AddServiceModalProps {
   isOpen: boolean;
@@ -40,16 +40,6 @@ interface AddServiceModalProps {
   } | null;
 }
 
-const COLOR_OPTIONS = [
-  { id: "TEAL", bg: "bg-[#377E7F]", ring: "ring-[#377E7F]", label: "Teal Volta" },
-  { id: "PURPLE", bg: "bg-purple-600", ring: "ring-purple-600", label: "Púrpura" },
-  { id: "ROSE", bg: "bg-rose-500", ring: "ring-rose-500", label: "Rosa" },
-  { id: "AMBER", bg: "bg-amber-500", ring: "ring-amber-500", label: "Ámbar" },
-  { id: "INDIGO", bg: "bg-indigo-600", ring: "ring-indigo-600", label: "Índigo" },
-  { id: "EMERALD", bg: "bg-emerald-500", ring: "ring-emerald-500", label: "Esmeralda" },
-  { id: "SKY", bg: "bg-sky-500", ring: "ring-sky-500", label: "Azul Cielo" },
-];
-
 export default function AddServiceModal({
   isOpen,
   onClose,
@@ -62,15 +52,14 @@ export default function AddServiceModal({
     isEditMode,
     handleChange,
     handleTypeChange,
-    handleColorSelect,
     handleSubmit,
   } = useAddServiceForm(isOpen, serviceToEdit, onSave, onClose);
 
   const { position, handleMouseDown } = useDraggableModal({
     isOpen,
     triggerRect,
-    modalWidth: 550,
-    modalHeight: 560,
+    modalWidth: 480,
+    modalHeight: 520,
   });
 
   const [mounted, setMounted] = useState(false);
@@ -90,7 +79,7 @@ export default function AddServiceModal({
           position: "fixed",
           left: `${position.x}px`,
           top: `${position.y}px`,
-          width: "550px",
+          width: "480px",
           maxWidth: "calc(100vw - 32px)",
           transition: "none",
         }}
@@ -102,9 +91,8 @@ export default function AddServiceModal({
           className="px-6 pt-5 pb-4 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none"
         >
           <div className="flex flex-col">
-            <h2 className="text-xl font-bold text-on-surface tracking-tight flex items-center gap-2">
-              <Briefcase className="w-5 h-5 text-primary" />
-              <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
+            <h2 className="text-xl font-bold text-on-surface tracking-tight">
+              {isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}
             </h2>
             <p className="text-sm text-on-surface-variant mt-0.5">
               {isEditMode
@@ -122,42 +110,20 @@ export default function AddServiceModal({
           </button>
         </div>
 
+        {/* Mode Switcher */}
+        <div className="px-6 pt-4 pb-1">
+          <SegmentedControl
+            value={formData.type || "INDIVIDUAL"}
+            onChange={(val) => handleTypeChange(val as "INDIVIDUAL" | "GROUP")}
+            options={[
+              { value: "INDIVIDUAL", label: "Cita Individual", icon: User },
+              { value: "GROUP", label: "Clase de Grupo", icon: Users },
+            ]}
+          />
+        </div>
+
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
-          {/* Tipo de Servicio Toggle */}
-          <div>
-            <label className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider block mb-1.5">
-              Tipo de Servicio
-            </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-surface-container-low/80 rounded-xl border border-outline-variant/50">
-              <button
-                type="button"
-                onClick={() => handleTypeChange("INDIVIDUAL")}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  formData.type === "INDIVIDUAL"
-                    ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/40"
-                    : "text-on-surface-variant/70 hover:text-on-surface"
-                }`}
-              >
-                <User className="w-3.5 h-3.5" />
-                <span>Cita Individual (1 a 1)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTypeChange("GROUP")}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  formData.type === "GROUP"
-                    ? "bg-surface-container-lowest text-primary shadow-sm border border-outline-variant/40"
-                    : "text-on-surface-variant/70 hover:text-on-surface"
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                <span>Clase Grupal (Aforo)</span>
-              </button>
-            </div>
-          </div>
-
+        <form onSubmit={handleSubmit} className="p-6 pt-3 flex flex-col gap-4">
           {/* Nombre del Servicio */}
           <div>
             <label htmlFor="name" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
@@ -175,40 +141,12 @@ export default function AddServiceModal({
             />
           </div>
 
-          {/* Color de Tarjeta en Agenda */}
-          <div>
-            <label className="text-sm font-medium text-on-surface mb-2 flex items-center gap-1.5">
-              <Palette className="w-3.5 h-3.5 text-on-surface shrink-0" />
-              <span>Color en Agenda</span>
-            </label>
-            <div className="flex items-center gap-2.5">
-              {COLOR_OPTIONS.map((c) => {
-                const isSelected = formData.color === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    title={c.label}
-                    onClick={() => handleColorSelect(c.id)}
-                    className={`w-7 h-7 rounded-full ${c.bg} cursor-pointer transition-transform hover:scale-110 flex items-center justify-center ${
-                      isSelected ? "ring-2 ring-offset-2 ring-primary scale-110" : "opacity-80 hover:opacity-100"
-                    }`}
-                  >
-                    {isSelected && (
-                      <span className="w-2 h-2 rounded-full bg-white block shadow-xs" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Duración, Precio y Aforo Máx (3 Columns) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Duración, Precio y Aforo Máx */}
+          <div className={cn("grid gap-3.5", formData.type === "GROUP" ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-2")}>
             <div>
-              <label htmlFor="duration" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
+              <label htmlFor="duration" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span className="whitespace-nowrap">Duración (min) <span className="text-error">*</span></span>
+                <span>Duración (min) <span className="text-error">*</span></span>
               </label>
               <input
                 id="duration"
@@ -224,9 +162,9 @@ export default function AddServiceModal({
             </div>
 
             <div>
-              <label htmlFor="price" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
+              <label htmlFor="price" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
                 <Euro className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span className="whitespace-nowrap">Precio (€) <span className="text-error">*</span></span>
+                <span>Precio (€) <span className="text-error">*</span></span>
               </label>
               <input
                 id="price"
@@ -241,25 +179,22 @@ export default function AddServiceModal({
               />
             </div>
 
-            <div>
-              <label htmlFor="capacity" className="text-xs font-semibold text-on-surface mb-1.5 flex items-center gap-1 whitespace-nowrap">
-                <Users className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span className="whitespace-nowrap">Aforo Máx.</span>
-              </label>
-              <input
-                id="capacity"
-                type="number"
-                min="1"
-                disabled={formData.type === "INDIVIDUAL"}
-                value={formData.type === "INDIVIDUAL" ? "1" : formData.capacity}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 text-sm border rounded-lg transition-all ${
-                  formData.type === "INDIVIDUAL"
-                    ? "bg-surface-container-low/30 border-outline-variant/40 text-on-surface-variant/50 cursor-not-allowed"
-                    : "bg-surface-container-low/60 border-outline-variant/70 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest"
-                }`}
-              />
-            </div>
+            {formData.type === "GROUP" && (
+              <div>
+                <label htmlFor="capacity" className="text-sm font-medium text-on-surface mb-1.5 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>Aforo Máx.</span>
+                </label>
+                <input
+                  id="capacity"
+                  type="number"
+                  min="2"
+                  value={formData.capacity || 10}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
+                />
+              </div>
+            )}
           </div>
 
           {/* Descripción (opcional) */}
@@ -279,13 +214,13 @@ export default function AddServiceModal({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/30">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-outline-variant/30 mt-1">
             <Button
               type="button"
               onClick={onClose}
               variant="outline"
               size="md"
-              className="px-4 text-xs font-medium cursor-pointer"
+              className="cursor-pointer font-medium"
             >
               Cancelar
             </Button>
@@ -293,7 +228,7 @@ export default function AddServiceModal({
               type="submit"
               variant="primary"
               size="md"
-              className="px-5 text-xs font-semibold shadow-sm cursor-pointer"
+              className="cursor-pointer font-medium"
             >
               {isEditMode ? "Guardar cambios" : "Guardar Servicio"}
             </Button>

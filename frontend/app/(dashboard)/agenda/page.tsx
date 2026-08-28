@@ -19,7 +19,7 @@ const AddClientModal = dynamicImport(() => import("@/components/AddClientModal")
   ssr: false,
 });
 
-const VALID_COLORS = ["TEAL", "PURPLE", "ROSE", "AMBER", "INDIGO", "EMERALD", "SKY"];
+const VALID_COLORS = ["TEAL", "DEEP_TEAL", "SAGE", "SLATE", "FOREST", "PETROL"];
 
 function getServiceDuration(app: any, servicesList: any[]): number {
   if (app.service?.duration && typeof app.service.duration === "number") {
@@ -50,11 +50,8 @@ function getServiceColor(app: any, servicesList: any[]): string {
     return dbService.color.toUpperCase();
   }
 
-  let hash = 0;
-  for (let i = 0; i < serviceName.length; i++) {
-    hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return VALID_COLORS[Math.abs(hash) % VALID_COLORS.length];
+  // Consistent Volta Primary Brand Teal
+  return "TEAL";
 }
 
 export default function AgendaPage() {
