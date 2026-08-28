@@ -1327,6 +1327,201 @@ function MonthView({
 }
 
 // Week View Component
+interface TimeGridEventCardProps {
+  event: Event
+  top: number
+  height: number
+  onEventClick: (event: Event) => void
+  onDragStart: (event: Event) => void
+  onDragEnd: () => void
+  getColorClasses: (color: string) => { bg: string; text: string }
+  leftOffsetPercent?: number
+  widthPercent?: number
+}
+
+function TimeGridEventCard({
+  event,
+  top,
+  height,
+  onEventClick,
+  onDragStart,
+  onDragEnd,
+  getColorClasses,
+  leftOffsetPercent = 0,
+  widthPercent = 100,
+}: TimeGridEventCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+  const colorClasses = getColorClasses(event.color)
+
+  const getDuration = () => {
+    const diff = event.endTime.getTime() - event.startTime.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`
+    }
+    return `${minutes}m`
+  }
+
+  const isShort = height < 38
+  const isMedium = height >= 38 && height < 60
+
+  return (
+    <div
+      draggable
+      onDragStart={() => onDragStart(event)}
+      onDragEnd={onDragEnd}
+      onClick={(e) => {
+        e.stopPropagation()
+        onEventClick(event)
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        top: `${top}px`,
+        height: `${height}px`,
+        left: `calc(${leftOffsetPercent}% + 2px)`,
+        width: `calc(${widthPercent}% - 4px)`,
+      }}
+      className={cn(
+        "absolute z-10 cursor-pointer rounded-md p-1.5 transition-all duration-150 overflow-hidden shadow-sm flex flex-col justify-start select-none",
+        colorClasses.bg,
+        "text-white",
+        isHovered && "z-30 ring-2 ring-white/80 shadow-md brightness-105"
+      )}
+    >
+      {/* Card Content based on available height */}
+      {isShort ? (
+        <div className="flex items-center gap-1.5 leading-tight truncate text-[11px]">
+          <span className="font-bold truncate">{event.title}</span>
+          <span className="opacity-80 text-[10px] shrink-0 font-medium">
+            {formatTime(event.startTime)}
+          </span>
+        </div>
+      ) : isMedium ? (
+        <div className="flex flex-col h-full justify-between leading-tight overflow-hidden">
+          <div className="font-bold text-xs truncate">{event.title}</div>
+          <div className="flex items-center justify-between gap-1 text-[10px] opacity-90 truncate">
+            <span>
+              {formatTime(event.startTime)} - {formatTime(event.endTime)}
+            </span>
+            {event.category && <span className="truncate opacity-80">· {event.category}</span>}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col h-full justify-between overflow-hidden">
+          <div>
+            <div className="font-bold text-xs truncate">{event.title}</div>
+            <div className="flex items-center gap-1 text-[11px] opacity-90 mt-0.5">
+              <Clock className="w-3 h-3 shrink-0 opacity-80" />
+              <span>
+                {formatTime(event.startTime)} - {formatTime(event.endTime)}
+              </span>
+              <span className="text-[10px] opacity-75">({getDuration()})</span>
+            </div>
+            {event.category && (
+              <div className="text-[10px] opacity-90 truncate mt-0.5 font-medium">
+                {event.category}
+              </div>
+            )}
+          </div>
+          {event.tags && event.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-auto pt-1">
+              {event.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-1.5 py-0.5 text-[9px] font-semibold rounded bg-white/20 text-white backdrop-blur-xs"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Hover Card / Tooltip Popup */}
+      {isHovered && (
+        <div className="absolute left-0 top-full z-50 mt-1 w-64 animate-in fade-in slide-in-from-top-2 duration-150 pointer-events-none">
+          <Card className="border border-outline-variant p-3 shadow-xl bg-surface-container-lowest text-on-surface">
+            <div className="space-y-2">
+              <h4 className="font-bold text-sm leading-tight text-on-surface">{event.title}</h4>
+              {event.description && (
+                <p className="text-xs text-on-surface-variant line-clamp-2">{event.description}</p>
+              )}
+              <div className="flex items-center gap-1 text-xs text-on-surface-variant font-medium">
+                <Clock className="h-3 w-3" />
+                <span>
+                  {formatTime(event.startTime)} - {formatTime(event.endTime)}
+                </span>
+                <span className="text-[10px] text-on-surface-variant/75">({getDuration()})</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {event.category && (
+                  <Badge variant="secondary" className="text-[10px] h-5">
+                    {event.category}
+                  </Badge>
+                )}
+                {event.tags?.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-[10px] h-5">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function layoutDayEvents(events: Event[]) {
+  const START_HOUR = 8
+  const HOUR_HEIGHT = 64
+
+  const sorted = [...events].sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+
+  const items = sorted.map((event) => {
+    const startHour = event.startTime.getHours()
+    const startMin = event.startTime.getMinutes()
+
+    const startTotalMins = (startHour - START_HOUR) * 60 + startMin
+    const durationMins = Math.max(15, Math.round((event.endTime.getTime() - event.startTime.getTime()) / 60000))
+    const endTotalMins = startTotalMins + durationMins
+
+    const top = Math.max(0, (startTotalMins / 60) * HOUR_HEIGHT)
+    const height = Math.max(22, (durationMins / 60) * HOUR_HEIGHT - 2)
+
+    return {
+      event,
+      top,
+      height,
+      startTotalMins,
+      endTotalMins,
+      leftOffsetPercent: 0,
+      widthPercent: 100,
+    }
+  })
+
+  // Calculate overlapping clusters
+  for (let i = 0; i < items.length; i++) {
+    const curr = items[i]
+    const overlaps = items.filter(
+      (other, j) => i !== j && curr.startTotalMins < other.endTotalMins && curr.endTotalMins > other.startTotalMins
+    )
+    if (overlaps.length > 0) {
+      const allCluster = [curr, ...overlaps].sort((a, b) => a.startTotalMins - b.startTotalMins)
+      const totalColumns = allCluster.length
+      const indexInCluster = allCluster.findIndex((item) => item.event.id === curr.event.id)
+      curr.widthPercent = Math.floor(100 / totalColumns)
+      curr.leftOffsetPercent = curr.widthPercent * indexInCluster
+    }
+  }
+
+  return items
+}
+
 function WeekView({
   currentDate,
   events,
@@ -1356,82 +1551,110 @@ function WeekView({
     return day
   })
 
-  // Hours 08:00 to 21:00 for salon business hours
-  const hours = Array.from({ length: 14 }, (_, i) => i + 8)
-
-  const getEventsForDayAndHour = (date: Date, hour: number) => {
-    return events.filter((event) => {
-      const eventDate = new Date(event.startTime)
-      const eventHour = eventDate.getHours()
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear() &&
-        eventHour === hour
-      )
-    })
-  }
+  // Hours 08:00 to 21:00 (14 hours total, each 64px high)
+  const START_HOUR = 8
+  const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR)
+  const HOUR_HEIGHT = 64
+  const TOTAL_GRID_HEIGHT = hours.length * HOUR_HEIGHT
 
   return (
     <div className="w-full h-full overflow-auto">
-      <div className="grid grid-cols-8 border-b border-outline-variant/30 bg-surface-container-low/50 min-w-[700px] sticky top-0 z-20">
-        <div className="border-r border-outline-variant/30 p-2.5 text-center text-xs font-semibold text-on-surface-variant sm:text-sm">Hora</div>
-        {weekDays.map((day) => {
-          const isToday = day.toDateString() === new Date().toDateString()
-          return (
-            <div
-              key={day.toISOString()}
-              className="border-r border-outline-variant/30 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm"
-            >
-              <div className={cn("hidden sm:block capitalize", isToday ? "text-primary font-bold" : "text-on-surface font-semibold")}>
-                {day.toLocaleDateString("es-ES", { weekday: "short" })}
+      {/* Sticky Day Header */}
+      <div className="flex border-b border-outline-variant/30 bg-surface-container-low/50 min-w-[750px] sticky top-0 z-20">
+        <div className="w-14 sm:w-16 flex-shrink-0 border-r border-outline-variant/30 p-2.5 text-center text-xs font-semibold text-on-surface-variant sm:text-sm">
+          Hora
+        </div>
+        <div className="grid grid-cols-7 flex-1">
+          {weekDays.map((day) => {
+            const isToday = day.toDateString() === new Date().toDateString()
+            return (
+              <div
+                key={day.toISOString()}
+                className="border-r border-outline-variant/30 p-2 text-center text-xs font-medium last:border-r-0 sm:text-sm"
+              >
+                <div className={cn("hidden sm:block capitalize", isToday ? "text-primary font-bold" : "text-on-surface font-semibold")}>
+                  {day.toLocaleDateString("es-ES", { weekday: "short" })}
+                </div>
+                <div className="sm:hidden capitalize font-semibold">{day.toLocaleDateString("es-ES", { weekday: "narrow" })}</div>
+                <div className={cn("text-[11px]", isToday ? "text-primary font-bold" : "text-on-surface-variant")}>
+                  {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
+                </div>
               </div>
-              <div className="sm:hidden capitalize font-semibold">{day.toLocaleDateString("es-ES", { weekday: "narrow" })}</div>
-              <div className={cn("text-[11px]", isToday ? "text-primary font-bold" : "text-on-surface-variant")}>
-                {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
-      <div className="grid grid-cols-8 min-w-[700px]">
-        {hours.map((hour) => (
-          <div key={`row-${hour}`} className="contents">
-            <div className="border-b border-r border-outline-variant/30 p-1.5 text-[11px] font-medium text-on-surface-variant/70 sm:p-2 sm:text-xs text-center">
+
+      {/* Time Grid Body */}
+      <div className="flex min-w-[750px] relative">
+        {/* Time Column */}
+        <div className="w-14 sm:w-16 flex-shrink-0 border-r border-outline-variant/30 select-none bg-surface-container-lowest/40">
+          {hours.map((hour) => (
+            <div
+              key={hour}
+              style={{ height: `${HOUR_HEIGHT}px` }}
+              className="border-b border-outline-variant/30 p-1 text-[11px] font-medium text-on-surface-variant/70 text-center flex items-start justify-center pt-1"
+            >
               {hour.toString().padStart(2, "0")}:00
             </div>
-            {weekDays.map((day) => {
-              const dayEvents = getEventsForDayAndHour(day, hour)
+          ))}
+        </div>
+
+        {/* 7 Day Columns */}
+        <div className="grid grid-cols-7 flex-1">
+          {weekDays.map((day) => {
+            const dayEvents = events.filter((event) => {
+              const eventDate = new Date(event.startTime)
               return (
-                <div
-                  key={`${day.toISOString()}-${hour}`}
-                  className="min-h-14 border-b border-r border-outline-variant/30 p-1 transition-colors hover:bg-surface-container-low/60 last:border-r-0 sm:min-h-16 cursor-pointer"
-                  onClick={() => {
-                    const slotDate = new Date(day);
-                    slotDate.setHours(hour, 0, 0, 0);
-                    onSlotClick(slotDate);
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => onDrop(day, hour)}
-                >
-                  <div className="space-y-1">
-                    {dayEvents.map((event) => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        onEventClick={onEventClick}
-                        onDragStart={onDragStart}
-                        onDragEnd={onDragEnd}
-                        getColorClasses={getColorClasses}
-                        variant="default"
-                      />
-                    ))}
-                  </div>
-                </div>
+                eventDate.getDate() === day.getDate() &&
+                eventDate.getMonth() === day.getMonth() &&
+                eventDate.getFullYear() === day.getFullYear()
               )
-            })}
-          </div>
-        ))}
+            })
+
+            const laidOutEvents = layoutDayEvents(dayEvents)
+
+            return (
+              <div
+                key={day.toISOString()}
+                className="relative border-r border-outline-variant/30 last:border-r-0"
+                style={{ height: `${TOTAL_GRID_HEIGHT}px` }}
+              >
+                {/* Background Hour Slots (for clicking / creating appointments) */}
+                {hours.map((hour) => (
+                  <div
+                    key={hour}
+                    style={{ height: `${HOUR_HEIGHT}px` }}
+                    className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      const slotDate = new Date(day)
+                      slotDate.setHours(hour, 0, 0, 0)
+                      onSlotClick(slotDate)
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => onDrop(day, hour)}
+                  />
+                ))}
+
+                {/* Proportional Height Event Cards */}
+                {laidOutEvents.map(({ event, top, height, leftOffsetPercent, widthPercent }) => (
+                  <TimeGridEventCard
+                    key={event.id}
+                    event={event}
+                    top={top}
+                    height={height}
+                    leftOffsetPercent={leftOffsetPercent}
+                    widthPercent={widthPercent}
+                    onEventClick={onEventClick}
+                    onDragStart={onDragStart}
+                    onDragEnd={onDragEnd}
+                    getColorClasses={getColorClasses}
+                  />
+                ))}
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -1457,61 +1680,75 @@ function DayView({
   onDrop: (date: Date, hour: number) => void
   getColorClasses: (color: string) => { bg: string; text: string }
 }) {
-  const hours = Array.from({ length: 14 }, (_, i) => i + 8)
+  const START_HOUR = 8
+  const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR)
+  const HOUR_HEIGHT = 64
+  const TOTAL_GRID_HEIGHT = hours.length * HOUR_HEIGHT
 
-  const getEventsForHour = (hour: number) => {
-    return events.filter((event) => {
-      const eventDate = new Date(event.startTime)
-      const eventHour = eventDate.getHours()
-      return (
-        eventDate.getDate() === currentDate.getDate() &&
-        eventDate.getMonth() === currentDate.getMonth() &&
-        eventDate.getFullYear() === currentDate.getFullYear() &&
-        eventHour === hour
-      )
-    })
-  }
+  const dayEvents = events.filter((event) => {
+    const eventDate = new Date(event.startTime)
+    return (
+      eventDate.getDate() === currentDate.getDate() &&
+      eventDate.getMonth() === currentDate.getMonth() &&
+      eventDate.getFullYear() === currentDate.getFullYear()
+    )
+  })
+
+  const laidOutEvents = layoutDayEvents(dayEvents)
 
   return (
     <div className="w-full h-full overflow-auto">
-      <div className="space-y-0 min-w-[500px]">
-        {hours.map((hour) => {
-          const hourEvents = getEventsForHour(hour)
-          return (
+      <div className="flex min-w-[500px] relative">
+        {/* Time Column */}
+        <div className="w-16 sm:w-24 flex-shrink-0 border-r border-outline-variant/30 select-none bg-surface-container-lowest/40">
+          {hours.map((hour) => (
             <div
               key={hour}
-              className="flex border-b border-outline-variant/30 last:border-b-0"
+              style={{ height: `${HOUR_HEIGHT}px` }}
+              className="border-b border-outline-variant/30 p-2 text-xs font-semibold text-on-surface-variant text-center flex items-start justify-center pt-1.5"
+            >
+              {hour.toString().padStart(2, "0")}:00
+            </div>
+          ))}
+        </div>
+
+        {/* Day Column */}
+        <div
+          className="flex-1 relative"
+          style={{ height: `${TOTAL_GRID_HEIGHT}px` }}
+        >
+          {/* Background Hour Slots */}
+          {hours.map((hour) => (
+            <div
+              key={hour}
+              style={{ height: `${HOUR_HEIGHT}px` }}
+              className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
+              onClick={() => {
+                const slotDate = new Date(currentDate)
+                slotDate.setHours(hour, 0, 0, 0)
+                onSlotClick(slotDate)
+              }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => onDrop(currentDate, hour)}
-            >
-              <div className="w-16 flex-shrink-0 border-r border-outline-variant/30 p-2 text-xs font-semibold text-on-surface-variant sm:w-24 sm:p-3 sm:text-sm text-center">
-                {hour.toString().padStart(2, "0")}:00
-              </div>
-              <div
-                className="min-h-16 flex-1 p-1.5 transition-colors hover:bg-surface-container-low/60 sm:min-h-20 sm:p-2.5 cursor-pointer"
-                onClick={() => {
-                  const slotDate = new Date(currentDate);
-                  slotDate.setHours(hour, 0, 0, 0);
-                  onSlotClick(slotDate);
-                }}
-              >
-                <div className="space-y-2">
-                  {hourEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onEventClick={onEventClick}
-                      onDragStart={onDragStart}
-                      onDragEnd={onDragEnd}
-                      getColorClasses={getColorClasses}
-                      variant="detailed"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )
-        })}
+            />
+          ))}
+
+          {/* Proportional Height Event Cards */}
+          {laidOutEvents.map(({ event, top, height, leftOffsetPercent, widthPercent }) => (
+            <TimeGridEventCard
+              key={event.id}
+              event={event}
+              top={top}
+              height={height}
+              leftOffsetPercent={leftOffsetPercent}
+              widthPercent={widthPercent}
+              onEventClick={onEventClick}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              getColorClasses={getColorClasses}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )
