@@ -100,25 +100,23 @@ async function sendWelcomeMessage(appointmentId) {
 }
 
 /**
- * The Sentinel: Scans for pending appointments for the next day and sends notifications
+ * The Sentinel: Scans for pending appointments in the upcoming 24 hours and sends notifications
  */
 async function runSentinel() {
-  logger.info(`[Sentinel] Starting daily scanning process: ${new Date().toLocaleString()}`);
+  logger.info(`[Sentinel] Scanning upcoming appointments: ${new Date().toLocaleString()}`);
 
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-
-  const endOfTomorrow = new Date(tomorrow);
-  endOfTomorrow.setHours(23, 59, 59, 999);
+  const now = new Date();
+  const windowStart = now;
+  // Lookahead window: up to 24 hours (with a 15-minute buffer: 24h + 15m)
+  const windowEnd = new Date(now.getTime() + (24 * 60 + 15) * 60 * 1000);
 
   try {
     const appointments = await prisma.appointment.findMany({
       where: {
         status: "PENDING",
         appointmentDate: {
-          gte: tomorrow,
-          lte: endOfTomorrow,
+          gte: windowStart,
+          lte: windowEnd,
         },
       },
       include: {
@@ -128,7 +126,7 @@ async function runSentinel() {
       },
     });
 
-    logger.info(`[Sentinel] Found ${appointments.length} pending appointments for tomorrow.`);
+    logger.info(`[Sentinel] Found ${appointments.length} pending appointment(s) in the 24h window.`);
 
     for (const appt of appointments) {
       try {
@@ -175,6 +173,10 @@ async function runSentinel() {
 
         // Fallback for non-Redis local execution
         if (!job) {
+          // Anti-spam jitter: Random 3s - 6s delay between batch sends to simulate human typing
+          const humanDelay = Math.floor(Math.random() * 3000) + 3000;
+          await new Promise((resolve) => setTimeout(resolve, humanDelay));
+
           await whatsappManager.initClient(appt.businessId);
           await whatsappManager.waitForReady(appt.businessId, 45000);
           await whatsappManager.sendMessage(appt.businessId, appt.clientPhone, message);

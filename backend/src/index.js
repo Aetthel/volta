@@ -52,8 +52,8 @@ app.use(
   })
 );
 
-// Schedule the Sentinel to run every day at 20:00
-cron.schedule("0 20 * * *", async () => {
+// Schedule the Sentinel to scan for upcoming 24h appointments every 15 minutes
+cron.schedule("*/15 * * * *", async () => {
   try {
     await runSentinel();
   } catch (err) {
