@@ -1087,7 +1087,6 @@ function EventCard({
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="font-semibold text-sm leading-tight">{event.title}</h4>
-                  <div className={cn("h-3 w-3 rounded-full flex-shrink-0", colorClasses.bg)} />
                 </div>
                 {event.description && <p className="text-xs text-on-surface-variant line-clamp-2">{event.description}</p>}
                 <div className="flex items-center gap-1 text-xs text-on-surface-variant">
@@ -1189,7 +1188,6 @@ function EventCard({
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <h4 className="font-semibold leading-tight">{event.title}</h4>
-                <div className={cn("h-4 w-4 rounded-full flex-shrink-0", colorClasses.bg)} />
               </div>
               {event.description && <p className="text-sm text-on-surface-variant">{event.description}</p>}
               <div className="space-y-1.5">

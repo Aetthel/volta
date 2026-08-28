@@ -152,7 +152,7 @@ export default function AgendaPage() {
 
       return {
         id: app.id,
-        title: `${app.clientName} - ${serviceName}`,
+        title: app.clientName,
         description: app.notes || `Servicio: ${serviceName}`,
         startTime,
         endTime,
