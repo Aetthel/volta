@@ -56,6 +56,7 @@ import Header from "@/components/Header"
 export interface Event {
   id: string
   title: string
+  clientName?: string
   description?: string
   startTime: Date
   endTime: Date
@@ -1371,36 +1372,43 @@ function TimeGridEventCard({
       {isShort ? (
         <div className="flex items-center gap-1.5 leading-tight truncate text-[11px]">
           <span className="font-bold truncate">{event.title}</span>
-          <span className="opacity-80 text-[10px] shrink-0 font-medium">
+          {event.clientName && (
+            <span className="opacity-90 text-[10px] truncate">· {event.clientName}</span>
+          )}
+          <span className="opacity-80 text-[10px] shrink-0 font-medium ml-auto">
             {formatTime(event.startTime)}
           </span>
         </div>
       ) : isMedium ? (
         <div className="flex flex-col h-full justify-between leading-tight overflow-hidden">
-          <div className="font-bold text-xs truncate">{event.title}</div>
-          <div className="flex items-center justify-between gap-1 text-[10px] opacity-90 truncate">
+          <div>
+            <div className="font-bold text-xs truncate">{event.title}</div>
+            {event.clientName && (
+              <div className="text-[11px] opacity-90 truncate font-medium">{event.clientName}</div>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-1 text-[10px] opacity-80 truncate">
             <span>
               {formatTime(event.startTime)} - {formatTime(event.endTime)}
             </span>
-            {event.category && <span className="truncate opacity-80">· {event.category}</span>}
           </div>
         </div>
       ) : (
         <div className="flex flex-col h-full justify-between overflow-hidden">
           <div>
             <div className="font-bold text-xs truncate">{event.title}</div>
-            <div className="flex items-center gap-1 text-[11px] opacity-90 mt-0.5">
+            {event.clientName && (
+              <div className="text-[11px] opacity-95 truncate font-medium mt-0.5">
+                {event.clientName}
+              </div>
+            )}
+            <div className="flex items-center gap-1 text-[10px] opacity-85 mt-1">
               <Clock className="w-3 h-3 shrink-0 opacity-80" />
               <span>
                 {formatTime(event.startTime)} - {formatTime(event.endTime)}
               </span>
-              <span className="text-[10px] opacity-75">({getDuration()})</span>
+              <span className="opacity-75">({getDuration()})</span>
             </div>
-            {event.category && (
-              <div className="text-[10px] opacity-90 truncate mt-0.5 font-medium">
-                {event.category}
-              </div>
-            )}
           </div>
           {event.tags && event.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-auto pt-1">
@@ -1421,8 +1429,11 @@ function TimeGridEventCard({
       {isHovered && (
         <div className="absolute left-0 top-full z-50 mt-1 w-64 animate-in fade-in slide-in-from-top-2 duration-150 pointer-events-none">
           <Card className="border border-outline-variant p-3 shadow-xl bg-surface-container-lowest text-on-surface">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <h4 className="font-bold text-sm leading-tight text-on-surface">{event.title}</h4>
+              {event.clientName && (
+                <p className="text-xs font-semibold text-primary">{event.clientName}</p>
+              )}
               {event.description && (
                 <p className="text-xs text-on-surface-variant line-clamp-2">{event.description}</p>
               )}

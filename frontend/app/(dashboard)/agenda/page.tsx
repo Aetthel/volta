@@ -54,6 +54,14 @@ function getServiceColor(app: any, servicesList: any[]): string {
   return "TEAL";
 }
 
+function formatShortClientName(fullName: string): string {
+  if (!fullName) return "";
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length <= 2) return fullName.trim();
+  // First name + first surname (e.g. Elisa Rodríguez)
+  return `${parts[0]} ${parts[1]}`;
+}
+
 export default function AgendaPage() {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "";
@@ -147,10 +155,13 @@ export default function AgendaPage() {
         statusTag = "Pendiente";
       }
 
+      const shortClient = formatShortClientName(app.clientName);
+
       return {
         id: app.id,
-        title: app.clientName,
-        description: app.notes || `Servicio: ${serviceName}`,
+        title: serviceName,
+        clientName: shortClient,
+        description: app.notes || (shortClient ? `Cliente: ${shortClient}` : undefined),
         startTime,
         endTime,
         color,
