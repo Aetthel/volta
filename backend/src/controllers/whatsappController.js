@@ -43,16 +43,7 @@ export const disconnectClient = async (req, res) => {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
-  const client = whatsappManager.getClient(businessId);
-  if (client) {
-    try {
-      await client.destroy();
-    } catch (destroyErr) {
-      logger.error("[API] Warning: error during client destroy:", destroyErr);
-    }
-    whatsappManager.clients.delete(businessId);
-  }
-  whatsappManager.deleteSession(businessId);
+  await whatsappManager.deleteSession(businessId);
   await whatsappManager.updateStatus(businessId, "DISCONNECTED", null);
   return ApiResponse.success(res, { message: "WhatsApp disconnected successfully" });
 };
