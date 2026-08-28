@@ -74,14 +74,16 @@ export default function MessagesSection({
       .then((res) => res.json())
       .then((data) => {
         if (data && !data.error) {
+          const defaultWelcome = `Hola {nombre}, bienvenido/a a ${profileName || "nuestro negocio"}. Por favor confirma la política de privacidad en: {link_lopd}`;
+          const defaultReminder = `Hola {nombre}, te recordamos tu cita de {servicio} para mañana a las {hora}. ¡Te esperamos en ${profileName || "nuestro negocio"}!`;
           setTemplates({
-            welcomeMessage: data.welcomeMessage || "",
-            reminderMessage: data.reminderMessage || "",
+            welcomeMessage: data.welcomeMessage || defaultWelcome,
+            reminderMessage: data.reminderMessage || defaultReminder,
           });
         }
       })
       .catch(() => {});
-  }, [businessId]);
+  }, [businessId, profileName]);
 
   useEffect(() => {
     fetchWhatsappStatus();

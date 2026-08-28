@@ -9,22 +9,40 @@ import { enqueueWhatsAppMessage } from "../queues/whatsappQueue.js";
 /**
  * Formats a message template by replacing placeholders with actual data
  */
-function formatMessage(template, { clientName, appointmentDate, businessName }) {
+/**
+ * Formats a message template by replacing placeholders with actual data
+ */
+function formatMessage(template, { clientName, appointmentDate, businessName, serviceName, lopdUrl }) {
   if (!template) return null;
 
-  const date = new Date(appointmentDate);
-  const dateStr = date.toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-  const timeStr = date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+  let dateStr = "";
+  let timeStr = "";
+
+  if (appointmentDate) {
+    const date = new Date(appointmentDate);
+    dateStr = date.toLocaleDateString("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    timeStr = date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+  }
 
   return template
-    .replace(/{{clientName}}/g, clientName)
-    .replace(/{{appointmentDate}}/g, dateStr)
-    .replace(/{{appointmentTime}}/g, timeStr)
-    .replace(/{{businessName}}/g, businessName);
+    // Single curly braces (UI variables)
+    .replace(/\{nombre\}/gi, clientName || "")
+    .replace(/\{link_lopd\}/gi, lopdUrl || "")
+    .replace(/\{fecha\}/gi, dateStr)
+    .replace(/\{hora\}/gi, timeStr)
+    .replace(/\{servicio\}/gi, serviceName || "")
+    .replace(/\{negocio\}/gi, businessName || "")
+    // Double curly braces (legacy support)
+    .replace(/\{\{clientName\}\}/gi, clientName || "")
+    .replace(/\{\{lopdUrl\}\}/gi, lopdUrl || "")
+    .replace(/\{\{appointmentDate\}\}/gi, dateStr)
+    .replace(/\{\{appointmentTime\}\}/gi, timeStr)
+    .replace(/\{\{serviceName\}\}/gi, serviceName || "")
+    .replace(/\{\{businessName\}\}/gi, businessName || "");
 }
 
 /**
@@ -37,10 +55,11 @@ async function sendWelcomeMessage(appointmentId) {
       include: {
         business: true,
         client: true,
+        service: true,
       },
     });
 
-    if (!appt || !appt.business.welcomeMessage) return;
+    if (!appt) return;
 
     if (!appt.client || appt.client.lopdStatus !== "Aceptado") {
       logger.info(
@@ -49,10 +68,15 @@ async function sendWelcomeMessage(appointmentId) {
       return;
     }
 
-    const message = formatMessage(appt.business.welcomeMessage, {
+    const template =
+      appt.business.welcomeMessage ||
+      `Hola {nombre}, tu cita para {servicio} en {negocio} ha sido confirmada para el {fecha} a las {hora}.`;
+
+    const message = formatMessage(template, {
       clientName: appt.clientName,
       appointmentDate: appt.appointmentDate,
       businessName: appt.business.name,
+      serviceName: appt.service?.name || "tu servicio",
     });
 
     // Enqueue job in Redis / BullMQ
@@ -100,6 +124,7 @@ async function runSentinel() {
       include: {
         business: true,
         client: true,
+        service: true,
       },
     });
 
@@ -111,11 +136,6 @@ async function runSentinel() {
           logger.info(
             `[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)} (LOPD: ${appt.client?.lopdStatus || "unknown"})`
           );
-          continue;
-        }
-
-        if (!appt.business.reminderMessage) {
-          logger.info(`[Sentinel] No reminder template for ${appt.business.name}, skipping.`);
           continue;
         }
 
@@ -134,10 +154,15 @@ async function runSentinel() {
           continue;
         }
 
-        const message = formatMessage(appt.business.reminderMessage, {
+        const template =
+          appt.business.reminderMessage ||
+          `Hola {nombre}, te recordamos tu cita de {servicio} para mañana a las {hora}. ¡Te esperamos en {negocio}!`;
+
+        const message = formatMessage(template, {
           clientName: appt.clientName,
           appointmentDate: appt.appointmentDate,
           businessName: appt.business.name,
+          serviceName: appt.service?.name || "tu servicio",
         });
 
         // Enqueue job to BullMQ / Redis
@@ -176,14 +201,29 @@ async function runSentinel() {
  * Sends an automatic LOPD consent message to a client.
  */
 async function sendConsentMessage(businessId, client) {
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { name: true, welcomeMessage: true },
+  });
+
+  const businessName = business?.name || "Martí's Peluquería";
   const FRONTEND_URL = config.frontendUrl;
   const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
   const tokenData = `${client.id}:${expiry}`;
   const token = computeHmac(tokenData, config.lopdHmacSecret);
   const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}&exp=${expiry}`;
-  const message = `¡Hola ${client.name}! Para cumplir con la LOPD y poder enviarte recordatorios de tus citas por WhatsApp, por favor acepta nuestra política de privacidad aquí: ${consentUrl}`;
 
-  logger.info(`[Bot] Triggering LOPD consent for client ${client.id}`);
+  const template =
+    business?.welcomeMessage ||
+    `Hola {nombre}, bienvenido/a a {negocio}. Por favor confirma la política de privacidad en: {link_lopd}`;
+
+  const message = formatMessage(template, {
+    clientName: client.name,
+    businessName,
+    lopdUrl: consentUrl,
+  });
+
+  logger.info(`[Bot] Triggering LOPD consent for client ${client.id} with message: "${message}"`);
 
   try {
     const job = await enqueueWhatsAppMessage("LOPD_CONSENT", {
@@ -206,4 +246,4 @@ async function sendConsentMessage(businessId, client) {
   }
 }
 
-export { runSentinel, sendWelcomeMessage, sendConsentMessage };
+export { runSentinel, sendWelcomeMessage, sendConsentMessage, formatMessage };
