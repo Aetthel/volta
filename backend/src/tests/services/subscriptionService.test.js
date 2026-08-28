@@ -162,7 +162,7 @@ describe("Subscription Service", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             businessId: "biz-1",
-            amount: 40.0,
+            amount: 25.0,
             status: "PAID",
           }),
         })

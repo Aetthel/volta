@@ -48,8 +48,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email,
             role: user.role,
             businessId: user.businessId,
-            businessName: user.business?.name || null,
-            businessLogoUrl: user.business?.logoUrl || null,
             subscriptionStatus: user.business?.subscriptionStatus || "TRIALING",
             trialExpiresAt: user.business?.trialExpiresAt
               ? user.business.trialExpiresAt.toISOString()

@@ -50,9 +50,10 @@ export function useAddClientForm(
     if (!isOpen) return;
 
     if (clientToEdit) {
+      const fullName = [clientToEdit.name, clientToEdit.surname].filter(Boolean).join(" ");
       setFormData({
-        name: clientToEdit.name ?? "",
-        surname: clientToEdit.surname ?? "",
+        name: fullName,
+        surname: "",
         phone: clientToEdit.phone ?? "",
         email: clientToEdit.email ?? "",
         frequency: clientToEdit.frequentService ?? "",
@@ -78,19 +79,14 @@ export function useAddClientForm(
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    let finalName = formData.name.trim();
-    let finalSurname = formData.surname.trim();
-
-    if (!finalSurname && finalName.includes(" ")) {
-      const parts = finalName.split(/\s+/);
-      finalName = parts[0] || "";
-      finalSurname = parts.slice(1).join(" ");
-    }
+    const parts = formData.name.trim().split(/\s+/);
+    const parsedName = parts[0] || "";
+    const parsedSurname = parts.slice(1).join(" ");
 
     onSave({
       ...formData,
-      name: finalName,
-      surname: finalSurname,
+      name: parsedName,
+      surname: parsedSurname,
       id: clientToEdit?.id,
     });
 

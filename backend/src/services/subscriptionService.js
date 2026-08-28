@@ -173,8 +173,7 @@ export async function processWebhookEvent(payload, signature) {
     case "subscription_created":
     case "subscription_payment_success": {
       const plan = (customData.plan || "PRO").toUpperCase() === "BASIC" ? "BASIC" : "PRO";
-      const defaultCents = plan === "BASIC" ? 3000 : 4000;
-      const totalAmount = (attributes.total || attributes.subtotal || defaultCents) / 100;
+      const totalAmount = (attributes.total || attributes.subtotal || 2500) / 100;
       const invoiceUrl = attributes.urls?.invoice_url || attributes.urls?.receipt || null;
       const subscriptionId = String(parsedPayload?.data?.id || "");
       const customerId = String(attributes.customer_id || "");
@@ -254,7 +253,7 @@ export async function processWebhookEvent(payload, signature) {
  */
 export async function activateMockSubscription(businessId, plan = "PRO") {
   const selectedPlan = plan.toUpperCase() === "BASIC" ? "BASIC" : "PRO";
-  const amount = selectedPlan === "BASIC" ? 30.0 : 40.0;
+  const amount = selectedPlan === "BASIC" ? 18.0 : 25.0;
 
   const updated = await prisma.business.update({
     where: { id: businessId },

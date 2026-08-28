@@ -115,24 +115,20 @@ export const createAppointment = async (appointmentData) => {
     throw error;
   }
 
-  const finalClientName = (clientName || serviceName || "Sesión de Grupo").trim();
-  const inputPhone = clientPhone ? normalizePhone(clientPhone) : "";
+  const inputPhone = normalizePhone(clientPhone);
 
-  // 3. Try to find client by exact phone number first (if phone provided)
-  let client = null;
-  if (inputPhone) {
-    client = await prisma.client.findFirst({
-      where: {
-        businessId,
-        phone: inputPhone,
-      },
-    });
-  }
+  // 3. Try to find client by exact phone number first
+  let client = await prisma.client.findFirst({
+    where: {
+      businessId,
+      phone: inputPhone,
+    },
+  });
 
   // 4. Fall back to searching by name and surname if phone didn't match
-  if (!client && finalClientName) {
-    const parts = finalClientName.split(/\s+/);
-    const firstName = parts[0] || "Sesión";
+  if (!client) {
+    const parts = clientName.trim().split(/\s+/);
+    const firstName = parts[0];
     const surname = parts.slice(1).join(" ");
 
     client = await prisma.client.findFirst({
@@ -145,8 +141,8 @@ export const createAppointment = async (appointmentData) => {
   }
 
   if (!client) {
-    const parts = finalClientName.split(/\s+/);
-    const firstName = parts[0] || "Sesión";
+    const parts = clientName.trim().split(" ");
+    const firstName = parts[0];
     const surname = parts.slice(1).join(" ");
 
     client = await prisma.client.create({
@@ -154,20 +150,20 @@ export const createAppointment = async (appointmentData) => {
         name: firstName,
         surname: surname || "",
         email: `${normalizeString(firstName)}${surname ? "." + normalizeString(surname).split(" ")[0] : ""}@email.com`,
-        phone: inputPhone || "",
+        phone: inputPhone,
         lopdStatus: "Pendiente",
         businessId,
         frequentService: reqService || null,
         lastVisit: new Date(),
       },
     });
-    logger.info(`[Service] Automatically registered client: ${client.id}`);
+    logger.info(`[Service] Automatically registered new LOPD-pending client: ${client.id}`);
   }
 
   const appointment = await prisma.appointment.create({
     data: {
-      clientName: finalClientName,
-      clientPhone: inputPhone || "",
+      clientName,
+      clientPhone: inputPhone,
       appointmentDate: reqDate,
       businessId,
       clientId: client.id,

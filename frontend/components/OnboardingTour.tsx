@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { ChevronRight, ChevronLeft, X, CheckCircle2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, Sparkles, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
 export interface TourStep {
@@ -207,6 +207,7 @@ export default function OnboardingTour({
         {/* Step Indicator Header */}
         <div className="flex items-center justify-between mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+            <Sparkles className="w-3.5 h-3.5" />
             Paso {currentStepIndex + 1} de {steps.length}
           </span>
           <button

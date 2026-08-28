@@ -737,7 +737,7 @@ export default function RootPage() {
                     Básico
                   </p>
                   <h4 className="text-display font-bold text-on-surface mb-2">
-                    30€
+                    18€
                     <span className="text-title-lg font-normal text-on-surface-variant">/mes</span>
                   </h4>
                   <p className="text-body-md text-on-surface-variant italic">
@@ -749,24 +749,22 @@ export default function RootPage() {
                   <p className="text-title-md font-bold mb-4 text-on-surface">Incluye:</p>
                   <ul className="space-y-4">
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
-                      <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      1 trabajador incluido (+5€/trabajador adicional)
+                      <Check className="w-4.5 h-4.5 text-primary shrink-0" />1 trabajador
+                    </li>
+                    <li className="flex items-center gap-3 text-body-md text-on-surface">
+                      <Check className="w-4.5 h-4.5 text-primary shrink-0" />1 calendario
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
                       <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      1 calendario
-                    </li>
-                    <li className="flex items-center gap-3 text-body-md text-on-surface">
-                      <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      Página de reserva online con tu marca (100)
-                    </li>
-                    <li className="flex items-center gap-3 text-body-md text-on-surface">
-                      <Check className="w-4.5 h-4.5 text-primary shrink-0" />
-                      Recordatorios automáticos por email/SMS
+                      Hasta 40 citas/mes
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-on-surface">
                       <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                       Soporte por email
+                    </li>
+                    <li className="flex items-center gap-3 text-body-md text-on-surface-variant/50 line-through">
+                      <Check className="w-4.5 h-4.5 text-outline shrink-0 opacity-30" />
+                      Sin recordatorios WhatsApp
                     </li>
                   </ul>
                 </div>
@@ -808,7 +806,7 @@ export default function RootPage() {
                     Pro
                   </p>
                   <h4 className="text-[2.75rem] font-bold text-white mb-2 leading-none">
-                    40€<span className="text-title-lg font-normal text-on-primary/80">/mes</span>
+                    25€<span className="text-title-lg font-normal text-on-primary/80">/mes</span>
                   </h4>
                   <p className="text-body-md text-on-primary/95">
                     Para negocios que quieren crecer.
@@ -816,23 +814,19 @@ export default function RootPage() {
                 </div>
 
                 <div className="flex-grow">
-                  <p className="text-title-md font-bold mb-4 text-white">Todo lo de Básico, más:</p>
+                  <p className="text-title-md font-bold mb-4 text-white">Todo lo Básico, más:</p>
                   <ul className="space-y-4">
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      2 trabajadores incluidos (+5€/trabajador adicional)
+                      Trabajadores ilimitados
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Multi-calendario / varias sedes o salas
+                      Citas y calendarios ilimitados
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Recordatorios WhatsApp bidireccional
-                    </li>
-                    <li className="flex items-center gap-3 text-body-md text-white">
-                      <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />
-                      Pagos online (señas y depósitos)
+                      Recordatorios WhatsApp 2 vías
                     </li>
                     <li className="flex items-center gap-3 text-body-md text-white">
                       <Check className="w-4.5 h-4.5 text-secondary-container shrink-0" />

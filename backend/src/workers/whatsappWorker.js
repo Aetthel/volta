@@ -25,10 +25,6 @@ export function createWhatsAppWorker() {
           await whatsappManager.initClient(businessId);
           await whatsappManager.waitForReady(businessId, 45000);
 
-          // Human-like delay (2.5s - 5.5s) to avoid bot detection by WhatsApp algorithms
-          const humanDelay = Math.floor(Math.random() * 3000) + 2500;
-          await new Promise((resolve) => setTimeout(resolve, humanDelay));
-
           await whatsappManager.sendMessage(businessId, targetPhone, message);
           logger.info(
             `[WhatsAppWorker] Job #${job.id} message delivered to ${maskPhone(targetPhone)}`

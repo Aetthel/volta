@@ -1,6 +1,5 @@
 import express from "express";
 import * as subscriptionController from "../controllers/subscriptionController.js";
-import * as webhookController from "../controllers/webhookController.js";
 import { asyncHandler } from "../utils/index.js";
 
 const router = express.Router();
@@ -9,12 +8,6 @@ const router = express.Router();
 router.post(
   "/lemonsqueezy",
   asyncHandler(subscriptionController.handleWebhook)
-);
-
-// POST /api/webhooks/whatsapp & /api/webhooks/whatsapp/:event
-router.post(
-  ["/whatsapp", "/whatsapp/:event"],
-  asyncHandler(webhookController.handleWhatsAppWebhook)
 );
 
 export default router;

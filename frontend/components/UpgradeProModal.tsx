@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import dynamic from "next/dynamic";
-import { X, Lock, Check, ArrowRight } from "lucide-react";
+import { X, Sparkles, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
 const SubscriptionCheckoutModal = dynamic(() => import("./SubscriptionCheckoutModal"), {
@@ -21,28 +20,17 @@ export default function UpgradeProModal({
   isOpen,
   onClose,
   title = "Desbloquea el Plan Pro",
-  description = "Para acceder a esta función (multi-calendario/sedes, WhatsApp bidireccional, pagos online o analítica), actualiza tu cuenta a Plan Pro (40€/mes).",
+  description = "Para acceder a esta función (multisede, miembros ilimitados o recordatorios por WhatsApp), actualiza tu cuenta a Plan Pro (25€/mes).",
 }: UpgradeProModalProps) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
   if (!isOpen && !isCheckoutOpen) return null;
 
-  return createPortal(
+  return (
     <>
       {isOpen && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) onClose();
-          }}
-        >
-          <div className="bg-surface rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-outline-variant/30 relative flex flex-col gap-6 select-none animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-surface rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-outline-variant/30 relative flex flex-col gap-6 select-none">
             {/* Close button */}
             <button
               onClick={onClose}
@@ -55,7 +43,7 @@ export default function UpgradeProModal({
             {/* Badge & Icon */}
             <div className="flex flex-col items-center text-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                <Lock className="w-7 h-7" />
+                <Sparkles className="w-7 h-7" />
               </div>
               <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
                 Ventaja Exclusiva Pro
@@ -68,23 +56,15 @@ export default function UpgradeProModal({
             <div className="bg-surface-container-low rounded-xl p-4 flex flex-col gap-2.5 border border-outline-variant/20">
               <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
                 <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Multi-calendario, varias sedes y salas</span>
+                <span>Trabajadores y agendas ilimitadas</span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
                 <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>2 trabajadores incluidos (+5€ extra)</span>
+                <span>Automatización de WhatsApp 2 vías</span>
               </div>
               <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
                 <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Recordatorios WhatsApp bidireccional</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
-                <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Pagos online (señas y depósitos)</span>
-              </div>
-              <div className="flex items-center gap-2.5 text-xs text-on-surface font-medium">
-                <Check className="w-4 h-4 text-primary shrink-0" />
-                <span>Analítica de negocio y soporte prioritario por chat</span>
+                <span>Gestión multisede y analítica avanzada</span>
               </div>
             </div>
 
@@ -99,7 +79,7 @@ export default function UpgradeProModal({
                   setIsCheckoutOpen(true);
                 }}
               >
-                <span>Actualizar a Plan Pro (40€/mes)</span>
+                <span>Actualizar a Plan Pro (25€/mes)</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
               <button
@@ -122,7 +102,6 @@ export default function UpgradeProModal({
           setIsCheckoutOpen(false);
         }}
       />
-    </>,
-    document.body
+    </>
   );
 }

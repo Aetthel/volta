@@ -23,28 +23,10 @@ export const getStatus = async (req, res) => {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
-  let business = await businessService.getBusinessWhatsApp(businessId);
+  const business = await businessService.getBusinessWhatsApp(businessId);
 
   if (!business) {
     return res.status(404).json({ error: "Negocio no encontrado" });
-  }
-
-  if (business.whatsappStatus !== "CONNECTED") {
-    try {
-      const state = await whatsappManager.getConnectionState(businessId);
-      if (state?.state === "open") {
-        await whatsappManager.updateStatus(businessId, "CONNECTED", null);
-        business.whatsappStatus = "CONNECTED";
-        business.qrCode = null;
-      } else if (business.whatsappStatus === "WAITING_QR" && !business.qrCode) {
-        const qrData = await whatsappManager.getQr(businessId);
-        if (qrData) {
-          business.qrCode = qrData;
-        }
-      }
-    } catch {
-      // ignore and return db state
-    }
   }
 
   return ApiResponse.success(res, {
@@ -61,7 +43,16 @@ export const disconnectClient = async (req, res) => {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
-  await whatsappManager.deleteSession(businessId);
+  const client = whatsappManager.getClient(businessId);
+  if (client) {
+    try {
+      await client.destroy();
+    } catch (destroyErr) {
+      logger.error("[API] Warning: error during client destroy:", destroyErr);
+    }
+    whatsappManager.clients.delete(businessId);
+  }
+  whatsappManager.deleteSession(businessId);
   await whatsappManager.updateStatus(businessId, "DISCONNECTED", null);
   return ApiResponse.success(res, { message: "WhatsApp disconnected successfully" });
 };

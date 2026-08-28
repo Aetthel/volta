@@ -12,10 +12,14 @@ RUN pnpm install --frozen-lockfile
 # Builder Stage
 FROM base AS builder
 RUN apt-get update && apt-get install -y \
-    python3 make g++ openssl \
+    chromium \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    python3 make g++ \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV NODE_ENV=production
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -33,10 +37,19 @@ RUN NEXT_PHASE=phase-production-build pnpm --filter frontend build
 
 # Production Runner Stage
 FROM base AS runner
+RUN apt-get update && apt-get install -y \
+    chromium \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV NODE_ENV=production
 
 RUN groupadd --gid 1001 volta && \
     useradd --uid 1001 --gid volta --shell /bin/sh --create-home volta && \
+    mkdir -p /app/backend/.wwebjs_auth && \
     chown -R volta:volta /app
 
 COPY --chown=volta:volta . .

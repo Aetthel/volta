@@ -54,13 +54,8 @@ export const updateClientSchema = z.object({
 
 // Appointments Validation Schemas
 export const appointmentSchema = z.object({
-  clientName: z.string().optional().nullable().or(z.literal("")),
-  clientPhone: z
-    .string()
-    .regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido")
-    .optional()
-    .nullable()
-    .or(z.literal("")),
+  clientName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+  clientPhone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido"),
   appointmentDate: z.string().datetime("Formato de fecha no válido (debe ser ISO 8601 UTC)"),
   businessId: z.string().min(1, "El ID de negocio es requerido"),
   service: z.string().optional().nullable(),

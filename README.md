@@ -21,9 +21,8 @@ El frontend se ha construido utilizando Next.js, aprovechando las capacidades de
 El backend es un servicio Node.js que expone una API REST utilizando Express.js. Las tecnologías clave incluyen:
 
 - Prisma ORM para el modelado y las consultas a la base de datos PostgreSQL.
-- Evolution API v2 (Baileys WebSocket) para la automatización, gestión multi-instancia y mensajería de WhatsApp de alto rendimiento.
-- Clasificador Inteligente de Intenciones (Groq Llama 3.3 / OpenAI) para respuestas automáticas.
-- node-cron y BullMQ para la programación y colas de tareas recurrentes.
+- whatsapp-web.js para la automatización e integración con el cliente de WhatsApp mediante una instancia de Puppeteer/Chromium.
+- node-cron para la programación de tareas recurrentes de fondo.
 - Zod para la validación estricta de esquemas de datos entrantes.
 - Helmet y express-rate-limit para la seguridad y control de tasa de solicitudes.
 
@@ -31,7 +30,7 @@ El backend es un servicio Node.js que expone una API REST utilizando Express.js.
 
 La aplicación está completamente dockerizada para garantizar la consistencia entre entornos de desarrollo y producción:
 
-- Docker Compose para levantar localmente el frontend, backend, Evolution API, Redis y la base de datos PostgreSQL.
+- Docker Compose para levantar localmente el frontend, backend y la base de datos PostgreSQL.
 - GitHub Container Registry (GHCR) para almacenar las imágenes de producción compiladas a través de flujos de trabajo de GitHub Actions.
 - Watchtower para el despliegue automático y continuo en el servidor de producción.
 - Cloudflare Tunnel para exponer de forma segura los servicios sin abrir puertos públicos y gestionar la encriptación SSL.
@@ -53,13 +52,9 @@ La estructura principal del monorepo es la siguiente:
 
 Las empresas pueden configurar sus horarios de apertura y cierre (BusinessHours) y dar de alta sus servicios con precios y duraciones específicas. La agenda permite agendar y gestionar el estado de las citas (Appointment).
 
-### Integración Automatizada de WhatsApp (Evolution API)
+### Integración Automatizada de WhatsApp
 
-A través de Evolution API v2, cada negocio puede vincular su propia cuenta de WhatsApp escaneando un código QR dinámico desde la interfaz web. El sistema gestiona las sesiones multi-instancia de forma independiente persistiendo los datos de autenticación en PostgreSQL y Redis.
-
-### Clasificación Inteligente de Respuestas
-
-Al recibir respuestas de clientes a través de WhatsApp Webhooks, el sistema clasifica automáticamente la intención en dos niveles (reglas directas y modelo LLM Llama 3.3 / GPT-4o-mini) para etiquetar el estado: `CONFIRMADO`, `CANCELADO`, `SOLICITA_CAMBIO` o `REQUIERE_HUMANO`.
+A través de la biblioteca whatsapp-web.js, cada negocio puede vincular su propia cuenta de WhatsApp escaneando un código QR dinámico desde la interfaz web. El sistema gestiona las sesiones de forma independiente persistiendo los datos de autenticación local.
 
 ### El Sentinel (Proceso de Notificaciones)
 
@@ -88,15 +83,13 @@ PORT=3000
 
 ### Paso 2: Levantar con Docker Compose
 
-La forma más sencilla de ejecutar el entorno local es utilizando Docker Compose:
+La forma más sencilla de ejecutar el entorno local es utilizando Docker Compose, el cual creará los contenedores necesarios e instalará Chromium en el contenedor del backend para whatsapp-web.js:
 
 docker compose up -d
 
 Este comando iniciará:
 
 - volta-db en el puerto 5432
-- volta-redis en el puerto 6379
-- volta-evolution-api en el puerto 8080
 - volta-backend en el puerto 3001
 - volta-frontend en el puerto 3000
 

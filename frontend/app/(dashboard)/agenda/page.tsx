@@ -5,10 +5,9 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
-import { Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
-import { Button, Skeleton } from "@/components/ui/volta-ui";
+import { Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
 
@@ -19,7 +18,7 @@ const AddClientModal = dynamicImport(() => import("@/components/AddClientModal")
   ssr: false,
 });
 
-const VALID_COLORS = ["TEAL", "DEEP_TEAL", "SAGE", "SLATE", "FOREST", "PETROL"];
+const VALID_COLORS = ["TEAL", "PURPLE", "ROSE", "AMBER", "INDIGO", "EMERALD", "SKY"];
 
 function getServiceDuration(app: any, servicesList: any[]): number {
   if (app.service?.duration && typeof app.service.duration === "number") {
@@ -50,16 +49,11 @@ function getServiceColor(app: any, servicesList: any[]): string {
     return dbService.color.toUpperCase();
   }
 
-  // Consistent Volta Primary Brand Teal
-  return "TEAL";
-}
-
-function formatShortClientName(fullName: string): string {
-  if (!fullName) return "";
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length <= 2) return fullName.trim();
-  // First name + first surname (e.g. Elisa Rodríguez)
-  return `${parts[0]} ${parts[1]}`;
+  let hash = 0;
+  for (let i = 0; i < serviceName.length; i++) {
+    hash = serviceName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return VALID_COLORS[Math.abs(hash) % VALID_COLORS.length];
 }
 
 export default function AgendaPage() {
@@ -144,29 +138,15 @@ export default function AgendaPage() {
 
       const color = getServiceColor(app, services);
 
-      let statusTag = "Pendiente";
-      if (app.attended === false) {
-        statusTag = "Cancelada";
-      } else if (app.status === "SENT") {
-        statusTag = "Confirmada";
-      } else if (app.status === "ERROR") {
-        statusTag = "Error";
-      } else if (app.status === "PENDING") {
-        statusTag = "Pendiente";
-      }
-
-      const shortClient = formatShortClientName(app.clientName);
-
       return {
         id: app.id,
-        title: serviceName,
-        clientName: shortClient,
-        description: app.notes || (shortClient ? `Cliente: ${shortClient}` : undefined),
+        title: `${app.clientName} - ${serviceName}`,
+        description: app.notes || `Servicio: ${serviceName}`,
         startTime,
         endTime,
         color,
         category: serviceName,
-        tags: [statusTag],
+        tags: [app.status || "Confirmada"],
         rawAppointment: app,
       };
     });
@@ -216,15 +196,15 @@ export default function AgendaPage() {
         ? updatedEvent.startTime.toISOString()
         : existing.appointmentDate;
 
-      // El backend expone PUT /appointments/:id; sin el id en la ruta Express
-      // no encontraba handler y la reprogramación se perdía en silencio.
-      const res = await fetch(`/api/backend/appointments/${id}`, {
+      const res = await fetch("/api/backend/appointments", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          ...existing,
           appointmentDate: newDate,
           clientName: updatedEvent.title?.split("-")[0]?.trim() || existing.clientName,
           serviceName: updatedEvent.category || existing.serviceName,
+          notes: updatedEvent.description !== undefined ? updatedEvent.description : existing.notes,
         }),
       });
 
@@ -242,8 +222,7 @@ export default function AgendaPage() {
 
   const handleEventDelete = async (id: string) => {
     try {
-      // Mismo motivo que en el update: el id va en la ruta, no en la query.
-      const res = await fetch(`/api/backend/appointments/${id}`, {
+      const res = await fetch(`/api/backend/appointments?id=${id}`, {
         method: "DELETE",
       });
 
@@ -276,22 +255,17 @@ export default function AgendaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface flex flex-col md:flex-row pb-24 md:pb-0">
-      {/* onNewAppointmentClick es lo que hace que el Sidebar pinte su botón
-          "Nueva Cita" al pie. Se envuelve en una arrow para descartar el evento
-          de click: handleOpenNewModalWithDate espera una Date opcional y un
-          MouseEvent es truthy, así que pasarlo directo reventaría al leer
-          getFullYear(). */}
-      <Sidebar onNewAppointmentClick={() => handleOpenNewModalWithDate()} />
+    <div className="min-h-screen bg-surface text-on-surface pb-24 md:pb-6">
+      <Sidebar />
       <BottomNav />
 
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
+      <div className="md:ml-[240px] transition-all duration-300">
         <TrialBanner />
-        <main className="flex-1 flex flex-col w-full">
+        <main className="p-4 sm:p-6 space-y-6">
           {isLoading ? (
-            <div className="p-gutter max-w-container-max w-full mx-auto pt-6 space-y-4 flex-1">
+            <div className="space-y-4">
               <Skeleton className="h-12 w-full rounded-xl" />
-              <Skeleton className="h-[600px] w-full rounded-2xl" />
+              <Skeleton className="h-[500px] w-full rounded-2xl" />
             </div>
           ) : (
             <EventManager
@@ -303,38 +277,37 @@ export default function AgendaPage() {
               availableTags={availableTags}
               defaultView="week"
               onOpenNewModal={handleOpenNewModalWithDate}
-              className="flex-1 flex flex-col w-full"
             />
           )}
         </main>
       </div>
-
-      {/* FAB solo en móvil, donde el Sidebar no se muestra. Mismas clases que
-          clientes, inicio y sedes. */}
-      <Button
-        variant="primary"
-        onClick={() => handleOpenNewModalWithDate()}
-        aria-label="Nueva cita"
-        className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg"
-      >
-        <Plus className="w-5 h-5" />
-      </Button>
 
       <NewAppointmentModal
         isOpen={isAppointmentModalOpen}
         onClose={() => setIsAppointmentModalOpen(false)}
         initialDate={prefilledDate}
         initialTime={prefilledTime}
-        /* El modal ya ha hecho el POST y solo llama aquí cuando el backend ha
-           confirmado la cita. Repetir el POST creaba una segunda cita en el
-           mismo hueco y el backend la rechazaba con 409, así que la reserva sí
-           existía pero la UI daba error y no refrescaba. */
-        onSave={() => {
-          showToast("Cita registrada exitosamente", "success");
-          // El propio modal se cierra (llama a onClose) cuando termina de
-          // mostrar el aviso de consentimiento LOPD; cerrarlo desde aquí lo
-          // desmontaba antes de que ese aviso llegara a verse.
-          fetchDashboardData();
+        onSave={async (appointmentData) => {
+          try {
+            const res = await fetch("/api/backend/appointments", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ...appointmentData,
+                businessId,
+              }),
+            });
+            if (res.ok) {
+              showToast("Cita registrada exitosamente", "success");
+              setIsAppointmentModalOpen(false);
+              fetchDashboardData();
+            } else {
+              showToast("Error al guardar la cita", "error");
+            }
+          } catch (err) {
+            console.error("Error saving appointment from modal:", err);
+            showToast("Error de servidor al guardar la cita", "error");
+          }
         }}
       />
 

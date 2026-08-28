@@ -16,7 +16,7 @@ import FaceIcon from "@/components/FaceIcon";
 import { X, ArrowRight } from "lucide-react";
 
 export default function WelcomeModal() {
-  const { alerts, markAsRead, markAllAsRead } = useAlerts();
+  const { alerts, markAllAsRead } = useAlerts();
   const { data: session } = useSession();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -38,23 +38,20 @@ export default function WelcomeModal() {
 
   const handleCloseModal = () => {
     setIsDismissed(true);
-    emergentes.forEach((a) => markAsRead(a.id));
   };
 
   const handleNext = () => {
-    if (current) {
-      markAsRead(current.id);
-    }
     if (activeIndex < totalSteps - 1) {
       setActiveIndex((prev) => prev + 1);
     } else {
+      markAllAsRead();
       setIsDismissed(true);
     }
   };
 
   const handleFinish = () => {
+    markAllAsRead();
     setIsDismissed(true);
-    emergentes.forEach((a) => markAsRead(a.id));
   };
 
   return (

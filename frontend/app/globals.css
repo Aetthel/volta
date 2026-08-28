@@ -62,15 +62,6 @@ html {
   --color-on-tertiary-fixed: #002020;
   --color-on-tertiary-fixed-variant: #004f50;
 
-  --color-background: #ffffff;
-  --color-foreground: #18181b;
-  --color-card: #ffffff;
-  --color-card-foreground: #18181b;
-  --color-muted: #f4f4f5;
-  --color-muted-foreground: #71717a;
-  --color-border: #e4e4e7;
-  --color-input: #e4e4e7;
-
   --radius-sm: calc(0.2rem * var(--radius-scale));
   --radius-md: calc(0.35rem * var(--radius-scale));
   --radius-lg: calc(0.5rem * var(--radius-scale));

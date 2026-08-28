@@ -8,7 +8,7 @@ const nextConfig = {
   turbopack: {
     root: path.resolve(process.cwd(), ".."),
   },
-  serverExternalPackages: ["backend"],
+  serverExternalPackages: ["backend", "whatsapp-web.js"],
   // Allow external origins to connect to the Next.js dev server HMR WebSocket.
   allowedDevOrigins: [
     "localhost",
