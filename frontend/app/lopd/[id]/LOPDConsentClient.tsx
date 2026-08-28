@@ -152,10 +152,10 @@ export default function LOPDConsentClient() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-start py-8 px-4 sm:px-6">
-      <div className="max-w-2xl w-full">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-4 sm:p-6">
+      <div className="max-w-xl w-full bg-surface-container-lowest rounded-md p-6 sm:p-8 shadow-sm border border-outline-variant">
         {accepted ? (
-          <div className="text-center py-12 flex flex-col items-center animate-in fade-in duration-300">
+          <div className="text-center py-8 flex flex-col items-center animate-in fade-in duration-300">
             <CheckCircle2 className="w-16 h-16 text-primary mb-4" />
             <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-2">
               ¡Muchas gracias, {data.clientName}!
@@ -170,7 +170,7 @@ export default function LOPDConsentClient() {
             </p>
           </div>
         ) : rejected ? (
-          <div className="text-center py-12 flex flex-col items-center animate-in fade-in duration-300">
+          <div className="text-center py-8 flex flex-col items-center animate-in fade-in duration-300">
             <XCircle className="w-16 h-16 text-on-surface-variant mb-4" />
             <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-2">
               Entendido, {data.clientName}
@@ -200,21 +200,21 @@ export default function LOPDConsentClient() {
             </div>
 
             {/* Intro */}
-            <p className="font-body-md text-body-md text-on-surface mb-6 leading-relaxed">
+            <p className="font-body-md text-body-md text-on-surface mb-5 leading-relaxed">
               Hola <strong>{data.clientName}</strong>, para poder gestionar tus citas y enviarte
               recordatorios automatizados de tus reservas a través de WhatsApp, necesitamos tu
               autorización para procesar tus datos de contacto conforme al RGPD.
             </p>
 
-            {/* Full Legal Policy Content (Scrolleable en la página, sin caja fija) */}
-            <div className="space-y-4 text-on-surface-variant font-body-sm text-body-sm leading-relaxed mb-6 border-t border-b border-outline-variant/30 py-4">
+            {/* Content Container: Legal Policy */}
+            <div className="bg-surface-container-low rounded-md p-5 mb-5 border border-outline-variant/65 text-on-surface-variant font-body-sm text-body-sm leading-relaxed space-y-3">
               {data.policy?.title && (
-                <h2 className="font-semibold text-on-surface text-body-md">
+                <h2 className="font-semibold text-on-surface text-body-md mb-1">
                   {data.policy.title}
                 </h2>
               )}
               {data.policy?.sections.map((section) => (
-                <div key={section.heading} className="space-y-1">
+                <div key={section.heading} className="space-y-0.5">
                   <strong className="text-on-surface block font-medium">
                     {section.heading}:
                   </strong>
@@ -223,7 +223,7 @@ export default function LOPDConsentClient() {
               ))}
 
               {data.policy && (
-                <p className="text-label-xs font-label-xs text-on-surface-variant/70 pt-2 text-right">
+                <p className="text-label-xs font-label-xs text-on-surface-variant/70 pt-2 text-right border-t border-outline-variant/40">
                   Versión {data.policy.version} · en vigor desde{" "}
                   {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
                     day: "numeric",
@@ -272,7 +272,7 @@ export default function LOPDConsentClient() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5 pt-2">
+              <div className="flex flex-col gap-2.5">
                 <Button
                   type="button"
                   variant="primary"
