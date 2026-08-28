@@ -207,11 +207,11 @@ async function sendConsentMessage(businessId, client) {
   });
 
   const businessName = business?.name || "Martí's Peluquería";
-  const FRONTEND_URL = config.frontendUrl;
+  const baseUrl = (config.frontendUrl || "http://localhost:3000").replace(/\/+$/, "");
   const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
   const tokenData = `${client.id}:${expiry}`;
   const token = computeHmac(tokenData, config.lopdHmacSecret);
-  const consentUrl = `${FRONTEND_URL}/lopd/${client.id}?token=${token}&exp=${expiry}`;
+  const consentUrl = `${baseUrl}/lopd/${client.id}?token=${token}&exp=${expiry}`;
 
   const template =
     business?.welcomeMessage ||
