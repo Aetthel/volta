@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -87,9 +88,12 @@ function WorkspaceSwitcher({
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 overflow-hidden">
             {businessLogo ? (
-              <img
+              <Image
                 src={businessLogo}
                 alt={businessName}
+                width={36}
+                height={36}
+                unoptimized
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.currentTarget as HTMLElement).style.display = "none";
@@ -317,13 +321,14 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const subscriptionStatus = session?.user?.subscriptionStatus || "ACTIVE";
   const planLabel = subscriptionPlan === "BASIC" ? "Plan Básico" : "Plan Pro";
 
+  const businessId = (session?.user as any)?.businessId;
+
   const [businessData, setBusinessData] = useState<{
     name?: string;
     logoUrl?: string | null;
   }>({});
 
   useEffect(() => {
-    const businessId = (session?.user as any)?.businessId;
     if (!businessId || businessId === "mock-business-id") return;
     fetch(`/api/backend/business/${businessId}`)
       .then((res) => res.json())
@@ -336,7 +341,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         }
       })
       .catch((err) => console.error("Error loading business in sidebar:", err));
-  }, [(session?.user as any)?.businessId]);
+  }, [businessId]);
 
   const businessName =
     businessData.name ||
