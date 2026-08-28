@@ -8,6 +8,14 @@ const nextConfig = {
   turbopack: {
     root: path.resolve(process.cwd(), ".."),
   },
+  // El bind mount del repo desde Windows al contenedor Linux no propaga eventos
+  // inotify, así que el watcher de Turbopack nunca se enteraba de los cambios y
+  // había que reiniciar el contenedor para ver cada edición. El sondeo cuesta algo
+  // de CPU, por eso solo se activa donde hace falta (docker-compose lo enciende
+  // para el servicio frontend).
+  ...(process.env.NEXT_DEV_POLLING === "true"
+    ? { watchOptions: { pollIntervalMs: 800 } }
+    : {}),
   serverExternalPackages: ["backend", "whatsapp-web.js"],
   // Allow external origins to connect to the Next.js dev server HMR WebSocket.
   allowedDevOrigins: [

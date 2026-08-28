@@ -18,6 +18,33 @@ interface UseDraggableModalOptions {
   modalHeight?: number;
 }
 
+/** Margen mínimo entre el modal y el borde de la ventana. */
+const VIEWPORT_MARGIN = 12;
+
+/**
+ * Los modales se limitan a la altura de la ventana (ver MODAL_MAX_HEIGHT en los
+ * componentes), así que la altura efectiva nunca supera el viewport disponible.
+ */
+function effectiveHeight(modalHeight: number) {
+  return Math.min(modalHeight, window.innerHeight - VIEWPORT_MARGIN * 2);
+}
+
+/**
+ * Mantiene el modal completamente dentro de la ventana. Si no cabe (ventana muy
+ * baja), se ancla al margen superior en lugar de quedar recortado por arriba.
+ */
+export function clampToViewport(x: number, y: number, modalWidth: number, modalHeight: number) {
+  if (typeof window === "undefined") return { x, y };
+
+  const maxX = window.innerWidth - modalWidth - VIEWPORT_MARGIN;
+  const maxY = window.innerHeight - effectiveHeight(modalHeight) - VIEWPORT_MARGIN;
+
+  return {
+    x: Math.max(VIEWPORT_MARGIN, Math.min(x, Math.max(VIEWPORT_MARGIN, maxX))),
+    y: Math.max(VIEWPORT_MARGIN, Math.min(y, Math.max(VIEWPORT_MARGIN, maxY))),
+  };
+}
+
 /**
  * Calculates modal coordinates relative to clicked element or screen center
  */
@@ -29,24 +56,18 @@ export function calculateModalPosition(
   if (typeof window === "undefined") return { x: 0, y: 0 };
 
   if (triggerRect && window.innerWidth >= 768) {
-    let targetX = triggerRect.right + 12;
+    let targetX = triggerRect.right + VIEWPORT_MARGIN;
     if (targetX + modalWidth > window.innerWidth) {
-      targetX = triggerRect.left - modalWidth - 12;
-    }
-    targetX = Math.max(12, Math.min(targetX, window.innerWidth - modalWidth - 12));
-
-    let targetY = triggerRect.top;
-    if (targetY + modalHeight > window.innerHeight) {
-      targetY = Math.max(12, window.innerHeight - modalHeight - 12);
+      targetX = triggerRect.left - modalWidth - VIEWPORT_MARGIN;
     }
 
-    return { x: targetX, y: targetY };
+    return clampToViewport(targetX, triggerRect.top, modalWidth, modalHeight);
   }
 
   // Default: Center modal on screen
-  const targetX = Math.max(12, (window.innerWidth - modalWidth) / 2);
-  const targetY = Math.max(12, (window.innerHeight - modalHeight) / 2);
-  return { x: targetX, y: targetY };
+  const targetX = (window.innerWidth - modalWidth) / 2;
+  const targetY = (window.innerHeight - effectiveHeight(modalHeight)) / 2;
+  return clampToViewport(targetX, targetY, modalWidth, modalHeight);
 }
 
 /**
@@ -73,6 +94,19 @@ export function useDraggableModal({
     prevIsOpenRef.current = isOpen;
   }, [isOpen, triggerRect, modalWidth, modalHeight]);
 
+  // Al redimensionar la ventana (o girar el móvil) el modal podría quedar fuera
+  // de la vista: lo devolvemos dentro de los límites.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleResize = () => {
+      setPosition((prev) => clampToViewport(prev.x, prev.y, modalWidth, modalHeight));
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isOpen, modalWidth, modalHeight]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
     if (
@@ -91,10 +125,14 @@ export function useDraggableModal({
     const startY = e.clientY - position.y;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      setPosition({
-        x: moveEvent.clientX - startX,
-        y: moveEvent.clientY - startY,
-      });
+      setPosition(
+        clampToViewport(
+          moveEvent.clientX - startX,
+          moveEvent.clientY - startY,
+          modalWidth,
+          modalHeight
+        )
+      );
     };
 
     const handleMouseUp = () => {
