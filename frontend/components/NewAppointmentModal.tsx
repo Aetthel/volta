@@ -334,6 +334,7 @@ export default function NewAppointmentModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label
+                  id="date-label"
                   htmlFor="date"
                   className="text-xs font-medium text-on-surface mb-1 flex items-center gap-1.5"
                 >
@@ -349,6 +350,14 @@ export default function NewAppointmentModal({
                   onClick={() => setShowDatePicker((open) => !open)}
                   aria-haspopup="dialog"
                   aria-expanded={showDatePicker}
+                  // Un <label for> sobre un botón se lleva el nombre accesible y
+                  // la fecha elegida no se anunciaba. aria-label tiene prioridad
+                  // sobre el <label>, así que se lee campo + valor.
+                  aria-label={
+                    selectedDate
+                      ? `Fecha: ${dateLabelFormatter.format(selectedDate)}`
+                      : "Fecha: seleccionar fecha"
+                  }
                   className={`w-full px-3 py-1.5 text-sm text-left bg-surface-container-low/60 border rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer truncate ${
                     showDatePicker
                       ? "border-primary bg-surface-container-lowest"

@@ -1,17 +1,65 @@
 import prisma from "../config/db.js";
-import { ApiResponse } from "../utils/index.js";
+import { ApiResponse, normalizePhone } from "../utils/index.js";
 import { validateBusinessHours, calculateAvailableSlots } from "../utils/businessHours.js";
+import * as bookingIdentityService from "../services/bookingIdentityService.js";
 import { z } from "zod";
 
 const createBookingSchema = z.object({
   businessId: z.string().min(1, "businessId es requerido"),
   serviceId: z.string().min(1, "serviceId es requerido"),
   appointmentDate: z.string().min(1, "Fecha de cita no válida"),
-  clientName: z.string().min(1, "El nombre del cliente es obligatorio").trim(),
-  clientPhone: z.string().min(6, "El teléfono del cliente es obligatorio").trim(),
   clientEmail: z.string().email("Formato de correo no válido").optional().or(z.literal("")),
 });
 
+/**
+ * El portal solo acepta reservas si el negocio las tiene activadas y su
+ * suscripción sigue viva.
+ */
+const isBookingOpen = (business) =>
+  business &&
+  business.enablePublicBooking !== false &&
+  business.subscriptionStatus !== "EXPIRED" &&
+  business.subscriptionStatus !== "CANCELLED";
+
+const BOOKING_CLOSED_MESSAGE =
+  "Las reservas públicas no están disponibles actualmente para este negocio.";
+
+/**
+ * Datos de marca del negocio, sin sesión: es lo único que necesita la pantalla
+ * de identificación para pintarse. El catálogo, los horarios y los datos de
+ * contacto viven detrás de la verificación del teléfono.
+ */
+export const getPublicBusinessProfile = async (req, res) => {
+  const { businessId } = req.params;
+
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      logoUrl: true,
+      coverUrl: true,
+      description: true,
+      themeColor: true,
+      enablePublicBooking: true,
+      subscriptionStatus: true,
+    },
+  });
+
+  if (!business) {
+    return res.status(404).json({ error: "Negocio no encontrado" });
+  }
+
+  if (!isBookingOpen(business)) {
+    return res.status(403).json({ error: BOOKING_CLOSED_MESSAGE });
+  }
+
+  const { subscriptionStatus: _status, ...profile } = business;
+  return ApiResponse.success(res, profile);
+};
+
+/** Catálogo completo. Exige sesión de reserva (`requireBookingSession`). */
 export const getPublicBusinessData = async (req, res) => {
   const { businessId } = req.params;
 
@@ -43,18 +91,18 @@ export const getPublicBusinessData = async (req, res) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
-  if (
-    business.enablePublicBooking === false ||
-    business.subscriptionStatus === "EXPIRED" ||
-    business.subscriptionStatus === "CANCELLED"
-  ) {
-    return res
-      .status(403)
-      .json({ error: "Las reservas públicas no están disponibles actualmente para este negocio." });
+  if (!isBookingOpen(business)) {
+    return res.status(403).json({ error: BOOKING_CLOSED_MESSAGE });
   }
 
-  const { subscriptionStatus: _, ...publicData } = business;
-  return ApiResponse.success(res, publicData);
+  const { subscriptionStatus: _status, ...publicData } = business;
+  return ApiResponse.success(res, {
+    ...publicData,
+    identity: {
+      phone: req.bookingIdentity.phone,
+      name: req.bookingIdentity.name,
+    },
+  });
 };
 
 export const getAvailableSlots = async (req, res) => {
@@ -70,12 +118,7 @@ export const getAvailableSlots = async (req, res) => {
     select: { subscriptionStatus: true, enablePublicBooking: true },
   });
 
-  if (
-    !business ||
-    business.enablePublicBooking === false ||
-    business.subscriptionStatus === "EXPIRED" ||
-    business.subscriptionStatus === "CANCELLED"
-  ) {
+  if (!isBookingOpen(business)) {
     return res.status(403).json({ error: "Las reservas públicas no están disponibles." });
   }
 
@@ -123,6 +166,80 @@ export const getAvailableSlots = async (req, res) => {
   return ApiResponse.success(res, { date, availableSlots: slots });
 };
 
+/** Comprueba que el negocio existe y admite reservas antes de gastar un código. */
+const assertBookingOpen = async (businessId) => {
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { id: true, enablePublicBooking: true, subscriptionStatus: true },
+  });
+
+  if (!business) {
+    const error = new Error("Negocio no encontrado");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (!isBookingOpen(business)) {
+    const error = new Error(BOOKING_CLOSED_MESSAGE);
+    error.statusCode = 403;
+    throw error;
+  }
+};
+
+const respondWithError = (res, error) => {
+  if (error.statusCode) {
+    const body = { error: error.message };
+    if (error.retryAfterSeconds) body.retryAfterSeconds = error.retryAfterSeconds;
+    if (error.attemptsLeft !== undefined) body.attemptsLeft = error.attemptsLeft;
+    if (error.expired) body.expired = true;
+    return res.status(error.statusCode).json(body);
+  }
+  throw error;
+};
+
+/**
+ * Paso 1: reconoce el teléfono y envía el código, o pide el nombre completo si
+ * ese teléfono no consta como cliente del negocio.
+ */
+export const startIdentity = async (req, res) => {
+  const { businessId } = req.params;
+  const { phone, fullName } = req.body;
+
+  try {
+    await assertBookingOpen(businessId);
+
+    const result = await bookingIdentityService.startVerification({
+      businessId,
+      phone,
+      fullName,
+      ipAddress: req.ip,
+    });
+
+    return ApiResponse.success(res, result);
+  } catch (error) {
+    return respondWithError(res, error);
+  }
+};
+
+/** Reenvío de código: mismo camino que el alta, con el mismo límite. */
+export const resendIdentityCode = startIdentity;
+
+/** Paso 2: valida el código y abre la sesión de reserva. */
+export const verifyIdentity = async (req, res) => {
+  const { businessId } = req.params;
+  const { phone, code } = req.body;
+
+  try {
+    await assertBookingOpen(businessId);
+
+    const result = await bookingIdentityService.verifyCode({ businessId, phone, code });
+
+    return ApiResponse.success(res, result);
+  } catch (error) {
+    return respondWithError(res, error);
+  }
+};
+
 export const createPublicBooking = async (req, res) => {
   const validationResult = createBookingSchema.safeParse(req.body);
 
@@ -131,8 +248,20 @@ export const createPublicBooking = async (req, res) => {
     return res.status(400).json({ error: firstError, details: validationResult.error.errors });
   }
 
-  const { businessId, serviceId, appointmentDate, clientName, clientPhone, clientEmail } =
-    validationResult.data;
+  const { businessId, serviceId, appointmentDate, clientEmail } = validationResult.data;
+
+  // La identidad sale siempre del token verificado. Si el cuerpo trae un
+  // `clientPhone` o un `clientName`, se ignoran: son los datos que un atacante
+  // manipularía para reservar en nombre de otra persona.
+  const clientPhone = normalizePhone(req.bookingIdentity.phone);
+  const clientName = (req.bookingIdentity.name || "").trim();
+
+  if (!clientPhone || !clientName) {
+    return res.status(401).json({
+      error: "Tu sesión ha caducado. Vuelve a verificar tu teléfono.",
+      code: "BOOKING_SESSION_INVALID",
+    });
+  }
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },
@@ -143,14 +272,8 @@ export const createPublicBooking = async (req, res) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
-  if (
-    business.enablePublicBooking === false ||
-    business.subscriptionStatus === "EXPIRED" ||
-    business.subscriptionStatus === "CANCELLED"
-  ) {
-    return res
-      .status(403)
-      .json({ error: "Las reservas públicas no están disponibles actualmente para este negocio." });
+  if (!isBookingOpen(business)) {
+    return res.status(403).json({ error: BOOKING_CLOSED_MESSAGE });
   }
 
   const service = await prisma.service.findUnique({
@@ -185,7 +308,7 @@ export const createPublicBooking = async (req, res) => {
   const dayEnd = new Date(targetDate);
   dayEnd.setHours(23, 59, 59, 999);
 
-  const cleanPhone = clientPhone.trim();
+  const [firstName, ...restOfName] = clientName.split(/\s+/);
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -217,26 +340,30 @@ export const createPublicBooking = async (req, res) => {
         throw error;
       }
 
-      // Client recognition by phone number
-      let client = await tx.client.findFirst({
-        where: {
+      // El teléfono es la clave del cliente dentro del negocio: el upsert sobre
+      // (businessId, phone) hace el alta idempotente, así que dos reservas
+      // simultáneas del mismo número nuevo no crean dos fichas.
+      const client = await tx.client.upsert({
+        where: { businessId_phone: { businessId, phone: clientPhone } },
+        update: {},
+        create: {
+          name: firstName,
+          surname: restOfName.join(" "),
+          phone: clientPhone,
+          email: clientEmail ? clientEmail.trim() : null,
           businessId,
-          phone: cleanPhone,
+          frequentService: service.name,
+          lopdStatus: "Pendiente",
+          lastVisit: new Date(),
         },
       });
 
-      if (!client) {
-        client = await tx.client.create({
-          data: {
-            name: clientName,
-            surname: "",
-            phone: cleanPhone,
-            email: clientEmail ? clientEmail.trim() : null,
-            businessId,
-            frequentService: service.name,
-            lopdStatus: "Pendiente",
-            lastVisit: new Date(),
-          },
+      // Un cliente que ya existía sin email aprovecha el que acaba de dar; nunca
+      // se pisa un dato que el negocio ya tenía.
+      if (clientEmail && !client.email) {
+        await tx.client.update({
+          where: { id: client.id },
+          data: { email: clientEmail.trim() },
         });
       }
 
@@ -245,8 +372,8 @@ export const createPublicBooking = async (req, res) => {
           businessId,
           serviceId,
           clientId: client.id,
-          clientName: clientName,
-          clientPhone: cleanPhone,
+          clientName,
+          clientPhone,
           serviceName: service.name,
           appointmentDate: targetDate,
           status: "PENDING",

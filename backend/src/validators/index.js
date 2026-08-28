@@ -176,16 +176,43 @@ export const registerSchema = z.object({
   businessType: z.string().optional().nullable(),
 });
 
+const phoneField = z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido");
+
+// El portal envía la hora que el cliente ha visto en pantalla ("2026-08-28T10:00:00"),
+// que es hora local del negocio: es lo que compara `validateBusinessHours`. Exigir
+// el sufijo `Z` de `z.datetime()` rechazaba todas las reservas del portal.
+const localOrOffsetDateTime = z
+  .string()
+  .regex(
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+    "Formato de fecha no válido (ISO 8601)"
+  );
+
+// `clientName` y `clientPhone` ya no se declaran: la identidad del que reserva
+// sale del token de sesión verificado, nunca del cuerpo de la petición.
 export const publicBookingSchema = z.object({
   businessId: z.string().min(1, "El ID de negocio es requerido"),
   serviceId: z.string().min(1, "El ID de servicio es requerido"),
-  clientName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  clientPhone: z.string().regex(/^\+?[0-9\s-]{9,20}$/, "Formato de teléfono no válido"),
   clientEmail: z
     .string()
     .email("Formato de email no válido")
     .optional()
     .nullable()
     .or(z.string().length(0)),
-  appointmentDate: z.string().datetime("Formato de fecha no válido (debe ser ISO 8601 UTC)"),
+  appointmentDate: localOrOffsetDateTime,
+});
+
+export const bookingIdentityStartSchema = z.object({
+  phone: phoneField,
+  fullName: z
+    .string()
+    .max(120, "El nombre es demasiado largo")
+    .optional()
+    .nullable()
+    .or(z.string().length(0)),
+});
+
+export const bookingIdentityVerifySchema = z.object({
+  phone: phoneField,
+  code: z.string().regex(/^\d{6}$/, "El código debe tener 6 dígitos"),
 });

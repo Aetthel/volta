@@ -147,7 +147,7 @@ export default function AgendaPage() {
         endTime,
         color,
         category: serviceName,
-        tags: [app.status || "Confirmada"],
+        tags: [app.status || "Pendiente"],
         rawAppointment: app,
       };
     });
@@ -158,7 +158,7 @@ export default function AgendaPage() {
   }, [services]);
 
   const availableTags = useMemo(() => {
-    return ["Confirmada", "Pendiente", "Completada", "Cancelada"];
+    return ["Pendiente", "Completada", "Cancelada"];
   }, []);
 
   const handleEventCreate = async (newEvent: Omit<Event, "id">) => {
@@ -171,7 +171,7 @@ export default function AgendaPage() {
           serviceName: newEvent.category || "Servicio General",
           appointmentDate: newEvent.startTime.toISOString(),
           businessId,
-          status: newEvent.tags?.[0] || "Confirmada",
+          status: newEvent.tags?.[0] || "Pendiente",
           notes: newEvent.description,
         }),
       });

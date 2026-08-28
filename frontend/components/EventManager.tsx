@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -27,6 +27,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+// Alias obligado: `Calendar` ya está tomado por el icono de lucide-react.
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   ChevronLeft,
   ChevronRight,
@@ -64,6 +66,23 @@ import Header from "@/components/Header";
 const MODAL_WIDTH = 440;
 const MODAL_HEIGHT = 520;
 const MODAL_MAX_HEIGHT = "calc(100vh - 24px)";
+
+// Alto/ancho aproximados del popover del calendario; solo sirven para decidir si
+// se abre hacia arriba o hacia abajo del campo.
+const DATE_POPOVER_WIDTH = 300;
+const DATE_POPOVER_HEIGHT = 340;
+
+// Duración de reserva por defecto cuando una cita no trae hora de fin válida.
+const DEFAULT_EVENT_DURATION_MS = 30 * 60000;
+
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+const eventDateLabelFormatter = new Intl.DateTimeFormat("es-ES", {
+  weekday: "short",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
 export interface Event {
   id: string;
@@ -110,7 +129,7 @@ export function EventManager({
   colors = defaultColors,
   defaultView = "week",
   className,
-  availableTags = ["Confirmada", "Pendiente", "Completada"],
+  availableTags = ["Pendiente", "Completada", "Cancelada"],
   onOpenNewModal,
 }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
@@ -162,17 +181,109 @@ export function EventManager({
     setMounted(true);
   }, []);
 
-  const formatDateForInput = (d?: Date | string) => {
-    if (!d) return "";
-    const dateObj = d instanceof Date ? d : new Date(d);
-    if (isNaN(dateObj.getTime())) return "";
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const year = dateObj.getFullYear();
-    const month = pad(dateObj.getMonth() + 1);
-    const day = pad(dateObj.getDate());
-    const hours = pad(dateObj.getHours());
-    const minutes = pad(dateObj.getMinutes());
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  // --- Fecha y hora de la cita en edición -----------------------------------
+  // El modal edita una sola fecha y una sola hora de inicio; la hora de fin se
+  // desplaza conservando la duración, igual que ya hace handleDrop al arrastrar
+  // una cita por el calendario.
+  const currentStart = (isCreating ? newEvent.startTime : selectedEvent?.startTime) as
+    | Date
+    | undefined;
+  const currentEnd = (isCreating ? newEvent.endTime : selectedEvent?.endTime) as Date | undefined;
+
+  const applyStartTime = useCallback(
+    (nextStart: Date) => {
+      const duration =
+        currentStart && currentEnd && currentEnd > currentStart
+          ? currentEnd.getTime() - currentStart.getTime()
+          : DEFAULT_EVENT_DURATION_MS;
+      const nextEnd = new Date(nextStart.getTime() + duration);
+
+      if (isCreating) {
+        setNewEvent((prev) => ({ ...prev, startTime: nextStart, endTime: nextEnd }));
+      } else {
+        setSelectedEvent((prev) =>
+          prev ? { ...prev, startTime: nextStart, endTime: nextEnd } : null
+        );
+      }
+    },
+    [currentStart, currentEnd, isCreating]
+  );
+
+  // El calendario va fuera de la tarjeta del modal (tiene overflow-hidden y el
+  // bloque de campos su propio scroll), así que se posiciona en coordenadas de
+  // viewport a partir del rect del disparador.
+  const dateTriggerRef = useRef<HTMLButtonElement>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePopoverPos, setDatePopoverPos] = useState({ left: 0, top: 0 });
+
+  useLayoutEffect(() => {
+    if (!showDatePicker) return;
+    const el = dateTriggerRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const openUpward =
+      rect.bottom + DATE_POPOVER_HEIGHT > window.innerHeight && rect.top > DATE_POPOVER_HEIGHT;
+
+    setDatePopoverPos({
+      left: Math.max(8, Math.min(rect.left, window.innerWidth - DATE_POPOVER_WIDTH - 8)),
+      top: openUpward ? rect.top - DATE_POPOVER_HEIGHT - 6 : rect.bottom + 6,
+    });
+  }, [showDatePicker]);
+
+  useEffect(() => {
+    if (!isDialogOpen) setShowDatePicker(false);
+  }, [isDialogOpen]);
+
+  // Al arrastrar el modal el popover quedaría flotando lejos de su campo.
+  useEffect(() => {
+    setShowDatePicker(false);
+  }, [position.x, position.y]);
+
+  const handlePickDate = (day: Date) => {
+    const base = currentStart ?? new Date();
+    const next = new Date(day);
+    next.setHours(base.getHours(), base.getMinutes(), 0, 0);
+    applyStartTime(next);
+    setShowDatePicker(false);
+  };
+
+  // Mientras se teclea, el borrador manda sobre la fecha: así se puede dejar el
+  // campo a medias ("1") sin que se normalice a "01" en cada pulsación.
+  const [hourDraft, setHourDraft] = useState<string | null>(null);
+  const [minuteDraft, setMinuteDraft] = useState<string | null>(null);
+
+  const displayHour = hourDraft ?? (currentStart ? pad2(currentStart.getHours()) : "");
+  const displayMinute = minuteDraft ?? (currentStart ? pad2(currentStart.getMinutes()) : "");
+
+  const commitTime = (rawHour: string, rawMinute: string) => {
+    const base = currentStart ?? new Date();
+    const hours = Math.min(23, parseInt(rawHour || "0", 10) || 0);
+    const minutes = Math.min(59, parseInt(rawMinute || "0", 10) || 0);
+    const next = new Date(base);
+    next.setHours(hours, minutes, 0, 0);
+    applyStartTime(next);
+  };
+
+  const handleHourChange = (value: string) => {
+    let digits = value.replace(/\D/g, "").slice(0, 2);
+    if (digits !== "" && parseInt(digits, 10) > 23) digits = "23";
+    setHourDraft(digits);
+    commitTime(digits, displayMinute);
+  };
+
+  const handleMinuteChange = (value: string) => {
+    let digits = value.replace(/\D/g, "").slice(0, 2);
+    if (digits !== "" && parseInt(digits, 10) > 59) digits = "59";
+    setMinuteDraft(digits);
+    commitTime(displayHour, digits);
+  };
+
+  // Al salir del campo se descarta el borrador y vuelve a mandar la fecha, que
+  // ya está normalizada a dos dígitos.
+  const handleTimeBlur = () => {
+    setHourDraft(null);
+    setMinuteDraft(null);
   };
 
   // Sync state if initialEvents changes from parent API updates
@@ -270,15 +381,37 @@ export function EventManager({
     setSelectedEvent(null);
   }, [selectedEvent, onEventUpdate]);
 
+  // Borrar una cita no se puede deshacer, así que el botón Eliminar solo abre
+  // esta confirmación; el borrado real ocurre al aceptarla.
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   const handleDeleteEvent = useCallback(
     (id: string) => {
       setEvents((prev) => prev.filter((e) => e.id !== id));
       onEventDelete?.(id);
+      setConfirmDeleteId(null);
       setIsDialogOpen(false);
       setSelectedEvent(null);
     },
     [onEventDelete]
   );
+
+  // Cerrar el modal por cualquier vía no debe dejar la confirmación pendiente.
+  useEffect(() => {
+    if (!isDialogOpen) setConfirmDeleteId(null);
+  }, [isDialogOpen]);
+
+  useEffect(() => {
+    if (!confirmDeleteId) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setConfirmDeleteId(null);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [confirmDeleteId]);
 
   const handleDragStart = useCallback((event: Event) => {
     setDraggedEvent(event);
@@ -862,66 +995,88 @@ export function EventManager({
                   />
                 </div>
 
-                {/* Hora Inicio & Fin (2 Columns) */}
+                {/* Fecha y Hora (2 Columns) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label
-                      htmlFor="modal-event-startTime"
+                      id="modal-event-date-label"
+                      htmlFor="modal-event-date"
                       className="text-xs font-medium text-on-surface mb-1 flex items-center gap-1.5"
                     >
-                      <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                      <span>Hora Inicio</span>
+                      <Calendar className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                      <span>Fecha</span>
                     </label>
-                    <input
-                      id="modal-event-startTime"
-                      type="datetime-local"
-                      value={
-                        isCreating
-                          ? formatDateForInput(newEvent.startTime)
-                          : formatDateForInput(selectedEvent?.startTime)
+                    <button
+                      id="modal-event-date"
+                      ref={dateTriggerRef}
+                      type="button"
+                      onClick={() => setShowDatePicker((open) => !open)}
+                      aria-haspopup="dialog"
+                      aria-expanded={showDatePicker}
+                      // Un <label for> sobre un botón se lleva el nombre accesible
+                      // y la fecha elegida no se anunciaba. aria-label tiene
+                      // prioridad sobre el <label>, así que se lee campo + valor.
+                      aria-label={
+                        currentStart
+                          ? `Fecha: ${eventDateLabelFormatter.format(currentStart)}`
+                          : "Fecha: seleccionar fecha"
                       }
-                      onChange={(e) => {
-                        const date = new Date(e.target.value);
-                        if (!isNaN(date.getTime())) {
-                          isCreating
-                            ? setNewEvent((prev) => ({ ...prev, startTime: date }))
-                            : setSelectedEvent((prev) =>
-                                prev ? { ...prev, startTime: date } : null
-                              );
-                        }
-                      }}
-                      className="w-full px-3 py-1.5 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
-                    />
+                      className={cn(
+                        "w-full px-3 py-1.5 text-sm text-left bg-surface-container-low/60 border rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer truncate",
+                        showDatePicker
+                          ? "border-primary bg-surface-container-lowest"
+                          : "border-outline-variant/70"
+                      )}
+                    >
+                      {currentStart ? (
+                        <span className="capitalize">
+                          {eventDateLabelFormatter.format(currentStart)}
+                        </span>
+                      ) : (
+                        <span className="text-on-surface-variant/40">Seleccionar fecha</span>
+                      )}
+                    </button>
                   </div>
 
                   <div>
                     <label
-                      htmlFor="modal-event-endTime"
+                      htmlFor="modal-event-hour"
                       className="text-xs font-medium text-on-surface mb-1 flex items-center gap-1.5"
                     >
                       <Clock className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                      <span>Hora Fin</span>
+                      <span>Hora</span>
                     </label>
-                    <input
-                      id="modal-event-endTime"
-                      type="datetime-local"
-                      value={
-                        isCreating
-                          ? formatDateForInput(newEvent.endTime)
-                          : formatDateForInput(selectedEvent?.endTime)
-                      }
-                      onChange={(e) => {
-                        const date = new Date(e.target.value);
-                        if (!isNaN(date.getTime())) {
-                          isCreating
-                            ? setNewEvent((prev) => ({ ...prev, endTime: date }))
-                            : setSelectedEvent((prev) =>
-                                prev ? { ...prev, endTime: date } : null
-                              );
-                        }
-                      }}
-                      className="w-full px-3 py-1.5 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
-                    />
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low/60 border border-outline-variant/70 rounded-lg focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
+                      <input
+                        id="modal-event-hour"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        aria-label="Hora"
+                        value={displayHour}
+                        onChange={(e) => handleHourChange(e.target.value)}
+                        onBlur={handleTimeBlur}
+                        className="w-8 bg-transparent text-sm font-semibold text-on-surface text-center outline-none"
+                        placeholder="10"
+                      />
+                      <span className="text-on-surface-variant/60 font-bold">:</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={2}
+                        aria-label="Minutos"
+                        value={displayMinute}
+                        onChange={(e) => handleMinuteChange(e.target.value)}
+                        onBlur={handleTimeBlur}
+                        className="w-8 bg-transparent text-sm font-semibold text-on-surface text-center outline-none"
+                        placeholder="00"
+                      />
+                      <span className="text-xs text-on-surface-variant ml-auto font-medium">
+                        hrs
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -1045,7 +1200,11 @@ export function EventManager({
                 {!isCreating && selectedEvent ? (
                   <button
                     type="button"
-                    onClick={() => handleDeleteEvent(selectedEvent.id)}
+                    onClick={() => {
+                      setShowDatePicker(false);
+                      setConfirmDeleteId(selectedEvent.id);
+                    }}
+                    aria-haspopup="dialog"
                     className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1080,6 +1239,105 @@ export function EventManager({
                 </div>
               </div>
             </div>
+
+            {/* Popover del calendario — fuera de la tarjeta a propósito: esa
+              tarjeta tiene overflow-hidden y el bloque de campos su propio
+              scroll, así que anidarlo dentro lo recortaría. */}
+            {showDatePicker && (
+              <>
+                <div
+                  className="fixed inset-0 z-110 pointer-events-auto"
+                  onClick={() => setShowDatePicker(false)}
+                />
+                <div
+                  role="dialog"
+                  aria-label="Seleccionar fecha"
+                  style={{
+                    position: "fixed",
+                    left: `${datePopoverPos.left}px`,
+                    top: `${datePopoverPos.top}px`,
+                  }}
+                  className="z-120 pointer-events-auto bg-surface-container-lowest rounded-xl shadow-2xl border border-outline-variant/60 animate-in fade-in zoom-in-95 duration-100"
+                >
+                  <CalendarPicker
+                    mode="single"
+                    autoFocus
+                    defaultMonth={currentStart}
+                    selected={currentStart}
+                    onSelect={(day) => {
+                      if (!day) return;
+                      handlePickDate(day);
+                    }}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Confirmación de borrado — el botón Eliminar está pegado a
+              Guardar Cambios y la acción no se puede deshacer. */}
+            {confirmDeleteId && (
+              <div className="fixed inset-0 z-130 pointer-events-auto flex items-center justify-center p-4">
+                <div
+                  className="absolute inset-0 bg-black/40 animate-in fade-in duration-100"
+                  onClick={() => setConfirmDeleteId(null)}
+                />
+                <div
+                  role="alertdialog"
+                  aria-modal="true"
+                  aria-labelledby="confirm-delete-title"
+                  aria-describedby="confirm-delete-desc"
+                  className="relative z-10 w-full max-w-sm bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 p-5 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 w-9 h-9 rounded-full bg-rose-500/10 flex items-center justify-center">
+                      <Trash2 className="w-4.5 h-4.5 text-rose-600 dark:text-rose-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3
+                        id="confirm-delete-title"
+                        className="text-base font-bold text-on-surface tracking-tight"
+                      >
+                        ¿Eliminar esta cita?
+                      </h3>
+                      <p id="confirm-delete-desc" className="text-xs text-on-surface-variant mt-1">
+                        {selectedEvent?.title ? (
+                          <>
+                            Se eliminará{" "}
+                            <span className="font-semibold text-on-surface">
+                              {selectedEvent.title}
+                            </span>{" "}
+                            de forma permanente. Esta acción no se puede deshacer.
+                          </>
+                        ) : (
+                          "La cita se eliminará de forma permanente. Esta acción no se puede deshacer."
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2.5 mt-5">
+                    <VoltaButton
+                      type="button"
+                      variant="outline"
+                      size="md"
+                      autoFocus
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="cursor-pointer font-medium"
+                    >
+                      Cancelar
+                    </VoltaButton>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteEvent(confirmDeleteId)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors cursor-pointer shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Eliminar cita</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>,
           document.body
         )}
