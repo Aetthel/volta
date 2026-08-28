@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
 
 const normalizeString = (str: string) => {
@@ -321,12 +321,25 @@ export function useNewAppointmentForm(
     }));
   };
 
-  const filteredServices = services.filter((srv) => {
-    if (bookingType === "GROUP") {
-      return srv.type === "GROUP" || (srv.capacity && srv.capacity > 1);
+  const filteredServices = useMemo(() => {
+    return services.filter((srv) => {
+      if (bookingType === "GROUP") {
+        return srv.type === "GROUP" || (srv.capacity && srv.capacity > 1);
+      }
+      return srv.type === "INDIVIDUAL" || !srv.type || srv.capacity === 1;
+    });
+  }, [services, bookingType]);
+
+  useEffect(() => {
+    if (filteredServices.length > 0) {
+      const exists = filteredServices.some((s) => s.name === formData.service);
+      if (!exists) {
+        setFormData((prev) => ({ ...prev, service: filteredServices[0].name }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, service: "" }));
     }
-    return srv.type === "INDIVIDUAL" || !srv.type || srv.capacity === 1;
-  });
+  }, [filteredServices, formData.service]);
 
   const serviceOptions = filteredServices.map((srv) => ({
     value: srv.name,

@@ -161,11 +161,17 @@ export default function NewAppointmentModal({
               onChange={(e) => setFormData((prev) => ({ ...prev, service: e.target.value }))}
               className="w-full px-3 py-2 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
             >
-              {serviceOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              {serviceOptions.length === 0 ? (
+                <option value="" disabled>
+                  {bookingType === "GROUP" ? "No hay clases de grupo configuradas" : "No hay servicios disponibles"}
                 </option>
-              ))}
+              ) : (
+                serviceOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label} {opt.sublabel ? `(${opt.sublabel})` : ""}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
