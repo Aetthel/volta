@@ -152,94 +152,94 @@ export default function LOPDConsentClient() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
-      <div className="max-w-xl w-full bg-surface-container-lowest rounded-md p-8 md:p-10 shadow-md border border-outline-variant relative overflow-hidden">
-        {/* Decorative Top Accent Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-primary" />
-
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-start py-8 px-4 sm:px-6">
+      <div className="max-w-2xl w-full">
         {accepted ? (
-          <div className="text-center py-6 flex flex-col items-center animate-in fade-in zoom-in duration-300">
-            <CheckCircle2 className="w-20 h-20 text-primary mb-6" />
-            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-3">
+          <div className="text-center py-12 flex flex-col items-center animate-in fade-in duration-300">
+            <CheckCircle2 className="w-16 h-16 text-primary mb-4" />
+            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-2">
               ¡Muchas gracias, {data.clientName}!
             </h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed mb-6">
               Has aceptado correctamente la política de privacidad de{" "}
               <strong>{data.businessName}</strong>.
             </p>
-            <p className="font-body-md text-body-md text-on-surface-variant bg-secondary-container/30 px-6 py-4 rounded-lg border border-outline-variant/50 max-w-sm">
+            <p className="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-5 py-3 rounded-lg border border-outline-variant/40 max-w-sm">
               A partir de ahora recibirás confirmaciones de tus citas y recordatorios automáticos
               directamente por WhatsApp.
             </p>
           </div>
         ) : rejected ? (
-          <div className="text-center py-6 flex flex-col items-center animate-in fade-in zoom-in duration-300">
-            <XCircle className="w-20 h-20 text-on-surface-variant mb-6" />
-            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-3">
+          <div className="text-center py-12 flex flex-col items-center animate-in fade-in duration-300">
+            <XCircle className="w-16 h-16 text-on-surface-variant mb-4" />
+            <h2 className="font-display text-headline-lg text-on-surface font-semibold mb-2">
               Entendido, {data.clientName}
             </h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed mb-6">
               Hemos registrado que <strong>no autorizas</strong> el envío de mensajes automáticos
               por parte de <strong>{data.businessName}</strong>.
             </p>
-            <p className="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-6 py-4 rounded-lg border border-outline-variant/50 max-w-sm">
+            <p className="font-body-md text-body-md text-on-surface-variant bg-surface-container-low px-5 py-3 rounded-lg border border-outline-variant/40 max-w-sm">
               No recibirás confirmaciones ni recordatorios por WhatsApp. Tus citas siguen siendo
-              válidas: el salón te atenderá con normalidad. Si cambias de opinión, puedes volver a
-              abrir este mismo enlace.
+              válidas y el salón te atenderá con normalidad.
             </p>
           </div>
         ) : (
           <div className="flex flex-col">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
+            {/* Header */}
+            <div className="flex items-center gap-2.5 mb-4">
+              <ShieldCheck className="w-6 h-6 text-primary shrink-0" />
               <div>
-                <h1 className="font-title-lg text-title-lg text-primary font-semibold">
+                <h1 className="font-title-lg text-title-lg text-primary font-semibold leading-tight">
                   Consentimiento de Notificaciones
                 </h1>
                 <p className="text-label-md font-label-md text-on-surface-variant">
-                  Ley Orgánica de Protección de Datos (LOPD)
+                  {data.businessName} · Ley Orgánica de Protección de Datos (LOPD)
                 </p>
               </div>
             </div>
 
-            <p className="font-body-lg text-body-lg text-on-surface mb-6 leading-relaxed">
+            {/* Intro */}
+            <p className="font-body-md text-body-md text-on-surface mb-6 leading-relaxed">
               Hola <strong>{data.clientName}</strong>, para poder gestionar tus citas y enviarte
-              recordatorios automatizados de tus reservas a través de WhatsApp, necesitamos que nos
-              autorices a procesar tus datos de contacto.
+              recordatorios automatizados de tus reservas a través de WhatsApp, necesitamos tu
+              autorización para procesar tus datos de contacto conforme al RGPD.
             </p>
 
-            {/* h-64: la política del Art. 13 son siete secciones. Con la altura
-                anterior se veían dos y el resto quedaba enterrado en el scroll,
-                que es justo lo contrario de "información previa y accesible". */}
-            <div className="bg-surface-container-low rounded-md p-6 mb-3 border border-outline-variant/65 text-on-surface-variant font-body-md text-body-md leading-relaxed h-64 overflow-y-auto custom-scrollbar">
-              <h3 className="font-semibold text-on-surface mb-2">{data.policy?.title}</h3>
+            {/* Full Legal Policy Content (Scrolleable en la página, sin caja fija) */}
+            <div className="space-y-4 text-on-surface-variant font-body-sm text-body-sm leading-relaxed mb-6 border-t border-b border-outline-variant/30 py-4">
+              {data.policy?.title && (
+                <h2 className="font-semibold text-on-surface text-body-md">
+                  {data.policy.title}
+                </h2>
+              )}
               {data.policy?.sections.map((section) => (
-                <p key={section.heading} className="mb-3 last:mb-0">
-                  <strong>{section.heading}:</strong> {section.body}
-                </p>
+                <div key={section.heading} className="space-y-1">
+                  <strong className="text-on-surface block font-medium">
+                    {section.heading}:
+                  </strong>
+                  <p>{section.body}</p>
+                </div>
               ))}
+
+              {data.policy && (
+                <p className="text-label-xs font-label-xs text-on-surface-variant/70 pt-2 text-right">
+                  Versión {data.policy.version} · en vigor desde{" "}
+                  {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              )}
             </div>
 
-            {/* La versión aceptada queda registrada en el log de auditoría, así que
-                el cliente debe poder ver cuál es la que está aceptando. */}
-            {data.policy && (
-              <p className="text-label-sm font-label-sm text-on-surface-variant mb-8 text-right">
-                Versión {data.policy.version} · en vigor desde{" "}
-                {new Date(data.policy.effectiveDate).toLocaleDateString("es-ES", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
-            )}
-
+            {/* Actions */}
             {confirmingReject ? (
               <div className="flex flex-col gap-3 animate-in fade-in duration-200">
                 <p className="font-body-md text-body-md text-on-surface text-center leading-relaxed">
                   Si no aceptas, <strong>no recibirás recordatorios de tus citas</strong> por
-                  WhatsApp. ¿Confirmas?
+                  WhatsApp. ¿Confirmas tu decisión?
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
@@ -248,7 +248,7 @@ export default function LOPDConsentClient() {
                     size="lg"
                     onClick={() => setConfirmingReject(false)}
                     disabled={submitting}
-                    className="flex-1 py-4 font-medium"
+                    className="flex-1 py-3 font-medium"
                   >
                     Volver
                   </Button>
@@ -258,7 +258,7 @@ export default function LOPDConsentClient() {
                     size="lg"
                     onClick={() => submitDecision("reject")}
                     disabled={submitting}
-                    className="flex-1 py-4 flex items-center justify-center gap-2 font-medium"
+                    className="flex-1 py-3 flex items-center justify-center gap-2 font-medium"
                   >
                     {submitting ? (
                       <>
@@ -272,14 +272,14 @@ export default function LOPDConsentClient() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2.5 pt-2">
                 <Button
                   type="button"
                   variant="primary"
                   size="lg"
                   onClick={() => submitDecision("accept")}
                   disabled={submitting}
-                  className="w-full py-4 flex items-center justify-center gap-2 active:scale-[0.98] disabled:scale-100 font-medium"
+                  className="w-full py-3.5 flex items-center justify-center gap-2 active:scale-[0.99] disabled:scale-100 font-medium text-body-md"
                 >
                   {submitting ? (
                     <>
@@ -295,7 +295,7 @@ export default function LOPDConsentClient() {
                   type="button"
                   onClick={() => setConfirmingReject(true)}
                   disabled={submitting}
-                  className="w-full py-3 text-label-lg font-label-lg text-on-surface-variant hover:text-on-surface underline underline-offset-4 disabled:opacity-50 transition-colors"
+                  className="w-full py-2 text-label-md font-label-md text-on-surface-variant hover:text-on-surface underline underline-offset-4 disabled:opacity-50 transition-colors"
                 >
                   No acepto
                 </button>
