@@ -33,18 +33,21 @@ function extractMessageText(messageObj) {
  */
 export async function handleWhatsAppWebhook(req, res) {
   const payload = req.body;
-  const { event, instance, data } = payload || {};
+  const rawEvent = payload?.event || req.params?.event || req.params?.[0] || "";
+  const event = rawEvent.toLowerCase().replace(/[_-]/g, ".");
+  const instance = payload?.instance || "";
+  const data = payload?.data || payload;
 
-  if (!event || !instance) {
-    return res.status(200).json({ status: "ignored", reason: "missing event or instance" });
+  if (!instance) {
+    return res.status(200).json({ status: "ignored", reason: "missing instance" });
   }
 
   const businessId = parseBusinessId(instance);
-  logger.info(`[WhatsApp Webhook] Received event: ${event} for business: ${businessId}`);
+  logger.info(`[WhatsApp Webhook] Received event: ${event || rawEvent} for business: ${businessId}`);
 
   try {
     // 1. Connection Update Event
-    if (event === "connection.update") {
+    if (event.includes("connection.update")) {
       const state = data?.state;
       logger.info(`[WhatsApp Webhook] Connection state for ${businessId}: ${state}`);
 
@@ -67,7 +70,7 @@ export async function handleWhatsAppWebhook(req, res) {
     }
 
     // 2. QR Code Updated Event
-    if (event === "qrcode.updated") {
+    if (event.includes("qrcode.updated")) {
       const qrBase64 = data?.qrcode?.base64 || data?.base64 || data?.qrcode?.code || null;
       if (qrBase64) {
         logger.info(`[WhatsApp Webhook] New QR code received for ${businessId}`);

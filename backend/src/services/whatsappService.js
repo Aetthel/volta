@@ -88,6 +88,10 @@ class WhatsAppManager {
     }
   }
 
+  async getConnectionState(businessId) {
+    return evolutionApiClient.getConnectionState(businessId);
+  }
+
   async waitForReady(businessId, timeoutMs = 15000) {
     const startTime = Date.now();
 

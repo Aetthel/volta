@@ -11,9 +11,9 @@ router.post(
   asyncHandler(subscriptionController.handleWebhook)
 );
 
-// POST /api/webhooks/whatsapp
+// POST /api/webhooks/whatsapp & /api/webhooks/whatsapp/:event
 router.post(
-  "/whatsapp",
+  ["/whatsapp", "/whatsapp/:event"],
   asyncHandler(webhookController.handleWhatsAppWebhook)
 );
 

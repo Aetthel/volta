@@ -29,10 +29,21 @@ export const getStatus = async (req, res) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
-  if (business.whatsappStatus === "WAITING_QR" && !business.qrCode) {
-    const qrData = await whatsappManager.getQr(businessId);
-    if (qrData) {
-      business.qrCode = qrData;
+  if (business.whatsappStatus !== "CONNECTED") {
+    try {
+      const state = await whatsappManager.getConnectionState(businessId);
+      if (state?.state === "open") {
+        await whatsappManager.updateStatus(businessId, "CONNECTED", null);
+        business.whatsappStatus = "CONNECTED";
+        business.qrCode = null;
+      } else if (business.whatsappStatus === "WAITING_QR" && !business.qrCode) {
+        const qrData = await whatsappManager.getQr(businessId);
+        if (qrData) {
+          business.qrCode = qrData;
+        }
+      }
+    } catch {
+      // ignore and return db state
     }
   }
 
