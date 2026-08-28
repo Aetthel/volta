@@ -15,6 +15,10 @@ import { enqueueWhatsAppMessage } from "../queues/whatsappQueue.js";
 function formatMessage(template, { clientName, appointmentDate, businessName, serviceName, lopdUrl }) {
   if (!template) return null;
 
+  const rawName = clientName ? clientName.trim() : "";
+  // Extract strictly first name (no surnames)
+  const firstName = rawName ? rawName.split(/\s+/)[0] : "";
+
   let dateStr = "";
   let timeStr = "";
 
@@ -30,14 +34,16 @@ function formatMessage(template, { clientName, appointmentDate, businessName, se
 
   return template
     // Single curly braces (UI variables)
-    .replace(/\{nombre\}/gi, clientName || "")
+    .replace(/\{nombre\}/gi, firstName)
+    .replace(/\{nombre_completo\}/gi, rawName)
     .replace(/\{link_lopd\}/gi, lopdUrl || "")
     .replace(/\{fecha\}/gi, dateStr)
     .replace(/\{hora\}/gi, timeStr)
     .replace(/\{servicio\}/gi, serviceName || "")
     .replace(/\{negocio\}/gi, businessName || "")
     // Double curly braces (legacy support)
-    .replace(/\{\{clientName\}\}/gi, clientName || "")
+    .replace(/\{\{clientName\}\}/gi, firstName)
+    .replace(/\{\{clientFullName\}\}/gi, rawName)
     .replace(/\{\{lopdUrl\}\}/gi, lopdUrl || "")
     .replace(/\{\{appointmentDate\}\}/gi, dateStr)
     .replace(/\{\{appointmentTime\}\}/gi, timeStr)
