@@ -139,6 +139,17 @@ export default function AgendaPage() {
 
       const color = getServiceColor(app, services);
 
+      let statusTag = "Pendiente";
+      if (app.attended === false) {
+        statusTag = "Cancelada";
+      } else if (app.status === "SENT") {
+        statusTag = "Confirmada";
+      } else if (app.status === "ERROR") {
+        statusTag = "Error";
+      } else if (app.status === "PENDING") {
+        statusTag = "Pendiente";
+      }
+
       return {
         id: app.id,
         title: `${app.clientName} - ${serviceName}`,
@@ -147,7 +158,7 @@ export default function AgendaPage() {
         endTime,
         color,
         category: serviceName,
-        tags: [app.status || "Confirmada"],
+        tags: [statusTag],
         rawAppointment: app,
       };
     });
