@@ -516,16 +516,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       items: [
         { id: "calendar", title: "Agenda", href: "/agenda", icon: Calendar },
         { id: "customers", title: "Clientes", href: "/clientes", icon: UserCheck },
-        {
-          id: "team",
-          title: "Equipo",
-          href: "/equipo",
-          icon: Users,
-          requiresFeature: "multiCalendar",
-          lockedTitle: "Gestión de Equipo Multi-Calendario",
-          lockedDescription:
-            "Organiza múltiples trabajadores, turnos y calendarios independientes actualizando a Plan Pro (40€/mes).",
-        },
+        { id: "team", title: "Equipo", href: "/equipo", icon: Users },
       ],
     });
 

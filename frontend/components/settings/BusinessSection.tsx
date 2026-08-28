@@ -12,28 +12,17 @@ import {
   Plus,
   Pencil,
   X,
-  Users,
-  UserPlus,
-  Edit2,
-  Trash2,
-  User,
   Globe,
   CreditCard,
   Copy,
   Check,
   ExternalLink,
 } from "lucide-react";
-import type { BusinessProfile, BusinessHours, Service, Worker, ToastState } from "@/types/settings";
+import type { BusinessProfile, BusinessHours, Service, ToastState } from "@/types/settings";
 import dynamic from "next/dynamic";
 import { formatCurrency } from "@/lib/utils";
 
 const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
-  ssr: false,
-});
-const WorkerModal = dynamic(() => import("@/components/settings/WorkerModal"), {
-  ssr: false,
-});
-const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
   ssr: false,
 });
 import {
@@ -87,20 +76,6 @@ export default function BusinessSection({
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [workers, setWorkers] = useState<Worker[]>([]);
-  const [showWorkers, setShowWorkers] = useState(false);
-  const [isWorkerModalOpen, setIsWorkerModalOpen] = useState(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-  const [upgradeInfo, setUpgradeInfo] = useState({ title: "", description: "" });
-  const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
-  const [workerFormData, setWorkerFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "EMPLEADO" as "JEFE" | "EMPLEADO",
-  });
-  const [workerErrorMsg, setWorkerErrorMsg] = useState("");
-
   const businessLogoInputRef = useRef<HTMLInputElement>(null);
 
   const fetchHours = useCallback(() => {
@@ -127,24 +102,10 @@ export default function BusinessSection({
       .catch(() => setLoadingServices(false));
   }, [businessId]);
 
-  const fetchWorkers = useCallback(() => {
-    if (!businessId || businessId === "mock-business-id" || role === "ADMIN") return;
-    fetch(`/api/backend/users?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setWorkers(data);
-          setShowWorkers(data.length > 1);
-        }
-      })
-      .catch(() => {});
-  }, [businessId, role]);
-
   useEffect(() => {
     fetchHours();
     fetchServices();
-    fetchWorkers();
-  }, [fetchHours, fetchServices, fetchWorkers]);
+  }, [fetchHours, fetchServices]);
 
   const handleBusinessLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -255,57 +216,6 @@ export default function BusinessSection({
         setTimeout(() => setToast({ show: false, text: "" }), 3000);
       })
       .catch(() => {});
-  };
-
-  const handleSaveWorker = (e: React.FormEvent) => {
-    e.preventDefault();
-    setWorkerErrorMsg("");
-    if (!workerFormData.name || !workerFormData.email) {
-      setWorkerErrorMsg("El nombre y el correo son obligatorios.");
-      return;
-    }
-    if (!editingWorker && !workerFormData.password) {
-      setWorkerErrorMsg("La contraseña es obligatoria para nuevos trabajadores.");
-      return;
-    }
-
-    const isEdit = !!editingWorker;
-    fetch(isEdit ? `/api/backend/users/${editingWorker.id}` : "/api/backend/users", {
-      method: isEdit ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...workerFormData, businessId }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error al guardar trabajador.");
-        return data;
-      })
-      .then(() => {
-        setToast({ show: true, text: isEdit ? "¡Trabajador actualizado!" : "¡Trabajador creado!" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-        setIsWorkerModalOpen(false);
-        fetchWorkers();
-      })
-      .catch((err) => setWorkerErrorMsg(err.message));
-  };
-
-  const handleDeleteWorker = (id: string) => {
-    if (id === session?.user?.id) {
-      alert("No puedes eliminar tu propia cuenta activa.");
-      return;
-    }
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este trabajador?")) return;
-    fetch(`/api/backend/users/${id}`, { method: "DELETE" })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al eliminar");
-        return res.json();
-      })
-      .then(() => {
-        setToast({ show: true, text: "¡Trabajador eliminado!" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-        fetchWorkers();
-      })
-      .catch((err) => alert(err.message));
   };
 
   const filteredServices = (services || []).filter((s) =>
@@ -840,101 +750,6 @@ export default function BusinessSection({
         </div>
       </Card>
 
-      {/* Workers Management Card */}
-      {showWorkers && (
-        <Card className="col-span-1 sm:col-span-2 lg:col-span-12">
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <CardTitle className="text-primary flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              <span className="text-primary">Gestión de Trabajadores</span>
-            </CardTitle>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => {
-                const plan = session?.user?.subscriptionPlan || "BASIC";
-                const status = session?.user?.subscriptionStatus || "ACTIVE";
-                const isTrial = status === "TRIALING";
-
-                if (!isTrial && plan === "BASIC" && workers.length >= 1) {
-                  setUpgradeInfo({
-                    title: "Límite de Trabajadores",
-                    description:
-                      "El Plan Básico incluye 1 trabajador. Para ampliar tu equipo, añade trabajadores adicionales por +5€/mes o actualiza al Plan Pro (40€/mes con 2 incluidos).",
-                  });
-                  setIsUpgradeModalOpen(true);
-                  return;
-                }
-
-                setEditingWorker(null);
-                setWorkerFormData({ name: "", email: "", password: "", role: "EMPLEADO" });
-                setWorkerErrorMsg("");
-                setIsWorkerModalOpen(true);
-              }}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 active:scale-95 font-medium cursor-pointer"
-            >
-              <UserPlus />
-              <span>Añadir Empleado</span>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-              {workers.map((worker) => (
-                <div
-                  key={worker.id}
-                  className="bg-surface-container-low border border-outline-variant/60 rounded-xl p-4 flex items-center gap-4 relative group/worker transition-all hover:shadow-sm"
-                >
-                  <div className="shrink-0">
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center border border-outline-variant/40 bg-secondary-container text-on-secondary-container">
-                      <User className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-body-lg truncate text-on-surface">
-                      {worker.name}
-                    </span>
-                    <span className="text-body-md truncate text-on-surface-variant">
-                      {worker.role === "JEFE" ? "Jefe de Tienda" : "Estilista"}
-                    </span>
-                  </div>
-                  <div className="absolute right-3 top-3 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover/worker:opacity-100 transition-opacity bg-surface-container-low pl-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditingWorker(worker);
-                        setWorkerFormData({
-                          name: worker.name,
-                          email: worker.email,
-                          password: "",
-                          role: worker.role as "JEFE" | "EMPLEADO",
-                        });
-                        setWorkerErrorMsg("");
-                        setIsWorkerModalOpen(true);
-                      }}
-                      className="p-1.5 hover:bg-surface-variant text-on-surface-variant hover:text-on-surface rounded-md active:scale-95 shadow-none w-8 h-8"
-                      title="Editar trabajador"
-                    >
-                      <Edit2 />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteWorker(worker.id)}
-                      disabled={worker.id === session?.user?.id}
-                      className="p-1.5 hover:bg-error-container/20 text-on-surface-variant hover:text-error rounded-md active:scale-95 disabled:opacity-40 shadow-none w-8 h-8"
-                      title="Eliminar trabajador"
-                    >
-                      <Trash2 />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <AddServiceModal
         isOpen={isAddServiceModalOpen}
         onClose={() => {
@@ -945,21 +760,6 @@ export default function BusinessSection({
         onSave={handleSaveService}
         serviceToEdit={serviceToEdit}
         triggerRect={serviceTriggerRect}
-      />
-      <WorkerModal
-        isOpen={isWorkerModalOpen}
-        onClose={() => setIsWorkerModalOpen(false)}
-        onSave={handleSaveWorker}
-        formData={workerFormData}
-        setFormData={setWorkerFormData}
-        errorMsg={workerErrorMsg}
-        isEditing={!!editingWorker}
-      />
-      <UpgradeProModal
-        isOpen={isUpgradeModalOpen}
-        onClose={() => setIsUpgradeModalOpen(false)}
-        title={upgradeInfo.title}
-        description={upgradeInfo.description}
       />
     </div>
   );

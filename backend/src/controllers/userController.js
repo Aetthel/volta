@@ -42,8 +42,8 @@ export const createUser = async (req, res) => {
     if (businessId && businessId !== req.user.businessId) {
       return res.status(403).json({ error: "Acceso denegado a otro negocio" });
     }
-    if (role === "ADMIN" || role === "JEFE") {
-      return res.status(403).json({ error: "No se pueden crear usuarios ADMIN o JEFE" });
+    if (role === "ADMIN") {
+      return res.status(403).json({ error: "No se pueden crear usuarios ADMIN" });
     }
   }
 
@@ -57,7 +57,7 @@ export const createUser = async (req, res) => {
     name,
     email,
     password,
-    role,
+    role: role || "EMPLEADO",
     businessId: (req.user.role !== "ADMIN" ? req.user.businessId : businessId) || null,
   });
 
@@ -72,11 +72,6 @@ export const updateUser = async (req, res) => {
 
   const { id } = req.params;
   const { name, email, password, role, businessId } = req.body;
-
-  // Only ADMIN users can modify roles or reassign business IDs
-  if (role !== undefined && req.user.role !== "ADMIN") {
-    return res.status(403).json({ error: "No se puede modificar el rol del usuario." });
-  }
 
   // If not admin, check target user ownership and request params
   if (req.user.role !== "ADMIN") {
@@ -105,7 +100,13 @@ export const updateUser = async (req, res) => {
   if (password !== undefined && password !== null && password !== "") {
     data.password = password;
   }
-  if (role !== undefined && req.user.role === "ADMIN") {
+  if (role !== undefined) {
+    if (role === "ADMIN" && req.user.role !== "ADMIN") {
+      return res.status(403).json({ error: "No se puede asignar el rol ADMIN." });
+    }
+    if (req.user.role !== "ADMIN" && req.user.role !== "JEFE") {
+      return res.status(403).json({ error: "No tienes permisos para modificar roles." });
+    }
     data.role = role;
   }
   if (businessId !== undefined && req.user.role === "ADMIN") {
