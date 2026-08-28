@@ -283,10 +283,19 @@ export function useNewAppointmentForm(
 
   const handleHourBlur = () => {
     const [h, m] = (formData.time || "10:00").split(":");
-    const paddedH = h.padStart(2, "0") || "10";
+    if (!h) {
+      setFormData((prev) => ({ ...prev, time: `10:${m || "00"}` }));
+      return;
+    }
+    const num = parseInt(h, 10);
+    // Smart afternoon conversion: Single digit 1-7 (without leading 0) maps to 13:00 - 19:00
+    let finalH = h.padStart(2, "0");
+    if (!h.startsWith("0") && num >= 1 && num <= 7) {
+      finalH = String(num + 12);
+    }
     setFormData((prev) => ({
       ...prev,
-      time: `${paddedH}:${m}`,
+      time: `${finalH}:${m || "00"}`,
     }));
   };
 

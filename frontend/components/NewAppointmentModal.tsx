@@ -273,6 +273,7 @@ export default function NewAppointmentModal({
                   pattern="[0-9]*"
                   maxLength={2}
                   value={selectedHour}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => handleHourChange(e.target.value)}
                   onBlur={handleHourBlur}
                   className="w-8 bg-transparent text-sm font-semibold text-on-surface text-center outline-none"
@@ -284,6 +285,7 @@ export default function NewAppointmentModal({
                   pattern="[0-9]*"
                   maxLength={2}
                   value={selectedMin}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) => handleMinChange(e.target.value)}
                   onBlur={handleMinBlur}
                   className="w-8 bg-transparent text-sm font-semibold text-on-surface text-center outline-none"
