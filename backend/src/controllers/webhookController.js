@@ -139,6 +139,12 @@ export async function handleWhatsAppWebhook(req, res) {
           }
         } else if (tag === INTENT_TAGS.CANCELADO) {
           logger.info(`[WhatsApp Webhook] Appointment cancelled by ${clientName} (${rawPhone})`);
+          if (appointment) {
+            await prisma.appointment.update({
+              where: { id: appointment.id },
+              data: { attended: false },
+            });
+          }
           if (targetUserId) {
             await prisma.alert.create({
               data: {
