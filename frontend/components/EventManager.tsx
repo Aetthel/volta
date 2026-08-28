@@ -89,6 +89,13 @@ const defaultColors = [
   { name: "Azul Cielo", value: "SKY", bg: "bg-sky-500", text: "text-white" },
 ]
 
+function formatTime(date: Date) {
+  return date.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
 export function EventManager({
   events: initialEvents = [],
   onEventCreate,
