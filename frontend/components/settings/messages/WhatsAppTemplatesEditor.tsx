@@ -22,6 +22,7 @@ import {
   Button,
 } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
+import { apiClient } from "@/lib/apiClient";
 
 const DEFAULT_WELCOME = `Hola {nombre}, ¡bienvenido/a a {negocio}! Por favor confirma tu consentimiento de privacidad en: {link_lopd}`;
 const DEFAULT_REMINDER = `Hola {nombre}, te recordamos tu cita de {servicio} para {fecha} a las {hora} en {negocio}. ¡Te esperamos!`;
@@ -47,49 +48,41 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
   const reminderTextareaRef = useRef<HTMLTextAreaElement>(null);
   const welcomeTextareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const fetchTemplates = useCallback(() => {
+  const fetchTemplates = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") return;
-    fetch(`/api/backend/whatsapp/templates?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && !data.error) {
-          const businessTitle = profileName || "nuestro negocio";
-          const defWelcome = `Hola {nombre}, bienvenido/a a ${businessTitle}. Por favor confirma tu política de privacidad en: {link_lopd}`;
-          const defReminder = `Hola {nombre}, te recordamos tu cita de {servicio} para {fecha} a las {hora}. ¡Te esperamos en ${businessTitle}!`;
-          setTemplates({
-            welcomeMessage: data.welcomeMessage || defWelcome,
-            reminderMessage: data.reminderMessage || defReminder,
-          });
-        }
-      })
-      .catch(() => {});
+    try {
+      const res = await apiClient.whatsapp.getTemplates<any>(businessId);
+      if (res.data && !res.data.error) {
+        const businessTitle = profileName || "nuestro negocio";
+        const defWelcome = `Hola {nombre}, bienvenido/a a ${businessTitle}. Por favor confirma tu política de privacidad en: {link_lopd}`;
+        const defReminder = `Hola {nombre}, te recordamos tu cita de {servicio} para {fecha} a las {hora}. ¡Te esperamos en ${businessTitle}!`;
+        setTemplates({
+          welcomeMessage: res.data.welcomeMessage || defWelcome,
+          reminderMessage: res.data.reminderMessage || defReminder,
+        });
+      }
+    } catch {}
   }, [businessId, profileName]);
 
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
 
-  const handleSaveTemplates = (e: React.FormEvent) => {
+  const handleSaveTemplates = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingTemplates(true);
-    fetch("/api/backend/whatsapp/templates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId, ...templates }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al guardar plantillas");
-        return res.json();
-      })
-      .then(() => {
-        setToast({ show: true, text: "¡Plantillas guardadas correctamente!" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-      })
-      .catch((err: any) => {
-        setToast({ show: true, text: err.message || "Error al guardar plantillas" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-      })
-      .finally(() => setSavingTemplates(false));
+    try {
+      const res = await apiClient.whatsapp.saveTemplates({ businessId, ...templates });
+      if (res.error) throw new Error(res.error);
+
+      setToast({ show: true, text: "¡Plantillas guardadas correctamente!" });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } catch (err: any) {
+      setToast({ show: true, text: err.message || "Error al guardar plantillas" });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } finally {
+      setSavingTemplates(false);
+    }
   };
 
   const insertVariable = (variableTag: string) => {

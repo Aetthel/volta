@@ -1,5 +1,5 @@
 /**
- * Cliente HTTP estandarizado para la comunicación del Frontend con el API Proxy del Backend
+ * Cliente HTTP estandarizado y tipado para la comunicación del Frontend con el API Proxy del Backend
  */
 
 export interface ApiResponse<T> {
@@ -8,10 +8,30 @@ export interface ApiResponse<T> {
   status: number;
 }
 
+export interface RequestOptions extends Omit<RequestInit, "body"> {
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+export class ApiError extends Error {
+  public status: number;
+  public data?: any;
+
+  constructor(message: string, status: number, data?: any) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
+  }
+}
+
 class ApiClient {
   private baseUrl = "/api/backend";
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
     const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${this.baseUrl}${cleanEndpoint}`;
 
@@ -31,7 +51,7 @@ class ApiClient {
 
       if (!response.ok) {
         return {
-          error: data?.error || `Error ${response.status}: ${response.statusText}`,
+          error: data?.error || data?.message || `Error ${response.status}: ${response.statusText}`,
           status: response.status,
         };
       }
@@ -41,9 +61,14 @@ class ApiClient {
         status: response.status,
       };
     } catch (err: any) {
-      console.error(`[API Client Error] ${options.method || "GET"} ${url}:`, err);
+      if (err.name === "AbortError") {
+        return {
+          error: "Petición cancelada.",
+          status: 499,
+        };
+      }
       return {
-        error: "Error de conexión con el servidor.",
+        error: err?.message || "Error de conexión con el servidor.",
         status: 500,
       };
     }
@@ -51,7 +76,8 @@ class ApiClient {
 
   public get<T>(
     path: string,
-    queryParams?: Record<string, string | number | undefined>
+    queryParams?: Record<string, string | number | boolean | undefined | null>,
+    options?: RequestOptions
   ): Promise<ApiResponse<T>> {
     let urlPath = path;
     if (queryParams) {
@@ -62,29 +88,87 @@ class ApiClient {
         const search = new URLSearchParams(
           filteredParams.map(([k, v]) => [k, String(v)])
         ).toString();
-        urlPath += `?${search}`;
+        urlPath += `${urlPath.includes("?") ? "&" : "?"}${search}`;
       }
     }
-    return this.request<T>(urlPath, { method: "GET" });
+    return this.request<T>(urlPath, { ...options, method: "GET" });
   }
 
-  public post<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
+  public post<T>(path: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(path, {
+      ...options,
       method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public put<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
+  public put<T>(path: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
     return this.request<T>(path, {
+      ...options,
       method: "PUT",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  public delete<T>(path: string): Promise<ApiResponse<T>> {
-    return this.request<T>(path, { method: "DELETE" });
+  public patch<T>(path: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+    return this.request<T>(path, {
+      ...options,
+      method: "PATCH",
+      body: body ? JSON.stringify(body) : undefined,
+    });
   }
+
+  public delete<T>(path: string, options?: RequestOptions): Promise<ApiResponse<T>> {
+    return this.request<T>(path, { ...options, method: "DELETE" });
+  }
+
+  // --- Domain Namespaces ---
+
+  public clients = {
+    getAll: <T = any>(businessId: string, search?: string) =>
+      this.get<T>("/clients", { businessId, search }),
+    getById: <T = any>(id: string) => this.get<T>(`/clients/${id}`),
+    create: <T = any>(data: any) => this.post<T>("/clients", data),
+    update: <T = any>(id: string, data: any) => this.put<T>(`/clients/${id}`, data),
+    delete: <T = any>(id: string) => this.delete<T>(`/clients/${id}`),
+  };
+
+  public team = {
+    getAll: <T = any>(businessId: string) => this.get<T>("/users", { businessId }),
+    invite: <T = any>(data: any) => this.post<T>("/users", data),
+    update: <T = any>(id: string, data: any) => this.put<T>(`/users/${id}`, data),
+    delete: <T = any>(id: string) => this.delete<T>(`/users/${id}`),
+  };
+
+  public services = {
+    getAll: <T = any>(businessId: string) => this.get<T>("/services", { businessId }),
+    create: <T = any>(data: any) => this.post<T>("/services", data),
+    update: <T = any>(id: string, data: any) => this.put<T>(`/services/${id}`, data),
+    delete: <T = any>(id: string) => this.delete<T>(`/services/${id}`),
+  };
+
+  public business = {
+    getById: <T = any>(id: string) => this.get<T>(`/business/${id}`),
+    update: <T = any>(id: string, data: any) => this.put<T>(`/business/${id}`, data),
+    getHours: <T = any>(id: string) => this.get<T>(`/business/${id}/hours`),
+    updateHours: <T = any>(id: string, hours: any) => this.put<T>(`/business/${id}/hours`, hours),
+  };
+
+  public whatsapp = {
+    getStatus: <T = any>(businessId: string) => this.get<T>("/whatsapp/status", { businessId }),
+    init: <T = any>(businessId: string) => this.post<T>("/whatsapp/init", { businessId }),
+    disconnect: <T = any>(businessId: string) => this.post<T>("/whatsapp/disconnect", { businessId }),
+    getTemplates: <T = any>(businessId: string) => this.get<T>("/whatsapp/templates", { businessId }),
+    saveTemplates: <T = any>(data: any) => this.post<T>("/whatsapp/templates", data),
+  };
+
+  public appointments = {
+    getAll: <T = any>(businessId: string, startDate?: string, endDate?: string) =>
+      this.get<T>("/appointments", { businessId, startDate, endDate }),
+    create: <T = any>(data: any) => this.post<T>("/appointments", data),
+    update: <T = any>(id: string, data: any) => this.put<T>(`/appointments/${id}`, data),
+    delete: <T = any>(id: string) => this.delete<T>(`/appointments/${id}`),
+  };
 }
 
 export const apiClient = new ApiClient();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { apiClient } from "@/lib/apiClient";
 
 export type LopdStatus = "Aceptado" | "Pendiente" | "Rechazado";
 
@@ -102,35 +103,27 @@ export function useClientsList(businessId: string) {
   const [showGeneralToast, setShowGeneralToast] = useState(false);
   const [toastText, setToastText] = useState("");
 
-  const fetchData = useCallback(() => {
+  const fetchData = useCallback(async () => {
     if (!businessId) return;
     setIsLoading(true);
 
-    const p1 = fetch(`/api/backend/clients?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setClients(data);
-        }
-      })
-      .catch((e) => {
-        console.error("Error loading clients:", e);
-      });
+    try {
+      const [clientsRes, appointmentsRes] = await Promise.all([
+        apiClient.clients.getAll<ClientItem[]>(businessId),
+        apiClient.appointments.getAll<any[]>(businessId),
+      ]);
 
-    const p2 = fetch(`/api/backend/appointments?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAppointments(data);
-        }
-      })
-      .catch((e) => {
-        console.error("Error loading appointments:", e);
-      });
-
-    Promise.all([p1, p2]).finally(() => {
+      if (Array.isArray(clientsRes.data)) {
+        setClients(clientsRes.data);
+      }
+      if (Array.isArray(appointmentsRes.data)) {
+        setAppointments(appointmentsRes.data);
+      }
+    } catch (e) {
+      console.error("Error loading clients data:", e);
+    } finally {
       setIsLoading(false);
-    });
+    }
   }, [businessId]);
 
   useEffect(() => {
@@ -157,89 +150,71 @@ export function useClientsList(businessId: string) {
   );
 
   const handleSaveClient = useCallback(
-    (data: any, onSuccess?: () => void) => {
+    async (data: any, onSuccess?: () => void) => {
       if (data.id) {
         // Edit mode
-        fetch(`/api/backend/clients/${data.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: data.name,
-            surname: data.surname,
-            email: data.email,
-            phone: data.phone,
-            frequentService: data.frequency,
-          }),
-        })
-          .then((res) => {
-            if (!res.ok) throw new Error("Failed to update client");
-            return res.json();
-          })
-          .then(() => {
-            fetchData();
-            onSuccess?.();
-            setToastText("Cliente actualizado correctamente");
-            setShowGeneralToast(true);
-            setTimeout(() => setShowGeneralToast(false), 3000);
-          })
-          .catch((err) => console.error("Error updating client:", err));
-        return;
-      }
-
-      // Create mode
-      fetch("/api/backend/clients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        const res = await apiClient.clients.update(data.id, {
           name: data.name,
           surname: data.surname,
           email: data.email,
           phone: data.phone,
-          businessId: businessId,
-        }),
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to save client");
-          return res.json();
-        })
-        .then(() => {
-          fetchData();
-          onSuccess?.();
-          setToastText("Cliente guardado correctamente");
-          setShowGeneralToast(true);
-          setTimeout(() => setShowGeneralToast(false), 3000);
-        })
-        .catch((err) => {
-          console.error("Error saving client:", err);
-          setToastText("Error al guardar el cliente");
-          setShowGeneralToast(true);
-          setTimeout(() => setShowGeneralToast(false), 3000);
+          frequentService: data.frequency,
         });
+
+        if (res.error) {
+          setToastText("Error al actualizar el cliente");
+          setShowGeneralToast(true);
+          setTimeout(() => setShowGeneralToast(false), 3000);
+          return;
+        }
+
+        fetchData();
+        onSuccess?.();
+        setToastText("Cliente actualizado correctamente");
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
+        return;
+      }
+
+      // Create mode
+      const res = await apiClient.clients.create({
+        name: data.name,
+        surname: data.surname,
+        email: data.email,
+        phone: data.phone,
+        businessId,
+      });
+
+      if (res.error) {
+        setToastText(res.error || "Error al guardar el cliente");
+        setShowGeneralToast(true);
+        setTimeout(() => setShowGeneralToast(false), 3000);
+        return;
+      }
+
+      fetchData();
+      onSuccess?.();
+      setToastText("Cliente guardado correctamente");
+      setShowGeneralToast(true);
+      setTimeout(() => setShowGeneralToast(false), 3000);
     },
     [businessId, fetchData]
   );
 
   const handleDeleteClient = useCallback(
-    (id: string, name: string) => {
+    async (id: string, name: string) => {
       if (!confirm(`¿Estás seguro de que deseas eliminar a ${name}?`)) return;
 
-      fetch(`/api/backend/clients/${id}`, {
-        method: "DELETE",
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to delete client");
-          return res.json();
-        })
-        .then(() => {
-          fetchData();
-          setToastText("Cliente eliminado correctamente");
-          setShowGeneralToast(true);
-          setTimeout(() => setShowGeneralToast(false), 3000);
-        })
-        .catch((err) => {
-          console.error("Error deleting client:", err);
-          alert("Error al eliminar el cliente");
-        });
+      const res = await apiClient.clients.delete(id);
+      if (res.error) {
+        alert(res.error || "Error al eliminar el cliente");
+        return;
+      }
+
+      fetchData();
+      setToastText("Cliente eliminado correctamente");
+      setShowGeneralToast(true);
+      setTimeout(() => setShowGeneralToast(false), 3000);
     },
     [fetchData]
   );

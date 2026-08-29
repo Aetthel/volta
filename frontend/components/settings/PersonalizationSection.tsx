@@ -27,6 +27,8 @@ import {
   Badge,
 } from "@/components/ui/volta-ui";
 
+import { apiClient } from "@/lib/apiClient";
+
 interface PersonalizationSectionProps {
   profile: BusinessProfile;
   setProfile: React.Dispatch<React.SetStateAction<BusinessProfile>>;
@@ -41,7 +43,7 @@ export default function PersonalizationSection({
   const { update } = useSession();
   const [savedBadge, setSavedBadge] = useState(false);
 
-  const updateSetting = (
+  const updateSetting = async (
     key: "themeColor" | "fontSizeLevel" | "borderRadiusLevel",
     value: string
   ) => {
@@ -72,19 +74,14 @@ export default function PersonalizationSection({
     setSavedBadge(true);
     setTimeout(() => setSavedBadge(false), 2000);
 
-    fetch(`/api/backend/business/${businessId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [key]: value }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to save");
-        return res.json();
-      })
-      .then(async (data) => {
-        if (update) await update({ [key]: data[key] });
-      })
-      .catch((err) => console.error("Error auto-saving personalization:", err));
+    try {
+      const res = await apiClient.business.update(businessId, { [key]: value });
+      if (res.data && update) {
+        await update({ [key]: res.data[key] });
+      }
+    } catch (err) {
+      console.error("Error auto-saving personalization:", err);
+    }
   };
 
   const currentThemeKey = profile.themeColor || "CLINICAL_ELEGANCE";

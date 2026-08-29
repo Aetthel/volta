@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BusinessProfile, ToastState } from "@/types/settings";
+import { apiClient } from "@/lib/apiClient";
 import {
   Card,
   CardHeader,
@@ -85,17 +86,17 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
   // Fetch full user record from backend
   useEffect(() => {
     if (session?.user?.id) {
-      fetch(`/api/backend/users`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            const current = data.find((u: { id?: string }) => u.id === session.user.id);
+      apiClient.team
+        .getAll<any[]>(session?.user?.businessId || "")
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            const current = res.data.find((u: { id?: string }) => u.id === session.user.id);
             if (current) setUserProfileData(current);
           }
         })
         .catch(() => {});
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, session?.user?.businessId]);
 
   const formatProfileDate = (dateString: string) => {
     if (!dateString) return "Fecha no disponible";
@@ -154,21 +155,16 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
     setSavingInfo(true);
     try {
-      const res = await fetch(`/api/backend/users/${session.user.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: personalForm.name.trim(),
-          email: personalForm.email.trim().toLowerCase(),
-        }),
+      const res = await apiClient.team.update(session.user.id, {
+        name: personalForm.name.trim(),
+        email: personalForm.email.trim().toLowerCase(),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al actualizar la información.");
+      if (res.error) throw new Error(res.error);
 
-      if (update) {
+      if (update && res.data) {
         await update({
           ...session,
-          user: { ...session?.user, name: data.name, email: data.email },
+          user: { ...session?.user, name: res.data.name, email: res.data.email },
         });
       }
 
@@ -207,15 +203,10 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
     setSavingPassword(true);
     try {
-      const res = await fetch(`/api/backend/users/${session.user.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password: passwordForm.newPassword,
-        }),
+      const res = await apiClient.team.update(session.user.id, {
+        password: passwordForm.newPassword,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al actualizar la contraseña.");
+      if (res.error) throw new Error(res.error);
 
       setPasswordForm({ newPassword: "", confirmPassword: "" });
       setToast({ show: true, text: "¡Contraseña actualizada correctamente!" });

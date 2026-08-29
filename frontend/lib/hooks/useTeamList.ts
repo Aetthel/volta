@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { apiClient } from "@/lib/apiClient";
 
 export interface TeamMember {
   id: string;
@@ -87,29 +88,26 @@ export function useTeamList(businessId: string, currentUserId?: string) {
   const [showToast, setShowToast] = useState(false);
   const [toastText, setToastText] = useState("");
 
-  const fetchMembers = useCallback(() => {
+  const fetchMembers = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") {
       setIsLoading(false);
       return;
     }
     setIsLoading(true);
 
-    fetch(`/api/backend/users?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setMembers(data);
-        } else {
-          setMembers([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error loading team members:", err);
+    try {
+      const res = await apiClient.team.getAll<TeamMember[]>(businessId);
+      if (Array.isArray(res.data)) {
+        setMembers(res.data);
+      } else {
         setMembers([]);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      }
+    } catch (err) {
+      console.error("Error loading team members:", err);
+      setMembers([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [businessId]);
 
   useEffect(() => {
@@ -137,24 +135,24 @@ export function useTeamList(businessId: string, currentUserId?: string) {
       role: "JEFE" | "EMPLEADO";
     }) => {
       const isEdit = !!workerData.id;
-      const res = await fetch(
-        isEdit ? `/api/backend/users/${workerData.id}` : "/api/backend/users",
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      const res = isEdit
+        ? await apiClient.team.update(workerData.id!, {
             name: workerData.name,
             email: workerData.email,
             password: workerData.password,
             role: workerData.role,
             businessId,
-          }),
-        }
-      );
+          })
+        : await apiClient.team.invite({
+            name: workerData.name,
+            email: workerData.email,
+            password: workerData.password,
+            role: workerData.role,
+            businessId,
+          });
 
-      const payload = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error(payload?.error || "Error al procesar el trabajador.");
+      if (res.error) {
+        throw new Error(res.error || "Error al procesar el trabajador.");
       }
 
       fetchMembers();
@@ -176,19 +174,16 @@ export function useTeamList(businessId: string, currentUserId?: string) {
         return;
       }
 
-      try {
-        const res = await fetch(`/api/backend/users/${id}`, { method: "DELETE" });
-        const payload = await res.json().catch(() => null);
-        if (!res.ok) {
-          throw new Error(payload?.error || "Error al eliminar trabajador.");
-        }
-        fetchMembers();
-        setToastText(`Se ha eliminado a ${name} del equipo.`);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      } catch (err: any) {
-        alert(err?.message || "Error al eliminar trabajador.");
+      const res = await apiClient.team.delete(id);
+      if (res.error) {
+        alert(res.error || "Error al eliminar trabajador.");
+        return;
       }
+
+      fetchMembers();
+      setToastText(`Se ha eliminado a ${name} del equipo.`);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
     },
     [currentUserId, fetchMembers]
   );

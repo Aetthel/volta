@@ -6,6 +6,7 @@ import type { ToastState } from "@/types/settings";
 import dynamic from "next/dynamic";
 import { Card, Button, Badge } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
+import { apiClient } from "@/lib/apiClient";
 
 const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
   ssr: false,
@@ -28,18 +29,16 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
   const [loadingQr, setLoadingQr] = useState(false);
   const [pollingActive, setPollingActive] = useState(false);
 
-  const fetchWhatsappStatus = useCallback(() => {
+  const fetchWhatsappStatus = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id" || !hasWhatsApp) return;
-    fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && !data.error) {
-          setWhatsappStatus(data.status);
-          setQrCode(data.qrCode);
-          setPollingActive(data.status === "WAITING_QR");
-        }
-      })
-      .catch(() => {});
+    try {
+      const res = await apiClient.whatsapp.getStatus<any>(businessId);
+      if (res.data && !res.data.error) {
+        setWhatsappStatus(res.data.status);
+        setQrCode(res.data.qrCode);
+        setPollingActive(res.data.status === "WAITING_QR");
+      }
+    } catch {}
   }, [businessId, hasWhatsApp]);
 
   useEffect(() => {
@@ -48,45 +47,38 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
 
   useEffect(() => {
     if (!pollingActive || !businessId || !hasWhatsApp) return;
-    const interval = setInterval(() => {
-      fetch(`/api/backend/whatsapp/status?businessId=${businessId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && !data.error) {
-            setWhatsappStatus(data.status);
-            setQrCode(data.qrCode);
-            if (data.status === "CONNECTED" || data.status === "DISCONNECTED") {
-              setPollingActive(false);
-              setQrCode(null);
-            }
+    const interval = setInterval(async () => {
+      try {
+        const res = await apiClient.whatsapp.getStatus<any>(businessId);
+        if (res.data && !res.data.error) {
+          setWhatsappStatus(res.data.status);
+          setQrCode(res.data.qrCode);
+          if (res.data.status === "CONNECTED" || res.data.status === "DISCONNECTED") {
+            setPollingActive(false);
+            setQrCode(null);
           }
-        })
-        .catch(() => {});
+        }
+      } catch {}
     }, 4000);
     return () => clearInterval(interval);
   }, [pollingActive, businessId, hasWhatsApp]);
 
-  const handleConnectWhatsapp = () => {
+  const handleConnectWhatsapp = async () => {
     if (!hasWhatsApp) {
       setIsUpgradeOpen(true);
       return;
     }
     setLoadingQr(true);
-    fetch("/api/backend/whatsapp/init", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId }),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        setWhatsappStatus("WAITING_QR");
-        setPollingActive(true);
-        setLoadingQr(false);
-      })
-      .catch(() => setLoadingQr(false));
+    try {
+      await apiClient.whatsapp.init(businessId);
+      setWhatsappStatus("WAITING_QR");
+      setPollingActive(true);
+    } finally {
+      setLoadingQr(false);
+    }
   };
 
-  const handleDisconnectWhatsapp = () => {
+  const handleDisconnectWhatsapp = async () => {
     if (
       !window.confirm(
         "¿Seguro que deseas desconectar tu cuenta de WhatsApp? Se detendrán los recordatorios automáticos."
@@ -94,20 +86,14 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
     ) {
       return;
     }
-    fetch("/api/backend/whatsapp/disconnect", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ businessId }),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        setWhatsappStatus("DISCONNECTED");
-        setQrCode(null);
-        setPollingActive(false);
-        setToast({ show: true, text: "WhatsApp desconectado correctamente." });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-      })
-      .catch(() => {});
+    try {
+      await apiClient.whatsapp.disconnect(businessId);
+      setWhatsappStatus("DISCONNECTED");
+      setQrCode(null);
+      setPollingActive(false);
+      setToast({ show: true, text: "WhatsApp desconectado correctamente." });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } catch {}
   };
 
   return (

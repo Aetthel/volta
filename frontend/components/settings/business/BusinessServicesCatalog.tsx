@@ -15,6 +15,7 @@ import {
   Badge,
   Skeleton,
 } from "@/components/ui/volta-ui";
+import { apiClient } from "@/lib/apiClient";
 
 const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
   ssr: false,
@@ -43,23 +44,22 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
   } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchServices = useCallback(() => {
+  const fetchServices = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") return;
     setLoadingServices(true);
-    fetch(`/api/backend/services?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setServices(data);
-        setLoadingServices(false);
-      })
-      .catch(() => setLoadingServices(false));
+    try {
+      const res = await apiClient.services.getAll<Service[]>(businessId);
+      if (Array.isArray(res.data)) setServices(res.data);
+    } finally {
+      setLoadingServices(false);
+    }
   }, [businessId]);
 
   useEffect(() => {
     fetchServices();
   }, [fetchServices]);
 
-  const handleSaveService = (serviceData: {
+  const handleSaveService = async (serviceData: {
     id?: string;
     name: string;
     price: number;
@@ -67,39 +67,35 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
     description?: string;
   }) => {
     const isEdit = !!serviceData.id;
-    fetch(isEdit ? `/api/backend/services/${serviceData.id}` : "/api/backend/services", {
-      method: isEdit ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...serviceData, businessId }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed");
-        return res.json();
-      })
-      .then(() => {
-        fetchServices();
-        setToast({
-          show: true,
-          text: isEdit ? "Servicio actualizado correctamente." : "Servicio añadido correctamente.",
-        });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-      })
-      .catch(() => {});
+    const res = isEdit
+      ? await apiClient.services.update(serviceData.id!, { ...serviceData, businessId })
+      : await apiClient.services.create({ ...serviceData, businessId });
+
+    if (res.error) {
+      setToast({ show: true, text: "Error al guardar el servicio" });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      return;
+    }
+
+    fetchServices();
+    setToast({
+      show: true,
+      text: isEdit ? "Servicio actualizado correctamente." : "Servicio añadido correctamente.",
+    });
+    setTimeout(() => setToast({ show: false, text: "" }), 3000);
   };
 
-  const handleDeleteService = (serviceId: string) => {
+  const handleDeleteService = async (serviceId: string) => {
     if (!window.confirm("¿Seguro que deseas eliminar este servicio?")) return;
-    fetch(`/api/backend/services/${serviceId}`, { method: "DELETE" })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed");
-        return res.json();
-      })
-      .then(() => {
-        fetchServices();
-        setToast({ show: true, text: "Servicio eliminado correctamente." });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-      })
-      .catch(() => {});
+    const res = await apiClient.services.delete(serviceId);
+    if (res.error) {
+      setToast({ show: true, text: "Error al eliminar el servicio" });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      return;
+    }
+    fetchServices();
+    setToast({ show: true, text: "Servicio eliminado correctamente." });
+    setTimeout(() => setToast({ show: false, text: "" }), 3000);
   };
 
   const filteredServices = useMemo(() => {

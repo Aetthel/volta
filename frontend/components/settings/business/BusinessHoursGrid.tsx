@@ -14,6 +14,7 @@ import {
   Skeleton,
 } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
+import { apiClient } from "@/lib/apiClient";
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -30,23 +31,22 @@ export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({
   const [loadingHours, setLoadingHours] = useState(false);
   const [savingHours, setSavingHours] = useState(false);
 
-  const fetchHours = useCallback(() => {
+  const fetchHours = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") return;
     setLoadingHours(true);
-    fetch(`/api/backend/business/${businessId}/hours`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          const sorted = [...data].sort((a, b) => {
-            const dayA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
-            const dayB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
-            return dayA - dayB;
-          });
-          setHours(sorted);
-        }
-        setLoadingHours(false);
-      })
-      .catch(() => setLoadingHours(false));
+    try {
+      const res = await apiClient.business.getHours<BusinessHours[]>(businessId);
+      if (Array.isArray(res.data)) {
+        const sorted = [...res.data].sort((a, b) => {
+          const dayA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
+          const dayB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
+          return dayA - dayB;
+        });
+        setHours(sorted);
+      }
+    } finally {
+      setLoadingHours(false);
+    }
   }, [businessId]);
 
   useEffect(() => {
@@ -57,15 +57,10 @@ export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({
     e.preventDefault();
     setSavingHours(true);
     try {
-      const res = await fetch(`/api/backend/business/${businessId}/hours`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(hours),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al guardar horarios");
+      const res = await apiClient.business.updateHours<BusinessHours[]>(businessId, hours);
+      if (res.error) throw new Error(res.error);
 
-      setHours(data);
+      if (res.data) setHours(res.data);
       setToast({ show: true, text: "¡Horario comercial guardado correctamente!" });
       setTimeout(() => setToast({ show: false, text: "" }), 3000);
     } catch (err: any) {

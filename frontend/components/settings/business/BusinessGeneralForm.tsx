@@ -13,7 +13,6 @@ import {
   Check,
   ExternalLink,
   QrCode,
-  Download,
   MapPin,
   Phone,
 } from "lucide-react";
@@ -31,8 +30,8 @@ import {
   Badge,
   FieldGroup,
   Field,
-  FieldLabel,
 } from "@/components/ui/volta-ui";
+import { apiClient } from "@/lib/apiClient";
 
 interface BusinessGeneralFormProps {
   profile: BusinessProfile;
@@ -81,14 +80,10 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
         return;
       }
       const reader = new FileReader();
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         const logoData = reader.result as string;
         setProfile((prev) => ({ ...prev, logoUrl: logoData }));
-        fetch(`/api/backend/business/${businessId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ logoUrl: logoData }),
-        });
+        await apiClient.business.update(businessId, { logoUrl: logoData });
         setToast({ show: true, text: "Logotipo comercial actualizado" });
         setTimeout(() => setToast({ show: false, text: "" }), 3000);
       };
@@ -96,13 +91,9 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     }
   };
 
-  const handleRemoveLogo = () => {
+  const handleRemoveLogo = async () => {
     setProfile((prev) => ({ ...prev, logoUrl: null }));
-    fetch(`/api/backend/business/${businessId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ logoUrl: null }),
-    });
+    await apiClient.business.update(businessId, { logoUrl: null });
     setToast({ show: true, text: "Logotipo eliminado" });
     setTimeout(() => setToast({ show: false, text: "" }), 3000);
   };
@@ -111,22 +102,17 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     e.preventDefault();
     setSavingBusiness(true);
     try {
-      const res = await fetch(`/api/backend/business/${businessId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(businessForm),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al actualizar información");
+      const res = await apiClient.business.update(businessId, businessForm);
+      if (res.error) throw new Error(res.error);
 
       setProfile((prev) => ({ ...prev, ...businessForm }));
       setToast({ show: true, text: "¡Datos comerciales guardados con éxito!" });
       setTimeout(() => setToast({ show: false, text: "" }), 3000);
 
-      if (update) {
+      if (update && res.data) {
         await update({
           ...session,
-          user: { ...session?.user, name: data.name, email: data.email },
+          user: { ...session?.user, name: res.data.name, email: res.data.email },
         });
       }
     } catch (err: any) {
@@ -137,14 +123,10 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     }
   };
 
-  const handleToggleBooking = () => {
+  const handleToggleBooking = async () => {
     const newValue = profile.enablePublicBooking === false ? true : false;
     setProfile((prev) => ({ ...prev, enablePublicBooking: newValue }));
-    fetch(`/api/backend/business/${businessId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ enablePublicBooking: newValue }),
-    });
+    await apiClient.business.update(businessId, { enablePublicBooking: newValue });
     setToast({
       show: true,
       text: newValue ? "Reservas online activadas" : "Reservas online desactivadas",
