@@ -32,3 +32,17 @@ The system SHALL calculate dashboard metrics dynamically using the actual servic
 
 - **WHEN** the Admin views the dashboard stats
 - **THEN** the system calculates estimated income and average tickets based on actual appointment service names and dynamic database prices
+
+### Requirement: Desacoplamiento Modular del Panel de Equipo
+El panel de administración de equipo SHALL gestionar la consulta, búsqueda y mutación de trabajadores mediante un hook especializado (`useTeamList`) y componentes modulares en `frontend/components/team/`.
+
+#### Scenario: Filtrado y edición de roles de trabajadores
+- **WHEN** un administrador busca trabajadores o filtra por rol (ADMIN, JEFE, EMPLEADO)
+- **THEN** la lógica de filtrado normalizado se ejecuta mediante el hook modular y la tabla se actualiza inmediatamente
+
+### Requirement: Modularización de Gestión Multi-Sede
+El panel de administración multi-sede SHALL organizar la visualización, creación y gestión de trabajadores por sede a través del hook `useLocationsList` y componentes modulares bajo `frontend/components/sedes/`.
+
+#### Scenario: Creación de sede y gestión de trabajadores
+- **WHEN** un administrador añade una nueva sede o gestiona los trabajadores adscritos a un establecimiento
+- **THEN** las operaciones se canalizan a través de `apiClient` y los modales modulares gestionan su estado de forma autónoma

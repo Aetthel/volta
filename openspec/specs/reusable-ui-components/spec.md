@@ -165,3 +165,31 @@ The `EventManager` component SHALL synchronize state updates without invoking `s
 
 - **WHEN** parent components supply updated `initialEvents` props to `EventManager`
 - **THEN** state synchronization MUST occur inside `useEffect` or pure render derivation to comply with React Hooks rules
+
+### Requirement: Adherencia Estricta a Tokens Semánticos de Volta UI
+Todos los componentes visuales e interactivos SHALL utilizar tokens semánticos de diseño (`bg-surface`, `bg-surface-container-*`, `text-on-surface`, `text-on-surface-variant`, `border-outline-variant`) en lugar de colores fijos de Tailwind o valores hexadecimales hardcodeados.
+
+#### Scenario: Visualización en diferentes temas y paletas
+- **WHEN** un usuario selecciona una paleta de color o conmuta entre modo claro y oscuro
+- **THEN** todas las superficies, textos y bordes se adaptan dinámicamente preservando los ratios de contraste WCAG AA
+
+### Requirement: Estandarización de Controles Interactivos y Micro-Interacciones
+Todos los botones de acción SHALL implementarse a través del componente `<Button>` unificado, garantizando micro-interacciones táctiles homogéneas (`active:scale-[0.98]`), estados de foco accesibles (`focus-visible:ring-2`) e indicadores de carga integrados.
+
+#### Scenario: Interacción con botones de acción
+- **WHEN** el usuario pulsa o navega por teclado sobre cualquier botón
+- **THEN** el botón responde con la animación de compresión sutil y el anillo de enfoque accesible
+
+### Requirement: Descomposición Atómica de Volta UI
+El sistema de diseño Volta UI SHALL organizar cada componente visual en archivos individuales dentro de `frontend/components/ui/`, exponiendo un barrel file unificado en `volta-ui.tsx` para compatibilidad completa hacia atrás.
+
+#### Scenario: Importación atómica y unificada
+- **WHEN** un desarrollador importa componentes desde `volta-ui.tsx` o desde sus archivos individuales (`card.tsx`, `alert.tsx`, `field.tsx`)
+- **THEN** los componentes se resuelven con idéntica API y contratos de tipos sin errores de empaquetado
+
+### Requirement: Descomposición Modular de Checkout y Navegación Lateral
+El modal de checkout y la barra lateral de navegación SHALL estructurar sus vistas en submódulos especializados dentro de `frontend/components/checkout/` y `frontend/components/sidebar/`.
+
+#### Scenario: Pasos de suscripción y navegación
+- **WHEN** un usuario avanza en los pasos de contratación o navega entre secciones protegidas
+- **THEN** los componentes de cada paso gestionan su estado local e integran la pasarela de LemonSqueezy o el control de permisos sin sobrecargar los orquestadores

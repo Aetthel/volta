@@ -87,3 +87,59 @@ The backend service SHALL enforce architectural consistency and code quality acr
 
 - **WHEN** the test script is executed
 - **THEN** all backend unit and integration tests run and verify endpoint functionality and mock databases.
+
+### Requirement: Descomposición y Cohesión de Vistas Complejas
+Los componentes de interfaz de usuario de alta interacción (como el gestor de eventos y calendario) SHALL desacoplar la lógica de navegación temporal, filtrado y gestión de estado modal en custom hooks especializados, aislando las vistas de renderizado en submódulos dedicados.
+
+#### Scenario: Uso del gestor de calendario con hooks extraídos
+- **WHEN** un desarrollador inspecciona o modifica el gestor de calendario
+- **THEN** la lógica de navegación de fechas y filtrado por categorías/etiquetas reside en hooks modulares independientes de los componentes de renderizado de cuadrícula
+
+### Requirement: Estandarización de Guard Clauses y Reducción de Complejidad
+Las funciones y manejadores de eventos tanto en el frontend como en el backend SHALL utilizar guard clauses y retornos tempranos (*early returns*) para mantener la profundidad de anidamiento de bloques `if` en un máximo de 2 niveles.
+
+#### Scenario: Validación de parámetros en manejadores
+- **WHEN** una función recibe entradas inválidas o precondiciones insatisfechas
+- **THEN** la función retorna inmediatamente al inicio sin envolver el cuerpo principal en bloques `else` anidados
+
+### Requirement: Seguridad Estricta de Tipos y Eliminación de Casts Inseguros
+El código fuente de Next.js y los tipos de sesión SHALL definir explícitamente todos los campos de usuario y negocio en las interfaces de TypeScript, prohibiendo el uso de `as any` en la lectura y mutación de sesión y modelos de dominio.
+
+#### Scenario: Acceso a propiedades de usuario en sesión
+- **WHEN** un componente accede a `session.user.businessId`, `session.user.role` o `session.user.subscriptionPlan`
+- **THEN** TypeScript infiere el tipo exacto sin requerir conversiones `(session.user as any)` ni producir advertencias del compilador
+
+### Requirement: Garantía de Entrega de Alertas en Webhooks
+El webhook de WhatsApp SHALL garantizar la persistencia de alertas para todos los mensajes entrantes válidos, resolviendo el usuario destinatario a través de la cita activa o, en su defecto, a través del usuario principal del negocio (`businessId`).
+
+#### Scenario: Mensaje recibido sin cita previa
+- **WHEN** un cliente envía un mensaje a la instancia de WhatsApp del negocio sin tener una cita registrada en la base de datos
+- **THEN** el sistema recupera el usuario administrador del negocio y crea la alerta en su bandeja de entrada
+
+### Requirement: Indexación Compuesta y Eficiencia en Consultas SQL
+Todas las consultas de lectura y filtrado sobre entidades multitenant SHALL ejecutarse mediante índices de base de datos compuestos que incluyan `businessId` y el campo de filtro o clasificación correspondiente (`appointmentDate`, `phone`, `email`, `status`).
+
+#### Scenario: Consulta de citas por rango de fechas
+- **WHEN** el backend consulta citas de un negocio para un día o semana específica
+- **THEN** PostgreSQL utiliza el índice compuesto `(businessId, appointmentDate)` realizando un Index Scan sin incurrir en lecturas secuenciales de tabla
+
+### Requirement: Certificación de Estándares de Código y Especificación
+Toda la base de código de Volta SHALL superar auditorías estáticas de tipos (`tsc --noEmit`), validación estructural de OpenSpec y revisión de buenas prácticas de React 19 y Next.js.
+
+#### Scenario: Validación de pipeline de integración
+- **WHEN** se ejecuta la suite de validación completa del proyecto
+- **THEN** todas las especificaciones de OpenSpec pasan con 0 incidentes y TypeScript compila con 0 errores
+
+### Requirement: Descomposición Modular de la Gestión de Clientes
+El panel de clientes SHALL desacoplar la lógica de filtrado, paginación y mutaciones en un custom hook reutilizable (`useClientsList`), organizando la presentación en componentes especializados dentro de `frontend/components/clients/`.
+
+#### Scenario: Visualización y filtrado de clientes
+- **WHEN** un usuario busca un cliente o filtra por estado LOPD
+- **THEN** la lógica de filtrado normalizado se ejecuta mediante el hook modular, y la tabla de clientes se actualiza sin recargar el componente de página
+
+### Requirement: Capa Centralizada de Cliente HTTP Tipado
+El frontend SHALL canalizar las peticiones de red hacia el backend mediante la instancia de `apiClient` (`frontend/lib/apiClient.ts`), proporcionando tipado estricto, serialización automática y propagación de errores estandarizada.
+
+#### Scenario: Petición de datos de clientes o citas
+- **WHEN** un hook o vista solicita recursos al backend (ej. `apiClient.get<ClientItem[]>('/clients')`)
+- **THEN** la respuesta se deserializa de forma segura y devuelve `{ data, error, status }` sin necesidad de envoltorios `fetch` manuales
