@@ -117,7 +117,14 @@ export async function handleWhatsAppWebhook(req, res) {
         const clientName = appointment?.clientName || "Cliente WhatsApp";
 
         // Create alert for business admin / owners
-        const targetUserId = appointment?.business?.users?.[0]?.id;
+        let targetUserId = appointment?.business?.users?.[0]?.id;
+        if (!targetUserId && businessId) {
+          const bizUser = await prisma.user.findFirst({
+            where: { businessId },
+            select: { id: true },
+          });
+          targetUserId = bizUser?.id;
+        }
 
         if (tag === INTENT_TAGS.CONFIRMADO) {
           logger.info(`[WhatsApp Webhook] Appointment confirmed by ${clientName} (${rawPhone})`);

@@ -41,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
+  DropdownMenuItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -488,11 +489,19 @@ export default function EquipoPage() {
                               ? `No hay resultados para "${searchQuery}"`
                               : "Tu equipo no tiene trabajadores registrados todavía. ¡Invita a tu primer compañero!"
                           }
-                          actionLabel="Invitar Trabajador"
-                          onAction={() => {
-                            setEditingWorker(null);
-                            setIsInviteModalOpen(true);
-                          }}
+                          action={
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => {
+                                setEditingWorker(null);
+                                setIsInviteModalOpen(true);
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-1.5" />
+                              Invitar Trabajador
+                            </Button>
+                          }
                         />
                       </TableCell>
                     </TableRow>
@@ -578,8 +587,8 @@ export default function EquipoPage() {
                               <DropdownMenuContent align="end" className="w-44">
                                 <DropdownMenuLabel>Opciones</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuCheckboxItem
-                                  onClick={(e) => {
+                                <DropdownMenuItem
+                                  onClick={(e: React.MouseEvent) => {
                                     setEditingWorker(member);
                                     setInviteModalTriggerRect(
                                       (e.target as HTMLElement).getBoundingClientRect()
@@ -590,17 +599,17 @@ export default function EquipoPage() {
                                 >
                                   <Edit3 className="w-3.5 h-3.5 text-primary" />
                                   <span>Editar datos</span>
-                                </DropdownMenuCheckboxItem>
+                                </DropdownMenuItem>
 
                                 <DropdownMenuSeparator />
-                                <DropdownMenuCheckboxItem
+                                <DropdownMenuItem
                                   disabled={member.id === currentUserId}
                                   onClick={() => handleDeleteWorker(member.id, member.name)}
                                   className="cursor-pointer text-error focus:text-error gap-2 disabled:opacity-40"
                                 >
                                   <Trash2 className="w-3.5 h-3.5 text-error" />
                                   <span>Eliminar miembro</span>
-                                </DropdownMenuCheckboxItem>
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>

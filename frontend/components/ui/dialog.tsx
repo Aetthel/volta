@@ -36,10 +36,10 @@ export function DialogTrigger({
   const ctx = React.useContext(DialogContext);
   if (!ctx) return null;
 
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
+  if (asChild && React.isValidElement<{ onClick?: (e: React.MouseEvent) => void }>(children)) {
+    return React.cloneElement(children, {
       onClick: (e: React.MouseEvent) => {
-        (children.props as any).onClick?.(e);
+        children.props.onClick?.(e);
         ctx.onOpenChange(true);
       },
     });
@@ -62,10 +62,10 @@ export function DialogClose({
   const ctx = React.useContext(DialogContext);
   if (!ctx) return null;
 
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
+  if (asChild && React.isValidElement<{ onClick?: (e: React.MouseEvent) => void }>(children)) {
+    return React.cloneElement(children, {
       onClick: (e: React.MouseEvent) => {
-        (children.props as any).onClick?.(e);
+        children.props.onClick?.(e);
         ctx.onOpenChange(false);
       },
     });

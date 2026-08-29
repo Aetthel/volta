@@ -19,9 +19,37 @@ const AddClientModal = dynamicImport(() => import("@/components/AddClientModal")
   ssr: false,
 });
 
+interface ServiceItem {
+  id?: string;
+  name: string;
+  duration?: number;
+  color?: string;
+  price?: number;
+}
+
+interface AppointmentItem {
+  id?: string;
+  clientName?: string;
+  appointmentDate?: string;
+  startTime?: string | Date;
+  endTime?: string | Date;
+  status?: string;
+  service?: {
+    name?: string;
+    duration?: number;
+    color?: string;
+  };
+  duration?: number;
+  serviceName?: string;
+  client?: {
+    name?: string;
+    frequentService?: string;
+  };
+}
+
 const VALID_COLORS = ["TEAL", "DEEP_TEAL", "SAGE", "SLATE", "FOREST", "PETROL"];
 
-function getServiceDuration(app: any, servicesList: any[]): number {
+function getServiceDuration(app: AppointmentItem, servicesList: ServiceItem[]): number {
   if (app.service?.duration && typeof app.service.duration === "number") {
     return app.service.duration;
   }
@@ -36,7 +64,7 @@ function getServiceDuration(app: any, servicesList: any[]): number {
   return 30; // default 30 min duration
 }
 
-function getServiceColor(app: any, servicesList: any[]): string {
+function getServiceColor(app: AppointmentItem, servicesList: ServiceItem[]): string {
   if (app.service?.color && VALID_COLORS.includes(app.service.color.toUpperCase())) {
     return app.service.color.toUpperCase();
   }

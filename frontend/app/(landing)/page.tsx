@@ -54,7 +54,7 @@ export default function RootPage() {
   // If user already has an active session, automatically navigate to Dashboard
   useEffect(() => {
     if (session?.user) {
-      const role = (session.user as any)?.role;
+      const role = session.user.role;
       router.replace(role === "ADMIN" ? "/admin" : "/inicio");
     }
   }, [session, router]);

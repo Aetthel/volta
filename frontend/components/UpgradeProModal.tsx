@@ -102,12 +102,15 @@ export default function UpgradeProModal({
                 <span>Actualizar a Plan Pro (40€/mes)</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={onClose}
-                className="w-full py-2 text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
+                className="w-full text-xs font-medium text-on-surface-variant"
               >
                 Continuar en el plan actual
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -43,10 +43,10 @@ export function DropdownMenuTrigger({
 }) {
   const ctx = React.useContext(DropdownContext);
 
-  if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
+  if (asChild && React.isValidElement<{ onClick?: (e: React.MouseEvent) => void }>(children)) {
+    return React.cloneElement(children, {
       onClick: (e: React.MouseEvent) => {
-        (children.props as any).onClick?.(e);
+        children.props.onClick?.(e);
         ctx?.setOpen((prev) => !prev);
       },
     });
@@ -139,3 +139,35 @@ export function DropdownMenuCheckboxItem({
     </div>
   );
 }
+
+export function DropdownMenuItem({
+  disabled,
+  onClick,
+  children,
+  className,
+}: {
+  disabled?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const ctx = React.useContext(DropdownContext);
+  return (
+    <div
+      role="menuitem"
+      onClick={(e) => {
+        if (disabled) return;
+        onClick?.(e);
+        ctx?.setOpen(false);
+      }}
+      className={cn(
+        "relative flex cursor-pointer select-none items-center rounded-lg px-2.5 py-1.5 text-sm outline-none hover:bg-surface-container-high focus:bg-surface-container-high transition-colors",
+        disabled && "pointer-events-none opacity-40 cursor-not-allowed",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+

@@ -3,14 +3,15 @@ export interface BusinessProfile {
   email: string;
   phone: string;
   address: string;
-  logoUrl: string;
-  coverUrl: string;
-  description: string;
-  ownerName: string;
-  workerPhoto: string;
-  themeColor: string;
-  fontSizeLevel: string;
-  borderRadiusLevel: string;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
+  description?: string | null;
+  ownerName?: string;
+  workerPhoto?: string;
+  themeColor?: string;
+  fontSizeLevel?: string;
+  borderRadiusLevel?: string;
+  businessType?: string | null;
   enablePublicBooking?: boolean;
 }
 

@@ -90,7 +90,7 @@ export default function MetricCard({
   return (
     <Card
       className={cn(
-        "relative p-5 flex flex-col justify-between bg-white border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-all hover:shadow-md select-none",
+        "relative p-5 flex flex-col justify-between bg-surface-container-lowest border border-outline-variant/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.02)] transition-all hover:shadow-md select-none",
         className
       )}
     >

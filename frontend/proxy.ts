@@ -25,8 +25,7 @@ export default auth((req) => {
   }
 
   const user = req.auth?.user;
-  const rawRole = (req.auth as any)?.role || user?.role;
-  const role = typeof rawRole === "string" ? rawRole.toUpperCase() : undefined;
+  const role = typeof user?.role === "string" ? user.role.toUpperCase() : undefined;
 
   // 2. Redirección si usuario ya autenticado intenta acceder a la Landing, Login o Register
   if (isLoggedIn && user && isPublicAuthRoute) {

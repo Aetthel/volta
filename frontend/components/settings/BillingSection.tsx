@@ -11,12 +11,18 @@ import {
   ShieldCheck,
   Calendar,
   Zap,
-  ArrowRight,
   Clock,
+  Sparkles,
+  Users,
+  MessageSquare,
+  Building2,
+  FileText,
+  Loader2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { Button, Card, Badge } from "@/components/ui/volta-ui";
+import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Badge, Skeleton } from "@/components/ui/volta-ui";
 import type { Invoice } from "@/types/domain";
+import { cn } from "@/lib/utils";
 
 const SubscriptionCheckoutModal = dynamic(
   () => import("@/components/SubscriptionCheckoutModal"),
@@ -56,7 +62,11 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
   }, []);
 
   const handleCancelSubscription = async () => {
-    if (!confirm("¿Estás seguro de que deseas cancelar tu suscripción? Mantendrás el acceso hasta el final de tu ciclo mensual actual.")) {
+    if (
+      !confirm(
+        "¿Estás seguro de que deseas cancelar tu suscripción? Mantendrás el acceso a todas las funciones hasta el final de tu ciclo actual."
+      )
+    ) {
       return;
     }
 
@@ -73,37 +83,40 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
         const errData = await res.json();
         onShowToast(errData.error || "No se pudo cancelar la suscripción");
       }
-    } catch (e) {
+    } catch {
       onShowToast("Error de conexión al cancelar la suscripción");
     } finally {
       setIsCancelling(false);
     }
   };
 
-  const currentPlan = subscriptionData?.subscriptionPlan || session?.user?.subscriptionPlan || "PRO";
-  const currentStatus = subscriptionData?.subscriptionStatus || session?.user?.subscriptionStatus || "TRIALING";
+  const currentPlan =
+    subscriptionData?.subscriptionPlan || session?.user?.subscriptionPlan || "PRO";
+  const currentStatus =
+    subscriptionData?.subscriptionStatus || session?.user?.subscriptionStatus || "TRIALING";
   const isGraceActive = subscriptionData?.isGracePeriodActive;
   const daysLeft = subscriptionData?.daysLeftInTrial ?? 0;
   const isCancelledEnd = subscriptionData?.cancelAtPeriodEnd;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
-      {/* Grace Period Alert */}
+    <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
+      {/* 1. Grace Period Alert (if active) */}
       {isGraceActive && (
-        <div className="p-4 bg-error/10 border border-error/30 rounded-2xl flex items-center justify-between gap-4 text-error">
+        <div className="p-4 bg-error/10 border-2 border-error/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-error">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-6 h-6 shrink-0" />
             <div>
               <p className="text-sm font-bold">Aviso: Periodo de Gracia de 3 Días Activo</p>
               <p className="text-xs text-error/90 mt-0.5">
-                Hubo un fallo en la renovación automática de tu tarjeta. Dispones de 3 días para actualizarla antes de la suspensión del servicio.
+                Hubo un fallo en la renovación automática de tu tarjeta. Dispones de 3 días para
+                actualizarla antes de la suspensión del servicio.
               </p>
             </div>
           </div>
           <Button
             variant="primary"
             size="sm"
-            className="bg-error text-white hover:bg-error/90 shrink-0"
+            className="bg-error text-white hover:bg-error/90 shrink-0 font-semibold"
             onClick={() => setIsCheckoutOpen(true)}
           >
             Actualizar Pago
@@ -111,107 +124,252 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
         </div>
       )}
 
-      {/* Subscription Overview Card */}
-      <Card className="p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-outline-variant/20">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="text-2xl font-bold text-on-surface">
-                Plan Volta {currentPlan === "BASIC" ? "Básico" : "Pro"}
-              </h3>
-              {currentStatus === "ACTIVE" && !isCancelledEnd && (
-                <Badge variant="default" className="bg-emerald-600 text-white">
-                  Suscripción Activa
-                </Badge>
-              )}
-              {currentStatus === "TRIALING" && (
-                <Badge variant="secondary" className="bg-primary/20 text-primary">
-                  {daysLeft > 0 ? `Prueba Gratuita (${daysLeft} días)` : "Prueba Gratuita"}
-                </Badge>
-              )}
-              {isCancelledEnd && (
-                <Badge variant="error">Cancelación Programada</Badge>
-              )}
-            </div>
-            <p className="text-sm text-on-surface-variant max-w-xl">
-              {currentPlan === "BASIC"
-                ? "1 Sede/calendario, 1 trabajador incluido (+5€ extra), hasta 100 reservas online/mes y recordatorios Email/SMS."
-                : "Multi-calendario, sedes/salas ilimitadas, 2 trabajadores incluidos (+5€ extra), WhatsApp bidireccional, pagos online y analítica completa."}
-            </p>
+      {/* 2. Main 2-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Plan Details & Capabilities (7 cols) */}
+        <Card className="lg:col-span-7 flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-4 border-b border-outline-variant/40">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <CardTitle className="text-xl font-bold text-on-surface flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-primary" />
+                      <span>Plan Volta {currentPlan === "BASIC" ? "Básico" : "Pro"}</span>
+                    </CardTitle>
+                    {currentStatus === "ACTIVE" && !isCancelledEnd && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        Suscripción Activa
+                      </span>
+                    )}
+                    {currentStatus === "TRIALING" && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                        <Clock className="w-3 h-3 text-primary" />
+                        {daysLeft > 0 ? `Prueba Gratuita (${daysLeft} días restantes)` : "Prueba Gratuita"}
+                      </span>
+                    )}
+                    {isCancelledEnd && (
+                      <Badge variant="error">Cancelación Programada</Badge>
+                    )}
+                  </div>
+                  <CardDescription className="text-xs text-on-surface-variant/80">
+                    {currentPlan === "BASIC"
+                      ? "Ideal para profesionales individuales o pequeños locales con reservas básicas."
+                      : "La solución completa con automatizaciones WhatsApp 2 vías, multi-agenda y analítica avanzada."}
+                  </CardDescription>
+                </div>
+
+                {/* Price Tag */}
+                <div className="text-left sm:text-right shrink-0">
+                  <div className="text-2xl font-bold text-on-surface">
+                    {currentPlan === "BASIC" ? "30,00€" : "40,00€"}
+                  </div>
+                  <span className="text-[11px] font-medium text-on-surface-variant">
+                    + IVA / mes
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-4 flex flex-col gap-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                Características incluidas en tu plan:
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-on-surface-variant">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    {currentPlan === "BASIC"
+                      ? "1 Calendario y local"
+                      : "Multi-calendario y sedes ilimitadas"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    {currentPlan === "BASIC"
+                      ? "1 Especialista incluido (+5€ extra)"
+                      : "2 Especialistas incluidos (+5€ extra)"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    {currentPlan === "BASIC"
+                      ? "Hasta 100 citas online / mes"
+                      : "Reservas y citas ilimitadas"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>
+                    {currentPlan === "BASIC"
+                      ? "Recordatorios Email y SMS"
+                      : "WhatsApp Bot interactivo 2 vías"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Gestión de clientes y consentimiento LOPD</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Portal público de reservas con código QR</span>
+                </div>
+              </div>
+            </CardContent>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Button
-              variant="primary"
-              size="md"
-              className="flex items-center gap-2 shadow-sm cursor-pointer"
-              onClick={() => setIsCheckoutOpen(true)}
-            >
-              <Zap className="w-4 h-4" />
-              <span>{currentStatus === "ACTIVE" ? "Cambiar / Mejorar Plan" : "Activar Suscripción"}</span>
-            </Button>
+          <CardFooter className="border-t border-outline-variant/40 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="primary"
+                size="md"
+                className="flex items-center justify-center gap-2 font-medium"
+                onClick={() => setIsCheckoutOpen(true)}
+              >
+                <Zap className="w-4 h-4" />
+                <span>
+                  {currentStatus === "ACTIVE" ? "Cambiar o Mejorar Plan" : "Activar Suscripción"}
+                </span>
+              </Button>
+            </div>
+
             {currentStatus === "ACTIVE" && !isCancelledEnd && (
               <Button
-                variant="outline"
-                size="md"
-                className="text-error border-error/40 hover:bg-error/10 cursor-pointer"
+                variant="ghost"
+                size="sm"
+                className="text-xs text-error hover:text-error hover:bg-error/10 font-semibold"
                 disabled={isCancelling}
                 onClick={handleCancelSubscription}
               >
-                Cancelar Suscripción
+                {isCancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                <span>Cancelar Suscripción</span>
               </Button>
             )}
-          </div>
+          </CardFooter>
+        </Card>
+
+        {/* Right Column: Security, Payment & Capacity (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          {/* Payment Method & Security Card */}
+          <Card className="p-5 bg-surface-container-low border border-outline-variant/50">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  Método de Pago y Facturación
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3" />
+                  SSL Seguro
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-white dark:bg-black/20 rounded-xl border border-outline-variant/40">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col text-xs">
+                  <span className="font-bold text-on-surface">Pagos Internacionales Seguros</span>
+                  <span className="text-on-surface-variant/80">
+                    Tarjeta, Apple Pay, Google Pay procesados por Lemon Squeezy (MoR).
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-on-surface-variant/80 leading-relaxed">
+                Todas las transacciones cumplen con la normativa fiscal de la UE (IVA intracomunitario) y la directiva PSD2 con autenticación reforzada SCA.
+              </p>
+            </div>
+          </Card>
+
+          {/* Business Limits / Capacity Card */}
+          <Card className="p-5 bg-surface-container-low border border-outline-variant/50">
+            <div className="flex flex-col gap-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-primary" />
+                Capacidad y Recursos del Negocio
+              </span>
+
+              <div className="flex flex-col gap-2.5 text-xs text-on-surface-variant">
+                <div className="flex items-center justify-between py-1 border-b border-outline-variant/30">
+                  <span className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    Especialistas en equipo:
+                  </span>
+                  <span className="font-bold text-on-surface">
+                    {currentPlan === "BASIC" ? "1 incluido" : "2 incluidos"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between py-1 border-b border-outline-variant/30">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
+                    Citas mensuales:
+                  </span>
+                  <span className="font-bold text-on-surface">
+                    {currentPlan === "BASIC" ? "100 citas/mes" : "Ilimitadas"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between py-1">
+                  <span className="flex items-center gap-2">
+                    <MessageSquare className="w-3.5 h-3.5 text-primary" />
+                    WhatsApp 2 Vías:
+                  </span>
+                  <span className="font-bold text-on-surface">
+                    {currentPlan === "BASIC" ? "No disponible" : "Activo"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
+      </div>
 
-        {/* Details grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 text-xs">
-          <div className="space-y-1">
-            <span className="text-on-surface-variant block font-medium">Cuota Mensual</span>
-            <span className="text-base font-bold text-on-surface">
-              {currentPlan === "BASIC" ? "30,00€" : "40,00€"} <span className="text-xs font-normal text-on-surface-variant">+ IVA / mes</span>
-            </span>
+      {/* 3. Invoices History Table */}
+      <Card className="flex flex-col overflow-hidden">
+        <CardHeader className="pb-3 border-b border-outline-variant/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary" />
+                <span>Historial de Facturas y Recibos</span>
+              </CardTitle>
+              <CardDescription>
+                Descarga tus facturas oficiales con desglose de impuestos emitidas tras cada cobro.
+              </CardDescription>
+            </div>
           </div>
+        </CardHeader>
 
-          <div className="space-y-1">
-            <span className="text-on-surface-variant block font-medium">Pasarela y Cumplimiento Fiscal</span>
-            <span className="text-base font-semibold text-on-surface flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-primary" /> Lemon Squeezy (MoR)
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-on-surface-variant block font-medium">Métodos Admitidos</span>
-            <span className="text-base font-semibold text-on-surface flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-on-surface-variant" /> Tarjeta, Apple Pay, Google Pay
-            </span>
-          </div>
-        </div>
-      </Card>
-
-      {/* Invoices History */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-lg font-bold text-on-surface">Historial de Facturas</h4>
-            <p className="text-xs text-on-surface-variant">
-              Facturas oficiales y válidas emitidas por Lemon Squeezy con desglose de impuestos.
-            </p>
-          </div>
-        </div>
-
-        <Card className="overflow-hidden">
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-xs text-on-surface-variant">
-              Cargando facturas...
+            <div className="p-8 flex flex-col gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between py-2 border-b border-outline-variant/20 animate-pulse">
+                  <Skeleton className="w-24 h-4" />
+                  <Skeleton className="w-32 h-4" />
+                  <Skeleton className="w-20 h-4" />
+                  <Skeleton className="w-16 h-4" />
+                </div>
+              ))}
             </div>
           ) : invoices.length === 0 ? (
-            <div className="p-8 text-center flex flex-col items-center gap-2 text-on-surface-variant">
-              <Calendar className="w-8 h-8 opacity-40 mb-1" />
-              <p className="text-sm font-semibold text-on-surface">No hay facturas emitidas todavía</p>
-              <p className="text-xs max-w-sm">
-                Tus recibos y facturas fiscales oficiales aparecerán aquí tras realizar el primer cobro de suscripción.
-              </p>
+            <div className="p-10 text-center flex flex-col items-center justify-center gap-3 text-on-surface-variant">
+              <div className="w-12 h-12 rounded-2xl bg-surface-container-high text-on-surface-variant/70 flex items-center justify-center">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-sm font-bold text-on-surface">No hay facturas emitidas todavía</p>
+                <p className="text-xs max-w-sm text-on-surface-variant/80">
+                  Tus recibos y facturas fiscales oficiales aparecerán aquí tras realizar el primer cobro de suscripción.
+                </p>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -223,34 +381,34 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                     <th className="py-3 px-4">Concepto</th>
                     <th className="py-3 px-4">Total</th>
                     <th className="py-3 px-4">Estado</th>
-                    <th className="py-3 px-4 text-right">Acción</th>
+                    <th className="py-3 px-4 text-right">Descarga</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">
                   {invoices.map((inv) => (
                     <tr key={inv.id} className="hover:bg-surface-container/50 transition-colors">
-                      <td className="py-3 px-4 text-on-surface">
+                      <td className="py-3.5 px-4 text-on-surface font-medium">
                         {new Date(inv.createdAt).toLocaleDateString("es-ES", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
                         })}
                       </td>
-                      <td className="py-3 px-4 font-mono font-medium text-on-surface">
+                      <td className="py-3.5 px-4 font-mono font-medium text-on-surface">
                         {inv.invoiceNumber}
                       </td>
-                      <td className="py-3 px-4 text-on-surface-variant">
+                      <td className="py-3.5 px-4 text-on-surface-variant">
                         {inv.billingReason || `Volta Plan Mensual`}
                       </td>
-                      <td className="py-3 px-4 font-bold text-on-surface">
+                      <td className="py-3.5 px-4 font-bold text-on-surface">
                         {Number(inv.amount).toFixed(2)}€
                       </td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600">
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                           <CheckCircle2 className="w-3 h-3" /> Pagada
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-4 text-right">
                         {inv.invoiceUrl ? (
                           <a
                             href={inv.invoiceUrl}
@@ -258,8 +416,8 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-primary font-semibold hover:underline cursor-pointer"
                           >
+                            <Download className="w-3.5 h-3.5" />
                             <span>Descargar PDF</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         ) : (
                           <span className="text-on-surface-variant/40">—</span>
@@ -271,8 +429,8 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
               </table>
             </div>
           )}
-        </Card>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Checkout Modal */}
       <SubscriptionCheckoutModal

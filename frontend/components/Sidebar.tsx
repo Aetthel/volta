@@ -321,7 +321,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const subscriptionStatus = session?.user?.subscriptionStatus || "ACTIVE";
   const planLabel = subscriptionPlan === "BASIC" ? "Plan Básico" : "Plan Pro";
 
-  const businessId = (session?.user as any)?.businessId;
+  const businessId = session?.user?.businessId;
 
   const [businessData, setBusinessData] = useState<{
     name?: string;
@@ -345,11 +345,11 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
 
   const businessName =
     businessData.name ||
-    (session?.user as any)?.businessName ||
+    session?.user?.businessName ||
     "Mi Negocio";
   const businessLogo =
     businessData.logoUrl ||
-    (session?.user as any)?.businessLogoUrl ||
+    session?.user?.businessLogoUrl ||
     null;
 
   const [isCollapsed, setIsCollapsed] = useState(false);

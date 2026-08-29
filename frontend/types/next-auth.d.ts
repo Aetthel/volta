@@ -36,7 +36,61 @@ declare module "next-auth" {
   }
 }
 
+declare module "@auth/core/types" {
+  interface Session {
+    user: {
+      id?: string;
+      role?: string;
+      businessId?: string | null;
+      businessName?: string | null;
+      businessLogoUrl?: string | null;
+      subscriptionStatus?: string;
+      trialExpiresAt?: string | null;
+      sandboxExpiresAt?: string | null;
+      businessType?: string | null;
+      subscriptionPlan?: string;
+      themeColor?: string;
+      fontSizeLevel?: string;
+      borderRadiusLevel?: string;
+    } & DefaultSession["user"];
+  }
+
+  interface User {
+    id?: string;
+    role?: string;
+    businessId?: string | null;
+    businessName?: string | null;
+    businessLogoUrl?: string | null;
+    subscriptionStatus?: string;
+    trialExpiresAt?: string | null;
+    sandboxExpiresAt?: string | null;
+    businessType?: string | null;
+    subscriptionPlan?: string;
+    themeColor?: string;
+    fontSizeLevel?: string;
+    borderRadiusLevel?: string;
+  }
+}
+
 declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    role?: string;
+    businessId?: string | null;
+    businessName?: string | null;
+    businessLogoUrl?: string | null;
+    subscriptionStatus?: string;
+    trialExpiresAt?: string | null;
+    sandboxExpiresAt?: string | null;
+    businessType?: string | null;
+    subscriptionPlan?: string;
+    themeColor?: string;
+    fontSizeLevel?: string;
+    borderRadiusLevel?: string;
+  }
+}
+
+declare module "@auth/core/jwt" {
   interface JWT {
     id?: string;
     role?: string;

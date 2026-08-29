@@ -1,4 +1,5 @@
-import type { NextAuthConfig } from "next-auth";
+import type { NextAuthConfig, Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
@@ -34,21 +35,21 @@ export const authConfig: NextAuthConfig = {
       const isLoggedIn = !!auth?.user;
       return isLoggedIn;
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: string; session?: any }) {
       if (user) {
-        token.role = (user as any).role;
-        token.id = (user as any).id;
-        token.businessId = (user as any).businessId;
-        token.businessName = (user as any).businessName || null;
-        token.businessLogoUrl = (user as any).businessLogoUrl || null;
-        token.subscriptionStatus = (user as any).subscriptionStatus || "TRIALING";
-        token.trialExpiresAt = (user as any).trialExpiresAt || null;
-        token.sandboxExpiresAt = (user as any).sandboxExpiresAt || null;
-        token.businessType = (user as any).businessType || null;
-        token.subscriptionPlan = (user as any).subscriptionPlan || "PRO";
-        token.themeColor = (user as any).themeColor || "TEAL";
-        token.fontSizeLevel = (user as any).fontSizeLevel || "MEDIUM";
-        token.borderRadiusLevel = (user as any).borderRadiusLevel || "MEDIUM";
+        token.role = user.role;
+        token.id = user.id;
+        token.businessId = user.businessId;
+        token.businessName = user.businessName || null;
+        token.businessLogoUrl = user.businessLogoUrl || null;
+        token.subscriptionStatus = user.subscriptionStatus || "TRIALING";
+        token.trialExpiresAt = user.trialExpiresAt || null;
+        token.sandboxExpiresAt = user.sandboxExpiresAt || null;
+        token.businessType = user.businessType || null;
+        token.subscriptionPlan = user.subscriptionPlan || "PRO";
+        token.themeColor = user.themeColor || "TEAL";
+        token.fontSizeLevel = user.fontSizeLevel || "MEDIUM";
+        token.borderRadiusLevel = user.borderRadiusLevel || "MEDIUM";
       }
       if (trigger === "update" && session) {
         const themeColor = session.themeColor || session.user?.themeColor;
@@ -71,21 +72,21 @@ export const authConfig: NextAuthConfig = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (token && session?.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
-        (session.user as any).businessId = token.businessId;
-        (session.user as any).businessName = token.businessName || null;
-        (session.user as any).businessLogoUrl = token.businessLogoUrl || null;
-        (session.user as any).subscriptionStatus = token.subscriptionStatus || "TRIALING";
-        (session.user as any).trialExpiresAt = token.trialExpiresAt || null;
-        (session.user as any).sandboxExpiresAt = token.sandboxExpiresAt || null;
-        (session.user as any).businessType = token.businessType || null;
-        (session.user as any).subscriptionPlan = token.subscriptionPlan || "PRO";
-        (session.user as any).themeColor = token.themeColor || "TEAL";
-        (session.user as any).fontSizeLevel = token.fontSizeLevel || "MEDIUM";
-        (session.user as any).borderRadiusLevel = token.borderRadiusLevel || "MEDIUM";
+        session.user.role = token.role;
+        session.user.id = token.id;
+        session.user.businessId = token.businessId;
+        session.user.businessName = token.businessName || null;
+        session.user.businessLogoUrl = token.businessLogoUrl || null;
+        session.user.subscriptionStatus = token.subscriptionStatus || "TRIALING";
+        session.user.trialExpiresAt = token.trialExpiresAt || null;
+        session.user.sandboxExpiresAt = token.sandboxExpiresAt || null;
+        session.user.businessType = token.businessType || null;
+        session.user.subscriptionPlan = token.subscriptionPlan || "PRO";
+        session.user.themeColor = token.themeColor || "TEAL";
+        session.user.fontSizeLevel = token.fontSizeLevel || "MEDIUM";
+        session.user.borderRadiusLevel = token.borderRadiusLevel || "MEDIUM";
       }
       return session;
     },

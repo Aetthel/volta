@@ -29,8 +29,8 @@ async function rateLimitedPost(request: NextRequest) {
 
   // Check if a new valid session cookie was actually assigned (ignore deletion/invalidation cookies)
   const setCookieHeader = response.headers.get("set-cookie") || "";
-  const setCookies = (response.headers as any).getSetCookie
-    ? (response.headers as any).getSetCookie()
+  const setCookies = typeof response.headers.getSetCookie === "function"
+    ? response.headers.getSetCookie()
     : [setCookieHeader];
 
   const isValidSessionCreated = setCookies.some((cookie: string) => {

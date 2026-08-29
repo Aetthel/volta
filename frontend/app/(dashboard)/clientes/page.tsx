@@ -850,57 +850,67 @@ export default function ClientesPage() {
                             <TableCell className="text-right py-4 pr-6">
                               <div className="flex items-center justify-end gap-1">
                                 {client.lopdStatus === "Aceptado" && (
-                                  <button
+                                  <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => handleSendCustomMessage(client)}
-                                    className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
+                                    className="h-8 w-8 text-on-surface-variant hover:text-primary hover:bg-primary/10"
                                     title="Enviar WhatsApp"
                                   >
                                     <MessageCircle className="w-4 h-4" />
-                                  </button>
+                                  </Button>
                                 )}
                                 {client.lopdStatus === "Pendiente" && (
-                                  <button
+                                  <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="icon"
                                     onClick={() => handleSendWhatsAppConsent(client)}
-                                    className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
+                                    className="h-8 w-8 text-amber-600 hover:text-amber-700 hover:bg-amber-500/10"
                                     title="Enviar recordatorio LOPD por WhatsApp"
                                   >
                                     <ShieldAlert className="w-4 h-4" />
-                                  </button>
+                                  </Button>
                                 )}
-                                <button
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => {
                                     setSelectedClientForAppointment(client);
                                     setIsAppointmentModalOpen(true);
                                   }}
-                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
+                                  className="h-8 w-8 text-on-surface-variant hover:text-primary hover:bg-primary/10"
                                   title="Agendar cita para este cliente"
                                 >
                                   <CalendarPlus className="w-4 h-4" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => {
                                     setEditingClient(client);
                                     setIsClientModalOpen(true);
                                   }}
-                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
+                                  className="h-8 w-8 text-on-surface-variant hover:text-primary hover:bg-primary/10"
                                   title="Editar cliente"
                                 >
                                   <Edit3 className="w-4 h-4" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() =>
                                     handleDeleteClient(client.id, `${client.name} ${client.surname || ""}`)
                                   }
-                                  className="p-1.5 text-on-surface-variant hover:text-on-surface transition-colors duration-150 cursor-pointer"
+                                  className="h-8 w-8 text-on-surface-variant hover:text-error hover:bg-error/10"
                                   title="Eliminar cliente"
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                </button>
+                                </Button>
                               </div>
                             </TableCell>
                           )}

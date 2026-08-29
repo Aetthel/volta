@@ -413,12 +413,15 @@ export default function SubscriptionCheckoutModal({
                   <Tag className="w-3.5 h-3.5 text-primary" /> ¿Tienes un cupón promocional?
                 </span>
                 {couponApplied && (
-                  <button
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
                     onClick={handleRemoveCoupon}
-                    className="text-error hover:underline text-xs font-medium cursor-pointer"
+                    className="text-error hover:text-error text-xs font-medium"
                   >
                     Eliminar cupón
-                  </button>
+                  </Button>
                 )}
               </div>
               {!couponApplied ? (

@@ -808,45 +808,9 @@ export const Separator = React.forwardRef<HTMLDivElement, SeparatorProps>(
 );
 Separator.displayName = "Separator";
 
-// Button
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
-}
+// Button (Unified)
+export { Button, type ButtonProps } from "./button";
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", ...props }, ref) => {
-    const variantClasses = {
-      primary:
-        "bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary shadow-sm",
-      secondary:
-        "bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80 shadow-sm",
-      outline: "border border-outline text-primary hover:bg-surface-container shadow-sm",
-      ghost:
-        "text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors",
-    };
-
-    const sizeClasses = {
-      sm: "px-3 py-1.5 text-[0.7rem] rounded",
-      md: "px-5 py-2 text-[0.75rem] rounded-md",
-      lg: "px-6 py-2.5 text-[0.875rem] rounded-md",
-    };
-
-    return (
-      <button
-        ref={ref}
-        className={cn(
-          "inline-flex items-center justify-center font-medium active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:pointer-events-none disabled:opacity-50 gap-2",
-          variantClasses[variant],
-          sizeClasses[size],
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
-Button.displayName = "Button";
 
 // Select
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
