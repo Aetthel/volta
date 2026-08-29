@@ -1,3 +1,9 @@
+# Capability: Automated Testing Suite
+
+## Purpose
+
+Define automated unit, integration, and end-to-end testing standards across the Volta monorepo to ensure continuous quality and regression prevention.
+
 ## Requirements
 
 ### Requirement: Automated Unit and Integration Testing
