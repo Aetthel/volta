@@ -59,7 +59,7 @@ export default function WelcomeModal() {
 
   return (
     <Dialog open={!isDismissed} onOpenChange={() => handleCloseModal()}>
-      <DialogContent className="gap-0 p-0 sm:max-w-[400px] rounded-[16px] overflow-hidden border border-outline-variant/60 bg-surface-container-lowest shadow-2xl">
+      <DialogContent className="gap-0 p-0 sm:max-w-[400px] rounded-2xl overflow-hidden border border-outline-variant/60 bg-surface-container-lowest shadow-2xl">
         {/* Top Light Hero Graphic Banner with Volta Logo & Gridlines */}
         <div className="relative w-full h-[185px] bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-low overflow-hidden flex items-center justify-center border-b border-outline-variant/30 select-none">
           {/* Dashed Grid Lines Pattern in Light Neutral */}

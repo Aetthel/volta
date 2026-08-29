@@ -91,7 +91,7 @@ export default function PersonalizationSection({
 
   const currentRadiusKey = profile.borderRadiusLevel || "MEDIUM";
   const currentRadiusPx =
-    currentRadiusKey === "SMALL" ? "4px" : currentRadiusKey === "LARGE" ? "16px" : "10px";
+    currentRadiusKey === "SMALL" ? "0px" : currentRadiusKey === "LARGE" ? "16px" : "8px";
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">

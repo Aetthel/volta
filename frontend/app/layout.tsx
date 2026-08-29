@@ -139,8 +139,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   };
 
   return (
-    <html lang="es" className={`${inter.variable}`}>
+    <html lang="es" className={`${inter.variable}`} style={inlineStyles}>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var f=localStorage.getItem("volta_font_size"),r=localStorage.getItem("volta_border_radius");var fs={SMALL:"0.9",MEDIUM:"1.0",LARGE:"1.15"},rs={SMALL:"0.0",MEDIUM:"1.0",LARGE:"2.0"};var root=document.documentElement;if(f&&fs[f])root.style.setProperty("--font-scale",fs[f]);if(r&&rs[r])root.style.setProperty("--radius-scale",rs[r]);}catch(e){}})();`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

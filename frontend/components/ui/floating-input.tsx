@@ -47,7 +47,7 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
             "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all",
             variant === "minimal" || variant === "borderless"
               ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
-              : "border border-outline rounded-sm focus:border-primary focus:border-2 py-3.5 pr-4",
+              : "border border-outline rounded-xl focus:border-primary focus:border-2 py-3.5 pr-4",
             variant === "minimal" || variant === "borderless"
               ? Icon
                 ? "pl-8"
@@ -120,7 +120,7 @@ export const FloatingSelect = React.forwardRef<HTMLSelectElement, FloatingSelect
           ref={ref}
           id={id}
           className={cn(
-            "peer block w-full bg-transparent bg-none text-body-lg text-on-surface border border-outline rounded-sm focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 pr-10 appearance-none cursor-pointer",
+            "peer block w-full bg-transparent bg-none text-body-lg text-on-surface border border-outline rounded-xl focus:border-primary focus:border-2 focus:outline-none transition-all py-3.5 pr-10 appearance-none cursor-pointer",
             Icon ? "pl-12" : "pl-4",
             className
           )}
@@ -184,7 +184,7 @@ export const FloatingTextarea = React.forwardRef<HTMLTextAreaElement, FloatingTe
             "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all resize-none",
             variant === "minimal" || variant === "borderless"
               ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
-              : "border border-outline rounded-sm focus:border-primary focus:border-2 py-3.5 px-4",
+              : "border border-outline rounded-xl focus:border-primary focus:border-2 py-3.5 px-4",
             className
           )}
           {...props}
