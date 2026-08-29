@@ -1,19 +1,21 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
+
+export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Skeleton({
   className = "",
   style = {},
-}: {
-  className?: string;
-  style?: React.CSSProperties;
-}) {
+  ...props
+}: SkeletonProps) {
   return (
     <div
-      className={`bg-surface-variant/60 animate-pulse rounded-lg ${className}`}
+      className={cn("bg-surface-variant/60 animate-pulse rounded-lg", className)}
       style={style}
       aria-hidden="true"
+      {...props}
     />
   );
 }

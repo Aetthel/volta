@@ -10,6 +10,7 @@ const badgeVariants = cva(
         default: "bg-primary text-on-primary",
         secondary: "bg-surface-container-high text-on-surface",
         destructive: "bg-error text-on-error",
+        error: "bg-error-container text-on-error-container",
         outline: "border border-outline-variant text-on-surface",
         success: "bg-green-500/15 text-green-700 dark:text-green-400 border border-green-500/20",
         warning: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20",
