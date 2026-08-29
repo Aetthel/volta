@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Users, Edit3, Trash2, CheckCircle2 } from "lucide-react";
+import { Users, Edit3, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -56,7 +56,7 @@ export const TeamTable: React.FC<TeamTableProps> = ({
   onInviteWorkerClick,
 }) => {
   return (
-    <div className="relative w-full overflow-x-auto flex-1 bg-surface-container-lowest">
+    <div className="relative w-full overflow-x-auto flex-1">
       <Table>
         <TableHeader>
           <TableRow className="border-b border-outline-variant/30">
@@ -186,10 +186,10 @@ export const TeamTable: React.FC<TeamTableProps> = ({
                   {/* Estado Column */}
                   {visibleColumns.has("estado") && (
                     <TableCell className="py-4">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 select-none">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                      <div className="inline-flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 select-none">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                         <span>Activo</span>
-                      </span>
+                      </div>
                     </TableCell>
                   )}
 

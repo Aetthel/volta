@@ -26,7 +26,7 @@ export const TeamPagination: React.FC<TeamPaginationProps> = ({
   if (totalItems === 0) return null;
 
   return (
-    <div className="w-full border-t border-outline-variant/30 py-3.5 px-6 flex items-center justify-between mt-auto bg-surface-container-lowest">
+    <div className="w-full border-t border-outline-variant/30 py-3.5 px-6 flex items-center justify-between mt-auto">
       <span className="text-xs text-on-surface-variant">
         Mostrando <strong className="text-on-surface">{startItem}–{endItem}</strong> de{" "}
         <strong className="text-on-surface">{totalItems}</strong> miembros

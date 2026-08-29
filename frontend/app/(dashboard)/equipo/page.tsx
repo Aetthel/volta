@@ -80,39 +80,36 @@ export default function EquipoPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
       <Sidebar onNewAppointmentClick={() => setIsAppointmentModalOpen(true)} />
-      <BottomNav />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
 
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col pt-6">
-          {/* Header */}
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <div>
-              <h1 className="font-display text-headline-lg text-on-surface font-semibold tracking-tight">
-                Equipo
+        <main className="flex-1 flex flex-col w-full p-0">
+          {/* Top Header & Controls Toolbar */}
+          <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
+            {/* Title & Header Profile */}
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="font-display text-headline-lg text-on-surface font-semibold capitalize tracking-tight">
+                Gestión de Equipo
               </h1>
-              <p className="text-body-sm text-on-surface-variant mt-1">
-                Administra los trabajadores, turnos y roles de acceso a tu negocio.
-              </p>
+              <div className="shrink-0">
+                <Header />
+              </div>
             </div>
-            <div className="shrink-0">
-              <Header />
-            </div>
-          </div>
 
-          {/* Action & Filter Toolbar */}
-          <TeamFiltersBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            roleFilter={roleFilter}
-            setRoleFilter={setRoleFilter}
-            visibleColumns={visibleColumns}
-            toggleColumn={toggleColumn}
-            onInviteWorkerClick={handleOpenInviteModal}
-            onFilterResetPage={() => setCurrentPage(1)}
-          />
+            {/* Filter Toolbar and Actions */}
+            <TeamFiltersBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              roleFilter={roleFilter}
+              setRoleFilter={setRoleFilter}
+              visibleColumns={visibleColumns}
+              toggleColumn={toggleColumn}
+              onInviteWorkerClick={handleOpenInviteModal}
+              onFilterResetPage={() => setCurrentPage(1)}
+            />
+          </div>
 
           {/* Main Table Container */}
           <div className="w-full flex-1 overflow-auto border-t border-outline-variant/30 flex flex-col justify-between">
@@ -148,38 +145,47 @@ export default function EquipoPage() {
           className="md:hidden fixed bottom-20 right-6 z-40 p-4 rounded-full shadow-lg"
           aria-label="Invitar nuevo trabajador"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-6 h-6" />
         </Button>
+
+        <BottomNav />
       </div>
 
-      {/* Invite / Edit Worker Modal */}
-      <InviteWorkerModal
-        isOpen={isInviteModalOpen}
-        onClose={() => {
-          setIsInviteModalOpen(false);
-          setEditingWorker(null);
-        }}
-        onSave={handleSaveWorker}
-        workerToEdit={editingWorker}
-        triggerRect={inviteModalTriggerRect}
-      />
+      {/* Invite/Edit Worker Modal */}
+      {isInviteModalOpen && (
+        <InviteWorkerModal
+          isOpen={isInviteModalOpen}
+          onClose={() => {
+            setIsInviteModalOpen(false);
+            setEditingWorker(null);
+            setInviteModalTriggerRect(null);
+          }}
+          onSave={handleSaveWorker}
+          workerToEdit={editingWorker}
+          triggerRect={inviteModalTriggerRect}
+        />
+      )}
 
       {/* New Appointment Modal */}
-      <NewAppointmentModal
-        isOpen={isAppointmentModalOpen}
-        onClose={() => setIsAppointmentModalOpen(false)}
-        onSave={() => fetchMembers()}
-      />
+      {isAppointmentModalOpen && (
+        <NewAppointmentModal
+          isOpen={isAppointmentModalOpen}
+          onClose={() => setIsAppointmentModalOpen(false)}
+          onSave={() => {
+            setIsAppointmentModalOpen(false);
+            fetchMembers();
+          }}
+        />
+      )}
 
-      {/* Toast Feedback */}
+      {/* Toast Notification */}
       {showToast && (
-        <Alert
-          variant="info"
-          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
-        >
-          <CheckCircle2 className="w-5 h-5 text-secondary shrink-0" />
-          <p className="text-sm font-medium text-on-secondary-container">{toastText}</p>
-        </Alert>
+        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <Alert variant="info" className="flex items-center gap-2 shadow-lg bg-surface border border-primary/20">
+            <CheckCircle2 className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">{toastText}</span>
+          </Alert>
+        </div>
       )}
     </div>
   );
