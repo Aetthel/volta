@@ -22,38 +22,39 @@ enum SubscriptionStatus {
 }
 
 model Business {
-  id                 String             @id @default(uuid())
-  name               String
-  phone              String             // Teléfono comercial para vincular WhatsApp
-  email              String?            // Email de contacto
-  address            String?            // Dirección comercial
-  logoUrl            String?            // URL del logo
-  coverUrl           String?            // URL de foto del negocio
-  description        String?            // Descripción
-  welcomeMessage     String?            // Plantilla de mensaje de bienvenida
-  reminderMessage    String?            // Plantilla de mensaje de recordatorio
-  whatsappStatus     WhatsAppStatus     @default(DISCONNECTED)
-  qrCode             String?            // Código QR para vinculación
-  themeColor         String             @default("CLINICAL_ELEGANCE")
-  fontSizeLevel      String             @default("MEDIUM")
-  borderRadiusLevel  String             @default("MEDIUM")
-  businessType       String?            // p.ej. Peluquería, Estética, Veterinaria
-  enablePublicBooking Boolean            @default(true)
-  subscriptionPlan   SubscriptionPlan   @default(PRO)
-  subscriptionStatus SubscriptionStatus @default(TRIALING)
-  trialExpiresAt     DateTime?
-  sandboxExpiresAt   DateTime?
-  gracePeriodExpiresAt DateTime?
-  cancelAtPeriodEnd  Boolean            @default(false)
+  id                         String                @id @default(uuid())
+  name                       String
+  phone                      String // Teléfono comercial para vincular WhatsApp
+  email                      String? // Email de contacto
+  address                    String? // Dirección comercial
+  logoUrl                    String? // URL del logo
+  coverUrl                   String? // URL de foto del negocio
+  description                String? // Descripción
+  welcomeMessage             String? // Plantilla de mensaje de bienvenida
+  reminderMessage            String? // Plantilla de mensaje de recordatorio
+  whatsappStatus             WhatsAppStatus        @default(DISCONNECTED)
+  qrCode                     String? // Código QR para vinculación
+  themeColor                 String                @default("CLINICAL_ELEGANCE")
+  fontSizeLevel              String                @default("MEDIUM")
+  borderRadiusLevel          String                @default("MEDIUM")
+  businessType               String? // p.ej. Peluquería, Estética, Veterinaria
+  enablePublicBooking        Boolean               @default(true)
+  subscriptionPlan           SubscriptionPlan      @default(PRO)
+  subscriptionStatus         SubscriptionStatus    @default(TRIALING)
+  trialExpiresAt             DateTime?
+  sandboxExpiresAt           DateTime?
+  gracePeriodExpiresAt       DateTime?
+  cancelAtPeriodEnd          Boolean               @default(false)
   lemonSqueezyCustomerId     String?
   lemonSqueezySubscriptionId String?
-  appointments       Appointment[]
-  clients            Client[]
-  hours              BusinessHours[]
-  services           Service[]
-  users              User[]
-  lopdConsentLogs    LopdConsentLog[]
-  invoices           Invoice[]
+  appointments               Appointment[]
+  clients                    Client[]
+  hours                      BusinessHours[]
+  services                   Service[]
+  users                      User[]
+  lopdConsentLogs            LopdConsentLog[]
+  invoices                   Invoice[]
+  bookingVerifications       BookingVerification[]
 }
 
 enum UserRole {
@@ -63,15 +64,15 @@ enum UserRole {
 }
 
 model User {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
-  email      String   @unique
-  password   String   // Hashed password
-  role       UserRole @default(EMPLEADO)
+  email      String    @unique
+  password   String // Hashed password
+  role       UserRole  @default(EMPLEADO)
   businessId String?
   business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   alerts     Alert[]
 
   @@index([businessId])
@@ -89,8 +90,8 @@ model Client {
   name            String
   surname         String
   email           String?
-  phone           String           // Formato internacional
-  lastVisit       DateTime?        // Cambiado a DateTime nativo
+  phone           String // Forma canónica de normalizePhone (dígitos, sin prefijo 34)
+  lastVisit       DateTime? // Cambiado a DateTime nativo
   frequentService String?
   lopdStatus      String           @default("Pendiente")
   avatarUrl       String?
@@ -101,7 +102,7 @@ model Client {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
-  @@index([businessId, phone])
+  @@unique([businessId, phone])
   @@index([businessId, email])
   @@index([businessId, lopdStatus])
   @@index([businessId])
@@ -113,18 +114,18 @@ enum ServiceType {
 }
 
 model Appointment {
-  id              String           @id @default(uuid())
+  id              String            @id @default(uuid())
   clientName      String
   clientPhone     String
   appointmentDate DateTime
   status          AppointmentStatus @default(PENDING)
-  attended        Boolean          @default(true)
+  attended        Boolean           @default(true)
   businessId      String
-  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business        Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
   clientId        String?
-  client          Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  client          Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
   serviceId       String?
-  service         Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  service         Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   serviceName     String?
 
   @@index([businessId, appointmentDate])
@@ -145,9 +146,9 @@ model BusinessHours {
   id         String   @id @default(uuid())
   businessId String
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  dayOfWeek  Int      // 0 = Domingo, 1 = Lunes, etc.
-  openTime   String   // e.g., "09:00"
-  closeTime  String   // e.g., "20:00"
+  dayOfWeek  Int // 0 = Domingo, 1 = Lunes, etc.
+  openTime   String // e.g., "09:00"
+  closeTime  String // e.g., "20:00"
   isClosed   Boolean  @default(false)
 
   @@unique([businessId, dayOfWeek])
@@ -155,20 +156,20 @@ model BusinessHours {
 }
 
 model Service {
-  id          String        @id @default(uuid())
-  businessId  String
-  business    Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  duration    Int           // Duración en minutos
-  price       Decimal       @db.Decimal(10, 2)
-  type        ServiceType   @default(INDIVIDUAL)
-  capacity    Int           @default(1)
-  color       String        @default("TEAL")
-  isActive    Boolean       @default(true)
+  id           String        @id @default(uuid())
+  businessId   String
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  duration     Int // Duración en minutos
+  price        Decimal       @db.Decimal(10, 2)
+  type         ServiceType   @default(INDIVIDUAL)
+  capacity     Int           @default(1)
+  color        String        @default("TEAL")
+  isActive     Boolean       @default(true)
   appointments Appointment[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
   @@index([businessId])
   @@index([businessId, isActive])
@@ -219,21 +220,40 @@ enum InvoiceStatus {
 }
 
 model Invoice {
-  id                    String        @id @default(uuid())
-  businessId            String
-  business              Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  lemonSqueezyId        String?       @unique
-  invoiceNumber         String
-  amount                Decimal       @db.Decimal(10, 2)
-  currency              String        @default("EUR")
-  status                InvoiceStatus @default(PAID)
-  invoiceUrl            String?
-  billingReason         String?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  id             String        @id @default(uuid())
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  lemonSqueezyId String?       @unique
+  invoiceNumber  String
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("EUR")
+  status         InvoiceStatus @default(PAID)
+  invoiceUrl     String?
+  billingReason  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@index([businessId])
   @@index([businessId, createdAt])
   @@index([businessId, status])
 }
 
+// Verificación por código de un solo uso del teléfono con el que un visitante
+// accede al portal público de reservas. Se purga a las 24h (ver cron de limpieza).
+model BookingVerification {
+  id          String    @id @default(uuid())
+  businessId  String
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  phone       String // Forma canónica de normalizePhone
+  pendingName String? // Nombre aportado cuando el teléfono no era cliente todavía
+  codeHash    String // HMAC-SHA256 del código; nunca se almacena en claro
+  attempts    Int       @default(0)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([businessId, phone])
+  @@index([businessId, phone, createdAt])
+  @@index([expiresAt])
+}

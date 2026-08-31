@@ -157,6 +157,9 @@ services:
     environment:
       - CI=true
       - NEXT_TELEMETRY_DISABLED=1
+      # Sin esto el HMR no se entera de las ediciones hechas en el host: el bind
+      # mount de Windows no propaga inotify al contenedor. Ver next.config.mjs.
+      - NEXT_DEV_POLLING=true
       - PNPM_CONFIG_STORE_DIR=/home/volta/.local/share/pnpm/store
       - DATABASE_URL=postgresql://${POSTGRES_USER:-volta_user}:${POSTGRES_PASSWORD:-volta_password}@db:5432/${POSTGRES_DB:-volta_db}?schema=public
       - BACKEND_INTERNAL_URL=http://backend:3001

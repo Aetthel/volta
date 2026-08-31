@@ -14,6 +14,10 @@ const envSchema = z.object({
   API_KEY: z.string().min(1, "API_KEY es requerida").default("test-api-key"),
   BACKEND_JWT_SECRET: z.string().min(1, "BACKEND_JWT_SECRET es requerida").default("test-jwt-secret"),
   LOPD_HMAC_SECRET: z.string().min(1, "LOPD_HMAC_SECRET es requerida").default("test-lopd-hmac-secret"),
+  BOOKING_JWT_SECRET: z
+    .string()
+    .min(1, "BOOKING_JWT_SECRET es requerida")
+    .default("test-booking-jwt-secret"),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
   EVOLUTION_API_URL: z.string().default("http://localhost:8080"),
   EVOLUTION_API_KEY: z.string().default("volta_dev_evolution_key_2026"),
@@ -32,6 +36,7 @@ try {
       API_KEY: process.env.API_KEY || "test-api-key",
       BACKEND_JWT_SECRET: process.env.BACKEND_JWT_SECRET || "test-jwt-secret",
       LOPD_HMAC_SECRET: process.env.LOPD_HMAC_SECRET || "test-lopd-hmac-secret",
+      BOOKING_JWT_SECRET: process.env.BOOKING_JWT_SECRET || "test-booking-jwt-secret",
       FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
       EVOLUTION_API_URL: process.env.EVOLUTION_API_URL || "http://localhost:8080",
       EVOLUTION_API_KEY: process.env.EVOLUTION_API_KEY || "volta_dev_evolution_key_2026",
@@ -49,6 +54,9 @@ const config = {
   apiKey: parsedEnv.API_KEY,
   backendJwtSecret: parsedEnv.BACKEND_JWT_SECRET,
   lopdHmacSecret: parsedEnv.LOPD_HMAC_SECRET,
+  // Secreto propio, separado del de backend: este token acredita a un visitante
+  // anónimo del portal público, no a un usuario con rol.
+  bookingJwtSecret: parsedEnv.BOOKING_JWT_SECRET,
   port:
     process.env.BACKEND_PORT ||
     (process.env.PORT && process.env.PORT !== "3000" ? process.env.PORT : 3001),
@@ -58,5 +66,15 @@ const config = {
   groqApiKey: parsedEnv.GROQ_API_KEY,
   openaiApiKey: parsedEnv.OPENAI_API_KEY,
 };
+
+// El secreto de la sesion de reserva firma credenciales para visitantes anonimos
+// de internet. Arrancar en produccion con el valor por defecto dejaria esos
+// tokens falsificables por cualquiera que lea el repositorio.
+if (process.env.NODE_ENV === "production" && config.bookingJwtSecret === "test-booking-jwt-secret") {
+  console.error(
+    "[31m[FATAL] BOOKING_JWT_SECRET no esta definida: el portal publico de reservas emitiria tokens firmados con el secreto por defecto.[0m"
+  );
+  process.exit(1);
+}
 
 export default config;

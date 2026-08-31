@@ -35,23 +35,23 @@ export default function WorkerModal({
   return (
     <div className="fixed inset-0 bg-black/55 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl w-full max-w-md shadow-2xl overflow-visible flex flex-col">
-        <div className="p-6 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
-          <h2 className="font-title-lg text-title-lg font-semibold text-on-surface flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary" />
+        <div className="px-5 py-3.5 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/35">
+          <h2 className="font-title-lg text-base font-semibold text-on-surface flex items-center gap-2">
+            <Users className="w-4 h-4 text-primary" />
             {isEditing ? "Editar Trabajador" : "Nuevo Trabajador"}
           </h2>
           <Button
             variant="ghost"
             onClick={onClose}
-            className="p-1.5 text-on-surface-variant rounded-full w-8 h-8 active:scale-90 shadow-none"
+            className="p-1 text-on-surface-variant rounded-full w-7 h-7 active:scale-90 shadow-none"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </Button>
         </div>
 
-        <form onSubmit={onSave} className="p-6 flex flex-col gap-6">
+        <form onSubmit={onSave} className="px-5 py-4 flex flex-col gap-4">
           {errorMsg && (
-            <div className="bg-error-container border border-error-container/45 text-on-error-container p-4 rounded-xl font-medium text-body-md">
+            <div className="bg-error-container border border-error-container/45 text-on-error-container px-3 py-2.5 rounded-xl font-medium text-body-md">
               {errorMsg}
             </div>
           )}
@@ -115,13 +115,13 @@ export default function WorkerModal({
             </Field>
           </FieldGroup>
 
-          <div className="flex items-center justify-end gap-3 mt-4 border-t border-outline-variant/50 pt-4">
+          <div className="flex items-center justify-end gap-3 mt-1 border-t border-outline-variant/50 pt-3">
             <Button
               type="button"
               variant="ghost"
               size="md"
               onClick={onClose}
-              className="px-4 py-2.5 text-on-surface-variant active:scale-95 shadow-none font-medium"
+              className="px-4 py-2 text-on-surface-variant active:scale-95 shadow-none font-medium"
             >
               Cancelar
             </Button>
@@ -129,7 +129,7 @@ export default function WorkerModal({
               type="submit"
               variant="primary"
               size="md"
-              className="px-5 py-2.5 active:scale-95 font-medium"
+              className="px-5 py-2 active:scale-95 font-medium"
             >
               {isEditing ? "Guardar Cambios" : "Crear Trabajador"}
             </Button>

@@ -8,6 +8,7 @@ import cron from "node-cron";
 import { runSentinel } from "./services/botService.js";
 import { cleanupExpiredDemos } from "./services/demoService.js";
 import { purgeExpiredConsentIdentifiers } from "./services/lopdService.js";
+import { purgeExpiredVerifications } from "./services/bookingIdentityService.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { fileURLToPath } from "url";
@@ -83,6 +84,17 @@ cron.schedule("30 3 * * *", async () => {
   }
 });
 
+// Purge public-booking verification data every day at 03:45, right after the
+// LOPD purge: the phone, name and IP of someone who never finished a booking
+// stop being necessary once the code has expired.
+cron.schedule("45 3 * * *", async () => {
+  try {
+    await purgeExpiredVerifications();
+  } catch (err) {
+    console.error("[Booking Verification Purge] Error:", err);
+  }
+});
+
 // CORS Middleware — only allow requests from configured frontend origins
 const ALLOWED_ORIGINS = (process.env.FRONTEND_URL || "http://localhost:3000")
   .split(",")
@@ -95,7 +107,7 @@ app.use((req, res, next) => {
   }
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, x-api-key"
+    "Origin, X-Requested-With, Content-Type, Accept, x-api-key, x-booking-token"
   );
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Vary", "Origin");

@@ -83,6 +83,14 @@ async function proxyRequest(
   const userAgent = request.headers.get("user-agent");
   if (userAgent) headers.set("user-agent", userAgent);
 
+  // El portal público de reservas viaja con su propia credencial: el token que
+  // el visitante recibe al verificar su teléfono por WhatsApp. Sin reenviarlo,
+  // el backend vería todas las peticiones del portal como no verificadas.
+  if (pathParts[0] === "public") {
+    const bookingToken = request.headers.get("x-booking-token");
+    if (bookingToken) headers.set("x-booking-token", bookingToken);
+  }
+
   // Pass LOPD headers for consent routes
   if (pathParts[0] === "lopd") {
     const lopdToken = request.headers.get("x-lopd-token");

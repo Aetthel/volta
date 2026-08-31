@@ -8,9 +8,28 @@ const normalizeString = (str) => {
     .replace(/\s+/g, " ");
 };
 
+/**
+ * Forma canónica de un teléfono dentro del sistema: solo dígitos y sin el
+ * prefijo 34. Es el único formato con el que se compara y se almacena
+ * `Client.phone`, de modo que `600112233`, `600 11 22 33` y `+34600112233`
+ * resuelvan siempre al mismo cliente.
+ *
+ * No confundir con `whatsappService.cleanPhoneForWhatsApp`, que hace lo
+ * contrario (añade el 34) porque es la forma de *marcado* que exige el
+ * `chatId` del gateway. Esa se aplica en el momento del envío, sobre el valor
+ * ya canónico; nunca para guardar ni para buscar.
+ *
+ * @param {string} phone
+ * @returns {string} Teléfono canónico, o "" si la entrada está vacía.
+ */
 const normalizePhone = (phone) => {
   if (!phone) return "";
-  const digits = phone.replace(/\D/g, "");
+  let digits = phone.replace(/\D/g, "");
+  // "0034600112233" es una forma habitual de escribir el prefijo internacional:
+  // sin quitar el 00 quedaría como un teléfono distinto al mismo número con "+34".
+  if (digits.startsWith("00") && digits.length > 2) {
+    digits = digits.slice(2);
+  }
   if (digits.startsWith("34") && digits.length > 9) {
     return digits.slice(2);
   }
