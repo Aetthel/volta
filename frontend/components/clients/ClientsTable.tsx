@@ -18,9 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
-import { Empty, Skeleton } from "@/components/ui/volta-ui";
+import { Avatar, Empty, Skeleton } from "@/components/ui/volta-ui";
 import { formatDateTimeParts } from "@/lib/utils";
 import { formatPhoneForDisplay, type ClientItem, type ClientColumn } from "@/lib/hooks/useClientsList";
 
@@ -172,10 +171,10 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
                   {visibleColumns.has("cliente") && (
                     <TableCell className="py-4 pl-6 font-medium">
                       <div className="flex items-center gap-3">
-                        <UserAvatar
+                        <Avatar
                           name={client.name}
                           surname={client.surname}
-                          avatarUrl={client.avatarUrl}
+                          src={client.avatarUrl}
                           size="md"
                         />
                         <div className="min-w-0">

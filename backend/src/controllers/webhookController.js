@@ -139,8 +139,11 @@ export async function handleWhatsAppWebhook(req, res) {
               data: {
                 userId: targetUserId,
                 type: "NOTIFICACION",
+                category: "APPOINTMENT",
                 title: `Cita Confirmada: ${clientName}`,
                 description: `El cliente ha confirmado su cita respondiendo "${text}"`,
+                actionUrl: "/agenda",
+                actionLabel: "Ver en Agenda",
               },
             });
           }
@@ -157,8 +160,11 @@ export async function handleWhatsAppWebhook(req, res) {
               data: {
                 userId: targetUserId,
                 type: "AVISO",
+                category: "APPOINTMENT",
                 title: `Cita Cancelada: ${clientName}`,
                 description: `El cliente ha indicado que no asistirá: "${text}"`,
+                actionUrl: "/agenda",
+                actionLabel: "Ver en Agenda",
               },
             });
           }
@@ -169,8 +175,11 @@ export async function handleWhatsAppWebhook(req, res) {
               data: {
                 userId: targetUserId,
                 type: "EMERGENTE",
+                category: "APPOINTMENT",
                 title: `Solicitud de Cambio de Cita: ${clientName}`,
                 description: `El cliente solicita cambiar la cita: "${text}"`,
+                actionUrl: "/agenda",
+                actionLabel: "Reprogramar",
               },
             });
           }
@@ -182,8 +191,11 @@ export async function handleWhatsAppWebhook(req, res) {
               data: {
                 userId: targetUserId,
                 type: "AVISO",
-                title: `Mensaje de ${clientName}`,
+                category: "WHATSAPP",
+                title: `Mensaje de WhatsApp: ${clientName}`,
                 description: `Mensaje recibido: "${text}"`,
+                actionUrl: "/clientes",
+                actionLabel: "Ver Cliente",
               },
             });
           }

@@ -6,6 +6,9 @@ import { asyncHandler } from "../utils/index.js";
 
 const router = express.Router();
 
+// GET: Summary counts of alerts
+router.get("/summary", authenticate, asyncHandler(alertsController.getAlertSummary));
+
 // GET: Fetch all alerts for the logged-in user
 router.get("/", authenticate, asyncHandler(alertsController.getAlerts));
 
@@ -23,5 +26,14 @@ router.put("/read-all", authenticate, asyncHandler(alertsController.markAllAlert
 
 // PUT: Mark a specific alert as read
 router.put("/:id/read", authenticate, asyncHandler(alertsController.markAlertAsRead));
+
+// PUT: Archive an alert
+router.put("/:id/archive", authenticate, asyncHandler(alertsController.archiveAlert));
+
+// PUT: Unarchive an alert
+router.put("/:id/unarchive", authenticate, asyncHandler(alertsController.unarchiveAlert));
+
+// DELETE: Delete an alert
+router.delete("/:id", authenticate, asyncHandler(alertsController.deleteAlert));
 
 export default router;

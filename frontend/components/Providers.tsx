@@ -4,32 +4,35 @@ import { Suspense } from "react";
 import { SessionProvider } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { AlertsProvider } from "@/lib/alerts";
-import ThemeInitializer from "@/components/ThemeInitializer";
+import { ThemeProvider } from "@/context/ThemeContext";
+import type { ThemePreferences } from "@/lib/theme";
 import TopProgressBar from "@/components/TopProgressBar";
 import SecurityGuard from "@/components/SecurityGuard";
 
-const WelcomeModal = dynamic(() => import("@/components/WelcomeModal"), {
-  ssr: false,
-});
+import WelcomeModal from "@/components/WelcomeModal";
 
 export default function Providers({
   session,
+  initialPreferences,
   children,
 }: {
   session: any;
+  initialPreferences?: ThemePreferences;
   children: React.ReactNode;
 }) {
   return (
-    <SessionProvider session={session}>
-      <AlertsProvider>
-        <ThemeInitializer />
-        <SecurityGuard />
-        <Suspense fallback={null}>
-          <TopProgressBar />
-        </Suspense>
-        <WelcomeModal />
-        {children}
-      </AlertsProvider>
+    <SessionProvider basePath="/api/auth" session={session}>
+      <ThemeProvider initialPreferences={initialPreferences}>
+        <AlertsProvider>
+          <SecurityGuard />
+          <Suspense fallback={null}>
+            <TopProgressBar />
+          </Suspense>
+          <WelcomeModal />
+          {children}
+        </AlertsProvider>
+      </ThemeProvider>
     </SessionProvider>
   );
 }
+

@@ -6,9 +6,7 @@ import dynamic from "next/dynamic";
 import { X, Lock, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
-const SubscriptionCheckoutModal = dynamic(() => import("./SubscriptionCheckoutModal"), {
-  ssr: false,
-});
+import SubscriptionCheckoutModal from "./SubscriptionCheckoutModal";
 
 interface UpgradeProModalProps {
   isOpen: boolean;

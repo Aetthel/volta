@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ChevronDown, Settings } from "lucide-react";
+import { Avatar } from "@/components/ui/volta-ui";
 
 interface WorkspaceSwitcherProps {
   businessName: string;
@@ -19,7 +19,6 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({
   isCollapsed,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const initial = businessName.trim().charAt(0).toUpperCase() || "B";
 
   return (
     <div className="relative">
@@ -31,23 +30,13 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({
         title={businessName}
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0 overflow-hidden">
-            {businessLogo ? (
-              <Image
-                src={businessLogo}
-                alt={businessName}
-                width={36}
-                height={36}
-                unoptimized
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = "none";
-                }}
-              />
-            ) : (
-              <span>{initial}</span>
-            )}
-          </div>
+          <Avatar
+            name={businessName}
+            src={businessLogo}
+            type="business"
+            size="sm"
+            className="w-9 h-9 rounded-xl shadow-xs"
+          />
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden min-w-0">
               <span className="text-sm font-semibold leading-tight text-on-surface truncate max-w-[140px]">

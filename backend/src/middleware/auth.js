@@ -99,4 +99,6 @@ const requireApiKey = (req, res, next) => {
   next();
 };
 
-export { authenticate, requireRole, requireApiKey };
+const requireAuth = authenticate;
+
+export { authenticate, requireAuth, requireRole, requireApiKey };

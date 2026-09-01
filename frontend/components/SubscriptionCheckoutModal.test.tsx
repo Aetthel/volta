@@ -58,18 +58,17 @@ describe("SubscriptionCheckoutModal", () => {
 
     // Step 1 -> Step 2
     const continueBtn = screen.getByRole("button", {
-      name: /continuar con datos de facturación/i,
+      name: /continuar a facturación/i,
     });
     fireEvent.click(continueBtn);
 
     expect(screen.getByText("Datos de Facturación")).toBeInTheDocument();
 
     // Step 2 -> Step 3
-    const toPaymentBtn = screen.getByRole("button", { name: /ir al pago seguro/i });
+    const toPaymentBtn = screen.getByRole("button", { name: /continuar al pago/i });
     fireEvent.click(toPaymentBtn);
 
-    expect(screen.getByText("Pasarela de Pago Segura")).toBeInTheDocument();
-    expect(screen.getByText("🍏 Apple Pay")).toBeInTheDocument();
-    expect(screen.getByText("🌐 Google Pay")).toBeInTheDocument();
+    expect(screen.getByText("Resumen y Pago")).toBeInTheDocument();
+    expect(screen.getByText(/Proceder al Pago Seguro/i)).toBeInTheDocument();
   });
 });

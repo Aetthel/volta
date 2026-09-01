@@ -12,12 +12,8 @@ import { Button, Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
 
-const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
-  ssr: false,
-});
-const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
-  ssr: false,
-});
+import NewAppointmentModal from "@/components/NewAppointmentModal";
+import AddClientModal from "@/components/AddClientModal";
 
 interface ServiceItem {
   id?: string;

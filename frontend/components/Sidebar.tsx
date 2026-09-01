@@ -19,13 +19,12 @@ import {
   FileText,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
+import { useAlerts } from "@/lib/alerts";
 import { WorkspaceSwitcher } from "./sidebar/WorkspaceSwitcher";
 import { SidebarNav, type NavGroupData } from "./sidebar/SidebarNav";
 import { CommandPaletteModal } from "./sidebar/CommandPaletteModal";
 
-const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
-  ssr: false,
-});
+import UpgradeProModal from "@/components/UpgradeProModal";
 
 interface SidebarProps {
   onNewAppointmentClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -39,6 +38,7 @@ const DEFAULT_WIDTH = 260;
 export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { unreadCount } = useAlerts();
 
   const role = session?.user?.role || "EMPLEADO";
   const subscriptionPlan = session?.user?.subscriptionPlan || "BASIC";
@@ -184,6 +184,13 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K", badge: "Nuevo" },
         { id: "admin", title: "Control Global", href: "/admin", icon: BarChart3 },
         { id: "sedes", title: "Locales", href: "/sedes", icon: Store },
+        {
+          id: "inbox",
+          title: "Inbox",
+          href: "/inbox",
+          icon: Inbox,
+          badge: unreadCount > 0 ? (unreadCount > 99 ? "+99" : `+${unreadCount}`) : undefined,
+        },
       ],
     });
     navGroups.push({
@@ -199,7 +206,13 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
       items: [
         { id: "search", title: "Buscar", icon: Search, shortcut: "⌘K", badge: "Nuevo" },
         { id: "home", title: "Inicio", href: "/inicio", icon: LayoutDashboard },
-        { id: "inbox", title: "Inbox", icon: Inbox, badge: "Próximamente" },
+        {
+          id: "inbox",
+          title: "Inbox",
+          href: "/inbox",
+          icon: Inbox,
+          badge: unreadCount > 0 ? (unreadCount > 99 ? "+99" : `+${unreadCount}`) : undefined,
+        },
         { id: "analytics", title: "Analítica", icon: Activity, badge: "Próximamente" },
       ],
     });

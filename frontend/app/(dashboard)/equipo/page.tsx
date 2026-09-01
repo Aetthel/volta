@@ -18,12 +18,8 @@ import { TeamTable } from "@/components/team/TeamTable";
 import { TeamPagination } from "@/components/team/TeamPagination";
 import type { WorkerToEdit } from "@/components/InviteWorkerModal";
 
-const InviteWorkerModal = dynamicImport(() => import("@/components/InviteWorkerModal"), {
-  ssr: false,
-});
-const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
-  ssr: false,
-});
+import InviteWorkerModal from "@/components/InviteWorkerModal";
+import NewAppointmentModal from "@/components/NewAppointmentModal";
 
 export default function EquipoPage() {
   const { data: session } = useSession();

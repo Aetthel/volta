@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
   User,
@@ -17,7 +17,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Calendar,
-  Sparkles,
+  QrCode,
+  Copy,
+  Check,
+  Smartphone,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BusinessProfile, ToastState } from "@/types/settings";
@@ -35,6 +39,8 @@ import {
   FieldGroup,
   Field,
   FieldLabel,
+  Avatar,
+  Alert,
 } from "@/components/ui/volta-ui";
 
 const DEFAULT_AVATAR =
@@ -59,16 +65,33 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
   // Password Form State
   const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
+  // 2FA State & Modal
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [is2faModalOpen, setIs2faModalOpen] = useState(false);
+  const [isDisable2faModalOpen, setIsDisable2faModalOpen] = useState(false);
+  const [twoFactorSetupData, setTwoFactorSetupData] = useState<{
+    secret: string;
+    qrCode: string;
+    otpAuthUrl: string;
+  } | null>(null);
+  const [twoFactorCodeInput, setTwoFactorCodeInput] = useState("");
+  const [disablePasswordInput, setDisablePasswordInput] = useState("");
+  const [twoFactorBackupCodes, setTwoFactorBackupCodes] = useState<string[]>([]);
+  const [loading2fa, setLoading2fa] = useState(false);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+
   // User database record
   const [userProfileData, setUserProfileData] = useState<{
     id?: string;
     createdAt?: string;
+    twoFactorEnabled?: boolean;
   } | null>(null);
 
   const workerPhotoInputRef = useRef<HTMLInputElement>(null);
@@ -91,7 +114,12 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
         .then((res) => {
           if (Array.isArray(res.data)) {
             const current = res.data.find((u: { id?: string }) => u.id === session.user.id);
-            if (current) setUserProfileData(current);
+            if (current) {
+              setUserProfileData(current);
+              if (typeof current.twoFactorEnabled === "boolean") {
+                setTwoFactorEnabled(current.twoFactorEnabled);
+              }
+            }
           }
         })
         .catch(() => {});
@@ -183,14 +211,14 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     e.preventDefault();
     if (!session?.user?.id) return;
 
-    if (!passwordForm.newPassword) {
-      setToast({ show: true, text: "Introduce una nueva contraseña" });
+    if (!passwordForm.currentPassword) {
+      setToast({ show: true, text: "Introduce tu contraseña actual" });
       setTimeout(() => setToast({ show: false, text: "" }), 3000);
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      setToast({ show: true, text: "La contraseña debe tener al menos 6 caracteres" });
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
+      setToast({ show: true, text: "La nueva contraseña debe tener al menos 8 caracteres" });
       setTimeout(() => setToast({ show: false, text: "" }), 3000);
       return;
     }
@@ -203,12 +231,14 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
     setSavingPassword(true);
     try {
-      const res = await apiClient.team.update(session.user.id, {
-        password: passwordForm.newPassword,
+      const res = await apiClient.auth.changePassword({
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
       });
+
       if (res.error) throw new Error(res.error);
 
-      setPasswordForm({ newPassword: "", confirmPassword: "" });
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setToast({ show: true, text: "¡Contraseña actualizada correctamente!" });
       setTimeout(() => setToast({ show: false, text: "" }), 3000);
     } catch (err: any) {
@@ -219,12 +249,92 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     }
   };
 
+  // 2FA: Open Setup Modal
+  const handleStart2faSetup = async () => {
+    setLoading2fa(true);
+    try {
+      const res = await apiClient.auth.setupTwoFactor();
+      if (res.error) throw new Error(res.error);
+      if (res.data) {
+        setTwoFactorSetupData(res.data);
+        setIs2faModalOpen(true);
+      }
+    } catch (err: any) {
+      setToast({ show: true, text: err.message || "Error al preparar 2FA." });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } finally {
+      setLoading2fa(false);
+    }
+  };
+
+  // 2FA: Confirm Code & Enable
+  const handleVerify2faCode = async () => {
+    if (!twoFactorSetupData || !twoFactorCodeInput.trim()) return;
+
+    setLoading2fa(true);
+    try {
+      const res = await apiClient.auth.enableTwoFactor({
+        secret: twoFactorSetupData.secret,
+        code: twoFactorCodeInput.trim(),
+      });
+
+      if (res.error) throw new Error(res.error);
+
+      setTwoFactorEnabled(true);
+      if (res.data?.backupCodes) {
+        setTwoFactorBackupCodes(res.data.backupCodes);
+      } else {
+        setIs2faModalOpen(false);
+      }
+      setToast({ show: true, text: "¡Autenticación en Dos Pasos activada!" });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } catch (err: any) {
+      setToast({ show: true, text: err.message || "Código inválido." });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } finally {
+      setLoading2fa(false);
+    }
+  };
+
+  // 2FA: Disable
+  const handleDisable2fa = async () => {
+    if (!disablePasswordInput) return;
+
+    setLoading2fa(true);
+    try {
+      const res = await apiClient.auth.disableTwoFactor({
+        password: disablePasswordInput,
+      });
+
+      if (res.error) throw new Error(res.error);
+
+      setTwoFactorEnabled(false);
+      setIsDisable2faModalOpen(false);
+      setDisablePasswordInput("");
+      setToast({ show: true, text: "Autenticación en Dos Pasos desactivada." });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } catch (err: any) {
+      setToast({ show: true, text: err.message || "Error al desactivar 2FA." });
+      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    } finally {
+      setLoading2fa(false);
+    }
+  };
+
+  // Copy secret key helper
+  const handleCopySecret = () => {
+    if (!twoFactorSetupData?.secret) return;
+    navigator.clipboard.writeText(twoFactorSetupData.secret);
+    setCopiedSecret(true);
+    setTimeout(() => setCopiedSecret(false), 2000);
+  };
+
   // Password strength helper
   const getPasswordStrength = (pwd: string) => {
     if (!pwd) return { score: 0, label: "", color: "" };
     let score = 0;
-    if (pwd.length >= 6) score += 1;
-    if (pwd.length >= 10) score += 1;
+    if (pwd.length >= 8) score += 1;
+    if (pwd.length >= 12) score += 1;
     if (/[A-Z]/.test(pwd) && /[0-9]/.test(pwd)) score += 1;
     if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
 
@@ -247,24 +357,19 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
             <div className="relative group/avatar shrink-0">
               <div
                 onClick={() => workerPhotoInputRef.current?.click()}
-                className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-outline-variant/60 hover:border-primary bg-surface-container-high shadow-xs flex items-center justify-center cursor-pointer transition-all duration-200"
+                className="relative rounded-full cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/40"
                 title="Haz clic para cambiar foto de perfil"
               >
-                {hasCustomPhoto ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={profile.workerPhoto}
-                    alt="Foto de perfil"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-2xl">
-                    {personalForm.name ? personalForm.name.charAt(0).toUpperCase() : "U"}
-                  </div>
-                )}
+                <Avatar
+                  name={personalForm.name || session?.user?.name || "Usuario"}
+                  src={hasCustomPhoto ? profile.workerPhoto : null}
+                  type="person"
+                  size="xl"
+                  className="w-20 h-20 shadow-sm"
+                />
 
                 {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-2xl">
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full">
                   <Camera className="w-5 h-5 text-white" />
                 </div>
               </div>
@@ -341,75 +446,132 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
       {/* 2. Main 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Columna Izquierda: Información Personal (7 cols) */}
-        <Card className="lg:col-span-7 flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
-              <User className="w-4 h-4 text-primary" />
-              <span>Información Personal</span>
-            </CardTitle>
-            <CardDescription>
-              Actualiza tu nombre público y el correo electrónico con el que accedes a la plataforma.
-            </CardDescription>
-          </CardHeader>
+        <div className="lg:col-span-7 flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                <span>Información Personal</span>
+              </CardTitle>
+              <CardDescription>
+                Actualiza tu nombre público y el correo electrónico con el que accedes a la plataforma.
+              </CardDescription>
+            </CardHeader>
 
-          <form onSubmit={handleSavePersonalInfo}>
-            <CardContent className="flex flex-col gap-5 pt-2">
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
-                  <FloatingInput
-                    id="userName"
-                    label="Nombre y Apellidos"
-                    type="text"
-                    required
-                    value={personalForm.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPersonalForm({ ...personalForm, name: e.target.value })
-                    }
-                    icon={User}
-                  />
-                </Field>
+            <form onSubmit={handleSavePersonalInfo}>
+              <CardContent className="flex flex-col gap-5 pt-2">
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
+                    <FloatingInput
+                      id="userName"
+                      label="Nombre y Apellidos"
+                      type="text"
+                      required
+                      value={personalForm.name}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPersonalForm({ ...personalForm, name: e.target.value })
+                      }
+                      icon={User}
+                    />
+                  </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
-                  <FloatingInput
-                    id="userEmail"
-                    label="correo@empresa.com"
-                    type="email"
-                    required
-                    value={personalForm.email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPersonalForm({ ...personalForm, email: e.target.value })
-                    }
-                    icon={Mail}
-                  />
-                </Field>
-              </FieldGroup>
-            </CardContent>
+                  <Field>
+                    <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
+                    <FloatingInput
+                      id="userEmail"
+                      label="correo@empresa.com"
+                      type="email"
+                      required
+                      value={personalForm.email}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPersonalForm({ ...personalForm, email: e.target.value })
+                      }
+                      icon={Mail}
+                    />
+                  </Field>
+                </FieldGroup>
+              </CardContent>
 
-            <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end">
-              <Button
-                type="submit"
-                disabled={savingInfo}
-                variant="primary"
-                size="md"
-                className="flex items-center gap-2 font-medium"
-              >
-                {savingInfo ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Guardando...</span>
-                  </>
+              <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={savingInfo}
+                  variant="primary"
+                  size="md"
+                  className="flex items-center gap-2 font-medium"
+                >
+                  {savingInfo ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>Guardar Cambios</span>
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+
+          {/* Two-Factor Authentication (2FA) Card */}
+          <Card className="p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0">
+                  <Smartphone className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <h3 className="font-bold text-base text-on-surface">
+                      Autenticación en Dos Pasos (2FA)
+                    </h3>
+                    <Badge
+                      variant={twoFactorEnabled ? "default" : "outline"}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        twoFactorEnabled ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" : ""
+                      }`}
+                    >
+                      {twoFactorEnabled ? "ACTIVADO" : "DESACTIVADO"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-on-surface-variant/80 leading-relaxed max-w-md">
+                    Protege tu cuenta exigiendo un código temporal de tu app autenticadora (Google Authenticator, Authy o 1Password) en cada inicio de sesión.
+                  </p>
+                </div>
+              </div>
+
+              <div className="shrink-0 self-stretch sm:self-auto flex justify-end">
+                {twoFactorEnabled ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsDisable2faModalOpen(true)}
+                    className="text-xs font-semibold text-error border-error/30 hover:bg-error/10"
+                  >
+                    Desactivar 2FA
+                  </Button>
                 ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    <span>Guardar Cambios</span>
-                  </>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleStart2faSetup}
+                    disabled={loading2fa}
+                    className="text-xs font-semibold gap-1.5"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Activar 2FA</span>
+                  </Button>
                 )}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
+              </div>
+            </div>
+          </Card>
+        </div>
 
         {/* Columna Derecha: Seguridad y Contraseña (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-6">
@@ -417,10 +579,10 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
             <CardHeader>
               <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
                 <Lock className="w-4 h-4 text-primary" />
-                <span>Seguridad y Contraseña</span>
+                <span>Cambio de Contraseña</span>
               </CardTitle>
               <CardDescription>
-                Cambia tu contraseña de acceso para mantener protegida tu cuenta.
+                Introduce tu contraseña actual para confirmar tu identidad y define una nueva clave de acceso.
               </CardDescription>
             </CardHeader>
 
@@ -428,12 +590,28 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
               <CardContent className="flex flex-col gap-4 pt-2">
                 <FieldGroup>
                   <Field>
+                    <FieldLabel htmlFor="currentPassword">Contraseña Actual</FieldLabel>
+                    <FloatingInput
+                      id="currentPassword"
+                      label="Contraseña actual"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={passwordForm.currentPassword}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+                      }
+                      icon={Key}
+                    />
+                  </Field>
+
+                  <Field>
                     <FieldLabel htmlFor="newPassword">Nueva Contraseña</FieldLabel>
                     <div className="relative">
                       <FloatingInput
                         id="newPassword"
-                        label="Mínimo 6 caracteres"
+                        label="Mínimo 8 caracteres"
                         type={showPassword ? "text" : "password"}
+                        required
                         value={passwordForm.newPassword}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setPasswordForm({ ...passwordForm, newPassword: e.target.value })
@@ -495,6 +673,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                       id="confirmPassword"
                       label="Repite la nueva contraseña"
                       type={showPassword ? "text" : "password"}
+                      required
                       value={passwordForm.confirmPassword}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
@@ -510,6 +689,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   type="submit"
                   disabled={
                     savingPassword ||
+                    !passwordForm.currentPassword ||
                     !passwordForm.newPassword ||
                     passwordForm.newPassword !== passwordForm.confirmPassword
                   }
@@ -532,25 +712,179 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
               </CardFooter>
             </form>
           </Card>
-
-          {/* Account Status Pill Card */}
-          <Card className="p-5 bg-surface-container-low border border-outline-variant/50">
-            <div className="flex items-start gap-3.5">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div className="flex flex-col gap-0.5 text-xs">
-                <span className="font-semibold text-on-surface text-sm">
-                  Cuenta y Acceso Protegido
-                </span>
-                <p className="text-on-surface-variant/80 leading-relaxed">
-                  Tus datos personales y credenciales de acceso están cifrados y asegurados bajo la normativa de protección de datos.
-                </p>
-              </div>
-            </div>
-          </Card>
         </div>
       </div>
+
+      {/* 2FA Setup Modal */}
+      {is2faModalOpen && twoFactorSetupData && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl animate-in zoom-in-95 duration-200">
+            {twoFactorBackupCodes.length === 0 ? (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                  <QrCode className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-center text-on-surface mb-2">
+                  Configurar Autenticación 2FA
+                </h3>
+                <p className="text-xs text-center text-on-surface-variant/80 mb-5">
+                  Escanea este código QR con tu aplicación autenticadora (Google Authenticator, Authy o 1Password).
+                </p>
+
+                {/* QR Code */}
+                <div className="bg-white p-4 rounded-2xl border border-outline-variant/40 mx-auto w-fit mb-5 shadow-xs">
+                  <img src={twoFactorSetupData.qrCode} alt="Código QR 2FA" className="w-48 h-48" />
+                </div>
+
+                {/* Secret Key with Copy */}
+                <div className="mb-5">
+                  <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 text-center">
+                    ¿No puedes escanear? Clave manual:
+                  </label>
+                  <div className="flex items-center gap-2 p-2 bg-surface-container-high/40 border border-outline-variant/50 rounded-xl">
+                    <span className="font-mono text-xs text-on-surface font-semibold truncate flex-1 text-center select-all">
+                      {twoFactorSetupData.secret}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopySecret}
+                      className="p-1.5 text-on-surface-variant hover:text-primary rounded-lg transition-colors"
+                      title="Copiar clave"
+                    >
+                      {copiedSecret ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 6 Digit Verification Input */}
+                <div className="mb-6">
+                  <label className="block text-xs font-semibold text-on-surface mb-1.5 text-center">
+                    Introduce el código de 6 dígitos para verificar:
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    autoFocus
+                    value={twoFactorCodeInput}
+                    onChange={(e) => setTwoFactorCodeInput(e.target.value.replace(/\D/g, ""))}
+                    placeholder="123456"
+                    className="w-full text-center text-xl font-bold tracking-widest px-4 py-2.5 bg-surface-container-high/40 border border-outline-variant/60 rounded-xl text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIs2faModalOpen(false);
+                      setTwoFactorCodeInput("");
+                    }}
+                    className="flex-1 justify-center text-xs font-semibold py-2.5"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    disabled={loading2fa || twoFactorCodeInput.length !== 6}
+                    onClick={handleVerify2faCode}
+                    className="flex-1 justify-center text-xs font-semibold py-2.5"
+                  >
+                    {loading2fa ? "Verificando..." : "Activar 2FA"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              /* Backup Codes Screen */
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-center text-on-surface mb-2">
+                  ¡2FA Activado con Éxito!
+                </h3>
+                <p className="text-xs text-center text-on-surface-variant/80 mb-4">
+                  Guarda estos códigos de respaldo en un lugar seguro. Si pierdes tu móvil, podrás utilizarlos para acceder a tu cuenta.
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 p-3 bg-surface-container-high/40 border border-outline-variant/50 rounded-2xl mb-6">
+                  {twoFactorBackupCodes.map((code, idx) => (
+                    <div key={idx} className="font-mono text-xs font-bold text-center text-on-surface py-1 bg-surface-container-lowest rounded-lg border border-outline-variant/30 select-all">
+                      {code}
+                    </div>
+                  ))}
+                </div>
+
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => {
+                    setIs2faModalOpen(false);
+                    setTwoFactorBackupCodes([]);
+                    setTwoFactorCodeInput("");
+                  }}
+                  className="w-full justify-center text-xs font-semibold py-2.5"
+                >
+                  He guardado mis códigos de respaldo
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 2FA Disable Modal */}
+      {isDisable2faModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-error/10 text-error flex items-center justify-center mx-auto mb-4">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-center text-on-surface mb-2">
+              Desactivar Autenticación 2FA
+            </h3>
+            <p className="text-xs text-center text-on-surface-variant/80 mb-5">
+              Introduce tu contraseña actual para confirmar la desactivación de la protección en dos pasos.
+            </p>
+
+            <div className="mb-6">
+              <input
+                type="password"
+                autoFocus
+                value={disablePasswordInput}
+                onChange={(e) => setDisablePasswordInput(e.target.value)}
+                placeholder="Contraseña actual"
+                className="w-full px-3.5 py-2.5 bg-surface-container-high/40 border border-outline-variant/60 rounded-xl text-sm text-on-surface focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsDisable2faModalOpen(false);
+                  setDisablePasswordInput("");
+                }}
+                className="flex-1 justify-center text-xs font-semibold py-2.5"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={loading2fa || !disablePasswordInput}
+                onClick={handleDisable2fa}
+                className="flex-1 justify-center text-xs font-semibold py-2.5 text-error border-error/30 hover:bg-error/10"
+              >
+                {loading2fa ? "Desactivando..." : "Desactivar"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -27,6 +27,7 @@ import alertsRouter from "./routes/alerts.js";
 import publicBookingRouter from "./routes/publicBooking.js";
 import subscriptionRouter from "./routes/subscription.js";
 import webhooksRouter from "./routes/webhooks.js";
+import authSecurityRouter from "./routes/authSecurity.js";
 
 // Global Error Handler Middleware
 import { errorHandler } from "./middleware/index.js";
@@ -170,7 +171,7 @@ app.get("/health", async (req, res) => {
 // Rate limiting for public LOPD routes
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: process.env.NODE_ENV === "production" ? 100 : 2000,
   message: { error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -179,7 +180,7 @@ const publicLimiter = rateLimit({
 // Global rate limiting for all API routes
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 500,
+  max: process.env.NODE_ENV === "production" ? 1000 : 10000,
   message: { error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -199,6 +200,7 @@ app.use("/api/alerts", globalLimiter, alertsRouter);
 app.use("/api/public/booking", publicLimiter, publicBookingRouter);
 app.use("/api/subscription", globalLimiter, subscriptionRouter);
 app.use("/api/webhooks", webhooksRouter);
+app.use("/api/auth-security", globalLimiter, authSecurityRouter);
 
 app.use(errorHandler);
 

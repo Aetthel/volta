@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Card } from "@/components/ui/volta-ui";
+import { Card, Avatar } from "@/components/ui/volta-ui";
 import { Clock, CalendarIcon } from "lucide-react";
-import UserAvatar from "@/components/UserAvatar";
 
 export interface UpcomingAppointment {
   id: string;
@@ -32,11 +31,11 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
               className="p-4 flex items-center justify-between bg-white rounded-default shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all duration-200 gap-4"
             >
               <div className="flex items-center gap-3.5 min-w-0">
-                <UserAvatar
+                <Avatar
                   name={app.clientName}
                   surname={app.clientSurname}
-                  avatarUrl={app.avatarUrl}
-                  size="lg"
+                  src={app.avatarUrl}
+                  size="md"
                 />
                 <div className="min-w-0">
                   <h4 className="font-bold text-on-surface text-body-md truncate">

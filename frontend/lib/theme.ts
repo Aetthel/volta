@@ -213,7 +213,25 @@ export const RADIUS_SCALES = {
   LARGE: { name: "Muy Redondeado", scale: "2.0" },
 };
 
-export function getThemeColor(color: string | null | undefined): keyof typeof COLOR_PALETTES {
+export type ThemeColorKey = keyof typeof COLOR_PALETTES;
+export type FontSizeKey = keyof typeof FONT_SCALES;
+export type BorderRadiusKey = keyof typeof RADIUS_SCALES;
+
+export interface ThemePreferences {
+  themeColor: ThemeColorKey;
+  fontSizeLevel: FontSizeKey;
+  borderRadiusLevel: BorderRadiusKey;
+}
+
+export const DEFAULT_THEME_PREFERENCES: ThemePreferences = {
+  themeColor: "CLINICAL_ELEGANCE",
+  fontSizeLevel: "MEDIUM",
+  borderRadiusLevel: "MEDIUM",
+};
+
+export const THEME_COOKIE_NAME = "volta_theme_prefs";
+
+export function getThemeColor(color: string | null | undefined): ThemeColorKey {
   if (!color) return "CLINICAL_ELEGANCE";
   const mapped: Record<string, string> = {
     TEAL: "CLINICAL_ELEGANCE",
@@ -227,7 +245,52 @@ export function getThemeColor(color: string | null | undefined): keyof typeof CO
     WARM_SAND: "WARM_SAND",
   };
   const target = mapped[color.toUpperCase()] || color.toUpperCase();
-  return (target in COLOR_PALETTES ? target : "CLINICAL_ELEGANCE") as keyof typeof COLOR_PALETTES;
+  return (target in COLOR_PALETTES ? target : "CLINICAL_ELEGANCE") as ThemeColorKey;
+}
+
+export function getFontSizeLevel(level: string | null | undefined): FontSizeKey {
+  if (!level) return "MEDIUM";
+  const upper = level.toUpperCase();
+  return (upper in FONT_SCALES ? upper : "MEDIUM") as FontSizeKey;
+}
+
+export function getBorderRadiusLevel(level: string | null | undefined): BorderRadiusKey {
+  if (!level) return "MEDIUM";
+  const upper = level.toUpperCase();
+  return (upper in RADIUS_SCALES ? upper : "MEDIUM") as BorderRadiusKey;
+}
+
+export function parseThemeCookie(cookieStr: string | null | undefined): ThemePreferences {
+  if (!cookieStr) return { ...DEFAULT_THEME_PREFERENCES };
+
+  try {
+    const raw = typeof cookieStr === "string" ? decodeURIComponent(cookieStr) : "";
+    const parsed = JSON.parse(raw);
+    return {
+      themeColor: getThemeColor(parsed.themeColor || parsed.theme),
+      fontSizeLevel: getFontSizeLevel(parsed.fontSizeLevel || parsed.font),
+      borderRadiusLevel: getBorderRadiusLevel(parsed.borderRadiusLevel || parsed.radius),
+    };
+  } catch {
+    return { ...DEFAULT_THEME_PREFERENCES };
+  }
+}
+
+export function serializeThemeCookie(prefs: Partial<ThemePreferences>): string {
+  const normalized = {
+    themeColor: getThemeColor(prefs.themeColor),
+    fontSizeLevel: getFontSizeLevel(prefs.fontSizeLevel),
+    borderRadiusLevel: getBorderRadiusLevel(prefs.borderRadiusLevel),
+  };
+  return encodeURIComponent(JSON.stringify(normalized));
+}
+
+export function setThemeCookie(prefs: Partial<ThemePreferences>): void {
+  if (typeof document === "undefined") return;
+  const serialized = serializeThemeCookie(prefs);
+  // 1 year expiry, Path=/, SameSite=Lax
+  const maxAge = 60 * 60 * 24 * 365;
+  document.cookie = `${THEME_COOKIE_NAME}=${serialized}; path=/; max-age=${maxAge}; SameSite=Lax`;
 }
 
 export function getThemeInlineStyles(
@@ -250,6 +313,41 @@ export function getThemeInlineStyles(
   return styles;
 }
 
+export const defaultThemeStyles: Record<string, string> = getThemeInlineStyles(
+  COLOR_PALETTES.CLINICAL_ELEGANCE,
+  "1.0",
+  "1.0"
+);
+
+export function getEffectiveInlineStyles(
+  prefs?: Partial<ThemePreferences>
+): Record<string, string> {
+  const themeColor = getThemeColor(prefs?.themeColor);
+  const fontSizeLevel = getFontSizeLevel(prefs?.fontSizeLevel);
+  const borderRadiusLevel = getBorderRadiusLevel(prefs?.borderRadiusLevel);
+
+  const palette = COLOR_PALETTES[themeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
+  const fontScale = FONT_SCALES[fontSizeLevel]?.scale || FONT_SCALES.MEDIUM.scale;
+  const radiusScale = RADIUS_SCALES[borderRadiusLevel]?.scale || RADIUS_SCALES.MEDIUM.scale;
+
+  return getThemeInlineStyles(palette, fontScale, radiusScale);
+}
+
+export function applyThemePreferences(
+  root: HTMLElement,
+  prefs: Partial<ThemePreferences>
+) {
+  const body = typeof document !== "undefined" ? document.body : null;
+  const styles = getEffectiveInlineStyles(prefs);
+
+  Object.entries(styles).forEach(([prop, val]) => {
+    root.style.setProperty(prop, val);
+    if (body) {
+      body.style.setProperty(prop, val);
+    }
+  });
+}
+
 export function applyThemeColors(
   root: HTMLElement,
   palette: (typeof COLOR_PALETTES)[keyof typeof COLOR_PALETTES]
@@ -264,3 +362,4 @@ export function applyThemeColors(
     }
   });
 }
+

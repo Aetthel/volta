@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "dotenvx run -f ../.env -- next dev",
+    "dev": "NODE_OPTIONS='--max-http-header-size=65536' dotenvx run -f ../.env -- next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

@@ -84,20 +84,22 @@ export default function SubscriptionCheckoutModal({
       setCouponError("");
       if (session?.user?.name) setLegalName(session.user.name);
       if (session?.user?.email) setBillingEmail(session.user.email);
-
-      // Setup Lemon Squeezy event handler
-      if (typeof window !== "undefined" && window.createLemonSqueezy) {
-        window.createLemonSqueezy();
-        window.LemonSqueezy?.Setup?.({
-          eventHandler: (event) => {
-            if (event.event === "Checkout.Success") {
-              handleCheckoutSuccess();
-            }
-          },
-        });
-      }
     }
-  }, [isOpen, initialPlan, handleCheckoutSuccess, session?.user?.name, session?.user?.email]);
+  }, [isOpen, initialPlan]);
+
+  // Setup Lemon Squeezy event handler
+  useEffect(() => {
+    if (isOpen && typeof window !== "undefined" && window.createLemonSqueezy) {
+      window.createLemonSqueezy();
+      window.LemonSqueezy?.Setup?.({
+        eventHandler: (event) => {
+          if (event.event === "Checkout.Success") {
+            handleCheckoutSuccess();
+          }
+        },
+      });
+    }
+  }, [isOpen, handleCheckoutSuccess]);
 
   const handleSelectPlan = (plan: "BASIC" | "PRO") => {
     setSelectedPlan(plan);

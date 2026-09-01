@@ -165,8 +165,11 @@ export const createAlertSchema = z.object({
   type: z.enum(["EMERGENTE", "AVISO", "NOTIFICACION"], {
     errorMap: () => ({ message: "Tipo de alerta no válido" }),
   }),
+  category: z.enum(["APPOINTMENT", "WHATSAPP", "CLIENT", "BILLING", "SYSTEM"]).optional(),
   title: z.string().min(1, "El título es requerido"),
   description: z.string().min(1, "La descripción es requerida"),
+  actionUrl: z.string().optional().nullable(),
+  actionLabel: z.string().optional().nullable(),
   targetUserId: z.string().optional(),
   targetBusinessId: z.string().optional(),
   targetRole: z.enum(["ADMIN", "JEFE", "EMPLEADO"]).optional(),

@@ -42,6 +42,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null;
           }
 
+          // 2FA Challenge handling
+          if (user.twoFactorEnabled) {
+            const twoFactorCode = credentials.twoFactorCode ? String(credentials.twoFactorCode).trim() : "";
+            if (!twoFactorCode) {
+              throw new Error("2FA_REQUIRED:" + user.id);
+            }
+
+            const { default: authSecurityService } = await import("backend/auth-security");
+            const is2FaValid = await authSecurityService.validateTwoFactorChallenge(user.id, twoFactorCode);
+            if (!is2FaValid) {
+              throw new Error("INVALID_2FA_CODE");
+            }
+          }
+
           return {
             id: user.id,
             name: user.name,
@@ -59,7 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               : null,
             businessType: user.business?.businessType || null,
             subscriptionPlan: user.business?.subscriptionPlan || "PRO",
-            themeColor: user.business?.themeColor || "TEAL",
+            themeColor: user.business?.themeColor || "CLINICAL_ELEGANCE",
             fontSizeLevel: user.business?.fontSizeLevel || "MEDIUM",
             borderRadiusLevel: user.business?.borderRadiusLevel || "MEDIUM",
           };

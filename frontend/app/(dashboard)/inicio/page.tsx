@@ -50,12 +50,8 @@ import { WeeklyPerformanceChart } from "@/components/WeeklyPerformanceChart";
 import { FeaturedServicesList } from "@/components/FeaturedServicesList";
 import { UpcomingAppointmentsList } from "@/components/UpcomingAppointmentsList";
 
-const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
-  ssr: false,
-});
-const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
-  ssr: false,
-});
+import NewAppointmentModal from "@/components/NewAppointmentModal";
+import AddClientModal from "@/components/AddClientModal";
 import {
   Alert,
   Badge,

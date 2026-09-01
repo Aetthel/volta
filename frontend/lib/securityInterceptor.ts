@@ -11,22 +11,22 @@ export function setupSecurityInterceptor() {
   const originalFetch = window.fetch;
 
   window.fetch = async function (...args) {
-    // Ejecutar siempre bound al objeto window para compatibilidad estricta con Safari
-    const response = await originalFetch.apply(window, args);
+    const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url || "";
+
+    if (
+      url.includes("__nextjs") ||
+      url.includes("_next") ||
+      url.includes("/api/auth") ||
+      url.includes("/api/backend/users/register") ||
+      url.includes("/api/backend/demo") ||
+      url.includes("/api/backend/public")
+    ) {
+      return originalFetch(...args);
+    }
+
+    const response = await originalFetch(...args);
 
     if (response.status === 403 || response.status === 401) {
-      const url = typeof args[0] === "string" ? args[0] : (args[0] as Request)?.url || "";
-      if (
-        url.includes("__nextjs") ||
-        url.includes("_next") ||
-        url.includes("/api/auth") ||
-        url.includes("/api/backend/users/register") ||
-        url.includes("/api/backend/demo") ||
-        url.includes("/api/backend/public")
-      ) {
-        return response;
-      }
-
       try {
         const clone = response.clone();
         const data = await clone.json();

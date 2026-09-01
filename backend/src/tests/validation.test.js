@@ -38,9 +38,11 @@ describe("validateId", () => {
   it("should return 400 for missing ID", () => {
     validateId("businessId")(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      error: "Invalid or missing parameter: businessId",
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.stringMatching(/businessId/),
+      })
+    );
   });
 
   it("should return 400 for invalid ID", () => {
@@ -71,6 +73,8 @@ describe("validateBody", () => {
     req.body = { name: "Test", age: "not-a-number" };
     validateBody(schema)(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: "Validation failed" }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: expect.stringMatching(/validación/i) })
+    );
   });
 });

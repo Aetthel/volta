@@ -182,6 +182,14 @@ export const registerUser = async (req, res) => {
     return { business: createdBusiness, user: createdUser };
   });
 
+  // Automatically trigger email OTP verification code
+  try {
+    const { default: authSecurityService } = await import("../services/authSecurityService.js");
+    await authSecurityService.sendUserVerificationOtp(user);
+  } catch (otpErr) {
+    console.error("[UserController] Error sending initial OTP email:", otpErr);
+  }
+
   const { password: _, ...sanitizedUser } = user;
 
   return ApiResponse.created(res, {

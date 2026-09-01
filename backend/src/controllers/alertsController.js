@@ -1,12 +1,14 @@
 import prisma from "../config/db.js";
 import { logger } from "../utils/logger.js";
 
-// GET: Fetch all alerts for the authenticated user
+// GET: Fetch alerts for the authenticated user with category & archive filters
 export const getAlerts = async (req, res) => {
   const userId = req.user?.id;
   if (!userId) {
     return res.status(401).json({ error: "No autorizado: ID de usuario faltante" });
   }
+
+  const { category, archived, unreadOnly, search } = req.query;
 
   try {
     // Check if user's business is in trial mode and evaluate milestone alerts
@@ -29,10 +31,14 @@ export const getAlerts = async (req, res) => {
           await prisma.alert.create({
             data: {
               type: "AVISO",
+              category: "BILLING",
               title,
               description:
                 "Tu período de prueba gratuita del Plan Pro finaliza pronto. Elige tu plan en Ajustes para mantener todas las funciones activas.",
+              actionUrl: "/ajustes",
+              actionLabel: "Elegir Plan",
               userId,
+              businessId: user.businessId,
               isRead: false,
             },
           });
@@ -46,10 +52,14 @@ export const getAlerts = async (req, res) => {
           await prisma.alert.create({
             data: {
               type: "AVISO",
+              category: "BILLING",
               title,
               description:
                 "Tu prueba de 10 días ha expirado. Elige el Plan Base (18€/mes) o Plan Pro (25€/mes) para continuar utilizando Volta.",
+              actionUrl: "/ajustes",
+              actionLabel: "Elegir Plan",
               userId,
+              businessId: user.businessId,
               isRead: false,
             },
           });
@@ -57,13 +67,81 @@ export const getAlerts = async (req, res) => {
       }
     }
 
+    const where = {
+      userId,
+    };
+
+    if (archived === "true") {
+      where.isArchived = true;
+    } else if (archived === "all") {
+      // Don't filter by isArchived
+    } else {
+      where.isArchived = false;
+    }
+
+    if (category && category !== "TODAS" && category !== "ALL") {
+      where.category = category;
+    }
+
+    if (unreadOnly === "true") {
+      where.isRead = false;
+    }
+
+    if (search && search.trim()) {
+      where.OR = [
+        { title: { contains: search.trim(), mode: "insensitive" } },
+        { description: { contains: search.trim(), mode: "insensitive" } },
+      ];
+    }
+
     const alerts = await prisma.alert.findMany({
-      where: { userId },
+      where,
       orderBy: { createdAt: "desc" },
     });
     return res.json(alerts);
   } catch (error) {
     logger.error("Error fetching alerts:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+// GET: Summary count per category and unread totals
+export const getAlertSummary = async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ error: "No autorizado" });
+  }
+
+  try {
+    const alerts = await prisma.alert.findMany({
+      where: { userId, isArchived: false },
+      select: { category: true, isRead: true },
+    });
+
+    const summary = {
+      total: alerts.length,
+      unreadTotal: alerts.filter((a) => !a.isRead).length,
+      categories: {
+        TODAS: alerts.length,
+        APPOINTMENT: alerts.filter((a) => a.category === "APPOINTMENT").length,
+        WHATSAPP: alerts.filter((a) => a.category === "WHATSAPP").length,
+        CLIENT: alerts.filter((a) => a.category === "CLIENT").length,
+        BILLING: alerts.filter((a) => a.category === "BILLING").length,
+        SYSTEM: alerts.filter((a) => a.category === "SYSTEM").length,
+      },
+      unreadCategories: {
+        TODAS: alerts.filter((a) => !a.isRead).length,
+        APPOINTMENT: alerts.filter((a) => a.category === "APPOINTMENT" && !a.isRead).length,
+        WHATSAPP: alerts.filter((a) => a.category === "WHATSAPP" && !a.isRead).length,
+        CLIENT: alerts.filter((a) => a.category === "CLIENT" && !a.isRead).length,
+        BILLING: alerts.filter((a) => a.category === "BILLING" && !a.isRead).length,
+        SYSTEM: alerts.filter((a) => a.category === "SYSTEM" && !a.isRead).length,
+      },
+    };
+
+    return res.json(summary);
+  } catch (error) {
+    logger.error("Error fetching alerts summary:", error);
     return res.status(500).json({ error: "Error interno del servidor" });
   }
 };
@@ -78,7 +156,6 @@ export const markAlertAsRead = async (req, res) => {
   }
 
   try {
-    // Check ownership first
     const alert = await prisma.alert.findUnique({
       where: { id: alertId },
     });
@@ -99,40 +176,143 @@ export const markAlertAsRead = async (req, res) => {
   }
 };
 
-// PUT: Mark all user alerts as read
+// PUT: Mark all user alerts as read (optionally by category)
 export const markAllAlertsAsRead = async (req, res) => {
   const userId = req.user?.id;
+  const { category } = req.query;
 
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
   }
 
   try {
+    const where = { userId, isRead: false };
+    if (category && category !== "TODAS" && category !== "ALL") {
+      where.category = category;
+    }
+
     await prisma.alert.updateMany({
-      where: { userId, isRead: false },
+      where,
       data: { isRead: true },
     });
-    return res.json({ success: true, message: "All alerts marked as read" });
+    return res.json({ success: true, message: "Todas las alertas marcadas como leídas" });
   } catch (error) {
     logger.error("Error marking all alerts as read:", error);
     return res.status(500).json({ error: "Error interno del servidor" });
   }
 };
 
+// PUT: Archive a specific alert
+export const archiveAlert = async (req, res) => {
+  const userId = req.user?.id;
+  const alertId = req.params.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "No autorizado" });
+  }
+
+  try {
+    const alert = await prisma.alert.findUnique({
+      where: { id: alertId },
+    });
+
+    if (!alert || alert.userId !== userId) {
+      return res.status(404).json({ error: "Alerta no encontrada o no autorizado" });
+    }
+
+    const updatedAlert = await prisma.alert.update({
+      where: { id: alertId },
+      data: { isArchived: true },
+    });
+
+    return res.json(updatedAlert);
+  } catch (error) {
+    logger.error("Error archiving alert:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+// PUT: Unarchive a specific alert
+export const unarchiveAlert = async (req, res) => {
+  const userId = req.user?.id;
+  const alertId = req.params.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "No autorizado" });
+  }
+
+  try {
+    const alert = await prisma.alert.findUnique({
+      where: { id: alertId },
+    });
+
+    if (!alert || alert.userId !== userId) {
+      return res.status(404).json({ error: "Alerta no encontrada o no autorizado" });
+    }
+
+    const updatedAlert = await prisma.alert.update({
+      where: { id: alertId },
+      data: { isArchived: false },
+    });
+
+    return res.json(updatedAlert);
+  } catch (error) {
+    logger.error("Error unarchiving alert:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
+// DELETE: Delete a specific alert
+export const deleteAlert = async (req, res) => {
+  const userId = req.user?.id;
+  const alertId = req.params.id;
+
+  if (!userId) {
+    return res.status(401).json({ error: "No autorizado" });
+  }
+
+  try {
+    const alert = await prisma.alert.findUnique({
+      where: { id: alertId },
+    });
+
+    if (!alert || alert.userId !== userId) {
+      return res.status(404).json({ error: "Alerta no encontrada o no autorizado" });
+    }
+
+    await prisma.alert.delete({
+      where: { id: alertId },
+    });
+
+    return res.json({ success: true, message: "Alerta eliminada correctamente" });
+  } catch (error) {
+    logger.error("Error deleting alert:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 // POST: Create alerts (Admin broadcast or backend triggers)
 export const createAlert = async (req, res) => {
-  const { type, title, description, targetUserId, targetBusinessId, targetRole } = req.body;
+  const {
+    type,
+    category = "SYSTEM",
+    title,
+    description,
+    actionUrl,
+    actionLabel,
+    targetUserId,
+    targetBusinessId,
+    targetRole,
+  } = req.body;
 
   try {
     let where = {};
 
     if (req.user?.role === "ADMIN") {
-      // Admin can target any user across any business
       if (targetUserId) where.id = targetUserId;
       if (targetBusinessId) where.businessId = targetBusinessId;
       if (targetRole) where.role = targetRole;
     } else {
-      // Non-admin: always scope to their own business, ignore targetBusinessId
       where.businessId = req.user?.businessId;
       if (targetUserId) where.id = targetUserId;
       if (targetRole) where.role = targetRole;
@@ -149,9 +329,13 @@ export const createAlert = async (req, res) => {
         prisma.alert.create({
           data: {
             type,
+            category,
             title,
             description,
+            actionUrl: actionUrl || null,
+            actionLabel: actionLabel || null,
             userId: u.id,
+            businessId: u.businessId,
             isRead: false,
           },
         })
