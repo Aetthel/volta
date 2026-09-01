@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { Alert, Button, Card } from "@/components/ui/volta-ui";
+import { Calendar } from "@/components/ui/calendar";
 import type { BookingIdentity } from "@/hooks/useBookingSession";
 
 export interface BookingService {
@@ -25,12 +26,21 @@ export interface BookingService {
   capacity: number;
 }
 
+/** Horario comercial tal y como lo devuelve el portal público. */
+export interface BookingBusinessHours {
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isClosed: boolean;
+}
+
 export interface BookingBusinessData {
   id: string;
   name: string;
   address?: string | null;
   themeColor?: string;
   services: BookingService[];
+  hours?: BookingBusinessHours[];
 }
 
 export type WizardStep = 1 | 2 | 3 | 4;
@@ -61,6 +71,28 @@ const formatLongDate = (isoDate: string) => {
   });
 };
 
+/**
+ * La fecha viaja como "YYYY-MM-DD" en hora local y el submit la recompone con
+ * `${date}T${time}:00`. Usar toISOString() adelantaría o atrasaría un día según
+ * el huso, así que se formatea con los getters locales.
+ */
+const toLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+/** Interpreta "YYYY-MM-DD" como medianoche local, no como UTC. */
+const fromLocalDateString = (value: string): Date | undefined => {
+  if (!value) return undefined;
+  const parsed = new Date(`${value}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
+/** Cuántos días mira hacia delante al reubicar una fecha que cae en cerrado. */
+const NEXT_OPEN_DAY_LOOKAHEAD = 14;
+
 export default function BookingWizard({
   business,
   identity,
@@ -79,8 +111,55 @@ export default function BookingWizard({
 
   const { service: selectedService, date: selectedDate, time: selectedTime } = selection;
 
+  // Días que el negocio marca como cerrados en Ajustes. El backend ya rechaza
+  // esas fechas; aquí se impide llegar siquiera a intentarlo.
+  const closedDays = useMemo(
+    () => new Set((business.hours ?? []).filter((h) => h.isClosed).map((h) => h.dayOfWeek)),
+    [business.hours]
+  );
+
+  const isDayClosed = useCallback(
+    (date: Date) => closedDays.has(date.getDay()),
+    [closedDays]
+  );
+
+  /** Un negocio sin ningún día abierto no admite reservas por el portal. */
+  const alwaysClosed = closedDays.size >= 7;
+
+  const today = useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }, []);
+
+  const selectedDateObj = fromLocalDateString(selectedDate);
+  const selectedDayIsClosed = selectedDateObj ? isDayClosed(selectedDateObj) : false;
+
+  // La fecha por defecto es hoy, que puede caer en cerrado. En vez de recibir al
+  // visitante con un "no hay horarios", se le coloca en el próximo día abierto.
+  useEffect(() => {
+    if (alwaysClosed || !selectedDateObj || !isDayClosed(selectedDateObj)) return;
+
+    for (let offset = 1; offset <= NEXT_OPEN_DAY_LOOKAHEAD; offset++) {
+      const candidate = new Date(selectedDateObj);
+      candidate.setDate(selectedDateObj.getDate() + offset);
+      if (!isDayClosed(candidate)) {
+        onSelectionChange({ ...selection, date: toLocalDateString(candidate), time: "" });
+        return;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, closedDays, alwaysClosed]);
+
   useEffect(() => {
     if (!selectedService || !selectedDate) return;
+    // Pedir huecos de un día cerrado siempre devuelve una lista vacía: se evita
+    // la ida y vuelta y se deja el mensaje explícito de "cerrado".
+    if (selectedDayIsClosed) {
+      setAvailableSlots([]);
+      setLoadingSlots(false);
+      return;
+    }
 
     let cancelled = false;
     setLoadingSlots(true);
@@ -103,7 +182,7 @@ export default function BookingWizard({
     return () => {
       cancelled = true;
     };
-  }, [business.id, selectedService, selectedDate, authFetch]);
+  }, [business.id, selectedService, selectedDate, selectedDayIsClosed, authFetch]);
 
   const update = (patch: Partial<WizardSelection>) =>
     onSelectionChange({ ...selection, ...patch });
@@ -111,6 +190,13 @@ export default function BookingWizard({
   const handleBookingSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!selectedService || !selectedTime) return;
+    // El backend ya lo rechaza, pero así el visitante no gasta un envío para
+    // recibir un error que aquí se puede explicar antes.
+    if (selectedDayIsClosed) {
+      setError("El negocio está cerrado el día seleccionado. Elige otra fecha.");
+      setStep(2);
+      return;
+    }
 
     setSubmitting(true);
     setError("");
@@ -284,33 +370,54 @@ export default function BookingWizard({
             </div>
 
             <Card className="p-6 mb-6">
-              <label
-                htmlFor="booking-date"
-                className="block text-body-sm font-semibold text-on-surface mb-2"
-              >
+              <span className="block text-body-sm font-semibold text-on-surface mb-2">
                 Fecha de la Cita
-              </label>
-              <input
-                id="booking-date"
-                type="date"
-                min={new Date().toISOString().split("T")[0]}
-                value={selectedDate}
-                onChange={(event) => update({ date: event.target.value, time: "" })}
-                className="w-full px-4 py-3 bg-surface-container-lowest text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
-              />
+              </span>
+
+              {alwaysClosed ? (
+                <Alert variant="error" className="py-2.5 px-4 rounded-xl text-body-sm">
+                  Este negocio no tiene días de apertura configurados, así que no admite reservas
+                  por ahora.
+                </Alert>
+              ) : (
+                <>
+                  <div className="flex justify-center rounded-xl border border-outline-variant/60 bg-surface-container-lowest">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDateObj}
+                      defaultMonth={selectedDateObj}
+                      // Los días cerrados y los pasados se pintan atenuados y no
+                      // se pueden pulsar: es el mismo criterio que la agenda.
+                      disabled={[{ before: today }, (date: Date) => isDayClosed(date)]}
+                      onSelect={(day) => {
+                        if (!day) return;
+                        update({ date: toLocalDateString(day), time: "" });
+                      }}
+                    />
+                  </div>
+
+                  <p className="mt-2 text-body-xs text-on-surface-variant/80 text-center">
+                    Los días en los que el negocio cierra aparecen tachados y no se pueden elegir.
+                  </p>
+                </>
+              )}
 
               <span className="block text-body-sm font-semibold text-on-surface mt-6 mb-3">
                 Horarios Disponibles
               </span>
-              {loadingSlots ? (
+              {selectedDayIsClosed || alwaysClosed ? (
+                <div className="p-4 rounded-xl bg-surface-container-high/50 border border-outline-variant/60 text-center text-on-surface-variant text-body-sm">
+                  El negocio está cerrado {selectedDate ? `el ${formatLongDate(selectedDate)}` : ""}
+                  . Elige otro día para ver los horarios.
+                </div>
+              ) : loadingSlots ? (
                 <div className="py-8 flex items-center justify-center gap-2 text-on-surface-variant text-body-sm">
                   <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                   Buscando horarios disponibles...
                 </div>
               ) : availableSlots.length === 0 ? (
                 <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/60 text-center text-on-surface-variant text-body-sm">
-                  No hay horarios disponibles para esta fecha. El negocio puede estar cerrado o
-                  tener su aforo completo.
+                  No quedan horarios libres para esta fecha. Prueba con otro día.
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
@@ -335,7 +442,7 @@ export default function BookingWizard({
             <div className="flex justify-end">
               <Button
                 variant="primary"
-                disabled={!selectedTime}
+                disabled={!selectedTime || selectedDayIsClosed || alwaysClosed}
                 onClick={() => setStep(3)}
                 className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2"
               >

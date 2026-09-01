@@ -13,6 +13,7 @@ interface CalendarMonthViewProps {
   onDragEnd: () => void;
   onDrop: (date: Date) => void;
   getColorClasses: (color: string) => { bg: string; text: string };
+  isDayClosed?: (date: Date) => boolean;
 }
 
 export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
@@ -24,6 +25,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
   onDragEnd,
   onDrop,
   getColorClasses,
+  isDayClosed,
 }) => {
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const startDate = new Date(firstDayOfMonth);
@@ -66,30 +68,53 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
           const dayEvents = getEventsForDay(day);
           const isCurrentMonth = day.getMonth() === currentDate.getMonth();
           const isToday = day.toDateString() === new Date().toDateString();
+          const closed = isDayClosed?.(day) ?? false;
 
           return (
             <div
               key={index}
+              data-day-cell
+              data-closed={closed || undefined}
               className={cn(
-                "min-h-24 border-b border-r border-outline-variant/30 p-1.5 transition-colors last:border-r-0 sm:min-h-28 sm:p-2 cursor-pointer",
+                "min-h-24 border-b border-r border-outline-variant/30 p-1.5 transition-colors last:border-r-0 sm:min-h-28 sm:p-2",
                 !isCurrentMonth && "bg-surface-container-low/30 opacity-60",
-                "hover:bg-surface-container-low/60"
+                closed
+                  ? "bg-surface-container-high/40 cursor-not-allowed"
+                  : "cursor-pointer hover:bg-surface-container-low/60"
               )}
-              onClick={() => {
-                const clickDate = new Date(day);
-                clickDate.setHours(9, 0, 0, 0);
-                onSlotClick(clickDate);
-              }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => onDrop(day)}
+              aria-disabled={closed || undefined}
+              onClick={
+                closed
+                  ? undefined
+                  : () => {
+                      const clickDate = new Date(day);
+                      clickDate.setHours(9, 0, 0, 0);
+                      onSlotClick(clickDate);
+                    }
+              }
+              // Sin preventDefault en onDragOver el navegador rechaza el soltar,
+              // así que el evento arrastrado vuelve a su fecha original.
+              onDragOver={closed ? undefined : (e) => e.preventDefault()}
+              onDrop={closed ? undefined : () => onDrop(day)}
             >
-              <div
-                className={cn(
-                  "mb-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs sm:text-sm font-semibold",
-                  isToday ? "bg-primary text-on-primary" : "text-on-surface"
+              <div className="mb-1.5 flex items-center justify-between gap-1">
+                <div
+                  className={cn(
+                    "flex h-6 w-6 items-center justify-center rounded-full text-xs sm:text-sm font-semibold",
+                    isToday
+                      ? "bg-primary text-on-primary"
+                      : closed
+                        ? "text-on-surface-variant/50"
+                        : "text-on-surface"
+                  )}
+                >
+                  {day.getDate()}
+                </div>
+                {closed && (
+                  <span className="text-[9px] font-semibold uppercase tracking-wide text-on-surface-variant/60 sm:text-[10px]">
+                    Cerrado
+                  </span>
                 )}
-              >
-                {day.getDate()}
               </div>
               <div className="space-y-1">
                 {dayEvents.slice(0, 4).map((event) => (

@@ -37,6 +37,12 @@ export interface EventManagerProps {
   className?: string;
   availableTags?: string[];
   onOpenNewModal?: (prefilledDate?: Date) => void;
+  /**
+   * Días marcados como cerrados en Ajustes. Se pintan en gris y no admiten
+   * citas ni actividades de grupo. Sin este prop el calendario se comporta como
+   * si el negocio abriera todos los días.
+   */
+  isDayClosed?: (date: Date) => boolean;
 }
 
 export const defaultColors: ColorItem[] = [
@@ -59,6 +65,7 @@ export function EventManager({
   className,
   availableTags = ["Confirmada", "Pendiente", "Completada", "Cancelada"],
   onOpenNewModal,
+  isDayClosed,
 }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -149,6 +156,10 @@ export function EventManager({
 
   const handleSlotClick = useCallback(
     (slotDate: Date) => {
+      // Las vistas ya desactivan el hueco, pero la guarda evita que un camino
+      // nuevo (atajo de teclado, otra vista) cuele una cita en día cerrado.
+      if (isDayClosed?.(slotDate)) return;
+
       if (onOpenNewModal) {
         onOpenNewModal(slotDate);
         return;
@@ -165,7 +176,7 @@ export function EventManager({
       setIsCreating(true);
       setIsDialogOpen(true);
     },
-    [onOpenNewModal, colors, categories]
+    [onOpenNewModal, colors, categories, isDayClosed]
   );
 
   const handleDragStart = useCallback((event: Event) => {
@@ -179,6 +190,12 @@ export function EventManager({
   const handleDrop = useCallback(
     (targetDate: Date, targetHour?: number) => {
       if (!draggedEvent) return;
+      // Reagendar arrastrando a un día cerrado dejaría la cita fuera del horario
+      // comercial, así que se descarta y el evento se queda donde estaba.
+      if (isDayClosed?.(targetDate)) {
+        setDraggedEvent(null);
+        return;
+      }
 
       const duration = draggedEvent.endTime.getTime() - draggedEvent.startTime.getTime();
       const newStartTime = new Date(targetDate);
@@ -197,7 +214,7 @@ export function EventManager({
       onEventUpdate?.(draggedEvent.id, updatedEvent);
       setDraggedEvent(null);
     },
-    [draggedEvent, onEventUpdate]
+    [draggedEvent, onEventUpdate, isDayClosed]
   );
 
   const handleCreateEvent = useCallback(() => {
@@ -308,6 +325,7 @@ export function EventManager({
                 onDragEnd={handleDragEnd}
                 onDrop={handleDrop}
                 getColorClasses={getColorClasses}
+                isDayClosed={isDayClosed}
               />
             )}
 
@@ -321,6 +339,7 @@ export function EventManager({
                 onDragEnd={handleDragEnd}
                 onDrop={handleDrop}
                 getColorClasses={getColorClasses}
+                isDayClosed={isDayClosed}
               />
             )}
 
@@ -334,6 +353,7 @@ export function EventManager({
                 onDragEnd={handleDragEnd}
                 onDrop={handleDrop}
                 getColorClasses={getColorClasses}
+                isDayClosed={isDayClosed}
               />
             )}
 
