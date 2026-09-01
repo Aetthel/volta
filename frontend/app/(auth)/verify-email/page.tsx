@@ -224,7 +224,7 @@ function VerifyEmailContent() {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleDigitChange(idx, e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(idx, e.target.value ? e : e)}
+                      onKeyDown={(e) => handleKeyDown(idx, e)}
                       className="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl font-bold bg-surface-container-high/50 border border-outline-variant/60 rounded-xl text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   ))}
