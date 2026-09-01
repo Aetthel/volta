@@ -58,7 +58,7 @@ describe("SubscriptionCheckoutModal", () => {
 
     // Step 1 -> Step 2
     const continueBtn = screen.getByRole("button", {
-      name: /continuar con datos de facturación/i,
+      name: /continuar a facturación/i,
     });
     fireEvent.click(continueBtn);
 
