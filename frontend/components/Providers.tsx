@@ -10,6 +10,7 @@ import TopProgressBar from "@/components/TopProgressBar";
 import SecurityGuard from "@/components/SecurityGuard";
 
 import WelcomeModal from "@/components/WelcomeModal";
+import LemonSqueezyInitializer from "@/components/LemonSqueezyInitializer";
 
 export default function Providers({
   session,
@@ -25,6 +26,7 @@ export default function Providers({
       <ThemeProvider initialPreferences={initialPreferences}>
         <AlertsProvider>
           <SecurityGuard />
+          <LemonSqueezyInitializer />
           <Suspense fallback={null}>
             <TopProgressBar />
           </Suspense>

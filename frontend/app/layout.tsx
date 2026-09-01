@@ -211,7 +211,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ClientProvidersWrapper session={session} initialPreferences={effectivePrefs}>
           {children}
         </ClientProvidersWrapper>
-        <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="lazyOnload" />
+        <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="afterInteractive" />
       </body>
     </html>
   );

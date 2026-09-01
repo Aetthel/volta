@@ -26,11 +26,7 @@ import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
 import FullScreenSplash from "@/components/FullScreenSplash";
 import { COLOR_PALETTES, getThemeInlineStyles } from "@/lib/theme";
-
-const SubscriptionCheckoutModal = dynamic(
-  () => import("@/components/SubscriptionCheckoutModal"),
-  { ssr: false }
-);
+import { LEMON_SQUEEZY_PRODUCT_URLS, buildLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -40,7 +36,6 @@ export default function RootPage() {
   const [demoMessage, setDemoMessage] = useState("Preparando tu entorno de demo...");
   const [demoProgress, setDemoProgress] = useState<number>(0);
   const { data: session } = useSession();
-  const [checkoutPlan, setCheckoutPlan] = useState<"BASIC" | "PRO" | null>(null);
   const router = useRouter();
 
   const defaultThemeStyles = getThemeInlineStyles(
@@ -774,14 +769,16 @@ export default function RootPage() {
 
                 <div className="mt-8 space-y-3">
                   {session?.user ? (
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full cursor-pointer"
-                      onClick={() => setCheckoutPlan("BASIC")}
+                    /* TODO: Insertar URL del producto de Lemon Squeezy aquí */
+                    <a
+                      href={buildLemonSqueezyCheckoutUrl(
+                        LEMON_SQUEEZY_PRODUCT_URLS.BASIC,
+                        session.user
+                      )}
+                      className="lemonsqueezy-button w-full inline-flex items-center justify-center py-3 px-6 rounded-xl border border-outline text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors cursor-pointer text-center"
                     >
                       Contratar Plan Básico
-                    </Button>
+                    </a>
                   ) : (
                     <Link href="/register">
                       <Button variant="outline" size="lg" className="w-full">
@@ -852,14 +849,16 @@ export default function RootPage() {
 
                 <div className="mt-8 space-y-3">
                   {session?.user ? (
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      className="w-full bg-white text-primary hover:bg-surface-container-lowest cursor-pointer"
-                      onClick={() => setCheckoutPlan("PRO")}
+                    /* TODO: Insertar URL del producto de Lemon Squeezy aquí */
+                    <a
+                      href={buildLemonSqueezyCheckoutUrl(
+                        LEMON_SQUEEZY_PRODUCT_URLS.PRO,
+                        session.user
+                      )}
+                      className="lemonsqueezy-button w-full inline-flex items-center justify-center py-3 px-6 rounded-xl bg-white text-primary font-semibold text-sm hover:bg-surface-container-lowest transition-colors cursor-pointer text-center"
                     >
                       Contratar Plan Pro
-                    </Button>
+                    </a>
                   ) : (
                     <Link href="/register">
                       <Button
@@ -1258,12 +1257,6 @@ export default function RootPage() {
       </footer>
 
       {isCreatingDemo && <FullScreenSplash message={demoMessage} progress={demoProgress} />}
-
-      <SubscriptionCheckoutModal
-        isOpen={!!checkoutPlan}
-        onClose={() => setCheckoutPlan(null)}
-        initialPlan={checkoutPlan || "PRO"}
-      />
     </div>
   );
 }

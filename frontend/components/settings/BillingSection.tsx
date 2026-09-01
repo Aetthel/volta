@@ -19,15 +19,10 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Badge, Skeleton } from "@/components/ui/volta-ui";
 import type { Invoice } from "@/types/domain";
 import { cn } from "@/lib/utils";
-
-const SubscriptionCheckoutModal = dynamic(
-  () => import("@/components/SubscriptionCheckoutModal"),
-  { ssr: false }
-);
+import { LEMON_SQUEEZY_PRODUCT_URLS, buildLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy";
 
 interface BillingSectionProps {
   onShowToast: (message: string) => void;
@@ -38,7 +33,6 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const fetchBillingData = async () => {
@@ -113,14 +107,18 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
               </p>
             </div>
           </div>
-          <Button
-            variant="primary"
-            size="sm"
-            className="bg-error text-white hover:bg-error/90 shrink-0 font-semibold"
-            onClick={() => setIsCheckoutOpen(true)}
+          {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
+          <a
+            href={buildLemonSqueezyCheckoutUrl(
+              currentPlan === "BASIC"
+                ? LEMON_SQUEEZY_PRODUCT_URLS.BASIC
+                : LEMON_SQUEEZY_PRODUCT_URLS.PRO,
+              session?.user
+            )}
+            className="lemonsqueezy-button bg-error text-white hover:bg-error/90 shrink-0 font-semibold text-xs py-2 px-3 rounded-lg inline-flex items-center justify-center transition-colors cursor-pointer"
           >
             Actualizar Pago
-          </Button>
+          </a>
         </div>
       )}
 
@@ -225,17 +223,21 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
 
           <CardFooter className="border-t border-outline-variant/40 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Button
-                variant="primary"
-                size="md"
-                className="flex items-center justify-center gap-2 font-medium"
-                onClick={() => setIsCheckoutOpen(true)}
+              {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
+              <a
+                href={buildLemonSqueezyCheckoutUrl(
+                  currentPlan === "BASIC"
+                    ? LEMON_SQUEEZY_PRODUCT_URLS.PRO
+                    : LEMON_SQUEEZY_PRODUCT_URLS.PRO,
+                  session?.user
+                )}
+                className="lemonsqueezy-button inline-flex items-center justify-center gap-2 font-medium bg-primary text-white hover:bg-primary/90 py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-sm"
               >
                 <Zap className="w-4 h-4" />
                 <span>
                   {currentStatus === "ACTIVE" ? "Cambiar o Mejorar Plan" : "Activar Suscripción"}
                 </span>
-              </Button>
+              </a>
             </div>
 
             {currentStatus === "ACTIVE" && !isCancelledEnd && (
@@ -431,18 +433,6 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
           )}
         </CardContent>
       </Card>
-
-      {/* Checkout Modal */}
-      <SubscriptionCheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        initialPlan={currentPlan === "BASIC" ? "BASIC" : "PRO"}
-        onSuccess={() => {
-          setIsCheckoutOpen(false);
-          onShowToast("¡Suscripción activada con éxito!");
-          fetchBillingData();
-        }}
-      />
     </div>
   );
 }
