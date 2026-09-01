@@ -152,6 +152,9 @@ class ApiClient {
     update: <T = any>(id: string, data: any) => this.put<T>(`/business/${id}`, data),
     getHours: <T = any>(id: string) => this.get<T>(`/business/${id}/hours`),
     updateHours: <T = any>(id: string, hours: any) => this.put<T>(`/business/${id}/hours`, hours),
+    getHolidays: <T = any>(id: string) => this.get<T>(`/business/${id}/holidays`),
+    updateHolidays: <T = any>(id: string, holidays: any) =>
+      this.put<T>(`/business/${id}/holidays`, holidays),
   };
 
   public whatsapp = {

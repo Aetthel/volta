@@ -15,6 +15,7 @@ interface CalendarWeekViewProps {
   onDrop: (date: Date, hour: number) => void;
   getColorClasses: (color: string) => { bg: string; text: string };
   isDayClosed?: (date: Date) => boolean;
+  getClosedLabel?: (date: Date) => string | undefined;
 }
 
 export const CalendarWeekView: React.FC<CalendarWeekViewProps> = ({
@@ -27,6 +28,7 @@ export const CalendarWeekView: React.FC<CalendarWeekViewProps> = ({
   onDrop,
   getColorClasses,
   isDayClosed,
+  getClosedLabel,
 }) => {
   const startOfWeek = new Date(currentDate);
   const dayOfWeek = (currentDate.getDay() + 6) % 7;
@@ -95,8 +97,11 @@ export const CalendarWeekView: React.FC<CalendarWeekViewProps> = ({
                   {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
                 </div>
                 {closed && (
-                  <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/60">
-                    Cerrado
+                  <div
+                    className="mt-0.5 truncate text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/60"
+                    title={getClosedLabel?.(day) ?? "Cerrado"}
+                  >
+                    {getClosedLabel?.(day) ?? "Cerrado"}
                   </div>
                 )}
               </div>
@@ -177,8 +182,8 @@ export const CalendarWeekView: React.FC<CalendarWeekViewProps> = ({
 
                 {closed && (
                   <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-6">
-                    <span className="rounded-full bg-surface-container-highest/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/70">
-                      Cerrado
+                    <span className="max-w-[90%] truncate rounded-full bg-surface-container-highest/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/70">
+                      {getClosedLabel?.(day) ?? "Cerrado"}
                     </span>
                   </div>
                 )}

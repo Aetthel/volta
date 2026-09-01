@@ -43,6 +43,8 @@ export interface EventManagerProps {
    * si el negocio abriera todos los días.
    */
   isDayClosed?: (date: Date) => boolean;
+  /** Motivo a mostrar en el día bloqueado: nombre del festivo o "Cerrado". */
+  getClosedLabel?: (date: Date) => string | undefined;
 }
 
 export const defaultColors: ColorItem[] = [
@@ -66,6 +68,7 @@ export function EventManager({
   availableTags = ["Confirmada", "Pendiente", "Completada", "Cancelada"],
   onOpenNewModal,
   isDayClosed,
+  getClosedLabel,
 }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -326,6 +329,7 @@ export function EventManager({
                 onDrop={handleDrop}
                 getColorClasses={getColorClasses}
                 isDayClosed={isDayClosed}
+                getClosedLabel={getClosedLabel}
               />
             )}
 
@@ -340,6 +344,7 @@ export function EventManager({
                 onDrop={handleDrop}
                 getColorClasses={getColorClasses}
                 isDayClosed={isDayClosed}
+                getClosedLabel={getClosedLabel}
               />
             )}
 
@@ -354,6 +359,7 @@ export function EventManager({
                 onDrop={handleDrop}
                 getColorClasses={getColorClasses}
                 isDayClosed={isDayClosed}
+                getClosedLabel={getClosedLabel}
               />
             )}
 

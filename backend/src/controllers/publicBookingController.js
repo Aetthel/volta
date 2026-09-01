@@ -1,6 +1,7 @@
 import prisma from "../config/db.js";
 import { ApiResponse, normalizePhone } from "../utils/index.js";
 import { validateBusinessHours, calculateAvailableSlots } from "../utils/businessHours.js";
+import { getHolidayForDate, getObservedHolidays } from "../utils/holidays.js";
 import * as bookingIdentityService from "../services/bookingIdentityService.js";
 import { z } from "zod";
 
@@ -95,9 +96,18 @@ export const getPublicBusinessData = async (req, res) => {
     return res.status(403).json({ error: BOOKING_CLOSED_MESSAGE });
   }
 
+  // Los festivos viajan ya resueltos a fechas: el asistente solo tiene que
+  // deshabilitarlas, sin duplicar el cálculo de la Pascua en el navegador.
+  const holidayPreferences = await prisma.businessHoliday.findMany({
+    where: { businessId },
+    select: { holidayKey: true, isObserved: true },
+  });
+  const currentYear = new Date().getFullYear();
+
   const { subscriptionStatus: _status, ...publicData } = business;
   return ApiResponse.success(res, {
     ...publicData,
+    holidays: getObservedHolidays(holidayPreferences, currentYear, currentYear + 1),
     identity: {
       phone: req.bookingIdentity.phone,
       name: req.bookingIdentity.name,
@@ -125,6 +135,22 @@ export const getAvailableSlots = async (req, res) => {
   const businessHours = await prisma.businessHours.findMany({
     where: { businessId },
   });
+
+  // Un festivo observado no ofrece ningún hueco, igual que un día cerrado.
+  const holidayPreferences = await prisma.businessHoliday.findMany({
+    where: { businessId },
+    select: { holidayKey: true, isObserved: true },
+  });
+
+  const [holidayYear, holidayMonth, holidayDay] = String(date).split("-").map(Number);
+  const holiday = getHolidayForDate(
+    holidayPreferences,
+    new Date(holidayYear, holidayMonth - 1, holidayDay)
+  );
+
+  if (holiday.isHoliday) {
+    return ApiResponse.success(res, { date, availableSlots: [], holiday: holiday.name });
+  }
 
   let duration = 30;
   let capacity = 1;
@@ -295,6 +321,20 @@ export const createPublicBooking = async (req, res) => {
     if (!hoursCheck.valid) {
       return res.status(400).json({ error: hoursCheck.reason });
     }
+  }
+
+  // 1.b Festivos: el portal no los ofrece, pero una petición directa sí podría
+  // colarlos, así que se rechazan aquí igual que un día fuera de horario.
+  const holidayPreferences = await prisma.businessHoliday.findMany({
+    where: { businessId },
+    select: { holidayKey: true, isObserved: true },
+  });
+
+  const holiday = getHolidayForDate(holidayPreferences, targetDate);
+  if (holiday.isHoliday) {
+    return res.status(400).json({
+      error: `El negocio está cerrado por festivo (${holiday.name}).`,
+    });
   }
 
   // 2. Slot Collision & Capacity Check in an atomic transaction

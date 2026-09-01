@@ -155,6 +155,59 @@ describe("Días cerrados en el calendario", () => {
     expect(onOpenNewModal).toHaveBeenCalledTimes(1);
   });
 
+  describe("festivos", () => {
+    // 12 de octubre de 2026 cae en lunes: día laborable que el festivo bloquea.
+    const FIESTA_NACIONAL = new Date(2026, 9, 12, 10, 0, 0, 0);
+    const esFiestaNacional = (date: Date) =>
+      date.getMonth() === 9 && date.getDate() === 12;
+
+    const renderConFestivo = (view: "month" | "week" | "day", today: Date) => {
+      vi.setSystemTime(today);
+      const onOpenNewModal = vi.fn();
+      const utils = render(
+        <EventManager
+          events={[]}
+          defaultView={view}
+          isDayClosed={esFiestaNacional}
+          getClosedLabel={(date) =>
+            esFiestaNacional(date) ? "Fiesta Nacional de España" : undefined
+          }
+          onOpenNewModal={onOpenNewModal}
+        />
+      );
+      return { ...utils, onOpenNewModal };
+    };
+
+    it("bloquea el día festivo en la vista semanal y lo nombra", () => {
+      const { container } = renderConFestivo("week", FIESTA_NACIONAL);
+
+      expect(container.querySelectorAll('[aria-disabled="true"]')).toHaveLength(1);
+      expect(screen.getAllByText("Fiesta Nacional de España").length).toBeGreaterThan(0);
+    });
+
+    it("no deja crear cita en el festivo", () => {
+      const { container, onOpenNewModal } = renderConFestivo("week", FIESTA_NACIONAL);
+
+      fireEvent.click(slots(container, { closed: true })[0]);
+      expect(onOpenNewModal).not.toHaveBeenCalled();
+    });
+
+    it("nombra el festivo en la vista diaria", () => {
+      renderConFestivo("day", FIESTA_NACIONAL);
+
+      expect(
+        screen.getByText(/Fiesta Nacional de España — el negocio no abre este día/i)
+      ).toBeInTheDocument();
+    });
+
+    it("marca solo esa celda en la vista mensual", () => {
+      const { container } = renderConFestivo("month", FIESTA_NACIONAL);
+
+      expect(monthCells(container, { closed: true })).toHaveLength(1);
+      expect(screen.getAllByText("Fiesta Nacional de España").length).toBeGreaterThan(0);
+    });
+  });
+
   it("descarta el reagendado al arrastrar una cita a un día cerrado", () => {
     vi.setSystemTime(WEDNESDAY);
     const onEventUpdate = vi.fn();

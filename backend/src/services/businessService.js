@@ -48,6 +48,35 @@ export const getBusinessHours = async (businessId) => {
   });
 };
 
+/** Excepciones del negocio al catálogo de festivos. Sin filas = todo por defecto. */
+export const getBusinessHolidays = async (businessId) => {
+  return prisma.businessHoliday.findMany({
+    where: { businessId },
+    select: { holidayKey: true, isObserved: true },
+  });
+};
+
+export const updateBusinessHolidays = async (businessId, holidaysData) => {
+  return prisma.$transaction(async (tx) => {
+    for (const holiday of holidaysData) {
+      await tx.businessHoliday.upsert({
+        where: {
+          businessId_holidayKey: {
+            businessId,
+            holidayKey: holiday.holidayKey,
+          },
+        },
+        update: { isObserved: holiday.isObserved },
+        create: {
+          businessId,
+          holidayKey: holiday.holidayKey,
+          isObserved: holiday.isObserved,
+        },
+      });
+    }
+  });
+};
+
 export const updateBusinessHours = async (businessId, hoursData) => {
   return prisma.$transaction(async (tx) => {
     for (const h of hoursData) {

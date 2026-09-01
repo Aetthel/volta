@@ -133,6 +133,17 @@ export const updateHoursSchema = z.array(
   })
 );
 
+/**
+ * Excepciones a los festivos. La clave se valida contra el catálogo en el
+ * controlador: aquí solo se comprueba la forma.
+ */
+export const updateHolidaysSchema = z.array(
+  z.object({
+    holidayKey: z.string().min(1, "La clave del festivo es requerida"),
+    isObserved: z.boolean(),
+  })
+);
+
 // WhatsApp Template Validation Schema
 export const templateSchema = z.object({
   businessId: z.string().min(1, "El ID de negocio es requerido"),

@@ -11,7 +11,7 @@ import BottomNav from "@/components/BottomNav";
 import { Button, Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
-import { useBusinessHours } from "@/lib/hooks/useBusinessHours";
+import { useBusinessSchedule } from "@/lib/hooks/useBusinessSchedule";
 
 const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
   ssr: false,
@@ -95,9 +95,10 @@ export default function AgendaPage() {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "";
 
-  // Días cerrados según el horario comercial de Ajustes: el calendario los pinta
-  // en gris y no deja crear ni arrastrar citas ni clases de grupo.
-  const { isDayClosed } = useBusinessHours(businessId);
+  // Días sin actividad: los cerrados por horario semanal y los festivos que el
+  // negocio observa. El calendario los pinta en gris y no deja crear ni
+  // arrastrar citas ni clases de grupo.
+  const { isDayClosed, getClosedLabel } = useBusinessSchedule(businessId);
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -337,6 +338,7 @@ export default function AgendaPage() {
               defaultView="week"
               onOpenNewModal={handleOpenNewModalWithDate}
               isDayClosed={isDayClosed}
+              getClosedLabel={getClosedLabel}
               className="flex-1 flex flex-col w-full"
             />
           )}

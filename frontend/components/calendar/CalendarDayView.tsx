@@ -15,6 +15,7 @@ interface CalendarDayViewProps {
   onDrop: (date: Date, hour: number) => void;
   getColorClasses: (color: string) => { bg: string; text: string };
   isDayClosed?: (date: Date) => boolean;
+  getClosedLabel?: (date: Date) => string | undefined;
 }
 
 export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
@@ -27,6 +28,7 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
   onDrop,
   getColorClasses,
   isDayClosed,
+  getClosedLabel,
 }) => {
   const START_HOUR = 8;
   const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR);
@@ -49,7 +51,7 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
     <div className="w-full h-full overflow-auto">
       {closed && (
         <div className="border-b border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-on-surface-variant/70">
-          Cerrado — el negocio no abre este día
+          {getClosedLabel?.(currentDate) ?? "Cerrado"} — el negocio no abre este día
         </div>
       )}
       <div className="flex min-w-[500px] relative">

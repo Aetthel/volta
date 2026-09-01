@@ -34,6 +34,14 @@ export interface BookingBusinessHours {
   isClosed: boolean;
 }
 
+/** Festivo ya resuelto a una fecha concreta por el backend. */
+export interface BookingHoliday {
+  date: string; // "YYYY-MM-DD"
+  key: string;
+  name: string;
+  scope: "NATIONAL" | "REGIONAL";
+}
+
 export interface BookingBusinessData {
   id: string;
   name: string;
@@ -41,6 +49,7 @@ export interface BookingBusinessData {
   themeColor?: string;
   services: BookingService[];
   hours?: BookingBusinessHours[];
+  holidays?: BookingHoliday[];
 }
 
 export type WizardStep = 1 | 2 | 3 | 4;
@@ -118,9 +127,22 @@ export default function BookingWizard({
     [business.hours]
   );
 
+  // Los festivos llegan resueltos a fecha: el cálculo de la Pascua vive en el
+  // backend y no se duplica en el navegador.
+  const holidaysByDate = useMemo(
+    () => new Map((business.holidays ?? []).map((h) => [h.date, h])),
+    [business.holidays]
+  );
+
   const isDayClosed = useCallback(
-    (date: Date) => closedDays.has(date.getDay()),
-    [closedDays]
+    (date: Date) => closedDays.has(date.getDay()) || holidaysByDate.has(toLocalDateString(date)),
+    [closedDays, holidaysByDate]
+  );
+
+  /** Nombre del festivo cuando el día lo es, para explicarlo al cliente. */
+  const getHolidayName = useCallback(
+    (date?: Date) => (date ? holidaysByDate.get(toLocalDateString(date))?.name : undefined),
+    [holidaysByDate]
   );
 
   /** Un negocio sin ningún día abierto no admite reservas por el portal. */
@@ -149,7 +171,7 @@ export default function BookingWizard({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, closedDays, alwaysClosed]);
+  }, [selectedDate, closedDays, holidaysByDate, alwaysClosed]);
 
   useEffect(() => {
     if (!selectedService || !selectedDate) return;
@@ -193,7 +215,12 @@ export default function BookingWizard({
     // El backend ya lo rechaza, pero así el visitante no gasta un envío para
     // recibir un error que aquí se puede explicar antes.
     if (selectedDayIsClosed) {
-      setError("El negocio está cerrado el día seleccionado. Elige otra fecha.");
+      const festivo = getHolidayName(selectedDateObj);
+      setError(
+        festivo
+          ? `El negocio está cerrado por ${festivo}. Elige otra fecha.`
+          : "El negocio está cerrado el día seleccionado. Elige otra fecha."
+      );
       setStep(2);
       return;
     }
@@ -397,7 +424,8 @@ export default function BookingWizard({
                   </div>
 
                   <p className="mt-2 text-body-xs text-on-surface-variant/80 text-center">
-                    Los días en los que el negocio cierra aparecen tachados y no se pueden elegir.
+                    Los días en los que el negocio cierra, festivos incluidos, aparecen tachados y
+                    no se pueden elegir.
                   </p>
                 </>
               )}
@@ -407,7 +435,9 @@ export default function BookingWizard({
               </span>
               {selectedDayIsClosed || alwaysClosed ? (
                 <div className="p-4 rounded-xl bg-surface-container-high/50 border border-outline-variant/60 text-center text-on-surface-variant text-body-sm">
-                  El negocio está cerrado {selectedDate ? `el ${formatLongDate(selectedDate)}` : ""}
+                  {getHolidayName(selectedDateObj)
+                    ? `El negocio está cerrado por ${getHolidayName(selectedDateObj)}`
+                    : `El negocio está cerrado${selectedDate ? ` el ${formatLongDate(selectedDate)}` : ""}`}
                   . Elige otro día para ver los horarios.
                 </div>
               ) : loadingSlots ? (

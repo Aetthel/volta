@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vite
 import BookingWizard, {
   type BookingBusinessData,
   type BookingBusinessHours,
+  type BookingHoliday,
   type WizardSelection,
 } from "./BookingWizard";
 
@@ -26,12 +27,16 @@ const HOURS: BookingBusinessHours[] = [
   })),
 ];
 
-const businessWith = (hours?: BookingBusinessHours[]): BookingBusinessData => ({
+const businessWith = (
+  hours?: BookingBusinessHours[],
+  holidays?: BookingHoliday[]
+): BookingBusinessData => ({
   id: "biz-1",
   name: "Peluquería Volta",
   address: "Calle Mayor 1",
   services: [service],
   hours,
+  holidays,
 });
 
 const identity = { phone: "600112233", name: "Ana García" };
@@ -57,7 +62,12 @@ const renderWizard = (
     // `null` representa un negocio que no envía horario; `undefined` toma el
     // horario por defecto (cierra los domingos).
     hours = HOURS,
-  }: { selection?: Partial<WizardSelection>; hours?: BookingBusinessHours[] | null } = {}
+    holidays,
+  }: {
+    selection?: Partial<WizardSelection>;
+    hours?: BookingBusinessHours[] | null;
+    holidays?: BookingHoliday[];
+  } = {}
 ) => {
   const onSelectionChange = vi.fn();
   const full: WizardSelection = {
@@ -69,7 +79,7 @@ const renderWizard = (
 
   const view = render(
     <BookingWizard
-      business={businessWith(hours ?? undefined)}
+      business={businessWith(hours ?? undefined, holidays)}
       identity={identity}
       selection={full}
       onSelectionChange={onSelectionChange}
@@ -191,6 +201,66 @@ describe("BookingWizard — días en los que el negocio cierra", () => {
 
     const domingos = await screen.findAllByRole("button", { name: /domingo/i });
     expect(domingos.some((dia) => !dia.hasAttribute("disabled"))).toBe(true);
+  });
+
+  describe("festivos", () => {
+    // El backend envía los festivos ya resueltos a fecha, Pascua incluida.
+    const FESTIVOS: BookingHoliday[] = [
+      {
+        date: "2026-10-12",
+        key: "FIESTA_NACIONAL",
+        name: "Fiesta Nacional de España",
+        scope: "NATIONAL",
+      },
+      { date: "2026-09-03", key: "SAN_JUAN", name: "San Juan", scope: "REGIONAL" },
+    ];
+
+    it("deshabilita en el calendario la fecha del festivo", async () => {
+      const authFetch = authFetchReturning({ availableSlots: ["10:00"] });
+      renderWizard(authFetch, { holidays: FESTIVOS });
+
+      // El 3 de septiembre de 2026 es jueves laborable, bloqueado por el festivo.
+      const festivo = await screen.findByRole("button", { name: /jueves, 3 de septiembre/i });
+      expect(festivo).toBeDisabled();
+    });
+
+    it("explica el festivo por su nombre en lugar de decir solo cerrado", async () => {
+      const authFetch = authFetchReturning({ availableSlots: [] });
+      renderWizard(authFetch, { selection: { date: "2026-09-03" }, holidays: FESTIVOS });
+
+      expect(await screen.findByText(/cerrado por San Juan/i)).toBeInTheDocument();
+    });
+
+    it("no pide horarios al backend en un festivo", async () => {
+      const authFetch = authFetchReturning({ availableSlots: [] });
+      renderWizard(authFetch, { selection: { date: "2026-09-03" }, holidays: FESTIVOS });
+
+      const llamadas = authFetch.mock.calls.filter(([url]) =>
+        String(url).includes("available-slots")
+      );
+      expect(llamadas).toHaveLength(0);
+    });
+
+    it("mueve la fecha al siguiente día hábil cuando arranca en festivo", async () => {
+      const authFetch = authFetchReturning({ availableSlots: [] });
+      const { onSelectionChange } = renderWizard(authFetch, {
+        selection: { date: "2026-09-03" },
+        holidays: FESTIVOS,
+      });
+
+      await waitFor(() => expect(onSelectionChange).toHaveBeenCalled());
+      expect(onSelectionChange).toHaveBeenCalledWith(
+        expect.objectContaining({ date: "2026-09-04", time: "" })
+      );
+    });
+
+    it("un día sin festivo ni cierre sigue reservable", async () => {
+      const authFetch = authFetchReturning({ availableSlots: ["10:00"] });
+      renderWizard(authFetch, { holidays: FESTIVOS });
+
+      const jueves = await screen.findByRole("button", { name: /jueves, 10 de septiembre/i });
+      expect(jueves).not.toBeDisabled();
+    });
   });
 
   it("no envía la reserva si la fecha elegida cae en cerrado", async () => {

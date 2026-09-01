@@ -50,6 +50,7 @@ model Business {
   appointments               Appointment[]
   clients                    Client[]
   hours                      BusinessHours[]
+  holidays                   BusinessHoliday[]
   services                   Service[]
   users                      User[]
   lopdConsentLogs            LopdConsentLog[]
@@ -140,6 +141,25 @@ enum AppointmentStatus {
   PENDING
   SENT
   ERROR
+}
+
+/**
+ * Excepciones del negocio al catálogo de festivos españoles.
+ *
+ * Solo se guarda lo que se aparta del comportamiento por defecto (nacionales
+ * cerrados, autonómicos abiertos), así que un negocio recién creado no necesita
+ * ninguna fila: `isObserved = false` sobre un nacional significa "ese día abro",
+ * y `true` sobre un autonómico, "este festivo me aplica".
+ */
+model BusinessHoliday {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  holidayKey String // Clave del catálogo: NAVIDAD, SAN_JUAN, VIERNES_SANTO...
+  isObserved Boolean
+
+  @@unique([businessId, holidayKey])
+  @@index([businessId])
 }
 
 model BusinessHours {

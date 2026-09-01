@@ -14,6 +14,7 @@ interface CalendarMonthViewProps {
   onDrop: (date: Date) => void;
   getColorClasses: (color: string) => { bg: string; text: string };
   isDayClosed?: (date: Date) => boolean;
+  getClosedLabel?: (date: Date) => string | undefined;
 }
 
 export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
@@ -26,6 +27,7 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
   onDrop,
   getColorClasses,
   isDayClosed,
+  getClosedLabel,
 }) => {
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const startDate = new Date(firstDayOfMonth);
@@ -111,8 +113,11 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                   {day.getDate()}
                 </div>
                 {closed && (
-                  <span className="text-[9px] font-semibold uppercase tracking-wide text-on-surface-variant/60 sm:text-[10px]">
-                    Cerrado
+                  <span
+                    className="min-w-0 truncate text-[9px] font-semibold uppercase tracking-wide text-on-surface-variant/60 sm:text-[10px]"
+                    title={getClosedLabel?.(day) ?? "Cerrado"}
+                  >
+                    {getClosedLabel?.(day) ?? "Cerrado"}
                   </span>
                 )}
               </div>
