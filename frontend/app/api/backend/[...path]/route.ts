@@ -30,8 +30,28 @@ async function proxyRequest(
     pathParts[0] === "lopd" &&
     (pathParts.length === 2 || PUBLIC_LOPD_ACTIONS.includes(pathParts[2]));
 
+  // Recuperar la contraseña o verificar el correo son, por definición, acciones
+  // de quien todavía no tiene sesión. Se listan una a una en lugar de abrir todo
+  // `auth-security`, porque ese mismo router sirve `change-password` y el alta
+  // del 2FA, que sí exigen estar autenticado.
+  const PUBLIC_AUTH_SECURITY_ACTIONS = [
+    "verify-otp",
+    "resend-otp",
+    "forgot-password",
+    "reset-password",
+  ];
+  const isPublicAuthSecurityRoute =
+    pathParts[0] === "auth-security" &&
+    ((pathParts.length === 2 && PUBLIC_AUTH_SECURITY_ACTIONS.includes(pathParts[1])) ||
+      // El reto de 2FA se resuelve entre el usuario y la contraseña, antes de
+      // que exista sesión.
+      (pathParts.length === 3 &&
+        pathParts[1] === "2fa" &&
+        pathParts[2] === "validate-challenge"));
+
   const isPublicRoute =
     isPublicLopdRoute ||
+    isPublicAuthSecurityRoute ||
     pathParts[0] === "health" ||
     pathParts[0] === "demo" ||
     pathParts[0] === "public" ||

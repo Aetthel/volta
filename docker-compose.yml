@@ -72,6 +72,9 @@ services:
       - EVOLUTION_API_KEY=${EVOLUTION_API_KEY:-volta_dev_evolution_key_2026}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      # RESEND_API_KEY y EMAIL_FROM llegan por `env_file: .env`. No se listan
+      # aquí a propósito: `environment` gana a `env_file`, así que un
+      # ${RESEND_API_KEY:-} sin definir en el host borraría la clave del .env.
     healthcheck:
       test: ["CMD-SHELL", "node -e 'fetch(\"http://localhost:3001/health\").then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))'"]
       interval: 10s

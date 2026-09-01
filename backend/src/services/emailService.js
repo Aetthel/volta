@@ -43,55 +43,69 @@ function renderBaseTemplate({ title, preheader, contentHtml }) {
 </html>`;
 }
 
+/** Tiempo máximo de espera a Resend; sin él una API colgada bloquea el login. */
+const RESEND_TIMEOUT_MS = 10000;
+
 /**
- * Unified email sender with Resend API support and local logger fallback
+ * Envío de correo vía Resend, con simulación por log cuando no hay clave.
+ *
+ * Distingue dos situaciones que antes se confundían: no tener clave (correcto en
+ * local, se simula) y fallar el envío teniéndola (un error real que hay que ver).
+ * En el segundo caso ya no se devuelve `success: true`, porque eso hacía que un
+ * usuario sin correo pareciera un usuario avisado.
  */
 async function sendRawEmail({ to, subject, html, text }) {
-  const resendApiKey = process.env.RESEND_API_KEY || config.resendApiKey;
-  const fromEmail = process.env.EMAIL_FROM || "Volta <no-reply@getvolta.app>";
+  const resendApiKey = config.resendApiKey;
+  const fromEmail = config.emailFrom;
 
   logger.info(`[EmailService] Preparing email to: ${to} | Subject: "${subject}"`);
 
-  if (resendApiKey) {
-    try {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [to],
-          subject,
-          html,
-          text,
-        }),
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json();
-        logger.error("[EmailService] Resend API error:", errJson);
-        throw new Error(errJson.message || "Failed to send email via Resend");
-      }
-
-      const resData = await response.json();
-      logger.info(`[EmailService] Email sent successfully via Resend. ID: ${resData.id}`);
-      return { success: true, id: resData.id };
-    } catch (apiErr) {
-      logger.error("[EmailService] Failed sending via Resend API, logging fallback:", apiErr.message);
-    }
-  }
-
-  // Local development / fallback simulation
-  logger.info(`[EmailService] [LOCAL/DEV SIMULATION]
+  if (!resendApiKey) {
+    // Sin clave: se vuelca el correo al log para poder seguir el flujo en local.
+    logger.info(`[EmailService] [LOCAL/DEV SIMULATION]
   ═══════════════════════════════════════════════
   To: ${to}
   Subject: ${subject}
   Content: ${text || html.slice(0, 150)}...
   ═══════════════════════════════════════════════`);
 
-  return { success: true, simulated: true };
+    return { success: true, simulated: true };
+  }
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: [to],
+        subject,
+        html,
+        text,
+      }),
+      signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      // Resend devuelve JSON en sus errores, pero un 502 de la capa de red no,
+      // así que el parseo no puede dar por hecho el formato.
+      const detail = await response.text();
+      logger.error(
+        `[EmailService] Resend rechazó el envío a ${to} (HTTP ${response.status}): ${detail}`
+      );
+      return { success: false, error: `Resend HTTP ${response.status}` };
+    }
+
+    const resData = await response.json();
+    logger.info(`[EmailService] Email sent successfully via Resend. ID: ${resData.id}`);
+    return { success: true, id: resData.id };
+  } catch (apiErr) {
+    logger.error(`[EmailService] No se pudo enviar el correo a ${to}: ${apiErr.message}`);
+    return { success: false, error: apiErr.message };
+  }
 }
 
 /**
