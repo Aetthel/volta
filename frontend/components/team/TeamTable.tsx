@@ -11,9 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
-import { Empty, Skeleton } from "@/components/ui/volta-ui";
+import { Avatar, Empty, Skeleton } from "@/components/ui/volta-ui";
 import {
   formatDate,
   getRoleLabel,
@@ -141,7 +140,7 @@ export const TeamTable: React.FC<TeamTableProps> = ({
                   {visibleColumns.has("miembro") && (
                     <TableCell className="py-4 pl-6 font-medium">
                       <div className="flex items-center gap-3">
-                        <UserAvatar name={member.name} size="md" />
+                        <Avatar name={member.name} size="md" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="font-semibold text-sm text-on-surface truncate">

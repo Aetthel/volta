@@ -17,12 +17,8 @@ import { ClientFiltersBar } from "@/components/clients/ClientFiltersBar";
 import { ClientsTable } from "@/components/clients/ClientsTable";
 import { ClientPagination } from "@/components/clients/ClientPagination";
 
-const AddClientModal = dynamicImport(() => import("@/components/AddClientModal"), {
-  ssr: false,
-});
-const NewAppointmentModal = dynamicImport(() => import("@/components/NewAppointmentModal"), {
-  ssr: false,
-});
+import AddClientModal from "@/components/AddClientModal";
+import NewAppointmentModal from "@/components/NewAppointmentModal";
 
 export default function ClientesPage() {
   const { data: session } = useSession();

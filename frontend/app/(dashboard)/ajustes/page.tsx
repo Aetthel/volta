@@ -7,6 +7,8 @@ import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   getThemeColor,
+  getFontSizeLevel,
+  getBorderRadiusLevel,
   COLOR_PALETTES,
   FONT_SCALES,
   RADIUS_SCALES,
@@ -188,9 +190,9 @@ function AjustesContent() {
     description: "",
     ownerName: session?.user?.name || "",
     workerPhoto: DEFAULT_AVATAR,
-    themeColor: session?.user?.themeColor || "TEAL",
-    fontSizeLevel: session?.user?.fontSizeLevel || "MEDIUM",
-    borderRadiusLevel: session?.user?.borderRadiusLevel || "MEDIUM",
+    themeColor: getThemeColor(session?.user?.themeColor),
+    fontSizeLevel: getFontSizeLevel(session?.user?.fontSizeLevel),
+    borderRadiusLevel: getBorderRadiusLevel(session?.user?.borderRadiusLevel),
   });
 
   // Fetch business profile on mount
@@ -202,16 +204,10 @@ function AjustesContent() {
         if (data && !data.error) {
           const savedWorkerPhoto =
             typeof window !== "undefined" ? localStorage.getItem("stylist_worker_photo") || "" : "";
-          const localColor =
-            typeof window !== "undefined" ? localStorage.getItem("volta_theme_color") : null;
-          const localFont =
-            typeof window !== "undefined" ? localStorage.getItem("volta_font_size") : null;
-          const localRadius =
-            typeof window !== "undefined" ? localStorage.getItem("volta_border_radius") : null;
 
-          const activeColor = getThemeColor(session?.user?.themeColor || localColor || data.themeColor);
-          const activeFont = session?.user?.fontSizeLevel || localFont || data.fontSizeLevel || "MEDIUM";
-          const activeRadius = session?.user?.borderRadiusLevel || localRadius || data.borderRadiusLevel || "MEDIUM";
+          const activeColor = getThemeColor(data.themeColor || session?.user?.themeColor);
+          const activeFont = getFontSizeLevel(data.fontSizeLevel || session?.user?.fontSizeLevel);
+          const activeRadius = getBorderRadiusLevel(data.borderRadiusLevel || session?.user?.borderRadiusLevel);
 
           setProfile((prev) => ({
             ...prev,

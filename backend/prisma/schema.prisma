@@ -54,6 +54,7 @@ model Business {
   users              User[]
   lopdConsentLogs    LopdConsentLog[]
   invoices           Invoice[]
+  alerts             Alert[]
 }
 
 enum UserRole {
@@ -63,19 +64,30 @@ enum UserRole {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  name       String
-  email      String   @unique
-  password   String   // Hashed password
-  role       UserRole @default(EMPLEADO)
-  businessId String?
-  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  alerts     Alert[]
+  id                      String    @id @default(uuid())
+  name                    String
+  email                   String    @unique
+  password                String    // Hashed password
+  role                    UserRole  @default(EMPLEADO)
+  businessId              String?
+  business                Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  emailVerified           Boolean   @default(false)
+  emailVerifiedAt         DateTime?
+  otpCode                 String?
+  otpExpiresAt            DateTime?
+  otpAttempts             Int       @default(0)
+  twoFactorEnabled        Boolean   @default(false)
+  twoFactorSecret         String?
+  twoFactorBackupCodes    String[]  @default([])
+  resetPasswordToken      String?
+  resetPasswordExpiresAt  DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  alerts                  Alert[]
 
   @@index([businessId])
   @@index([businessId, role])
+  @@index([resetPasswordToken])
 }
 
 enum WhatsAppStatus {
@@ -180,19 +192,36 @@ enum AlertType {
   NOTIFICACION
 }
 
+enum AlertCategory {
+  APPOINTMENT
+  WHATSAPP
+  CLIENT
+  BILLING
+  SYSTEM
+}
+
 model Alert {
-  id          String    @id @default(uuid())
+  id          String        @id @default(uuid())
   type        AlertType
+  category    AlertCategory @default(SYSTEM)
   title       String
   description String
-  isRead      Boolean   @default(false)
+  actionUrl   String?
+  actionLabel String?
+  isRead      Boolean       @default(false)
+  isArchived  Boolean       @default(false)
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId  String?
+  business    Business?     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([userId])
   @@index([userId, isRead])
+  @@index([businessId])
+  @@index([businessId, category])
+  @@index([isArchived])
 }
 
 model LopdConsentLog {

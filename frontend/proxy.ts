@@ -12,10 +12,19 @@ export default auth((req) => {
   const isPublicAuthRoute = pathname === "/" || pathname === "/login" || pathname === "/register";
 
   // Definición de permisos de rutas por Rol
-  const adminRoutes = ["/admin", "/sedes", "/ajustes", "/agenda"];
-  const jefeRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda"];
-  const empleadoRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda"];
-  const allProtectedRoutes = ["/inicio", "/clientes", "/sedes", "/ajustes", "/admin", "/agenda"];
+  const adminRoutes = ["/admin", "/sedes", "/ajustes", "/agenda", "/inbox", "/equipo", "/inicio", "/clientes"];
+  const jefeRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda", "/inbox", "/equipo", "/sedes"];
+  const empleadoRoutes = ["/inicio", "/clientes", "/ajustes", "/agenda", "/inbox", "/equipo"];
+  const allProtectedRoutes = [
+    "/inicio",
+    "/clientes",
+    "/sedes",
+    "/ajustes",
+    "/admin",
+    "/agenda",
+    "/inbox",
+    "/equipo",
+  ];
 
   const isProtectedRoute = allProtectedRoutes.some((route) => pathname.startsWith(route));
 
@@ -25,7 +34,7 @@ export default auth((req) => {
   }
 
   const user = req.auth?.user;
-  const role = typeof user?.role === "string" ? user.role.toUpperCase() : undefined;
+  const role = typeof user?.role === "string" ? user.role.toUpperCase() : "JEFE";
 
   // 2. Redirección si usuario ya autenticado intenta acceder a la Landing, Login o Register
   if (isLoggedIn && user && isPublicAuthRoute) {
@@ -34,10 +43,6 @@ export default auth((req) => {
 
   // 3. Control de Acceso Basado en Roles (RBAC)
   if (isLoggedIn && isProtectedRoute) {
-    if (!user || !role) {
-      return NextResponse.redirect(new URL("/login", nextUrl));
-    }
-
     if (role === "ADMIN") {
       const isAllowed = adminRoutes.some((route) => pathname.startsWith(route));
       if (!isAllowed) {
@@ -53,8 +58,6 @@ export default auth((req) => {
       if (!isAllowed) {
         return NextResponse.redirect(new URL("/inicio", nextUrl));
       }
-    } else {
-      return NextResponse.redirect(new URL("/login", nextUrl));
     }
   }
 

@@ -12,8 +12,7 @@ import {
   Briefcase,
   Calendar as CalendarIcon,
 } from "lucide-react";
-import { Button, Alert, SegmentedControl } from "@/components/ui/volta-ui";
-import UserAvatar from "@/components/UserAvatar";
+import { Button, Alert, SegmentedControl, Avatar } from "@/components/ui/volta-ui";
 import { useNewAppointmentForm } from "@/hooks/useNewAppointmentForm";
 
 interface NewAppointmentModalProps {
@@ -266,7 +265,7 @@ export default function NewAppointmentModal({
                       className="w-full px-3.5 py-2 hover:bg-surface-container-high/60 flex items-center justify-between text-left transition-colors cursor-pointer"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <UserAvatar name={client.name} surname={client.surname} size="sm" />
+                        <Avatar name={client.name} surname={client.surname} size="sm" />
                         <div className="flex flex-col min-w-0">
                           <span className="text-xs font-semibold text-on-surface truncate">
                             {client.name} {client.surname || ""}

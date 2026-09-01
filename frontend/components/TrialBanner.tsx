@@ -5,9 +5,7 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { AlertTriangle, Clock, ArrowRight, X } from "lucide-react";
 
-const SubscriptionCheckoutModal = dynamic(() => import("./SubscriptionCheckoutModal"), {
-  ssr: false,
-});
+import SubscriptionCheckoutModal from "./SubscriptionCheckoutModal";
 
 function TrialBannerContent() {
   const [isVisible, setIsVisible] = useState(true);

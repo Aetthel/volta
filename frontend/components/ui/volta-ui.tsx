@@ -13,6 +13,7 @@ export * from "./empty";
 export * from "./progress-bar";
 export * from "./context-menu";
 export * from "./segmented-control";
+export * from "./avatar";
 export { Button, type ButtonProps } from "./button";
 export { Select as NativeSelect, type NativeSelectProps, Select } from "./native-select";
 export { Textarea, type TextareaProps } from "./textarea";

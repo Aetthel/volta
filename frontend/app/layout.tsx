@@ -1,12 +1,15 @@
 import { Inter } from "next/font/google";
+import { cookies } from "next/headers";
 import Script from "next/script";
 import ClientProvidersWrapper from "@/components/ClientProvidersWrapper";
 import {
-  COLOR_PALETTES,
-  FONT_SCALES,
-  RADIUS_SCALES,
+  parseThemeCookie,
+  getEffectiveInlineStyles,
+  THEME_COOKIE_NAME,
   getThemeColor,
-  getThemeInlineStyles,
+  getFontSizeLevel,
+  getBorderRadiusLevel,
+  type ThemePreferences,
 } from "@/lib/theme";
 import { auth } from "@/auth";
 import "./globals.css";
@@ -22,38 +25,72 @@ export const dynamic = "force-dynamic";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://volta.aetthel.com"),
   title: {
-    default: "Software Citas + WhatsApp Web | Agenda y Recordatorios 24/7",
+    default: "Volta | Software de Citas + WhatsApp Web | Agenda y Recordatorios 24/7",
     template: "%s | Volta",
   },
   description:
-    "Plataforma de agenda online y avisos por WhatsApp para negocios. Evita ausencias y gestiona clientes en tiempo real. ¡Solicita tu acceso hoy!",
+    "Plataforma de agenda online y automatización de citas por WhatsApp con IA para negocios y clínicas. Evita ausencias y gestiona clientes en tiempo real.",
   keywords: [
+    "Volta",
+    "Volta Aetthel",
     "software de citas",
     "gestion de citas whatsapp",
     "agenda online",
     "recordatorios whatsapp automatizados",
     "sistema de reservas LOPD",
+    "software reservas whatsapp ia",
+    "agenda whatsapp para clinicas",
+    "agenda citas peluquerias estetica",
   ],
+  authors: [{ name: "Aetthel", url: "https://aetthel.com" }],
+  creator: "Aetthel",
+  publisher: "Aetthel",
+  alternates: {
+    canonical: "./",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
-    title: "Software Citas + WhatsApp Web | Agenda y Recordatorios 24/7",
+    title: "Volta | Software de Citas + WhatsApp Web con IA",
     description:
-      "Plataforma de agenda online y avisos por WhatsApp para negocios. Evita ausencias y gestiona clientes en tiempo real. ¡Solicita tu acceso hoy!",
+      "Plataforma de agenda online y avisos por WhatsApp para negocios. Evita ausencias y gestiona clientes en tiempo real.",
+    url: "https://volta.aetthel.com",
     siteName: "Volta",
     locale: "es_ES",
     type: "website",
+    images: [
+      {
+        url: "https://volta.aetthel.com/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Volta - Software de Citas y Automatización WhatsApp",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Software Citas + WhatsApp Web | Agenda y Recordatorios 24/7",
+    title: "Volta | Software de Citas + WhatsApp Web con IA",
     description:
-      "Plataforma de agenda online y avisos por WhatsApp para negocios. Evita ausencias y gestiona clientes en tiempo real. ¡Solicita tu acceso hoy!",
+      "Plataforma de agenda online y avisos por WhatsApp para negocios. Evita ausencias y gestiona clientes en tiempo real.",
+    images: ["https://volta.aetthel.com/opengraph-image"],
   },
   icons: {
     icon: "/face.svg",
     shortcut: "/face.svg",
     apple: "/face.svg",
   },
+  category: "technology",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -63,26 +100,47 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   } catch (e) {
     session = null;
   }
-  const themeColor = getThemeColor(session?.user?.themeColor);
-  const fontSizeLevel = (session?.user?.fontSizeLevel || "MEDIUM") as keyof typeof FONT_SCALES;
-  const borderRadiusLevel = (session?.user?.borderRadiusLevel ||
-    "MEDIUM") as keyof typeof RADIUS_SCALES;
+
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get(THEME_COOKIE_NAME)?.value;
+  const cookiePrefs = parseThemeCookie(themeCookie);
+
+  const effectivePrefs: ThemePreferences = {
+    themeColor: getThemeColor(
+      cookieStore.has(THEME_COOKIE_NAME)
+        ? cookiePrefs.themeColor
+        : session?.user?.themeColor || cookiePrefs.themeColor
+    ),
+    fontSizeLevel: getFontSizeLevel(
+      cookieStore.has(THEME_COOKIE_NAME)
+        ? cookiePrefs.fontSizeLevel
+        : session?.user?.fontSizeLevel || cookiePrefs.fontSizeLevel
+    ),
+    borderRadiusLevel: getBorderRadiusLevel(
+      cookieStore.has(THEME_COOKIE_NAME)
+        ? cookiePrefs.borderRadiusLevel
+        : session?.user?.borderRadiusLevel || cookiePrefs.borderRadiusLevel
+    ),
+  };
 
   // Resolve styles on the server to prevent FOUC (styling flash)
-  const palette = COLOR_PALETTES[themeColor] || COLOR_PALETTES.CLINICAL_ELEGANCE;
-  const fontScale = FONT_SCALES[fontSizeLevel]?.scale || FONT_SCALES.MEDIUM.scale;
-  const radiusScale = RADIUS_SCALES[borderRadiusLevel]?.scale || RADIUS_SCALES.MEDIUM.scale;
-
-  const inlineStyles = getThemeInlineStyles(palette, fontScale, radiusScale) as React.CSSProperties;
+  const inlineStyles = getEffectiveInlineStyles(effectivePrefs) as React.CSSProperties;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "SoftwareApplication",
+        "@type": ["SoftwareApplication", "WebApplication"],
+        "@id": "https://volta.aetthel.com/#software",
         name: "Volta",
-        operatingSystem: "All",
+        url: "https://volta.aetthel.com",
+        operatingSystem: "Web",
         applicationCategory: "BusinessApplication",
+        author: {
+          "@type": "Organization",
+          name: "Aetthel",
+          url: "https://aetthel.com",
+        },
         offers: {
           "@type": "Offer",
           price: "0.00",
@@ -96,7 +154,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           reviewCount: "128",
         },
         description:
-          "Plataforma de agenda online y avisos por WhatsApp para negocios. Evita ausencias y gestiona clientes en tiempo real.",
+          "Plataforma de agenda online y avisos por WhatsApp con IA para negocios y clínicas. Evita ausencias y gestiona clientes en tiempo real.",
       },
       {
         "@type": "FAQPage",
@@ -142,11 +200,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="es" className={`${inter.variable}`} style={inlineStyles}>
       <head>
         <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var f=localStorage.getItem("volta_font_size"),r=localStorage.getItem("volta_border_radius");var fs={SMALL:"0.9",MEDIUM:"1.0",LARGE:"1.15"},rs={SMALL:"0.0",MEDIUM:"1.0",LARGE:"2.0"};var root=document.documentElement;if(f&&fs[f])root.style.setProperty("--font-scale",fs[f]);if(r&&rs[r])root.style.setProperty("--radius-scale",rs[r]);}catch(e){}})();`,
-          }}
-        />
-        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
@@ -155,9 +208,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="min-h-screen font-sans font-normal bg-surface text-on-surface antialiased"
         style={inlineStyles}
       >
-        <ClientProvidersWrapper session={session}>{children}</ClientProvidersWrapper>
+        <ClientProvidersWrapper session={session} initialPreferences={effectivePrefs}>
+          {children}
+        </ClientProvidersWrapper>
         <Script src="https://assets.lemonsqueezy.com/lemon.js" strategy="lazyOnload" />
       </body>
     </html>
   );
 }
+

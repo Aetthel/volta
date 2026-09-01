@@ -120,6 +120,9 @@ function NavItem({
             }`}
             strokeWidth={isActive ? 2 : 1.75}
           />
+          {isCollapsed && item.badge !== undefined && item.badge !== null && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-primary ring-2 ring-surface" />
+          )}
         </div>
         {!isCollapsed && (
           <span className="text-sm font-medium tracking-normal truncate">

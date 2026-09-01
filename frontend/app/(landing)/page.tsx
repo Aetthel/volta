@@ -25,7 +25,7 @@ import dynamic from "next/dynamic";
 import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
 import FullScreenSplash from "@/components/FullScreenSplash";
-import { COLOR_PALETTES, applyThemeColors } from "@/lib/theme";
+import { COLOR_PALETTES, getThemeInlineStyles } from "@/lib/theme";
 
 const SubscriptionCheckoutModal = dynamic(
   () => import("@/components/SubscriptionCheckoutModal"),
@@ -43,13 +43,11 @@ export default function RootPage() {
   const [checkoutPlan, setCheckoutPlan] = useState<"BASIC" | "PRO" | null>(null);
   const router = useRouter();
 
-  // Enforce default Volta theme on the landing page
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const root = document.documentElement;
-      applyThemeColors(root, COLOR_PALETTES.CLINICAL_ELEGANCE);
-    }
-  }, []);
+  const defaultThemeStyles = getThemeInlineStyles(
+    COLOR_PALETTES.CLINICAL_ELEGANCE,
+    "1.0",
+    "1.0"
+  ) as React.CSSProperties;
 
   // If user already has an active session, automatically navigate to Dashboard
   useEffect(() => {
@@ -161,7 +159,10 @@ export default function RootPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface antialiased font-sans">
+    <div
+      className="min-h-screen bg-surface text-on-surface antialiased font-sans"
+      style={defaultThemeStyles}
+    >
       {/* 1. Header Navigation */}
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${

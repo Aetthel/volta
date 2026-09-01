@@ -30,6 +30,7 @@ import {
   Badge,
   FieldGroup,
   Field,
+  Avatar,
 } from "@/components/ui/volta-ui";
 import { apiClient } from "@/lib/apiClient";
 
@@ -173,21 +174,16 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
             <div className="relative group/logo shrink-0">
               <div
                 onClick={() => businessLogoInputRef.current?.click()}
-                className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-outline-variant/60 hover:border-primary bg-surface-container-high shadow-xs flex items-center justify-center cursor-pointer transition-all duration-200"
+                className="relative rounded-2xl cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/40"
                 title="Haz clic para cambiar el logotipo comercial"
               >
-                {profile.logoUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={profile.logoUrl}
-                    alt="Logo del Negocio"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-2xl">
-                    {profile.name ? profile.name.charAt(0).toUpperCase() : "V"}
-                  </div>
-                )}
+                <Avatar
+                  name={profile.name || "Volta"}
+                  src={profile.logoUrl}
+                  type="business"
+                  size="xl"
+                  className="w-20 h-20 rounded-2xl shadow-sm"
+                />
 
                 {/* Hover overlay */}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity rounded-2xl">

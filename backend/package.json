@@ -7,7 +7,8 @@
   "exports": {
     "./db": "./src/config/db.js",
     "./bot": "./src/services/botService.js",
-    "./whatsapp": "./src/services/whatsappService.js"
+    "./whatsapp": "./src/services/whatsappService.js",
+    "./auth-security": "./src/services/authSecurityService.js"
   },
   "scripts": {
     "dev": "nodemon src/index.js",

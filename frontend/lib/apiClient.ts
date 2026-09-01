@@ -169,6 +169,27 @@ class ApiClient {
     update: <T = any>(id: string, data: any) => this.put<T>(`/appointments/${id}`, data),
     delete: <T = any>(id: string) => this.delete<T>(`/appointments/${id}`),
   };
+
+  public auth = {
+    verifyOtp: <T = any>(data: { email: string; code: string }) =>
+      this.post<T>("/auth-security/verify-otp", data),
+    resendOtp: <T = any>(data: { email: string }) =>
+      this.post<T>("/auth-security/resend-otp", data),
+    forgotPassword: <T = any>(data: { email: string }) =>
+      this.post<T>("/auth-security/forgot-password", data),
+    resetPassword: <T = any>(data: { email: string; token: string; newPassword: string }) =>
+      this.post<T>("/auth-security/reset-password", data),
+    setupTwoFactor: <T = { secret: string; qrCode: string; otpAuthUrl: string }>() =>
+      this.post<T>("/auth-security/2fa/setup"),
+    enableTwoFactor: <T = { message: string; backupCodes: string[] }>(data: {
+      secret: string;
+      code: string;
+    }) => this.post<T>("/auth-security/2fa/enable", data),
+    disableTwoFactor: <T = any>(data: { password: string }) =>
+      this.post<T>("/auth-security/2fa/disable", data),
+    changePassword: <T = any>(data: { currentPassword: string; newPassword: string }) =>
+      this.post<T>("/auth-security/change-password", data),
+  };
 }
 
 export const apiClient = new ApiClient();

@@ -15,7 +15,11 @@ import {
   ShieldCheck,
   AlertCircle,
 } from "lucide-react";
-import { COLOR_PALETTES, getThemeColor, applyThemeColors } from "@/lib/theme";
+import {
+  COLOR_PALETTES,
+  getThemeColor,
+  getThemeInlineStyles,
+} from "@/lib/theme";
 import { formatCurrency } from "@/lib/utils";
 import {
   Button,
@@ -35,6 +39,8 @@ interface PublicBusinessData {
   address: string;
   description?: string;
   themeColor?: string;
+  fontSizeLevel?: string;
+  borderRadiusLevel?: string;
   enablePublicBooking?: boolean;
   hours: Array<{
     dayOfWeek: number;
@@ -87,12 +93,6 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
           setError(data.error);
         } else {
           setBusiness(data);
-          if (typeof document !== "undefined") {
-            const root = document.documentElement;
-            const themeKey = getThemeColor(data.themeColor);
-            const palette = COLOR_PALETTES[themeKey] || COLOR_PALETTES.CLINICAL_ELEGANCE;
-            applyThemeColors(root, palette);
-          }
         }
         setLoading(false);
       })
@@ -215,8 +215,19 @@ export default function PublicBookingPage({ params }: { params: Promise<{ busine
     "19:30",
   ];
 
+  const bookingThemeKey = getThemeColor(business?.themeColor);
+  const bookingPalette = COLOR_PALETTES[bookingThemeKey] || COLOR_PALETTES.CLINICAL_ELEGANCE;
+  const bookingStyles = getThemeInlineStyles(
+    bookingPalette,
+    "1.0",
+    "1.0"
+  ) as React.CSSProperties;
+
   return (
-    <div className="min-h-screen bg-surface py-8 px-4 sm:px-8 max-w-3xl mx-auto flex flex-col justify-between select-none">
+    <div
+      className="min-h-screen bg-surface py-8 px-4 sm:px-8 max-w-3xl mx-auto flex flex-col justify-between select-none"
+      style={bookingStyles}
+    >
       <div>
         {/* Header / Branding */}
         <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-6 mb-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">

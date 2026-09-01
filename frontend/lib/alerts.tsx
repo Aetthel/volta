@@ -1,14 +1,20 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
+
+export type AlertCategory = "APPOINTMENT" | "WHATSAPP" | "CLIENT" | "BILLING" | "SYSTEM";
 
 export interface AlertItem {
   id: string;
   type: "EMERGENTE" | "AVISO" | "NOTIFICACION";
+  category?: AlertCategory;
   title: string;
   description: string;
+  actionUrl?: string | null;
+  actionLabel?: string | null;
   isRead: boolean;
+  isArchived?: boolean;
   createdAt: string;
 }
 
@@ -17,9 +23,14 @@ interface AlertsContextType {
   isLoading: boolean;
   fetchAlerts: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
+  markAllAsRead: (category?: string) => Promise<void>;
+  archiveAlert: (id: string) => Promise<void>;
+  unarchiveAlert: (id: string) => Promise<void>;
+  deleteAlert: (id: string) => Promise<void>;
   hasUnread: boolean;
   unreadCount: number;
+  categoryCounts: Record<string, number>;
+  categoryUnreadCounts: Record<string, number>;
 }
 
 const AlertsContext = createContext<AlertsContextType | undefined>(undefined);
@@ -63,11 +74,21 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = async (category?: string) => {
     try {
-      setAlerts((prev) => prev.map((alert) => ({ ...alert, isRead: true })));
+      setAlerts((prev) =>
+        prev.map((alert) =>
+          !category || category === "TODAS" || alert.category === category
+            ? { ...alert, isRead: true }
+            : alert
+        )
+      );
 
-      const res = await fetch("/api/backend/alerts/read-all", {
+      const url = category && category !== "TODAS"
+        ? `/api/backend/alerts/read-all?category=${encodeURIComponent(category)}`
+        : "/api/backend/alerts/read-all";
+
+      const res = await fetch(url, {
         method: "PUT",
       });
 
@@ -80,6 +101,61 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const archiveAlert = async (id: string) => {
+    try {
+      setAlerts((prev) =>
+        prev.map((alert) => (alert.id === id ? { ...alert, isArchived: true } : alert))
+      );
+
+      const res = await fetch(`/api/backend/alerts/${id}/archive`, {
+        method: "PUT",
+      });
+
+      if (!res.ok) {
+        fetchAlerts();
+      }
+    } catch (e) {
+      console.error("Error archiving alert:", e);
+      fetchAlerts();
+    }
+  };
+
+  const unarchiveAlert = async (id: string) => {
+    try {
+      setAlerts((prev) =>
+        prev.map((alert) => (alert.id === id ? { ...alert, isArchived: false } : alert))
+      );
+
+      const res = await fetch(`/api/backend/alerts/${id}/unarchive`, {
+        method: "PUT",
+      });
+
+      if (!res.ok) {
+        fetchAlerts();
+      }
+    } catch (e) {
+      console.error("Error unarchiving alert:", e);
+      fetchAlerts();
+    }
+  };
+
+  const deleteAlert = async (id: string) => {
+    try {
+      setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+
+      const res = await fetch(`/api/backend/alerts/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        fetchAlerts();
+      }
+    } catch (e) {
+      console.error("Error deleting alert:", e);
+      fetchAlerts();
+    }
+  };
+
   useEffect(() => {
     if (status !== "unauthenticated") {
       setIsLoading(true);
@@ -87,7 +163,7 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
 
       const interval = setInterval(() => {
         fetchAlerts();
-      }, 30000);
+      }, 20000);
 
       return () => clearInterval(interval);
     } else {
@@ -95,9 +171,42 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
     }
   }, [status, fetchAlerts]);
 
-  const unreadAlerts = alerts.filter((a) => !a.isRead);
+  const activeAlerts = useMemo(() => alerts.filter((a) => !a.isArchived), [alerts]);
+  const unreadAlerts = useMemo(() => activeAlerts.filter((a) => !a.isRead), [activeAlerts]);
   const unreadCount = unreadAlerts.length;
   const hasUnread = unreadCount > 0;
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      TODAS: activeAlerts.length,
+      APPOINTMENT: 0,
+      WHATSAPP: 0,
+      CLIENT: 0,
+      BILLING: 0,
+      SYSTEM: 0,
+    };
+    activeAlerts.forEach((a) => {
+      const cat = a.category || "SYSTEM";
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [activeAlerts]);
+
+  const categoryUnreadCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      TODAS: unreadAlerts.length,
+      APPOINTMENT: 0,
+      WHATSAPP: 0,
+      CLIENT: 0,
+      BILLING: 0,
+      SYSTEM: 0,
+    };
+    unreadAlerts.forEach((a) => {
+      const cat = a.category || "SYSTEM";
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [unreadAlerts]);
 
   return (
     <AlertsContext.Provider
@@ -107,8 +216,13 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
         fetchAlerts,
         markAsRead,
         markAllAsRead,
+        archiveAlert,
+        unarchiveAlert,
+        deleteAlert,
         hasUnread,
         unreadCount,
+        categoryCounts,
+        categoryUnreadCounts,
       }}
     >
       {children}
@@ -126,8 +240,13 @@ export function AlertsProvider({ children }: { children: React.ReactNode }) {
           fetchAlerts: async () => {},
           markAsRead: async () => {},
           markAllAsRead: async () => {},
+          archiveAlert: async () => {},
+          unarchiveAlert: async () => {},
+          deleteAlert: async () => {},
           hasUnread: false,
           unreadCount: 0,
+          categoryCounts: { TODAS: 0, APPOINTMENT: 0, WHATSAPP: 0, CLIENT: 0, BILLING: 0, SYSTEM: 0 },
+          categoryUnreadCounts: { TODAS: 0, APPOINTMENT: 0, WHATSAPP: 0, CLIENT: 0, BILLING: 0, SYSTEM: 0 },
         }}
       >
         {children}
@@ -147,9 +266,15 @@ export function useAlerts() {
       fetchAlerts: async () => {},
       markAsRead: async () => {},
       markAllAsRead: async () => {},
+      archiveAlert: async () => {},
+      unarchiveAlert: async () => {},
+      deleteAlert: async () => {},
       hasUnread: false,
       unreadCount: 0,
+      categoryCounts: { TODAS: 0, APPOINTMENT: 0, WHATSAPP: 0, CLIENT: 0, BILLING: 0, SYSTEM: 0 },
+      categoryUnreadCounts: { TODAS: 0, APPOINTMENT: 0, WHATSAPP: 0, CLIENT: 0, BILLING: 0, SYSTEM: 0 },
     };
   }
   return context;
 }
+

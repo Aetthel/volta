@@ -27,7 +27,7 @@ import {
   Badge,
 } from "@/components/ui/volta-ui";
 
-import { apiClient } from "@/lib/apiClient";
+import { useTheme } from "@/hooks/useTheme";
 
 interface PersonalizationSectionProps {
   profile: BusinessProfile;
@@ -40,8 +40,12 @@ export default function PersonalizationSection({
   setProfile,
   businessId,
 }: PersonalizationSectionProps) {
-  const { update } = useSession();
+  const { themeColor, fontSizeLevel, borderRadiusLevel, updateTheme, isSaving } = useTheme();
   const [savedBadge, setSavedBadge] = useState(false);
+
+  const activeThemeColor = profile.themeColor || themeColor || "CLINICAL_ELEGANCE";
+  const activeFontSize = profile.fontSizeLevel || fontSizeLevel || "MEDIUM";
+  const activeBorderRadius = profile.borderRadiusLevel || borderRadiusLevel || "MEDIUM";
 
   const updateSetting = async (
     key: "themeColor" | "fontSizeLevel" | "borderRadiusLevel",
@@ -49,49 +53,26 @@ export default function PersonalizationSection({
   ) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
 
-    const root = document.documentElement;
-    const body = document.body;
-    if (key === "themeColor") {
-      localStorage.setItem("volta_theme_color", value);
-      const palette = COLOR_PALETTES[value as keyof typeof COLOR_PALETTES];
-      if (palette) applyThemeColors(root, palette);
-    } else if (key === "fontSizeLevel") {
-      localStorage.setItem("volta_font_size", value);
-      const scale = FONT_SCALES[value as keyof typeof FONT_SCALES]?.scale;
-      if (scale) {
-        root.style.setProperty("--font-scale", scale);
-        if (body) body.style.setProperty("--font-scale", scale);
-      }
-    } else if (key === "borderRadiusLevel") {
-      localStorage.setItem("volta_border_radius", value);
-      const scale = RADIUS_SCALES[value as keyof typeof RADIUS_SCALES]?.scale;
-      if (scale) {
-        root.style.setProperty("--radius-scale", scale);
-        if (body) body.style.setProperty("--radius-scale", scale);
-      }
-    }
+    const success = await updateTheme(
+      { [key]: value },
+      { persistToDb: true, businessId }
+    );
 
-    setSavedBadge(true);
-    setTimeout(() => setSavedBadge(false), 2000);
-
-    try {
-      const res = await apiClient.business.update(businessId, { [key]: value });
-      if (res.data && update) {
-        await update({ [key]: res.data[key] });
-      }
-    } catch (err) {
-      console.error("Error auto-saving personalization:", err);
+    if (success) {
+      setSavedBadge(true);
+      setTimeout(() => setSavedBadge(false), 2000);
     }
   };
 
-  const currentThemeKey = profile.themeColor || "CLINICAL_ELEGANCE";
+  const currentThemeKey = activeThemeColor;
   const currentPalette =
     COLOR_PALETTES[currentThemeKey as keyof typeof COLOR_PALETTES] ||
     COLOR_PALETTES.CLINICAL_ELEGANCE;
 
-  const currentRadiusKey = profile.borderRadiusLevel || "MEDIUM";
+  const currentRadiusKey = activeBorderRadius;
   const currentRadiusPx =
     currentRadiusKey === "SMALL" ? "0px" : currentRadiusKey === "LARGE" ? "16px" : "8px";
+
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
