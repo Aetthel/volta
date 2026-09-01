@@ -73,6 +73,8 @@ describe("validateBody", () => {
     req.body = { name: "Test", age: "not-a-number" };
     validateBody(schema)(req, res, next);
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: "Validation failed" }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ error: expect.stringMatching(/validación/i) })
+    );
   });
 });
