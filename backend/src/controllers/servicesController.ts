@@ -2,12 +2,18 @@ import * as catalogService from "../services/catalogService.js";
 import * as businessService from "../services/businessService.js";
 import { cacheService } from "../services/cacheService.js";
 import { ApiResponse } from "../utils/index.js";
+import type { Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
 
-export const getServices = async (req, res) => {
-  const { businessId } = req.query;
+export const getServices = async (req: AuthRequest, res: Response) => {
+  const { businessId } = req.query as { businessId?: string };
+
+  if (!businessId) {
+    return res.status(400).json({ error: "businessId es requerido" });
+  }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -22,11 +28,11 @@ export const getServices = async (req, res) => {
   return ApiResponse.success(res, services);
 };
 
-export const createService = async (req, res) => {
+export const createService = async (req: AuthRequest, res: Response) => {
   const { businessId, name, description, duration, price, capacity, type, color } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -52,8 +58,8 @@ export const createService = async (req, res) => {
   return ApiResponse.created(res, service);
 };
 
-export const updateService = async (req, res) => {
-  const { id } = req.params;
+export const updateService = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
   const { name, description, duration, price, capacity, type, color, isActive } = req.body;
 
   const service = await catalogService.getServiceById(id);
@@ -62,11 +68,11 @@ export const updateService = async (req, res) => {
   }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && service.businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && service.businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este servicio" });
   }
 
-  const updatedData = { name, description, duration, price, type, color, isActive };
+  const updatedData: any = { name, description, duration, price, type, color, isActive };
   if (capacity !== undefined) {
     updatedData.capacity = parseInt(capacity, 10);
   }
@@ -79,8 +85,8 @@ export const updateService = async (req, res) => {
   return ApiResponse.success(res, updated);
 };
 
-export const deleteService = async (req, res) => {
-  const { id } = req.params;
+export const deleteService = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
   const service = await catalogService.getServiceById(id);
   if (!service) {
@@ -88,7 +94,7 @@ export const deleteService = async (req, res) => {
   }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && service.businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && service.businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este servicio" });
   }
 
@@ -98,4 +104,11 @@ export const deleteService = async (req, res) => {
   await cacheService.del(`volta:cache:biz:${service.businessId}:services`);
 
   return ApiResponse.deleted(res);
+};
+
+export default {
+  getServices,
+  createService,
+  updateService,
+  deleteService,
 };

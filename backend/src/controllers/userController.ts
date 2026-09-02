@@ -1,14 +1,17 @@
 import * as userService from "../services/userService.js";
 import { ApiResponse } from "../utils/index.js";
 import prisma from "../config/db.js";
+import type { Request, Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
+import authSecurityService from "../services/authSecurityService.js";
 
-export const getUsers = async (req, res) => {
+export const getUsers = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ error: "No autorizado" });
   }
 
-  const { businessId } = req.query;
-  const where = {};
+  const { businessId } = req.query as { businessId?: string };
+  const where: any = {};
 
   if (businessId && businessId !== "null" && businessId !== "undefined") {
     where.businessId = businessId;
@@ -19,16 +22,12 @@ export const getUsers = async (req, res) => {
     where.businessId = req.user?.businessId || "no_business";
   }
 
-  // Los campos que salen los declara `TEAM_MEMBER_FIELDS` en el servicio. Aquí
-  // ya no se filtra nada: quitar `password` a mano daba la falsa impresión de
-  // que la respuesta estaba saneada, cuando arrastraba el secreto TOTP y los
-  // tokens de recuperación de todo el equipo.
   const users = await userService.getUsers(where);
 
   return ApiResponse.success(res, users);
 };
 
-export const createUser = async (req, res) => {
+export const createUser = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ error: "No autorizado" });
   }
@@ -63,12 +62,12 @@ export const createUser = async (req, res) => {
   return ApiResponse.created(res, sanitized);
 };
 
-export const updateUser = async (req, res) => {
+export const updateUser = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ error: "No autorizado" });
   }
 
-  const { id } = req.params;
+  const { id } = req.params as { id: string };
   const { name, email, password, role, businessId } = req.body;
 
   // If not admin, check target user ownership and request params
@@ -82,10 +81,10 @@ export const updateUser = async (req, res) => {
     }
   }
 
-  const data = {};
+  const data: any = {};
   if (name !== undefined) data.name = name;
   if (email !== undefined && email !== null) {
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanEmail = (email as string).trim().toLowerCase();
     // Check if email taken by someone else
     const existing = await userService.getUserByEmail(cleanEmail);
     if (existing && existing.id !== id) {
@@ -117,12 +116,12 @@ export const updateUser = async (req, res) => {
   return ApiResponse.success(res, sanitized);
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ error: "No autorizado" });
   }
 
-  const { id } = req.params;
+  const { id } = req.params as { id: string };
 
   // If not admin, check target user ownership
   if (req.user.role !== "ADMIN") {
@@ -136,9 +135,9 @@ export const deleteUser = async (req, res) => {
   return ApiResponse.deleted(res);
 };
 
-export const registerUser = async (req, res) => {
+export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, businessName, phone, businessType } = req.body;
-  const cleanEmail = email ? email.trim().toLowerCase() : "";
+  const cleanEmail = email ? (email as string).trim().toLowerCase() : "";
 
   if (!cleanEmail) {
     return res.status(400).json({ error: "El correo electrónico es requerido." });
@@ -152,9 +151,9 @@ export const registerUser = async (req, res) => {
 
   // 2. Create Business and JEFE User atomically in a transaction
   const trialExpiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
-  const hashedPassword = password ? await userService.hashPassword(password) : undefined;
+  const hashedPassword = await userService.hashPassword(password || "");
 
-  const { business, user } = await prisma.$transaction(async (tx) => {
+  const { business, user } = await prisma.$transaction(async (tx: any) => {
     const createdBusiness = await tx.business.create({
       data: {
         name: businessName,
@@ -170,8 +169,6 @@ export const registerUser = async (req, res) => {
             email: cleanEmail,
             password: hashedPassword,
             role: "JEFE",
-            // El alta pública es la única vía que nace pendiente: hasta que el
-            // usuario introduzca el código, `authorize()` no le abrirá sesión.
             status: "PENDING_VERIFICATION",
           },
         },
@@ -181,19 +178,14 @@ export const registerUser = async (req, res) => {
       },
     });
 
-    return { business: createdBusiness, user: createdBusiness.users[0] };
+    return { business: createdBusiness, user: (createdBusiness as any).users[0] };
   });
 
   // Automatically trigger email OTP verification code.
-  // El fallo no tumba el alta: la cuenta ya existe y el usuario puede pedir un
-  // reenvío desde la pantalla de verificación. Pero sí se le dice, porque con
-  // la verificación obligatoria un correo perdido en silencio es una cuenta
-  // encerrada sin explicación.
   let emailSent = false;
   try {
-    const { default: authSecurityService } = await import("../services/authSecurityService.js");
     const delivery = await authSecurityService.sendUserVerificationOtp(user);
-    emailSent = !!delivery.emailSent;
+    emailSent = Boolean(delivery.emailSent);
   } catch (otpErr) {
     console.error("[UserController] Error sending initial OTP email:", otpErr);
   }
@@ -213,4 +205,12 @@ export const registerUser = async (req, res) => {
       trialExpiresAt: business.trialExpiresAt,
     },
   });
+};
+
+export default {
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  registerUser,
 };

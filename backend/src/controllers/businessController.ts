@@ -5,8 +5,9 @@ import {
   getObservedHolidays,
   isKnownHolidayKey,
 } from "../utils/holidays.js";
+import type { Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
 
-/** Años que se devuelven al calendario: el actual y el siguiente. */
 const HOLIDAY_YEARS_AHEAD = 1;
 
 const defaultHours = [
@@ -19,11 +20,11 @@ const defaultHours = [
   { dayOfWeek: 0, openTime: "09:00", closeTime: "20:00", isClosed: true },
 ];
 
-export const getBusiness = async (req, res) => {
-  const { id } = req.params;
+export const getBusiness = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -35,8 +36,8 @@ export const getBusiness = async (req, res) => {
   return ApiResponse.success(res, business);
 };
 
-export const updateBusiness = async (req, res) => {
-  const { id } = req.params;
+export const updateBusiness = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
   const {
     name,
     email,
@@ -51,11 +52,11 @@ export const updateBusiness = async (req, res) => {
   } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
-  const updateData = {};
+  const updateData: Record<string, any> = {};
   if (name !== undefined) updateData.name = name;
   if (email !== undefined) updateData.email = email;
   if (phone !== undefined) updateData.phone = phone;
@@ -72,11 +73,11 @@ export const updateBusiness = async (req, res) => {
   return ApiResponse.success(res, updated);
 };
 
-export const getHours = async (req, res) => {
-  const { id } = req.params;
+export const getHours = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -88,14 +89,10 @@ export const getHours = async (req, res) => {
   return ApiResponse.success(res, hours);
 };
 
-/**
- * Festivos que el negocio observa, ya resueltos a fechas concretas. Es lo que
- * consume el calendario de la agenda para pintarlos en gris.
- */
-export const getHolidays = async (req, res) => {
-  const { id } = req.params;
+export const getHolidays = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
-  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -104,16 +101,15 @@ export const getHolidays = async (req, res) => {
 
   return ApiResponse.success(res, {
     holidays: getObservedHolidays(preferences, currentYear, currentYear + HOLIDAY_YEARS_AHEAD),
-    // El catálogo del año en curso alimenta la pantalla de Ajustes.
     catalogue: getHolidayCatalogue(preferences, currentYear),
   });
 };
 
-export const updateHolidays = async (req, res) => {
-  const { id } = req.params;
+export const updateHolidays = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
   const holidaysData = req.body;
 
-  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -122,9 +118,7 @@ export const updateHolidays = async (req, res) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
-  // Una clave desconocida quedaría almacenada sin efecto ninguno y sería
-  // imposible de depurar después, así que se rechaza aquí.
-  const unknown = holidaysData.find((h) => !isKnownHolidayKey(h.holidayKey));
+  const unknown = holidaysData.find((h: any) => !isKnownHolidayKey(h.holidayKey));
   if (unknown) {
     return res.status(400).json({ error: `Festivo no reconocido: ${unknown.holidayKey}` });
   }
@@ -140,12 +134,12 @@ export const updateHolidays = async (req, res) => {
   });
 };
 
-export const updateHours = async (req, res) => {
-  const { id } = req.params;
+export const updateHours = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
   const hoursData = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -162,4 +156,13 @@ export const updateHours = async (req, res) => {
   const updatedHours = await businessService.getBusinessHours(id);
 
   return ApiResponse.success(res, updatedHours);
+};
+
+export default {
+  getBusiness,
+  updateBusiness,
+  getHours,
+  getHolidays,
+  updateHolidays,
+  updateHours,
 };

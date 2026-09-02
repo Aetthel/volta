@@ -5,6 +5,7 @@ import config from "../config/index.js";
 import { verifyToken } from "../utils/crypto.js";
 import prisma from "../config/db.js";
 import type { AuthRequest, UserRole } from "../types/index.js";
+export type { AuthRequest, UserRole };
 
 const API_KEY = config.apiKey;
 const JWT_SECRET = config.backendJwtSecret;

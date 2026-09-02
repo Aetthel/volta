@@ -1,11 +1,17 @@
 import * as clientsService from "../services/clientsService.js";
 import { ApiResponse } from "../utils/index.js";
+import type { Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
 
-export const getClients = async (req, res) => {
-  const { businessId } = req.query;
+export const getClients = async (req: AuthRequest, res: Response) => {
+  const { businessId } = req.query as { businessId?: string };
+
+  if (!businessId) {
+    return res.status(400).json({ error: "businessId es requerido" });
+  }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -13,11 +19,11 @@ export const getClients = async (req, res) => {
   return ApiResponse.success(res, clients);
 };
 
-export const createClient = async (req, res) => {
+export const createClient = async (req: AuthRequest, res: Response) => {
   const { name, surname, email, phone, businessId } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -25,13 +31,13 @@ export const createClient = async (req, res) => {
   return ApiResponse.created(res, client);
 };
 
-export const updateClient = async (req, res) => {
-  const { id } = req.params;
+export const updateClient = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN") {
+  if (req.user?.role !== "ADMIN") {
     const client = await clientsService.getClientById(id);
-    if (!client || client.businessId !== req.user.businessId) {
+    if (!client || client.businessId !== req.user?.businessId) {
       return res.status(403).json({ error: "Acceso denegado a este cliente" });
     }
   }
@@ -48,13 +54,13 @@ export const updateClient = async (req, res) => {
   return ApiResponse.success(res, client);
 };
 
-export const deleteClient = async (req, res) => {
-  const { id } = req.params;
+export const deleteClient = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN") {
+  if (req.user?.role !== "ADMIN") {
     const client = await clientsService.getClientById(id);
-    if (!client || client.businessId !== req.user.businessId) {
+    if (!client || client.businessId !== req.user?.businessId) {
       return res.status(403).json({ error: "Acceso denegado a este cliente" });
     }
   }
@@ -63,8 +69,8 @@ export const deleteClient = async (req, res) => {
   return ApiResponse.deleted(res);
 };
 
-export const resendConsent = async (req, res) => {
-  const { id } = req.params;
+export const resendConsent = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
 
   const client = await clientsService.getClientById(id);
   if (!client) {
@@ -72,7 +78,7 @@ export const resendConsent = async (req, res) => {
   }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && client.businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && client.businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este cliente" });
   }
 
@@ -89,8 +95,8 @@ export const resendConsent = async (req, res) => {
   return ApiResponse.ok(res);
 };
 
-export const sendMessage = async (req, res) => {
-  const { id } = req.params;
+export const sendMessage = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
   const { message } = req.body;
 
   if (!message || typeof message !== "string" || message.trim().length === 0) {
@@ -103,10 +109,19 @@ export const sendMessage = async (req, res) => {
   }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && client.businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && client.businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este cliente" });
   }
 
   await clientsService.sendMessage(client, message);
   return ApiResponse.ok(res);
+};
+
+export default {
+  getClients,
+  createClient,
+  updateClient,
+  deleteClient,
+  resendConsent,
+  sendMessage,
 };

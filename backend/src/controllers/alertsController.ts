@@ -1,14 +1,16 @@
 import prisma from "../config/db.js";
 import { logger } from "../utils/logger.js";
+import type { Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
 
 // GET: Fetch alerts for the authenticated user with category & archive filters
-export const getAlerts = async (req, res) => {
+export const getAlerts = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     return res.status(401).json({ error: "No autorizado: ID de usuario faltante" });
   }
 
-  const { category, archived, unreadOnly, search } = req.query;
+  const { category, archived, unreadOnly, search } = req.query as Record<string, string | undefined>;
 
   try {
     // Check if user's business is in trial mode and evaluate milestone alerts
@@ -67,7 +69,7 @@ export const getAlerts = async (req, res) => {
       }
     }
 
-    const where = {
+    const where: any = {
       userId,
     };
 
@@ -106,7 +108,7 @@ export const getAlerts = async (req, res) => {
 };
 
 // GET: Summary count per category and unread totals
-export const getAlertSummary = async (req, res) => {
+export const getAlertSummary = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
@@ -147,9 +149,9 @@ export const getAlertSummary = async (req, res) => {
 };
 
 // PUT: Mark a specific alert as read
-export const markAlertAsRead = async (req, res) => {
+export const markAlertAsRead = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const alertId = req.params.id;
+  const alertId = req.params.id as string;
 
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
@@ -177,16 +179,16 @@ export const markAlertAsRead = async (req, res) => {
 };
 
 // PUT: Mark all user alerts as read (optionally by category)
-export const markAllAlertsAsRead = async (req, res) => {
+export const markAllAlertsAsRead = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const { category } = req.query;
+  const { category } = req.query as { category?: string };
 
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
   }
 
   try {
-    const where = { userId, isRead: false };
+    const where: any = { userId, isRead: false };
     if (category && category !== "TODAS" && category !== "ALL") {
       where.category = category;
     }
@@ -203,9 +205,9 @@ export const markAllAlertsAsRead = async (req, res) => {
 };
 
 // PUT: Archive a specific alert
-export const archiveAlert = async (req, res) => {
+export const archiveAlert = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const alertId = req.params.id;
+  const alertId = req.params.id as string;
 
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
@@ -233,9 +235,9 @@ export const archiveAlert = async (req, res) => {
 };
 
 // PUT: Unarchive a specific alert
-export const unarchiveAlert = async (req, res) => {
+export const unarchiveAlert = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const alertId = req.params.id;
+  const alertId = req.params.id as string;
 
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
@@ -263,9 +265,9 @@ export const unarchiveAlert = async (req, res) => {
 };
 
 // DELETE: Delete a specific alert
-export const deleteAlert = async (req, res) => {
+export const deleteAlert = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const alertId = req.params.id;
+  const alertId = req.params.id as string;
 
   if (!userId) {
     return res.status(401).json({ error: "No autorizado" });
@@ -292,7 +294,7 @@ export const deleteAlert = async (req, res) => {
 };
 
 // POST: Create alerts (Admin broadcast or backend triggers)
-export const createAlert = async (req, res) => {
+export const createAlert = async (req: AuthRequest, res: Response) => {
   const {
     type,
     category = "SYSTEM",
@@ -306,7 +308,7 @@ export const createAlert = async (req, res) => {
   } = req.body;
 
   try {
-    let where = {};
+    const where: any = {};
 
     if (req.user?.role === "ADMIN") {
       if (targetUserId) where.id = targetUserId;

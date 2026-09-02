@@ -1,12 +1,13 @@
 import * as adminService from "../services/adminService.js";
 import { ApiResponse } from "../utils/index.js";
+import type { Request, Response } from "express";
 
-export const getBusinesses = async (req, res) => {
+export const getBusinesses = async (_req: Request, res: Response) => {
   const businesses = await adminService.getAllBusinesses();
   return ApiResponse.success(res, businesses);
 };
 
-export const createBusiness = async (req, res) => {
+export const createBusiness = async (req: Request, res: Response) => {
   const { name, email, phone, address, password } = req.body;
 
   const business = await adminService.createBusiness(
@@ -22,8 +23,8 @@ export const createBusiness = async (req, res) => {
   return ApiResponse.created(res, business);
 };
 
-export const deleteBusiness = async (req, res) => {
-  const { id } = req.params;
+export const deleteBusiness = async (req: Request, res: Response) => {
+  const { id } = req.params as { id: string };
   const business = await adminService.getAllBusinesses();
   const exists = business.some((b) => b.id === id);
   if (!exists) {
@@ -33,7 +34,14 @@ export const deleteBusiness = async (req, res) => {
   return ApiResponse.deleted(res);
 };
 
-export const getDashboard = async (req, res) => {
+export const getDashboard = async (_req: Request, res: Response) => {
   const data = await adminService.getDashboardData();
   return ApiResponse.success(res, data);
+};
+
+export default {
+  getBusinesses,
+  createBusiness,
+  deleteBusiness,
+  getDashboard,
 };
