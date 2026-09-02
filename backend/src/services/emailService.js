@@ -96,8 +96,11 @@ async function sendRawEmail({ to, subject, html, text }) {
       );
       if (response.status === 403 && detail.includes("testing emails")) {
         logger.warn(
-          `[EmailService] ℹ️ AVISO MODO TEST RESEND: La clave API de Resend está en modo prueba gratuito (sólo permite enviar a la cuenta registrada). En producción requiere verificar dominio en resend.com/domains.`
+          `[EmailService] ℹ️ AVISO MODO TEST RESEND: La clave API de Resend está en modo sandbox (sólo permite enviar a la cuenta propietaria). En desarrollo local se simula el envío con éxito.`
         );
+        if (process.env.NODE_ENV !== "production") {
+          return { success: true, simulated: true };
+        }
       }
       return { success: false, error: `Resend HTTP ${response.status}` };
     }
