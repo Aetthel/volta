@@ -3,12 +3,12 @@
  * Differentiates operational errors from programmer/unexpected errors.
  */
 export class AppError extends Error {
-  /**
-   * @param {string} message - Error description
-   * @param {number} [statusCode=500] - HTTP status code
-   * @param {any} [details=null] - Additional error details or field violations
-   */
-  constructor(message, statusCode = 500, details = null) {
+  public statusCode: number;
+  public status: "fail" | "error";
+  public isOperational: boolean;
+  public details: unknown;
+
+  constructor(message: string, statusCode = 500, details: unknown = null) {
     super(message);
     this.name = "AppError";
     this.statusCode = statusCode;
@@ -19,27 +19,27 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 
-  static badRequest(message = "Solicitud incorrecta", details = null) {
+  static badRequest(message = "Solicitud incorrecta", details: unknown = null): AppError {
     return new AppError(message, 400, details);
   }
 
-  static unauthorized(message = "No autorizado", details = null) {
+  static unauthorized(message = "No autorizado", details: unknown = null): AppError {
     return new AppError(message, 401, details);
   }
 
-  static forbidden(message = "Acceso denegado", details = null) {
+  static forbidden(message = "Acceso denegado", details: unknown = null): AppError {
     return new AppError(message, 403, details);
   }
 
-  static notFound(message = "Recurso no encontrado", details = null) {
+  static notFound(message = "Recurso no encontrado", details: unknown = null): AppError {
     return new AppError(message, 404, details);
   }
 
-  static conflict(message = "Conflicto con el estado actual del recurso", details = null) {
+  static conflict(message = "Conflicto con el estado actual del recurso", details: unknown = null): AppError {
     return new AppError(message, 409, details);
   }
 
-  static internal(message = "Error interno del servidor", details = null) {
+  static internal(message = "Error interno del servidor", details: unknown = null): AppError {
     return new AppError(message, 500, details);
   }
 }

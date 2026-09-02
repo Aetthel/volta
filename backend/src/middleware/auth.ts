@@ -1,12 +1,15 @@
+import type { Response, NextFunction, RequestHandler } from "express";
+import crypto from "crypto";
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { verifyToken } from "../utils/crypto.js";
-import crypto from "crypto";
 import prisma from "../config/db.js";
+import type { AuthRequest, UserRole } from "../types/index.js";
 
 const API_KEY = config.apiKey;
 const JWT_SECRET = config.backendJwtSecret;
 
-function safeCompare(a, b) {
+function safeCompare(a?: string | null, b?: string | null): boolean {
   if (!a || !b) return false;
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
@@ -14,7 +17,11 @@ function safeCompare(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-const authenticate = async (req, res, next) => {
+export const authenticate: RequestHandler = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<Response | void> => {
   const apiKey = req.header("x-api-key");
   if (!apiKey || !safeCompare(apiKey, API_KEY)) {
     return res.status(401).json({ error: "Acceso no autorizado: API Key inválida o ausente" });
@@ -26,16 +33,16 @@ const authenticate = async (req, res, next) => {
   }
 
   const token = authHeader.substring(7);
-  const decoded = verifyToken(token, JWT_SECRET);
+  const decoded = verifyToken<Record<string, any>>(token, JWT_SECRET);
   if (!decoded) {
     return res.status(401).json({ error: "Acceso no autorizado: Token inválido o expirado" });
   }
 
   req.user = {
-    id: decoded.id || null,
-    role: decoded.role || null,
+    id: decoded.id || "",
+    role: decoded.role as UserRole,
     businessId: decoded.businessId || null,
-    email: decoded.email || null,
+    email: decoded.email || "",
   };
 
   // Perform database verification of business trial/subscription status (except for subscription endpoints)
@@ -80,18 +87,24 @@ const authenticate = async (req, res, next) => {
   next();
 };
 
-const requireRole = (allowedRoles) => (req, res, next) => {
-  if (!req.user || !req.user.role || !allowedRoles.includes(req.user.role)) {
-    return res.status(403).json({
-      error: "Acceso denegado: Permisos insuficientes",
-      code: "PERMISSIONS_REVOKED",
-      redirect: "/",
-    });
-  }
-  next();
-};
+export const requireRole =
+  (allowedRoles: UserRole[]): RequestHandler =>
+  (req: AuthRequest, res: Response, next: NextFunction): Response | void => {
+    if (!req.user || !req.user.role || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        error: "Acceso denegado: Permisos insuficientes",
+        code: "PERMISSIONS_REVOKED",
+        redirect: "/",
+      });
+    }
+    next();
+  };
 
-const requireApiKey = (req, res, next) => {
+export const requireApiKey: RequestHandler = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Response | void => {
   const apiKey = req.header("x-api-key");
   if (!apiKey || !safeCompare(apiKey, API_KEY)) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -99,6 +112,6 @@ const requireApiKey = (req, res, next) => {
   next();
 };
 
-const requireAuth = authenticate;
+export const requireAuth = authenticate;
 
-export { authenticate, requireAuth, requireRole, requireApiKey };
+export default { authenticate, requireAuth, requireRole, requireApiKey };

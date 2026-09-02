@@ -1,7 +1,18 @@
+import type { Response, NextFunction, RequestHandler } from "express";
 import prisma from "../config/db.js";
+import type { AuthRequest } from "../types/index.js";
 
-export const checkSubscriptionLimits = (action) => {
-  return async (req, res, next) => {
+export type SubscriptionAction =
+  | "CREATE_LOCATION"
+  | "INVITE_MEMBER"
+  | "INVITE_WORKER"
+  | "WHATSAPP_CONNECT"
+  | "ONLINE_PAYMENTS"
+  | "CREATE_APPOINTMENT"
+  | "CREATE_PUBLIC_BOOKING";
+
+export const checkSubscriptionLimits = (action: SubscriptionAction): RequestHandler => {
+  return async (req: AuthRequest, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
       const businessId = req.user?.businessId;
       if (!businessId) {
@@ -40,7 +51,6 @@ export const checkSubscriptionLimits = (action) => {
       // Plan PRO Limits (40€/mes)
       if (business.subscriptionPlan === "PRO") {
         // Pro includes unlimited locations, unlimited appointments, whatsapp 2-way, payments, etc.
-        // Worker limits for Pro (2 included, extra workers allowed)
         return next();
       }
 
@@ -114,3 +124,5 @@ export const checkSubscriptionLimits = (action) => {
     }
   };
 };
+
+export default { checkSubscriptionLimits };

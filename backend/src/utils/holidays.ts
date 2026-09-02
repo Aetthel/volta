@@ -1,24 +1,53 @@
 /**
  * Festivos españoles.
- *
- * El catálogo se calcula, no se siembra en base de datos: así funciona para
- * cualquier año sin mantenimiento anual, incluidos los festivos que dependen de
- * la Pascua y que cambian de fecha cada año.
- *
- * Se distinguen dos grupos:
- * - `NATIONAL_HOLIDAYS`: festivos de ámbito nacional. Se aplican a todos los
- *   negocios salvo que uno marque expresamente que ese día abre.
- * - `REGIONAL_HOLIDAYS`: festivos autonómicos o que algunas comunidades trasladan
- *   (San Juan, Jueves Santo, Lunes de Pascua, San Esteban). No se aplican a nadie
- *   hasta que el negocio los activa, porque cerrar un negocio de Madrid por San
- *   Juan sería un error.
  */
+
+export interface BaseHoliday {
+  key: string;
+  name: string;
+  month?: number;
+  day?: number;
+  easterOffset?: number;
+  note?: string;
+}
+
+export interface CatalogHoliday extends BaseHoliday {
+  scope: "NATIONAL" | "REGIONAL";
+}
+
+export interface BusinessHolidayPreference {
+  holidayKey: string;
+  isObserved: boolean;
+}
+
+export interface ObservedHolidayResult {
+  date: string;
+  key: string;
+  name: string;
+  scope: "NATIONAL" | "REGIONAL";
+}
+
+export interface HolidayCheckResult {
+  isHoliday: boolean;
+  name?: string;
+  key?: string;
+}
+
+export interface HolidayCatalogueItem {
+  key: string;
+  name: string;
+  scope: "NATIONAL" | "REGIONAL";
+  note: string | null;
+  date: string;
+  isObserved: boolean;
+  isDefault: boolean;
+}
 
 /**
  * Domingo de Pascua por el algoritmo de Meeus/Jones/Butcher (calendario
  * gregoriano). De él cuelgan Jueves Santo, Viernes Santo y Lunes de Pascua.
  */
-export function getEasterSunday(year) {
+export function getEasterSunday(year: number): Date {
   const a = year % 19;
   const b = Math.floor(year / 100);
   const c = year % 100;
@@ -38,14 +67,14 @@ export function getEasterSunday(year) {
 }
 
 /** Fecha desplazada en días, en hora local. */
-const shiftDays = (date, days) => {
+const shiftDays = (date: Date, days: number): Date => {
   const result = new Date(date);
   result.setDate(date.getDate() + days);
   return result;
 };
 
 /** "YYYY-MM-DD" en hora local: usar toISOString() correría un día según el huso. */
-export const toDateKey = (date) => {
+export const toDateKey = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -53,7 +82,7 @@ export const toDateKey = (date) => {
 };
 
 /** Festivos nacionales: se observan salvo que el negocio diga lo contrario. */
-export const NATIONAL_HOLIDAYS = [
+export const NATIONAL_HOLIDAYS: BaseHoliday[] = [
   { key: "ANO_NUEVO", name: "Año Nuevo", month: 1, day: 1 },
   { key: "EPIFANIA", name: "Epifanía del Señor (Reyes)", month: 1, day: 6 },
   { key: "VIERNES_SANTO", name: "Viernes Santo", easterOffset: -2 },
@@ -67,7 +96,7 @@ export const NATIONAL_HOLIDAYS = [
 ];
 
 /** Festivos autonómicos: solo se observan si el negocio los activa. */
-export const REGIONAL_HOLIDAYS = [
+export const REGIONAL_HOLIDAYS: BaseHoliday[] = [
   {
     key: "JUEVES_SANTO",
     name: "Jueves Santo",
@@ -96,51 +125,39 @@ export const REGIONAL_HOLIDAYS = [
   },
 ];
 
-export const ALL_HOLIDAYS = [
-  ...NATIONAL_HOLIDAYS.map((h) => ({ ...h, scope: "NATIONAL" })),
-  ...REGIONAL_HOLIDAYS.map((h) => ({ ...h, scope: "REGIONAL" })),
+export const ALL_HOLIDAYS: CatalogHoliday[] = [
+  ...NATIONAL_HOLIDAYS.map((h) => ({ ...h, scope: "NATIONAL" as const })),
+  ...REGIONAL_HOLIDAYS.map((h) => ({ ...h, scope: "REGIONAL" as const })),
 ];
 
-const HOLIDAYS_BY_KEY = new Map(ALL_HOLIDAYS.map((h) => [h.key, h]));
+const HOLIDAYS_BY_KEY = new Map<string, CatalogHoliday>(ALL_HOLIDAYS.map((h) => [h.key, h]));
 
-export const isKnownHolidayKey = (key) => HOLIDAYS_BY_KEY.has(key);
+export const isKnownHolidayKey = (key: string): boolean => HOLIDAYS_BY_KEY.has(key);
 
 /** Fecha concreta que ocupa un festivo del catálogo en un año dado. */
-const resolveHolidayDate = (holiday, year) => {
+const resolveHolidayDate = (holiday: CatalogHoliday, year: number): Date => {
   if (typeof holiday.easterOffset === "number") {
     return shiftDays(getEasterSunday(year), holiday.easterOffset);
   }
-  return new Date(year, holiday.month - 1, holiday.day);
+  return new Date(year, (holiday.month ?? 1) - 1, holiday.day ?? 1);
 };
 
-/**
- * Decide si un festivo del catálogo se observa, combinando su ámbito con las
- * preferencias del negocio.
- *
- * @param {object} holiday - Entrada del catálogo.
- * @param {Map<string, boolean>} preferences - key -> isObserved guardado por el negocio.
- */
-const isObserved = (holiday, preferences) => {
+const isObserved = (holiday: CatalogHoliday, preferences: Map<string, boolean>): boolean => {
   const stored = preferences.get(holiday.key);
   if (stored !== undefined) return stored;
-  // Sin preferencia guardada: los nacionales cierran, los autonómicos no.
   return holiday.scope === "NATIONAL";
 };
 
-/**
- * Festivos que un negocio observa dentro de un rango de años.
- *
- * @param {Array<{holidayKey: string, isObserved: boolean}>} businessPreferences
- * @param {number} fromYear
- * @param {number} toYear
- * @returns {Array<{date: string, key: string, name: string, scope: string}>}
- */
-export function getObservedHolidays(businessPreferences, fromYear, toYear) {
-  const preferences = new Map(
+export function getObservedHolidays(
+  businessPreferences?: BusinessHolidayPreference[] | null,
+  fromYear = new Date().getFullYear(),
+  toYear = fromYear
+): ObservedHolidayResult[] {
+  const preferences = new Map<string, boolean>(
     (businessPreferences || []).map((p) => [p.holidayKey, p.isObserved])
   );
 
-  const result = [];
+  const result: ObservedHolidayResult[] = [];
 
   for (let year = fromYear; year <= toYear; year++) {
     for (const holiday of ALL_HOLIDAYS) {
@@ -158,16 +175,14 @@ export function getObservedHolidays(businessPreferences, fromYear, toYear) {
   return result.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-/**
- * Comprueba si una fecha concreta cae en festivo observado por el negocio.
- *
- * @returns {{ isHoliday: boolean, name?: string, key?: string }}
- */
-export function getHolidayForDate(businessPreferences, date) {
+export function getHolidayForDate(
+  businessPreferences: BusinessHolidayPreference[] | null | undefined,
+  date: Date | string
+): HolidayCheckResult {
   const target = date instanceof Date ? date : new Date(date);
   if (isNaN(target.getTime())) return { isHoliday: false };
 
-  const preferences = new Map(
+  const preferences = new Map<string, boolean>(
     (businessPreferences || []).map((p) => [p.holidayKey, p.isObserved])
   );
   const year = target.getFullYear();
@@ -183,12 +198,11 @@ export function getHolidayForDate(businessPreferences, date) {
   return { isHoliday: false };
 }
 
-/**
- * Catálogo completo para la pantalla de Ajustes: cada festivo con su fecha del
- * año indicado y si el negocio lo observa ahora mismo.
- */
-export function getHolidayCatalogue(businessPreferences, year) {
-  const preferences = new Map(
+export function getHolidayCatalogue(
+  businessPreferences: BusinessHolidayPreference[] | null | undefined,
+  year: number
+): HolidayCatalogueItem[] {
+  const preferences = new Map<string, boolean>(
     (businessPreferences || []).map((p) => [p.holidayKey, p.isObserved])
   );
 
@@ -202,3 +216,15 @@ export function getHolidayCatalogue(businessPreferences, year) {
     isDefault: preferences.get(holiday.key) === undefined,
   }));
 }
+
+export default {
+  getEasterSunday,
+  toDateKey,
+  NATIONAL_HOLIDAYS,
+  REGIONAL_HOLIDAYS,
+  ALL_HOLIDAYS,
+  isKnownHolidayKey,
+  getObservedHolidays,
+  getHolidayForDate,
+  getHolidayCatalogue,
+};

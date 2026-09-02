@@ -2,10 +2,28 @@
  * Global Express error handling middleware.
  * Formats API errors and handles custom, Zod, and DB-level (Prisma) exceptions.
  */
+import type { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { logger } from "../utils/logger.js";
 import { AppError } from "../utils/appError.js";
 
-const errorHandler = (err, req, res, next) => {
+export interface CustomError extends Error {
+  statusCode?: number;
+  status?: number | string;
+  isOperational?: boolean;
+  details?: unknown;
+  code?: string;
+  issues?: Array<{ path: (string | number)[]; message: string }>;
+  meta?: { target?: string[] };
+  body?: unknown;
+}
+
+export const errorHandler: ErrorRequestHandler = (
+  err: CustomError,
+  req: Request,
+  res: Response,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction
+): Response | void => {
   logger.error("[Global Error Handler]", {
     message: err.message,
     name: err.name,
@@ -68,12 +86,11 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Fallback for unhandled exceptions
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
+  const statusCode = typeof err.statusCode === "number" ? err.statusCode : 500;
+  return res.status(statusCode).json({
     error:
       statusCode === 500 ? "Error interno del servidor." : err.message || "Error en la petición.",
   });
 };
 
-export { errorHandler };
 export default errorHandler;

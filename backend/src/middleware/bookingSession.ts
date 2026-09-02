@@ -1,14 +1,26 @@
+import type { Request, Response, NextFunction } from "express";
+// @ts-ignore - bookingIdentityService is an existing JS module
 import { verifyBookingToken } from "../services/bookingIdentityService.js";
+
+export interface BookingIdentity {
+  phone: string;
+  businessId: string;
+  fullName?: string | null;
+  [key: string]: unknown;
+}
+
+export interface BookingRequest extends Request {
+  bookingIdentity?: BookingIdentity;
+}
 
 /**
  * Exige una sesión de reserva verificada en el portal público.
- *
- * El negocio se toma de `req.params.businessId` cuando la ruta lo lleva, y del
- * cuerpo cuando no (el caso de `POST /reserve`). El token solo vale para el
- * negocio para el que se emitió: sin esa comprobación, un token legítimo de un
- * negocio abriría el catálogo de cualquier otro.
  */
-export const requireBookingSession = (req, res, next) => {
+export const requireBookingSession = (
+  req: BookingRequest,
+  res: Response,
+  next: NextFunction
+): Response | void => {
   const token = req.header("x-booking-token");
 
   if (!token) {
@@ -19,7 +31,7 @@ export const requireBookingSession = (req, res, next) => {
   }
 
   const businessId = req.params?.businessId || req.body?.businessId || null;
-  const identity = verifyBookingToken(token, businessId);
+  const identity = verifyBookingToken(token, businessId) as BookingIdentity | null;
 
   if (!identity) {
     return res.status(401).json({
