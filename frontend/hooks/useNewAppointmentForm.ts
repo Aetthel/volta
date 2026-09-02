@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { formatPhoneNumber } from "@/lib/utils";
 
 const normalizeString = (str: string) => {
   return str
@@ -129,7 +130,8 @@ export function useNewAppointmentForm(
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const finalVal = id === "clientPhone" ? formatPhoneNumber(value) : value;
+    setFormData((prev) => ({ ...prev, [id]: finalVal }));
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

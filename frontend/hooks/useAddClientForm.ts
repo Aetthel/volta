@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { formatPhoneNumber } from "@/lib/utils";
 
 export interface ClientToEdit {
   id: string;
@@ -53,7 +54,7 @@ export function useAddClientForm(
       setFormData({
         name: clientToEdit.name ?? "",
         surname: clientToEdit.surname ?? "",
-        phone: clientToEdit.phone ?? "",
+        phone: clientToEdit.phone ? formatPhoneNumber(clientToEdit.phone) : "",
         email: clientToEdit.email ?? "",
         frequency: clientToEdit.frequentService ?? "",
         notes: "",
@@ -68,7 +69,8 @@ export function useAddClientForm(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
+    const finalVal = id === "phone" ? formatPhoneNumber(value) : value;
+    setFormData((prev) => ({ ...prev, [id]: finalVal }));
   };
 
   const handleFrequencyChange = (val: string) => {

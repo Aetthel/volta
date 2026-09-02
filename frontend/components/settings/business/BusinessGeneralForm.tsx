@@ -24,12 +24,13 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-  FloatingInput,
-  FloatingTextarea,
+  Input,
+  Textarea,
   Button,
   Badge,
   FieldGroup,
   Field,
+  FieldLabel,
   Avatar,
 } from "@/components/ui/volta-ui";
 import { apiClient } from "@/lib/apiClient";
@@ -382,8 +383,11 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field>
-                  <FloatingInput
-                    label="Nombre Comercial *"
+                  <FieldLabel>
+                    Nombre Comercial <span className="text-error">*</span>
+                  </FieldLabel>
+                  <Input
+                    placeholder="Ej. Peluquería Volta"
                     value={businessForm.name}
                     onChange={(e) => setBusinessForm({ ...businessForm, name: e.target.value })}
                     required
@@ -391,8 +395,9 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                 </Field>
 
                 <Field>
-                  <FloatingInput
-                    label="Teléfono de Contacto"
+                  <FieldLabel>Teléfono de Contacto</FieldLabel>
+                  <Input
+                    placeholder="+34 600 000 000"
                     type="tel"
                     value={businessForm.phone}
                     onChange={(e) => setBusinessForm({ ...businessForm, phone: e.target.value })}
@@ -402,8 +407,9 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field>
-                  <FloatingInput
-                    label="Email de Contacto"
+                  <FieldLabel>Email de Contacto</FieldLabel>
+                  <Input
+                    placeholder="contacto@empresa.com"
                     type="email"
                     value={businessForm.email}
                     onChange={(e) => setBusinessForm({ ...businessForm, email: e.target.value })}
@@ -411,8 +417,9 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                 </Field>
 
                 <Field>
-                  <FloatingInput
-                    label="Dirección Física"
+                  <FieldLabel>Dirección Física</FieldLabel>
+                  <Input
+                    placeholder="Calle Mayor 12, Madrid"
                     value={businessForm.address}
                     onChange={(e) => setBusinessForm({ ...businessForm, address: e.target.value })}
                   />
@@ -420,8 +427,9 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
               </div>
 
               <Field>
-                <FloatingTextarea
-                  label="Descripción del Negocio / Especialidades"
+                <FieldLabel>Descripción del Negocio / Especialidades</FieldLabel>
+                <Textarea
+                  placeholder="Describe los servicios o especialidades de tu negocio..."
                   value={businessForm.description}
                   onChange={(e) => setBusinessForm({ ...businessForm, description: e.target.value })}
                   rows={3}

@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
-  FloatingInput,
+  Input,
   Button,
   Select,
   FieldGroup,
@@ -172,9 +172,9 @@ export const LocationWorkersModal: React.FC<LocationWorkersModalProps> = ({
                 <FieldGroup className="grid grid-cols-1 gap-4">
                   <Field>
                     <FieldLabel htmlFor="worker-name">Nombre Completo</FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="worker-name"
-                      label="Nombre"
+                      placeholder="Nombre y Apellidos"
                       type="text"
                       required
                       value={workerFormData.name}
@@ -187,9 +187,9 @@ export const LocationWorkersModal: React.FC<LocationWorkersModalProps> = ({
 
                   <Field>
                     <FieldLabel htmlFor="worker-email">Correo Electrónico</FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="worker-email"
-                      label="Email"
+                      placeholder="correo@empresa.com"
                       type="email"
                       required
                       value={workerFormData.email}
@@ -204,9 +204,9 @@ export const LocationWorkersModal: React.FC<LocationWorkersModalProps> = ({
                     <FieldLabel htmlFor="worker-pass">
                       {editingWorker ? "Nueva Contraseña (opcional)" : "Contraseña"}
                     </FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="worker-pass"
-                      label="Contraseña"
+                      placeholder={editingWorker ? "Nueva contraseña (opcional)" : "Contraseña"}
                       type="password"
                       required={!editingWorker}
                       value={workerFormData.password}

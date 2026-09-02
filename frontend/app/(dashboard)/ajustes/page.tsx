@@ -48,7 +48,7 @@ import {
   FieldGroup,
   Field,
   FieldLabel,
-  FloatingInput,
+  Input,
 } from "@/components/ui/volta-ui";
 import {
   User,
@@ -480,9 +480,9 @@ function AdminProfileSection({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="adminName">Nombre Completo</FieldLabel>
-                <FloatingInput
+                <Input
                   id="adminName"
-                  label="Nombre y Apellidos"
+                  placeholder="Nombre y Apellidos"
                   value={adminForm.name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setAdminForm({ ...adminForm, name: e.target.value })
@@ -493,9 +493,9 @@ function AdminProfileSection({
               </Field>
               <Field>
                 <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
-                <FloatingInput
+                <Input
                   id="adminEmail"
-                  label="correo@empresa.com"
+                  placeholder="correo@empresa.com"
                   type="email"
                   value={adminForm.email}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -509,9 +509,9 @@ function AdminProfileSection({
                 <FieldLabel htmlFor="adminPassword">
                   Nueva Contraseña (dejar en blanco para mantener)
                 </FieldLabel>
-                <FloatingInput
+                <Input
                   id="adminPassword"
-                  label="Mínimo 6 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                   type="password"
                   value={adminForm.password}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

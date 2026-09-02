@@ -7,7 +7,7 @@ import {
   FieldGroup,
   Field,
   FieldLabel,
-  FloatingInput,
+  Input,
   InlineSelect,
 } from "@/components/ui/volta-ui";
 
@@ -59,9 +59,9 @@ export default function WorkerModal({
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="workerName">Nombre Completo</FieldLabel>
-              <FloatingInput
+              <Input
                 id="workerName"
-                label="Nombre y Apellidos"
+                placeholder="Nombre y Apellidos"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 icon={User}
@@ -70,9 +70,9 @@ export default function WorkerModal({
             </Field>
             <Field>
               <FieldLabel htmlFor="workerEmail">Correo Electrónico</FieldLabel>
-              <FloatingInput
+              <Input
                 id="workerEmail"
-                label="correo@empresa.com"
+                placeholder="correo@empresa.com"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -89,9 +89,9 @@ export default function WorkerModal({
                   </span>
                 )}
               </FieldLabel>
-              <FloatingInput
+              <Input
                 id="workerPassword"
-                label={isEditing ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"}
+                placeholder={isEditing ? "Nueva contraseña (opcional)" : "Mínimo 6 caracteres"}
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}

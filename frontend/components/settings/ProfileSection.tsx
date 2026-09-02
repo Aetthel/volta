@@ -33,7 +33,7 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-  FloatingInput,
+  Input,
   Button,
   Badge,
   FieldGroup,
@@ -475,9 +475,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                 <FieldGroup>
                   <Field>
                     <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="userName"
-                      label="Nombre y Apellidos"
+                      placeholder="Nombre y Apellidos"
                       type="text"
                       required
                       value={personalForm.name}
@@ -490,9 +490,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
                   <Field>
                     <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="userEmail"
-                      label="correo@empresa.com"
+                      placeholder="correo@empresa.com"
                       type="email"
                       required
                       value={personalForm.email}
@@ -603,9 +603,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                 <FieldGroup>
                   <Field>
                     <FieldLabel htmlFor="currentPassword">Contraseña Actual</FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="currentPassword"
-                      label="Contraseña actual"
+                      placeholder="Contraseña actual"
                       type={showPassword ? "text" : "password"}
                       required
                       value={passwordForm.currentPassword}
@@ -619,9 +619,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   <Field>
                     <FieldLabel htmlFor="newPassword">Nueva Contraseña</FieldLabel>
                     <div className="relative">
-                      <FloatingInput
+                      <Input
                         id="newPassword"
-                        label="Mínimo 8 caracteres"
+                        placeholder="Mínimo 8 caracteres"
                         type={showPassword ? "text" : "password"}
                         required
                         value={passwordForm.newPassword}
@@ -629,11 +629,12 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                           setPasswordForm({ ...passwordForm, newPassword: e.target.value })
                         }
                         icon={Key}
+                        className="pr-10"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface transition-colors p-1"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface transition-colors p-1 z-20 cursor-pointer"
                         tabIndex={-1}
                         aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                       >
@@ -681,9 +682,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
                   <Field>
                     <FieldLabel htmlFor="confirmPassword">Confirmar Contraseña</FieldLabel>
-                    <FloatingInput
+                    <Input
                       id="confirmPassword"
-                      label="Repite la nueva contraseña"
+                      placeholder="Repite la nueva contraseña"
                       type={showPassword ? "text" : "password"}
                       required
                       value={passwordForm.confirmPassword}
