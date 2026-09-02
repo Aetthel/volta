@@ -1,5 +1,4 @@
 import path from "path";
-import fs from "fs";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { z } from "zod";
@@ -23,19 +22,20 @@ const envSchema = z.object({
   EVOLUTION_API_KEY: z.string().default("volta_dev_evolution_key_2026"),
   GROQ_API_KEY: z.string().optional().default(""),
   OPENAI_API_KEY: z.string().optional().default(""),
-  // Envío de correo transaccional (recuperación de contraseña, verificación de
-  // alta). Sin clave el servicio simula el envío por log, que sirve en local
-  // pero dejaría a un usuario de producción sin poder recuperar su cuenta.
   RESEND_API_KEY: z.string().optional().default(""),
   EMAIL_FROM: z.string().optional().default("Volta <onboarding@resend.dev>"),
 });
 
-let parsedEnv;
+export type EnvConfig = z.infer<typeof envSchema>;
+
+let parsedEnv: EnvConfig;
 try {
   parsedEnv = envSchema.parse(process.env);
-} catch (err) {
+} catch (err: any) {
   if (process.env.NEXT_PHASE === "phase-production-build" || process.env.NODE_ENV === "test") {
-    console.warn(`[WARN] Environment validation bypassed during ${process.env.NODE_ENV === "test" ? "tests" : "Next.js build"}`);
+    console.warn(
+      `[WARN] Environment validation bypassed during ${process.env.NODE_ENV === "test" ? "tests" : "Next.js build"}`
+    );
     parsedEnv = {
       DATABASE_URL: process.env.DATABASE_URL || "postgresql://dummy:dummy@localhost:5432/dummy",
       API_KEY: process.env.API_KEY || "test-api-key",
@@ -56,13 +56,27 @@ try {
   }
 }
 
-const config = {
+export interface AppConfig {
+  databaseUrl: string;
+  apiKey: string;
+  backendJwtSecret: string;
+  lopdHmacSecret: string;
+  bookingJwtSecret: string;
+  port: number | string;
+  frontendUrl: string;
+  evolutionApiUrl: string;
+  evolutionApiKey: string;
+  groqApiKey: string;
+  openaiApiKey: string;
+  resendApiKey: string;
+  emailFrom: string;
+}
+
+const config: AppConfig = {
   databaseUrl: parsedEnv.DATABASE_URL,
   apiKey: parsedEnv.API_KEY,
   backendJwtSecret: parsedEnv.BACKEND_JWT_SECRET,
   lopdHmacSecret: parsedEnv.LOPD_HMAC_SECRET,
-  // Secreto propio, separado del de backend: este token acredita a un visitante
-  // anónimo del portal público, no a un usuario con rol.
   bookingJwtSecret: parsedEnv.BOOKING_JWT_SECRET,
   port:
     process.env.BACKEND_PORT ||
@@ -76,19 +90,13 @@ const config = {
   emailFrom: parsedEnv.EMAIL_FROM,
 };
 
-// El secreto de la sesion de reserva firma credenciales para visitantes anonimos
-// de internet. Arrancar en produccion con el valor por defecto dejaria esos
-// tokens falsificables por cualquiera que lea el repositorio.
 if (process.env.NODE_ENV === "production" && config.bookingJwtSecret === "test-booking-jwt-secret") {
   console.error(
-    "[31m[FATAL] BOOKING_JWT_SECRET no esta definida: el portal publico de reservas emitiria tokens firmados con el secreto por defecto.[0m"
+    " \x1b[31m[FATAL] BOOKING_JWT_SECRET no esta definida: el portal publico de reservas emitiria tokens firmados con el secreto por defecto. \x1b[0m"
   );
   process.exit(1);
 }
 
-// Sin clave de Resend el envío se limita a escribir el correo en el log. En
-// local es cómodo, pero en producción significa que nadie recibe el enlace de
-// recuperación ni el código de alta, y el fallo no da la cara por ningún lado.
 if (process.env.NODE_ENV === "production" && !config.resendApiKey) {
   console.warn(
     "\x1b[33m[WARN] RESEND_API_KEY no está definida: los correos de recuperación de contraseña y verificación NO se enviarán, solo se registrarán en el log.\x1b[0m"

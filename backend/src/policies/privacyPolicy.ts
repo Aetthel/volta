@@ -25,7 +25,17 @@
  * Las claves son las etiquetas que guarda el registro de negocios. Cualquier
  * valor desconocido o nulo cae en la frase neutra, que es válida para todos.
  */
-const BUSINESS_TYPE_PHRASES = {
+export interface PolicyInterpolateVars {
+  clientName?: string | null;
+  businessName?: string | null;
+  businessType?: string | null;
+  businessEmail?: string | null;
+  businessPhone?: string | null;
+  businessAddress?: string | null;
+  [key: string]: unknown;
+}
+
+const BUSINESS_TYPE_PHRASES: Record<string, string> = {
   Peluquería: "a la peluquería",
   Barbería: "a la barbería",
   "Peluquería / Barbería": "al establecimiento",
@@ -37,25 +47,16 @@ const BUSINESS_TYPE_PHRASES = {
 
 const DEFAULT_BUSINESS_TYPE_PHRASE = "al establecimiento";
 
-const toBusinessTypePhrase = (businessType) =>
-  BUSINESS_TYPE_PHRASES[businessType] ?? DEFAULT_BUSINESS_TYPE_PHRASE;
+const toBusinessTypePhrase = (businessType?: string | null): string =>
+  (businessType && BUSINESS_TYPE_PHRASES[businessType]) ?? DEFAULT_BUSINESS_TYPE_PHRASE;
 
-/**
- * Canal de contacto del responsable. El artículo 13 exige datos de contacto
- * reales, así que degrada al teléfono (obligatorio en Business) cuando el
- * negocio no ha rellenado el correo, que es opcional.
- */
-const businessContactPhrase = ({ businessEmail, businessPhone }) => {
+const businessContactPhrase = ({ businessEmail, businessPhone }: PolicyInterpolateVars): string => {
   if (businessEmail) return `el correo electrónico ${businessEmail}`;
   if (businessPhone) return `el teléfono ${businessPhone}`;
   return "los datos facilitados en el propio establecimiento";
 };
 
-/**
- * Cláusula de domicilio. Se devuelve vacía si no consta, de forma que la frase
- * siga siendo correcta sin necesidad de condicionales dentro del texto legal.
- */
-const businessAddressClause = ({ businessAddress }) =>
+const businessAddressClause = ({ businessAddress }: PolicyInterpolateVars): string =>
   businessAddress ? `, con domicilio en ${businessAddress}` : "";
 
 const POLICY_VERSIONS = [
@@ -161,25 +162,20 @@ const POLICY_VERSIONS = [
 ];
 
 /** Versión vigente: la última de la lista. */
-export const CURRENT_POLICY_VERSION = POLICY_VERSIONS[POLICY_VERSIONS.length - 1].version;
+export const CURRENT_POLICY_VERSION = POLICY_VERSIONS[POLICY_VERSIONS.length - 1]!.version;
 
-/** true si la versión existe. Sirve para validar lo que reporta el cliente. */
-export const isKnownPolicyVersion = (version) =>
-  POLICY_VERSIONS.some((p) => p.version === version);
+export const isKnownPolicyVersion = (version?: string | null): boolean =>
+  Boolean(version && POLICY_VERSIONS.some((p) => p.version === version));
 
-const interpolate = (text, vars) =>
+const interpolate = (text: string, vars: PolicyInterpolateVars): string =>
   text
-    .replace(/{{clientName}}/g, vars.clientName ?? "")
-    .replace(/{{businessName}}/g, vars.businessName ?? "")
+    .replace(/{{clientName}}/g, (vars.clientName as string) ?? "")
+    .replace(/{{businessName}}/g, (vars.businessName as string) ?? "")
     .replace(/{{toBusinessType}}/g, toBusinessTypePhrase(vars.businessType))
     .replace(/{{businessContact}}/g, businessContactPhrase(vars))
     .replace(/{{businessAddressClause}}/g, businessAddressClause(vars));
 
-/**
- * Devuelve la política solicitada (por defecto, la vigente) con los marcadores
- * ya sustituidos y lista para renderizar.
- */
-export const getPolicy = (vars = {}, version = CURRENT_POLICY_VERSION) => {
+export const getPolicy = (vars: PolicyInterpolateVars = {}, version = CURRENT_POLICY_VERSION) => {
   const policy = POLICY_VERSIONS.find((p) => p.version === version);
   if (!policy) return null;
 

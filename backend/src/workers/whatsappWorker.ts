@@ -1,21 +1,27 @@
-import { Worker } from "bullmq";
+import { Worker, type Job } from "bullmq";
 import { redisConnectionOptions } from "../config/redis.js";
 import whatsappManager from "../services/whatsappService.js";
 import prisma from "../config/db.js";
 import { logger, maskPhone } from "../utils/logger.js";
+import type { WhatsAppJobPayload, WhatsAppJobType } from "../queues/whatsappQueue.js";
 
-export function createWhatsAppWorker() {
+export function createWhatsAppWorker(): Worker<WhatsAppJobPayload, any, WhatsAppJobType> | { close: () => Promise<void> } | null {
   if (process.env.NODE_ENV === "test") {
     return { close: async () => {} };
   }
 
   try {
-    const worker = new Worker(
+    const worker = new Worker<WhatsAppJobPayload, any, WhatsAppJobType>(
       "whatsappQueue",
-      async (job) => {
+      async (job: Job<WhatsAppJobPayload, any, WhatsAppJobType>) => {
         const { name, data } = job;
         const { businessId, phone, clientPhone, message, appointmentId } = data;
         const targetPhone = phone || clientPhone;
+
+        if (!targetPhone || !message) {
+          logger.warn(`[WhatsAppWorker] Missing phone or message for job #${job.id}`);
+          return;
+        }
 
         logger.info(
           `[WhatsAppWorker] Processing job #${job.id} (${name}) for business ${businessId}`
@@ -40,7 +46,7 @@ export function createWhatsAppWorker() {
               data: { status: "SENT" },
             });
           }
-        } catch (err) {
+        } catch (err: any) {
           logger.error(`[WhatsAppWorker] Job #${job.id} failed:`, err.message);
 
           if (
@@ -79,8 +85,10 @@ export function createWhatsAppWorker() {
 
     logger.info("[WhatsAppWorker] Worker started successfully.");
     return worker;
-  } catch (err) {
+  } catch (err: any) {
     logger.error("[WhatsAppWorker] Failed to start worker:", err.message);
     return null;
   }
 }
+
+export default { createWhatsAppWorker };
