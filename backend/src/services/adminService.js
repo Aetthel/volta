@@ -33,16 +33,17 @@ export const createBusiness = async ({ name, email, phone, address }, password) 
         email,
         phone,
         address: address || "",
+        users: {
+          create: {
+            name: `${name} Encargado`,
+            email,
+            password: hashedPass,
+            role: "JEFE",
+          },
+        },
       },
-    });
-
-    await tx.user.create({
-      data: {
-        name: `${name} Encargado`,
-        email,
-        password: hashedPass,
-        role: "JEFE",
-        businessId: biz.id,
+      include: {
+        users: true,
       },
     });
 

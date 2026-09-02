@@ -36,18 +36,21 @@ export const createDemo = async () => {
         subscriptionPlan: "PRO",
         subscriptionStatus: "DEMO_SANDBOX",
         sandboxExpiresAt: expiresAt,
+        users: {
+          create: {
+            name: "Dueño Demo",
+            email,
+            password: hashedPass,
+            role: "JEFE",
+          },
+        },
+      },
+      include: {
+        users: true,
       },
     });
 
-    const demoUser = await tx.user.create({
-      data: {
-        name: "Dueño Demo",
-        email,
-        password: hashedPass,
-        role: "JEFE",
-        businessId: biz.id,
-      },
-    });
+    const demoUser = biz.users[0];
 
     await tx.alert.createMany({
       data: [

@@ -90,7 +90,7 @@ services:
       - /app/backend/node_modules
     ports:
       - "3001:3001"
-    command: sh -c "cd /app/backend && pnpm prisma:push && cd /app && pnpm --filter backend dev"
+    command: sh -c "cd /app/backend && pnpm prisma:generate && pnpm prisma:push && cd /app && pnpm --filter backend dev"
     deploy:
       resources:
         limits:
