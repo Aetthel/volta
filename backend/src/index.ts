@@ -1,6 +1,7 @@
 import config from "./config/index.js";
 import * as dbInit from "./config/dbInit.js";
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
+import type { Server } from "http";
 import prisma from "./config/db.js";
 import redisClient from "./config/redis.js";
 import { createWhatsAppWorker } from "./workers/whatsappWorker.js";
@@ -101,9 +102,9 @@ const ALLOWED_ORIGINS = (process.env.FRONTEND_URL || "http://localhost:3000")
   .split(",")
   .map((s) => s.trim());
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
-  if (ALLOWED_ORIGINS.includes(origin)) {
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
   }
   res.header(
@@ -113,7 +114,8 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Vary", "Origin");
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
+    res.sendStatus(200);
+    return;
   }
   next();
 });
@@ -121,8 +123,8 @@ app.use((req, res, next) => {
 app.use(
   express.json({
     limit: "50mb",
-    verify: (req, res, buf) => {
-      req.rawBody = buf;
+    verify: (req: Request, _res: Response, buf: Buffer) => {
+      (req as any).rawBody = buf;
     },
   })
 );
@@ -131,14 +133,14 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 /**
  * Health check endpoint verifying DB & Redis status
  */
-app.get("/health", async (req, res) => {
+app.get("/health", async (_req: Request, res: Response) => {
   let dbStatus = "disconnected";
   let redisStatus = "disconnected";
 
   try {
     await prisma.$queryRaw`SELECT 1`;
     dbStatus = "connected";
-  } catch (err) {
+  } catch (err: any) {
     dbStatus = `error: ${err.message}`;
   }
 
@@ -148,7 +150,7 @@ app.get("/health", async (req, res) => {
       if (pingRes === "PONG") {
         redisStatus = "connected";
       }
-    } catch (err) {
+    } catch (err: any) {
       redisStatus = `error: ${err.message}`;
     }
   } else {
@@ -217,7 +219,7 @@ async function initActiveWhatsappClients() {
         `[WhatsApp] Auto-initializing ${connectedBusinesses.length} connected clients on startup...`
       );
       for (const biz of connectedBusinesses) {
-        await whatsappManager.initClient(biz.id).catch((err) => {
+        await whatsappManager.initClient(biz.id).catch((err: any) => {
           console.error(`[WhatsApp] Auto-init failed for ${biz.id}:`, err);
         });
       }
@@ -230,8 +232,8 @@ async function initActiveWhatsappClients() {
 // Start server (only if executed directly)
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 
-function setupGracefulShutdown(serverInstance) {
-  const shutdown = async (signal) => {
+function setupGracefulShutdown(serverInstance?: Server | null) {
+  const shutdown = async (signal: string) => {
     console.log(`[API] Recibida señal ${signal}. Iniciando Graceful Shutdown...`);
     if (serverInstance) {
       serverInstance.close(() => {
@@ -272,7 +274,7 @@ if (isMain) {
 
       setupGracefulShutdown(server);
     })
-    .catch((err) => {
+    .catch((err: any) => {
       console.error("[API] Failed to initialize database on startup:", err);
       process.exit(1);
     });
