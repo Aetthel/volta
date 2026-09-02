@@ -1,6 +1,8 @@
 import { PrismaClient } from "../generated/client/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
+// @ts-ignore - pg types
 import pkg from "pg";
+// @ts-ignore - config is an existing JS module
 import config from "./index.js";
 
 const { Pool } = pkg;
@@ -16,13 +18,15 @@ const prisma = new PrismaClient({ adapter }).$extends({
     service: {
       price: {
         needs: { price: true },
-        compute: ({ price }) => (price === null || price === undefined ? price : Number(price)),
+        compute: ({ price }: { price: unknown }) => (price === null || price === undefined ? price : Number(price)),
       },
     },
   },
 });
 
-const gracefulShutdown = async () => {
+export type ExtendedPrismaClient = typeof prisma;
+
+const gracefulShutdown = async (): Promise<void> => {
   try {
     await prisma.$disconnect();
     await pool.end();
