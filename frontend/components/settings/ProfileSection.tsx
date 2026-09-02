@@ -86,6 +86,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
   const [twoFactorBackupCodes, setTwoFactorBackupCodes] = useState<string[]>([]);
   const [loading2fa, setLoading2fa] = useState(false);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const [copiedBackupCodes, setCopiedBackupCodes] = useState(false);
 
   // User database record
   const [userProfileData, setUserProfileData] = useState<{
@@ -327,6 +328,17 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     navigator.clipboard.writeText(twoFactorSetupData.secret);
     setCopiedSecret(true);
     setTimeout(() => setCopiedSecret(false), 2000);
+  };
+
+  // Los códigos de respaldo se guardan hasheados, así que esta pantalla es la
+  // única vez que se pueden leer. Sin un copiar de golpe había que ir
+  // seleccionando los ocho a mano, y quien no lo hiciera se quedaba sin forma
+  // de entrar al perder el móvil.
+  const handleCopyBackupCodes = () => {
+    if (twoFactorBackupCodes.length === 0) return;
+    navigator.clipboard.writeText(twoFactorBackupCodes.join("\n"));
+    setCopiedBackupCodes(true);
+    setTimeout(() => setCopiedBackupCodes(false), 2000);
   };
 
   // Password strength helper
@@ -816,6 +828,24 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     </div>
                   ))}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={handleCopyBackupCodes}
+                  className="w-full flex items-center justify-center gap-1.5 mb-3 py-2 text-xs font-semibold text-on-surface-variant hover:text-primary border border-outline-variant/50 rounded-xl transition-colors"
+                >
+                  {copiedBackupCodes ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-600">Códigos copiados</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copiar los 8 códigos</span>
+                    </>
+                  )}
+                </button>
 
                 <Button
                   type="button"

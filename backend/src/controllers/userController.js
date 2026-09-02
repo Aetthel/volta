@@ -19,15 +19,13 @@ export const getUsers = async (req, res) => {
     where.businessId = req.user?.businessId || "no_business";
   }
 
+  // Los campos que salen los declara `TEAM_MEMBER_FIELDS` en el servicio. Aquí
+  // ya no se filtra nada: quitar `password` a mano daba la falsa impresión de
+  // que la respuesta estaba saneada, cuando arrastraba el secreto TOTP y los
+  // tokens de recuperación de todo el equipo.
   const users = await userService.getUsers(where);
 
-  // Map password out
-  const sanitizedUsers = users.map((u) => {
-    const { password, ...rest } = u;
-    return rest;
-  });
-
-  return ApiResponse.success(res, sanitizedUsers);
+  return ApiResponse.success(res, users);
 };
 
 export const createUser = async (req, res) => {

@@ -5,16 +5,38 @@ export const hashPassword = async (password) => {
   return bcrypt.hash(password, 10);
 };
 
+/**
+ * Campos que puede ver un miembro del salón al listar a sus compañeros.
+ *
+ * Es una lista blanca a propósito. Antes se devolvía la fila entera quitando
+ * sólo `password`, y eso sacaba por la API el `twoFactorSecret` en claro —con lo
+ * que cualquier empleado podía generar los códigos de su jefe—, además del
+ * `otpCode` vivo y los tokens de recuperación. Declarando lo que sale, un campo
+ * sensible nuevo en el modelo se queda dentro por defecto en vez de filtrarse
+ * hasta que alguien se acuerde de añadirlo a una lista de exclusión.
+ */
+const TEAM_MEMBER_FIELDS = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  status: true,
+  emailVerified: true,
+  twoFactorEnabled: true,
+  businessId: true,
+  createdAt: true,
+  updatedAt: true,
+  business: {
+    select: {
+      name: true,
+    },
+  },
+};
+
 export const getUsers = async (where = {}) => {
   return prisma.user.findMany({
     where,
-    include: {
-      business: {
-        select: {
-          name: true,
-        },
-      },
-    },
+    select: TEAM_MEMBER_FIELDS,
     orderBy: { name: "asc" },
   });
 };
