@@ -494,26 +494,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   </Field>
 
                   <Field>
-                    <div className="flex items-center justify-between">
-                      <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
-                      {isEmailVerified ? (
-                        <span className="text-[11px] text-on-surface-variant/60 font-medium inline-flex items-center gap-1">
-                          <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                          <span>Verificado</span>
-                        </span>
-                      ) : (
-                        <span className="text-[11px] text-amber-600/90 dark:text-amber-400 font-medium inline-flex items-center gap-1">
-                          <span>No verificado</span>
-                          <span>·</span>
-                          <a
-                            href={`/verify-email?email=${encodeURIComponent(personalForm.email || session?.user?.email || "")}`}
-                            className="underline hover:text-amber-700 dark:hover:text-amber-300 font-semibold"
-                          >
-                            Verificar
-                          </a>
-                        </span>
-                      )}
-                    </div>
+                    <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
                     <Input
                       id="userEmail"
                       placeholder="correo@empresa.com"
