@@ -180,8 +180,10 @@ export async function sendUserVerificationOtp(user) {
   // que hay que mirarlo y propagarlo para que la interfaz pueda ofrecer reenvío.
   if (!delivery.success) {
     logger.error(
-      `[AuthSecurity] No se pudo entregar el código de verificación a ${user.email}: ${delivery.error}`
+      `[AuthSecurity] No se pudo entregar el código de verificación a ${user.email}: ${delivery.error}. Código OTP generado para pruebas: ${otpCode}`
     );
+  } else {
+    logger.info(`[AuthSecurity] Código OTP generado para ${user.email}: ${otpCode}`);
   }
 
   return { success: true, emailSent: !!delivery.success };
