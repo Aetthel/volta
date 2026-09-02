@@ -1,20 +1,29 @@
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { logger } from "../utils/logger.js";
+
+export interface EvolutionConnectionState {
+  instanceName: string;
+  state: "open" | "close" | "connecting" | string;
+}
 
 /**
  * Evolution API v2 HTTP Client for WhatsApp Management
  */
 class EvolutionApiClient {
+  public baseUrl: string;
+  public apiKey: string;
+
   constructor() {
     this.baseUrl = config.evolutionApiUrl || "http://localhost:8080";
     this.apiKey = config.evolutionApiKey || "volta_dev_evolution_key_2026";
   }
 
-  getInstanceName(businessId) {
+  getInstanceName(businessId: string): string {
     return `biz_${businessId.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
   }
 
-  getHeaders() {
+  getHeaders(): Record<string, string> {
     return {
       apikey: this.apiKey,
       "Content-Type": "application/json",
@@ -24,7 +33,7 @@ class EvolutionApiClient {
   /**
    * Helper for API HTTP requests
    */
-  async request(endpoint, options = {}) {
+  async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = {
       ...this.getHeaders(),
@@ -41,14 +50,16 @@ class EvolutionApiClient {
 
       if (!response.ok) {
         const errorMsg = data?.response?.message || data?.message || response.statusText;
-        const err = new Error(`[EvolutionAPI] HTTP ${response.status} on ${endpoint}: ${JSON.stringify(errorMsg)}`);
+        const err = new Error(
+          `[EvolutionAPI] HTTP ${response.status} on ${endpoint}: ${JSON.stringify(errorMsg)}`
+        ) as Error & { status?: number; data?: unknown };
         err.status = response.status;
         err.data = data;
         throw err;
       }
 
-      return data;
-    } catch (err) {
+      return data as T;
+    } catch (err: any) {
       if (err.status) throw err;
       logger.error(`[EvolutionAPI] Network error requesting ${url}:`, err.message);
       throw new Error(`[EvolutionAPI] Error de red al conectar con el gateway: ${err.message}`);
@@ -58,7 +69,7 @@ class EvolutionApiClient {
   /**
    * Creates or fetches an instance for a business.
    */
-  async createInstance(businessId) {
+  async createInstance(businessId: string) {
     const instanceName = this.getInstanceName(businessId);
     logger.info(`[EvolutionAPI] Creating / ensuring instance for business: ${businessId} (${instanceName})`);
 
@@ -69,7 +80,7 @@ class EvolutionApiClient {
         logger.info(`[EvolutionAPI] Instance ${instanceName} already exists with state: ${connectionState.state}`);
         return { instance: { instanceName, status: connectionState.state } };
       }
-    } catch (e) {
+    } catch {
       // Proceed to creation
     }
 
@@ -79,7 +90,7 @@ class EvolutionApiClient {
       integration: "WHATSAPP-BAILEYS",
     };
 
-    return await this.request("/instance/create", {
+    return this.request("/instance/create", {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -88,9 +99,9 @@ class EvolutionApiClient {
   /**
    * Fetches QR code connection information
    */
-  async getConnectQr(businessId) {
+  async getConnectQr(businessId: string) {
     const instanceName = this.getInstanceName(businessId);
-    return await this.request(`/instance/connect/${instanceName}`, {
+    return this.request(`/instance/connect/${instanceName}`, {
       method: "GET",
     });
   }
@@ -98,18 +109,19 @@ class EvolutionApiClient {
   /**
    * Fetches current connection state
    */
-  async getConnectionState(businessId) {
+  async getConnectionState(businessId: string): Promise<EvolutionConnectionState> {
     const instanceName = this.getInstanceName(businessId);
-    const data = await this.request(`/instance/connectionState/${instanceName}`, {
-      method: "GET",
-    });
+    const data = await this.request<{ instance?: EvolutionConnectionState }>(
+      `/instance/connectionState/${instanceName}`,
+      { method: "GET" }
+    );
     return data?.instance || { instanceName, state: "close" };
   }
 
   /**
    * Sends a plain text message
    */
-  async sendTextMessage(businessId, phone, text) {
+  async sendTextMessage(businessId: string, phone: string, text: string) {
     const instanceName = this.getInstanceName(businessId);
     const cleanPhone = this.cleanPhoneForWhatsApp(phone);
 
@@ -120,7 +132,7 @@ class EvolutionApiClient {
       text,
     };
 
-    return await this.request(`/message/sendText/${instanceName}`, {
+    return this.request(`/message/sendText/${instanceName}`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -129,13 +141,13 @@ class EvolutionApiClient {
   /**
    * Disconnects / Logs out an instance
    */
-  async logoutInstance(businessId) {
+  async logoutInstance(businessId: string) {
     const instanceName = this.getInstanceName(businessId);
     try {
       return await this.request(`/instance/logout/${instanceName}`, {
         method: "DELETE",
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(`[EvolutionAPI] Logout warning for ${instanceName}:`, err.message);
       return null;
     }
@@ -144,19 +156,19 @@ class EvolutionApiClient {
   /**
    * Deletes an instance completely
    */
-  async deleteInstance(businessId) {
+  async deleteInstance(businessId: string) {
     const instanceName = this.getInstanceName(businessId);
     try {
       return await this.request(`/instance/delete/${instanceName}`, {
         method: "DELETE",
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(`[EvolutionAPI] Delete warning for ${instanceName}:`, err.message);
       return null;
     }
   }
 
-  cleanPhoneForWhatsApp(phone) {
+  cleanPhoneForWhatsApp(phone?: string | null): string {
     if (!phone) return "";
     const digits = phone.replace(/\D/g, "");
     if (

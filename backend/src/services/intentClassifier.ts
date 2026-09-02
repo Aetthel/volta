@@ -1,3 +1,4 @@
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { logger } from "../utils/logger.js";
 
@@ -6,7 +7,16 @@ export const INTENT_TAGS = {
   CANCELADO: "CANCELADO",
   SOLICITA_CAMBIO: "SOLICITA_CAMBIO",
   REQUIERE_HUMANO: "REQUIERE_HUMANO",
-};
+} as const;
+
+export type IntentTag = (typeof INTENT_TAGS)[keyof typeof INTENT_TAGS];
+
+export interface ClassificationResult {
+  tag: IntentTag;
+  confidence: number;
+  source: string;
+  reason?: string;
+}
 
 /**
  * Two-tier Intent Classifier for WhatsApp appointment responses
@@ -15,7 +25,7 @@ class IntentClassifier {
   /**
    * Level 1: Deterministic regex/keyword classification (0ms, 0€)
    */
-  classifyDeterministic(text) {
+  classifyDeterministic(text?: string | null): ClassificationResult | null {
     if (!text || typeof text !== "string") return null;
 
     const normalized = text
@@ -26,9 +36,11 @@ class IntentClassifier {
       .replace(/[^\w\s]/gi, ""); // remove punctuation
 
     // Exact affirmative patterns
-    const affirmativeDirect = /^(si|sip|yes|ok|okay|vale|confirmo|confirmado|confirmar|asistire|alli estare|ahi estare|perfecto|de acuerdo|listo|voy|1)$/i;
+    const affirmativeDirect =
+      /^(si|sip|yes|ok|okay|vale|confirmo|confirmado|confirmar|asistire|alli estare|ahi estare|perfecto|de acuerdo|listo|voy|1)$/i;
     // Starts with confirmation
-    const affirmativePrefix = /^(si|confirmo|ok|vale)\s+(gracias|muchas gracias|alli estare|nos vemos|perfecto)/i;
+    const affirmativePrefix =
+      /^(si|confirmo|ok|vale)\s+(gracias|muchas gracias|alli estare|nos vemos|perfecto)/i;
 
     if (affirmativeDirect.test(normalized) || affirmativePrefix.test(normalized)) {
       return {
@@ -40,9 +52,11 @@ class IntentClassifier {
     }
 
     // Exact cancellation patterns
-    const cancellationDirect = /^(no|nop|cancelo|cancelar|cancelado|anulo|anular|no puedo|no podre|no asisto|imposible|2)$/i;
+    const cancellationDirect =
+      /^(no|nop|cancelo|cancelar|cancelado|anulo|anular|no puedo|no podre|no asisto|imposible|2)$/i;
     // Starts with cancellation
-    const cancellationPrefix = /^(no puedo|cancelo|anular)\s+(ir|asistir|gracias|el turno|la cita)/i;
+    const cancellationPrefix =
+      /^(no puedo|cancelo|anular)\s+(ir|asistir|gracias|el turno|la cita)/i;
 
     if (cancellationDirect.test(normalized) || cancellationPrefix.test(normalized)) {
       return {
@@ -59,7 +73,7 @@ class IntentClassifier {
   /**
    * Level 2: AI / LLM classification using Groq Cloud (Free Tier) or OpenAI
    */
-  async classifyWithLLM(text, context = {}) {
+  async classifyWithLLM(text: string, _context: Record<string, unknown> = {}): Promise<ClassificationResult> {
     const groqKey = config.groqApiKey;
     const openaiKey = config.openaiApiKey;
 
@@ -99,15 +113,15 @@ Responde ÚNICAMENTE un objeto JSON válido con este esquema:
         if (res.ok) {
           const json = await res.json();
           const parsed = JSON.parse(json.choices[0]?.message?.content || "{}");
-          if (parsed.tag && INTENT_TAGS[parsed.tag]) {
+          if (parsed.tag && (INTENT_TAGS as any)[parsed.tag]) {
             return {
-              tag: parsed.tag,
+              tag: parsed.tag as IntentTag,
               confidence: 0.95,
               source: "groq_llama_3.3",
             };
           }
         }
-      } catch (groqErr) {
+      } catch (groqErr: any) {
         logger.warn("[IntentClassifier] Groq request failed, falling back:", groqErr.message);
       }
     }
@@ -136,15 +150,15 @@ Responde ÚNICAMENTE un objeto JSON válido con este esquema:
         if (res.ok) {
           const json = await res.json();
           const parsed = JSON.parse(json.choices[0]?.message?.content || "{}");
-          if (parsed.tag && INTENT_TAGS[parsed.tag]) {
+          if (parsed.tag && (INTENT_TAGS as any)[parsed.tag]) {
             return {
-              tag: parsed.tag,
+              tag: parsed.tag as IntentTag,
               confidence: 0.95,
               source: "openai_gpt4o_mini",
             };
           }
         }
-      } catch (openaiErr) {
+      } catch (openaiErr: any) {
         logger.warn("[IntentClassifier] OpenAI request failed:", openaiErr.message);
       }
     }
@@ -168,7 +182,7 @@ Responde ÚNICAMENTE un objeto JSON válido con este esquema:
   /**
    * Main classifier method combining Level 1 and Level 2
    */
-  async classify(text, context = {}) {
+  async classify(text: string, context: Record<string, unknown> = {}): Promise<ClassificationResult> {
     const level1Result = this.classifyDeterministic(text);
     if (level1Result) {
       logger.info(`[IntentClassifier] Level 1 Match: ${level1Result.tag} ("${text}")`);

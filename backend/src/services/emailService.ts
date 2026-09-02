@@ -1,10 +1,14 @@
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { logger } from "../utils/logger.js";
 
-/**
- * Renders the base Volta branded HTML email template
- */
-function renderBaseTemplate({ title, preheader, contentHtml }) {
+interface BaseTemplateOptions {
+  title: string;
+  preheader?: string;
+  contentHtml: string;
+}
+
+function renderBaseTemplate({ title, contentHtml }: BaseTemplateOptions): string {
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -43,25 +47,29 @@ function renderBaseTemplate({ title, preheader, contentHtml }) {
 </html>`;
 }
 
-/** Tiempo máximo de espera a Resend; sin él una API colgada bloquea el login. */
 const RESEND_TIMEOUT_MS = 10000;
 
-/**
- * Envío de correo vía Resend, con simulación por log cuando no hay clave.
- *
- * Distingue dos situaciones que antes se confundían: no tener clave (correcto en
- * local, se simula) y fallar el envío teniéndola (un error real que hay que ver).
- * En el segundo caso ya no se devuelve `success: true`, porque eso hacía que un
- * usuario sin correo pareciera un usuario avisado.
- */
-async function sendRawEmail({ to, subject, html, text }) {
+export interface SendRawEmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}
+
+export interface SendEmailResult {
+  success: boolean;
+  simulated?: boolean;
+  id?: string;
+  error?: string;
+}
+
+async function sendRawEmail({ to, subject, html, text }: SendRawEmailOptions): Promise<SendEmailResult> {
   const resendApiKey = config.resendApiKey;
   const fromEmail = config.emailFrom;
 
   logger.info(`[EmailService] Preparing email to: ${to} | Subject: "${subject}"`);
 
   if (!resendApiKey) {
-    // Sin clave: se vuelca el correo al log para poder seguir el flujo en local.
     logger.info(`[EmailService] [LOCAL/DEV SIMULATION]
   ═══════════════════════════════════════════════
   To: ${to}
@@ -105,22 +113,22 @@ async function sendRawEmail({ to, subject, html, text }) {
       return { success: false, error: `Resend HTTP ${response.status}` };
     }
 
-    const resData = await response.json();
+    const resData = (await response.json()) as { id: string };
     logger.info(`[EmailService] Email sent successfully via Resend. ID: ${resData.id}`);
     return { success: true, id: resData.id };
-  } catch (apiErr) {
+  } catch (apiErr: any) {
     logger.error(`[EmailService] No se pudo enviar el correo a ${to}: ${apiErr.message}`);
     return { success: false, error: apiErr.message };
   }
 }
 
-/**
- * Sends a 6-digit verification code for new user registrations
- */
-export async function sendOtpEmail(email, { name, code }) {
+export async function sendOtpEmail(
+  email: string,
+  { name, code }: { name?: string | null; code: string }
+): Promise<SendEmailResult> {
   const firstName = name ? name.trim().split(" ")[0] : "Usuario";
   const subject = `${code} es tu código de verificación de Volta`;
-  
+
   const contentHtml = `
     <h2>Hola ${firstName},</h2>
     <p>¡Bienvenido/a a Volta! Para completar la activación de tu cuenta y proteger tu negocio, introduce el siguiente código de verificación de 6 dígitos:</p>
@@ -134,13 +142,13 @@ export async function sendOtpEmail(email, { name, code }) {
   const text = `Hola ${firstName},\n\nTu código de verificación de Volta es: ${code}\nVálido durante 10 minutos.`;
   const html = renderBaseTemplate({ title: subject, contentHtml });
 
-  return await sendRawEmail({ to: email, subject, html, text });
+  return sendRawEmail({ to: email, subject, html, text });
 }
 
-/**
- * Sends a password reset email with temporary signed token URL
- */
-export async function sendPasswordResetEmail(email, { name, resetUrl }) {
+export async function sendPasswordResetEmail(
+  email: string,
+  { name, resetUrl }: { name?: string | null; resetUrl: string }
+): Promise<SendEmailResult> {
   const firstName = name ? name.trim().split(" ")[0] : "Usuario";
   const subject = `Restablece tu contraseña de Volta`;
 
@@ -162,13 +170,13 @@ export async function sendPasswordResetEmail(email, { name, resetUrl }) {
   const text = `Hola ${firstName},\n\nPara restablecer tu contraseña de Volta, accede al siguiente enlace (válido por 1 hora):\n${resetUrl}\n\nSi no solicitaste este cambio, ignora este mensaje.`;
   const html = renderBaseTemplate({ title: subject, contentHtml });
 
-  return await sendRawEmail({ to: email, subject, html, text });
+  return sendRawEmail({ to: email, subject, html, text });
 }
 
-/**
- * Sends security notification email when credentials or 2FA change
- */
-export async function sendSecurityAlertEmail(email, { name, title, description }) {
+export async function sendSecurityAlertEmail(
+  email: string,
+  { name, title, description }: { name?: string | null; title: string; description: string }
+): Promise<SendEmailResult> {
   const firstName = name ? name.trim().split(" ")[0] : "Usuario";
   const subject = `Aviso de Seguridad en tu cuenta de Volta: ${title}`;
 
@@ -186,7 +194,7 @@ export async function sendSecurityAlertEmail(email, { name, title, description }
   const text = `Hola ${firstName},\n\nAviso de seguridad: ${title}\n${description}\nFecha: ${new Date().toLocaleString("es-ES")}`;
   const html = renderBaseTemplate({ title: subject, contentHtml });
 
-  return await sendRawEmail({ to: email, subject, html, text });
+  return sendRawEmail({ to: email, subject, html, text });
 }
 
 export default {

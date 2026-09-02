@@ -1,19 +1,13 @@
 import prisma from "../config/db.js";
 import bcrypt from "bcryptjs";
+import type { CreateUserInput, UpdateUserInput } from "../validators/index.js";
 
-export const hashPassword = async (password) => {
+export const hashPassword = async (password: string): Promise<string> => {
   return bcrypt.hash(password, 10);
 };
 
 /**
  * Campos que puede ver un miembro del salón al listar a sus compañeros.
- *
- * Es una lista blanca a propósito. Antes se devolvía la fila entera quitando
- * sólo `password`, y eso sacaba por la API el `twoFactorSecret` en claro —con lo
- * que cualquier empleado podía generar los códigos de su jefe—, además del
- * `otpCode` vivo y los tokens de recuperación. Declarando lo que sale, un campo
- * sensible nuevo en el modelo se queda dentro por defecto en vez de filtrarse
- * hasta que alguien se acuerde de añadirlo a una lista de exclusión.
  */
 const TEAM_MEMBER_FIELDS = {
   id: true,
@@ -31,9 +25,9 @@ const TEAM_MEMBER_FIELDS = {
       name: true,
     },
   },
-};
+} as const;
 
-export const getUsers = async (where = {}) => {
+export const getUsers = async (where: Record<string, any> = {}) => {
   return prisma.user.findMany({
     where,
     select: TEAM_MEMBER_FIELDS,
@@ -41,13 +35,13 @@ export const getUsers = async (where = {}) => {
   });
 };
 
-export const getUserById = async (id) => {
+export const getUserById = async (id: string) => {
   return prisma.user.findUnique({
     where: { id },
   });
 };
 
-export const getUserByEmail = async (email) => {
+export const getUserByEmail = async (email?: string | null) => {
   if (!email) return null;
   const cleanEmail = email.trim().toLowerCase();
   return prisma.user.findFirst({
@@ -60,7 +54,7 @@ export const getUserByEmail = async (email) => {
   });
 };
 
-export const createUser = async (userData) => {
+export const createUser = async (userData: CreateUserInput & { [key: string]: any }) => {
   const data = { ...userData };
   if (data.password) {
     data.password = await hashPassword(data.password);
@@ -71,25 +65,35 @@ export const createUser = async (userData) => {
       data: {
         ...rest,
         business: { connect: { id: businessId } },
-      },
+      } as any,
     });
   }
-  return prisma.user.create({ data });
+  return prisma.user.create({ data: data as any });
 };
 
-export const updateUser = async (id, updateData) => {
+export const updateUser = async (id: string, updateData: UpdateUserInput & { [key: string]: any }) => {
   const data = { ...updateData };
   if (data.password) {
     data.password = await hashPassword(data.password);
   }
   return prisma.user.update({
     where: { id },
-    data,
+    data: data as any,
   });
 };
 
-export const deleteUser = async (id) => {
+export const deleteUser = async (id: string) => {
   return prisma.user.delete({
     where: { id },
   });
+};
+
+export default {
+  hashPassword,
+  getUsers,
+  getUserById,
+  getUserByEmail,
+  createUser,
+  updateUser,
+  deleteUser,
 };

@@ -1,15 +1,15 @@
-import { Redis } from "ioredis";
+import { Redis, type RedisOptions } from "ioredis";
 import { logger } from "../utils/logger.js";
 import fs from "fs";
 
 const isDocker = fs.existsSync("/.dockerenv");
 const IS_TEST = process.env.NODE_ENV === "test";
 
-const baseOptions = {
+const baseOptions: RedisOptions = {
   maxRetriesPerRequest: null, // Required by BullMQ
   enableReadyCheck: false,
   offlineQueue: false,
-  retryStrategy(times) {
+  retryStrategy(times: number) {
     if (IS_TEST) return null;
     const delay = Math.min(times * 150, 5000);
     logger.warn(`[Redis] Intentando reconexión #${times} en ${delay}ms...`);
@@ -17,8 +17,8 @@ const baseOptions = {
   },
 };
 
-const getRedisConnectionOptions = () => {
-  const options = { ...baseOptions };
+const getRedisConnectionOptions = (): RedisOptions => {
+  const options: RedisOptions = { ...baseOptions };
 
   if (process.env.REDIS_TLS === "true") {
     options.tls = { rejectUnauthorized: false };
@@ -38,7 +38,7 @@ const getRedisConnectionOptions = () => {
         const dbIndex = parseInt(parsedUrl.pathname.substring(1), 10);
         if (!isNaN(dbIndex)) options.db = dbIndex;
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(
         `[Redis] Could not parse REDIS_URL (${err.message}), falling back to direct options.`
       );
@@ -55,7 +55,7 @@ const getRedisConnectionOptions = () => {
 
 export const redisConnectionOptions = getRedisConnectionOptions();
 
-let redisClient = null;
+let redisClient: Redis | null = null;
 
 if (!IS_TEST) {
   try {
@@ -67,10 +67,10 @@ if (!IS_TEST) {
       logger.info(`[Redis] Connected to Redis server at ${hostLog}`);
     });
 
-    redisClient.on("error", (err) => {
+    redisClient.on("error", (err: Error) => {
       logger.warn(`[Redis] Connection error: ${err.message}`);
     });
-  } catch (err) {
+  } catch (err: unknown) {
     logger.error("[Redis] Initialization failed:", err);
   }
 }

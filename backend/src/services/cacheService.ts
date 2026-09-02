@@ -5,43 +5,31 @@ import { logger } from "../utils/logger.js";
  * Cache service providing Redis-backed in-memory caching with graceful fallbacks
  */
 class CacheService {
+  public client: any;
+  public defaultTTL: number;
+
   constructor() {
     this.client = redisClient;
     this.defaultTTL = 300; // 5 minutes in seconds
   }
 
-  /**
-   * Check if redis client is connected and ready
-   */
-  isReady() {
-    return this.client && this.client.status === "ready";
+  isReady(): boolean {
+    return Boolean(this.client && this.client.status === "ready");
   }
 
-  /**
-   * Get cached item by key
-   * @param {string} key
-   * @returns {Promise<any|null>}
-   */
-  async get(key) {
+  async get<T = unknown>(key: string): Promise<T | null> {
     if (!this.client) return null;
     try {
       const data = await this.client.get(key);
       if (!data) return null;
-      return JSON.parse(data);
-    } catch (err) {
+      return JSON.parse(data) as T;
+    } catch (err: any) {
       logger.warn(`[CacheService] Error reading key "${key}": ${err.message}`);
       return null;
     }
   }
 
-  /**
-   * Set cached item with TTL in seconds
-   * @param {string} key
-   * @param {any} value
-   * @param {number} [ttlSeconds]
-   * @returns {Promise<boolean>}
-   */
-  async set(key, value, ttlSeconds = this.defaultTTL) {
+  async set<T = unknown>(key: string, value: T, ttlSeconds = this.defaultTTL): Promise<boolean> {
     if (!this.client) return false;
     try {
       const serialized = JSON.stringify(value);
@@ -51,34 +39,24 @@ class CacheService {
         await this.client.set(key, serialized);
       }
       return true;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(`[CacheService] Error writing key "${key}": ${err.message}`);
       return false;
     }
   }
 
-  /**
-   * Delete specific key from cache
-   * @param {string} key
-   * @returns {Promise<boolean>}
-   */
-  async del(key) {
+  async del(key: string): Promise<boolean> {
     if (!this.client) return false;
     try {
       await this.client.del(key);
       return true;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(`[CacheService] Error deleting key "${key}": ${err.message}`);
       return false;
     }
   }
 
-  /**
-   * Invalidate all keys matching a wildcard pattern (e.g. "volta:cache:biz:123:*")
-   * @param {string} pattern
-   * @returns {Promise<number>} Number of keys deleted
-   */
-  async invalidatePattern(pattern) {
+  async invalidatePattern(pattern: string): Promise<number> {
     if (!this.client) return 0;
     try {
       const stream = this.client.scanStream({
@@ -94,20 +72,17 @@ class CacheService {
         }
       }
       return totalDeleted;
-    } catch (err) {
+    } catch (err: any) {
       logger.warn(`[CacheService] Error invalidating pattern "${pattern}": ${err.message}`);
       return 0;
     }
   }
 
-  /**
-   * Helper to generate standardized cache keys
-   */
   static keys = {
-    businessServices: (businessId) => `volta:cache:biz:${businessId}:services`,
-    businessProfile: (businessId) => `volta:cache:biz:${businessId}:profile`,
-    publicBookingSlots: (businessId, dateStr) => `volta:cache:biz:${businessId}:slots:${dateStr}`,
-    businessPattern: (businessId) => `volta:cache:biz:${businessId}:*`,
+    businessServices: (businessId: string): string => `volta:cache:biz:${businessId}:services`,
+    businessProfile: (businessId: string): string => `volta:cache:biz:${businessId}:profile`,
+    publicBookingSlots: (businessId: string, dateStr: string): string => `volta:cache:biz:${businessId}:slots:${dateStr}`,
+    businessPattern: (businessId: string): string => `volta:cache:biz:${businessId}:*`,
   };
 }
 
