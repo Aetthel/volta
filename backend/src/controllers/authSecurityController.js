@@ -15,15 +15,30 @@ export async function verifyOtp(req, res) {
 
   try {
     const result = await authSecurityService.verifyUserOtp(email, code);
+
+    // La cuenta ya estaba verificada: el código no se ha llegado a comprobar,
+    // así que la respuesta no lleva ni datos del usuario ni token de sesión.
+    // La pantalla manda a iniciar sesión con normalidad.
+    if (result.alreadyVerified) {
+      return ApiResponse.success(res, {
+        message: "Esta cuenta ya estaba verificada. Inicia sesión con tu contraseña.",
+        alreadyVerified: true,
+      });
+    }
+
     return ApiResponse.success(res, {
       message: "Correo verificado correctamente.",
-      alreadyVerified: !!result.alreadyVerified,
+      alreadyVerified: false,
+      // De un solo uso y con dos minutos de vida: lo canjea `authorize()` para
+      // abrir sesión sin volver a pedir la contraseña del registro.
+      loginToken: result.loginToken,
       user: {
         id: result.user.id,
         email: result.user.email,
         name: result.user.name,
         role: result.user.role,
         businessId: result.user.businessId,
+        status: result.user.status,
         emailVerified: result.user.emailVerified,
       },
     });
@@ -59,7 +74,15 @@ export async function resendOtp(req, res) {
       });
     }
 
-    await authSecurityService.sendUserVerificationOtp(user);
+    const result = await authSecurityService.sendUserVerificationOtp(user);
+
+    // Un reenvío que no sale deja al usuario esperando un correo que no llega,
+    // así que se responde con error en vez de con un éxito que no lo es.
+    if (!result.emailSent) {
+      return res.status(502).json({
+        error: "No hemos podido enviar el correo en este momento. Inténtalo de nuevo en unos minutos.",
+      });
+    }
 
     return ApiResponse.success(res, {
       message: "Se ha enviado un nuevo código a tu correo.",

@@ -13,6 +13,20 @@ import {
 // Base32 alphabet for standard RFC 3548 / RFC 4648
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
+/** Validez del código OTP de alta. El texto del correo anuncia estos 10 minutos. */
+const OTP_TTL_MS = 10 * 60 * 1000;
+
+/**
+ * Validez del token que la pantalla de verificación canjea por sesión. Es un
+ * salto inmediato entre dos peticiones seguidas, así que basta con muy poco.
+ */
+const VERIFICATION_LOGIN_TTL_MS = 2 * 60 * 1000;
+
+/** Nunca se guarda un token en claro: en la base sólo vive su SHA-256. */
+function hashToken(raw) {
+  return crypto.createHash("sha256").update(raw).digest("hex");
+}
+
 /**
  * Base32 encode a buffer into a standard TOTP secret string
  */
@@ -145,7 +159,7 @@ export function generateBackupCodes() {
  */
 export async function sendUserVerificationOtp(user) {
   const otpCode = generateOtpCode();
-  const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const otpExpiresAt = new Date(Date.now() + OTP_TTL_MS);
 
   await prisma.user.update({
     where: { id: user.id },
@@ -156,12 +170,85 @@ export async function sendUserVerificationOtp(user) {
     },
   });
 
-  await sendOtpEmail(user.email, {
+  const delivery = await sendOtpEmail(user.email, {
     name: user.name,
     code: otpCode,
   });
 
-  return { success: true };
+  // Ahora que la verificación es obligatoria, un correo que no sale deja la
+  // cuenta encerrada. `sendRawEmail` devuelve el fallo en vez de lanzarlo, así
+  // que hay que mirarlo y propagarlo para que la interfaz pueda ofrecer reenvío.
+  if (!delivery.success) {
+    logger.error(
+      `[AuthSecurity] No se pudo entregar el código de verificación a ${user.email}: ${delivery.error}`
+    );
+  }
+
+  return { success: true, emailSent: !!delivery.success };
+}
+
+/**
+ * Emite el token de un solo uso que la pantalla de verificación canjea por una
+ * sesión. Sustituye a pedir de nuevo la contraseña que el usuario acaba de
+ * escribir en el registro, sin arrastrarla por la URL ni por el almacenamiento
+ * del navegador.
+ */
+async function issueVerificationLoginToken(userId) {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      verificationLoginToken: hashToken(rawToken),
+      verificationLoginExpiresAt: new Date(Date.now() + VERIFICATION_LOGIN_TTL_MS),
+    },
+  });
+
+  return rawToken;
+}
+
+/**
+ * Canjea el token de verificación por el usuario al que pertenece, gastándolo.
+ *
+ * El consumo va en un `updateMany` condicionado en lugar de un find + update:
+ * así dos peticiones simultáneas con el mismo token sólo pueden ganar una, y el
+ * `count` distingue el caso válido del token gastado, caducado o inexistente
+ * sin ramas intermedias que se puedan colar.
+ *
+ * Se excluye a las cuentas con 2FA: esta vía no pide contraseña, y gastar el
+ * token antes de plantear el desafío lo quemaría sin remedio. Una cuenta recién
+ * registrada nunca tiene 2FA (se activa desde ajustes, ya con sesión), y quien
+ * lo tenga siempre conserva el inicio de sesión normal.
+ */
+export async function consumeVerificationLoginToken(email, rawToken) {
+  const cleanEmail = (email || "").toLowerCase().trim();
+  if (!cleanEmail || !rawToken) return null;
+
+  const hashedToken = hashToken(String(rawToken).trim());
+
+  const { count } = await prisma.user.updateMany({
+    where: {
+      email: cleanEmail,
+      verificationLoginToken: hashedToken,
+      verificationLoginExpiresAt: { gt: new Date() },
+      status: "ACTIVE",
+      twoFactorEnabled: false,
+    },
+    data: {
+      verificationLoginToken: null,
+      verificationLoginExpiresAt: null,
+    },
+  });
+
+  if (count !== 1) {
+    logger.warn(`[AuthSecurity] Token de verificación inválido o ya gastado para ${cleanEmail}`);
+    return null;
+  }
+
+  return prisma.user.findUnique({
+    where: { email: cleanEmail },
+    include: { business: true },
+  });
 }
 
 /**
@@ -177,8 +264,11 @@ export async function verifyUserOtp(email, code) {
     throw new Error("Usuario no encontrado.");
   }
 
+  // Esta rama se alcanza sin haber comprobado el código, así que no puede
+  // devolver datos del usuario ni emitir el token de sesión: si lo hiciera,
+  // bastaría con conocer un correo ya verificado para suplantar la cuenta.
   if (user.emailVerified) {
-    return { success: true, alreadyVerified: true, user };
+    return { success: true, alreadyVerified: true };
   }
 
   if (!user.otpCode || !user.otpExpiresAt) {
@@ -206,6 +296,9 @@ export async function verifyUserOtp(email, code) {
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
     data: {
+      // El alta queda activada aquí: `status` es lo que mira `authorize()`.
+      // Una cuenta SUSPENDED no se reactiva por verificar el correo.
+      status: user.status === "PENDING_VERIFICATION" ? "ACTIVE" : user.status,
       emailVerified: true,
       emailVerifiedAt: new Date(),
       otpCode: null,
@@ -215,7 +308,12 @@ export async function verifyUserOtp(email, code) {
     include: { business: true },
   });
 
-  return { success: true, user: updatedUser };
+  const loginToken =
+    updatedUser.status === "ACTIVE" && !updatedUser.twoFactorEnabled
+      ? await issueVerificationLoginToken(updatedUser.id)
+      : null;
+
+  return { success: true, user: updatedUser, loginToken };
 }
 
 /**
@@ -289,6 +387,10 @@ export async function resetPasswordWithToken(email, rawToken, newPassword) {
       resetPasswordToken: null,
       resetPasswordExpiresAt: null,
       emailVerified: true, // Resetting via email proves ownership
+      // Y si esa prueba llega estando el alta pendiente, activa la cuenta. Sin
+      // esto quedaba verificada pero bloqueada, y en bucle: el acceso mandaría
+      // a verificar, y verificar respondería que ya está verificada.
+      ...(user.status === "PENDING_VERIFICATION" ? { status: "ACTIVE" } : {}),
     },
   });
 
@@ -466,6 +568,7 @@ export default {
   generateOtpCode,
   sendUserVerificationOtp,
   verifyUserOtp,
+  consumeVerificationLoginToken,
   requestPasswordReset,
   resetPasswordWithToken,
   setupTwoFactor,

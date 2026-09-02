@@ -4,7 +4,6 @@ import { useState, useCallback, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft, Check, Store, Scissors, Sparkles, HeartPulse, Flower2, MoreHorizontal } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { Alert, Button } from "@/components/ui/volta-ui";
 import { COLOR_PALETTES, getThemeInlineStyles } from "@/lib/theme";
 
@@ -131,6 +130,10 @@ export default function RegisterPage() {
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  // El backend confirma si el correo con el código llegó a salir. Si no salió,
+  // la cuenta existe pero el usuario no tiene forma de saberlo sin que se lo
+  // digamos, y con la verificación obligatoria eso es una cuenta encerrada.
+  const [emailSent, setEmailSent] = useState(true);
 
   // Step validation check
   const validateStep = (step: number) => {
@@ -223,13 +226,11 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto sign-in
-      await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      // Aquí había un `signIn` automático. Se ha quitado: abría sesión antes de
+      // verificar el correo, que es justo lo que este flujo debe impedir. La
+      // cuenta nace en PENDING_VERIFICATION y `authorize()` la rechaza hasta
+      // que el usuario introduzca el código.
+      setEmailSent(data?.emailSent !== false);
       setIsLoading(false);
       setCurrentStep(4);
     } catch (err: unknown) {
@@ -530,9 +531,17 @@ export default function RegisterPage() {
                 </h1>
                 <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
                   Tu negocio ha sido creado. Hemos enviado un código de 6 dígitos a tu correo{" "}
-                  <strong className="text-on-surface font-semibold">{email}</strong> para verificar tu cuenta y activar todas las funciones.
+                  <strong className="text-on-surface font-semibold">{email}</strong>. Necesitas
+                  introducirlo para activar la cuenta y entrar al panel.
                 </p>
               </div>
+
+              {!emailSent && (
+                <Alert variant="error" className="py-2.5 px-4 text-xs sm:text-sm rounded-xl mb-5">
+                  No hemos podido enviar el correo con el código. Tu cuenta está creada: entra en la
+                  pantalla de verificación y pulsa &laquo;Reenviar nuevo código&raquo;.
+                </Alert>
+              )}
 
               <div className="w-full rounded-2xl border border-outline-variant/40 bg-surface-container-high/30 p-4 mb-6 space-y-3 shadow-xs">
                 <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/20">
@@ -604,7 +613,7 @@ export default function RegisterPage() {
               <Button
                 type="button"
                 onClick={() => {
-                  window.location.href = `/verify-email?email=${encodeURIComponent(email)}`;
+                  window.location.href = `/verify-email?email=${encodeURIComponent(email)}&sent=1`;
                 }}
                 variant="primary"
                 size="sm"

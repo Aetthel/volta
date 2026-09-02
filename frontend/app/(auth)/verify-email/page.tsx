@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import { Mail, CheckCircle2, AlertCircle, RefreshCw, ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Button, Alert, Card } from "@/components/ui/volta-ui";
@@ -12,6 +13,11 @@ function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailParam = searchParams.get("email") || "";
+  // El registro llega con `sent=1` porque acaba de mandar un código y no tiene
+  // sentido permitir otro al instante. Quien cae aquí desde el acceso, en
+  // cambio, arrastra un código viejo y a menudo caducado: hacerle esperar 60
+  // segundos para pedir uno nuevo sería un callejón sin salida.
+  const justSent = searchParams.get("sent") === "1";
 
   const [email, setEmail] = useState(emailParam);
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
@@ -19,7 +25,7 @@ function VerifyEmailContent() {
   const [resending, setResending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [cooldown, setCooldown] = useState(60);
+  const [cooldown, setCooldown] = useState(justSent ? 60 : 0);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -102,12 +108,39 @@ function VerifyEmailContent() {
       if (res.error) {
         setError(res.error);
         setLoading(false);
-      } else {
-        setSuccess(true);
-        setTimeout(() => {
-          router.push(`/login?verified=true&email=${encodeURIComponent(targetEmail)}`);
-        }, 1500);
+        return;
       }
+
+      setSuccess(true);
+
+      // El backend devuelve un token de un solo uso cuando el código era
+      // correcto. Canjearlo abre sesión sin volver a pedir la contraseña que el
+      // usuario acaba de escribir en el registro.
+      const loginToken = res.data?.loginToken;
+
+      if (loginToken) {
+        const signInResult = await signIn("credentials", {
+          email: targetEmail.trim(),
+          loginToken,
+          redirect: false,
+        });
+
+        if (!signInResult?.error) {
+          // Recarga completa para que el middleware vea la cookie de sesión ya
+          // asentada, igual que hace la pantalla de acceso.
+          setTimeout(() => {
+            window.location.href = "/inicio";
+          }, 1200);
+          return;
+        }
+      }
+
+      // Sin token (cuenta ya verificada) o si el canje falla —caducado, gastado
+      // o cuenta con 2FA—, la cuenta queda verificada igualmente: sólo hace
+      // falta pasar por el acceso normal.
+      setTimeout(() => {
+        router.push(`/login?verified=true&email=${encodeURIComponent(targetEmail)}`);
+      }, 1200);
     } catch {
       setError("Error al conectar con el servidor.");
       setLoading(false);

@@ -38,6 +38,16 @@ describe("POST /api/users/register", () => {
   });
 
   it("should return 201 Created and return sanitized user and business on successful registration", async () => {
+    const createUser = jest.fn().mockResolvedValue({
+      id: "u-new",
+      name: "New Owner",
+      email: "newowner@volta.es",
+      role: "JEFE",
+      businessId: "b-new",
+      status: "PENDING_VERIFICATION",
+      password: "hashedpassword",
+    });
+
     jest.spyOn(prisma.user, "findFirst").mockResolvedValue(null);
     jest.spyOn(prisma, "$transaction").mockImplementation(async (cb) => {
       return cb({
@@ -51,16 +61,7 @@ describe("POST /api/users/register", () => {
             trialExpiresAt: new Date(),
           }),
         },
-        user: {
-          create: jest.fn().mockResolvedValue({
-            id: "u-new",
-            name: "New Owner",
-            email: "newowner@volta.es",
-            role: "JEFE",
-            businessId: "b-new",
-            password: "hashedpassword",
-          }),
-        },
+        user: { create: createUser },
       });
     });
 
@@ -77,5 +78,14 @@ describe("POST /api/users/register", () => {
     expect(res.body.user.password).toBeUndefined();
     expect(res.body.business).toBeDefined();
     expect(res.body.business.name).toBe("New Salon");
+
+    // El alta pública nace pendiente: hasta introducir el código, `authorize()`
+    // no abre sesión. Es lo que impide saltarse la pantalla de verificación.
+    expect(createUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "PENDING_VERIFICATION" }),
+      })
+    );
+    expect(res.body.verificationRequired).toBe(true);
   });
 });

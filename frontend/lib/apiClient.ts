@@ -13,6 +13,28 @@ export interface RequestOptions extends Omit<RequestInit, "body"> {
   signal?: AbortSignal;
 }
 
+/**
+ * Respuesta de la verificación por OTP.
+ *
+ * `loginToken` sólo viene cuando el código se ha comprobado de verdad y la
+ * cuenta acaba de pasar a activa. En el caso `alreadyVerified` no llega, porque
+ * esa rama del backend responde sin haber validado ningún código.
+ */
+export interface VerifyOtpResult {
+  message: string;
+  alreadyVerified: boolean;
+  loginToken?: string | null;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+    businessId: string | null;
+    status: string;
+    emailVerified: boolean;
+  };
+}
+
 export class ApiError extends Error {
   public status: number;
   public data?: any;
@@ -171,7 +193,7 @@ class ApiClient {
   };
 
   public auth = {
-    verifyOtp: <T = any>(data: { email: string; code: string }) =>
+    verifyOtp: <T = VerifyOtpResult>(data: { email: string; code: string }) =>
       this.post<T>("/auth-security/verify-otp", data),
     resendOtp: <T = any>(data: { email: string }) =>
       this.post<T>("/auth-security/resend-otp", data),

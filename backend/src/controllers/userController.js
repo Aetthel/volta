@@ -176,16 +176,25 @@ export const registerUser = async (req, res) => {
         password: hashedPassword,
         role: "JEFE",
         businessId: createdBusiness.id,
+        // El alta pública es la única vía que nace pendiente: hasta que el
+        // usuario introduzca el código, `authorize()` no le abrirá sesión.
+        status: "PENDING_VERIFICATION",
       },
     });
 
     return { business: createdBusiness, user: createdUser };
   });
 
-  // Automatically trigger email OTP verification code
+  // Automatically trigger email OTP verification code.
+  // El fallo no tumba el alta: la cuenta ya existe y el usuario puede pedir un
+  // reenvío desde la pantalla de verificación. Pero sí se le dice, porque con
+  // la verificación obligatoria un correo perdido en silencio es una cuenta
+  // encerrada sin explicación.
+  let emailSent = false;
   try {
     const { default: authSecurityService } = await import("../services/authSecurityService.js");
-    await authSecurityService.sendUserVerificationOtp(user);
+    const delivery = await authSecurityService.sendUserVerificationOtp(user);
+    emailSent = !!delivery.emailSent;
   } catch (otpErr) {
     console.error("[UserController] Error sending initial OTP email:", otpErr);
   }
@@ -194,6 +203,8 @@ export const registerUser = async (req, res) => {
 
   return ApiResponse.created(res, {
     user: sanitizedUser,
+    verificationRequired: true,
+    emailSent,
     business: {
       id: business.id,
       name: business.name,

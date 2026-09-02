@@ -64,6 +64,20 @@ enum UserRole {
   EMPLEADO
 }
 
+/// Ciclo de vida de la cuenta. Es la fuente de verdad de "¿puede entrar?":
+/// `emailVerified` sigue siendo el registro de auditoría de la prueba del correo,
+/// pero quien decide el acceso en `authorize()` es este campo.
+///
+/// El valor por defecto es ACTIVE a propósito. Sólo el alta pública
+/// (`registerUser`) nace en PENDING_VERIFICATION; los empleados que crea un JEFE
+/// y el admin inicial no pasan por el flujo de OTP, y un default pendiente los
+/// dejaría encerrados fuera de su propio panel.
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+}
+
 model User {
   id                     String    @id @default(uuid())
   name                   String
@@ -72,11 +86,17 @@ model User {
   role                   UserRole  @default(EMPLEADO)
   businessId             String?
   business               Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  status                 UserStatus @default(ACTIVE)
   emailVerified          Boolean   @default(false)
   emailVerifiedAt        DateTime?
   otpCode                String?
   otpExpiresAt           DateTime?
   otpAttempts            Int       @default(0)
+  // Token de un solo uso que canjea la pantalla de verificación por una sesión,
+  // para no volver a pedir la contraseña recién introducida en el registro.
+  // Se guarda hasheado en SHA-256; el original sólo viaja en la respuesta del OTP.
+  verificationLoginToken     String?
+  verificationLoginExpiresAt DateTime?
   twoFactorEnabled       Boolean   @default(false)
   twoFactorSecret        String?
   twoFactorBackupCodes   String[]  @default([])
@@ -89,6 +109,7 @@ model User {
   @@index([businessId])
   @@index([businessId, role])
   @@index([resetPasswordToken])
+  @@index([verificationLoginToken])
 }
 
 enum WhatsAppStatus {

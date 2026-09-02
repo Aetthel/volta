@@ -57,12 +57,32 @@ function LoginContent() {
       });
 
       if (result?.error) {
-        if (result.error.includes("2FA_REQUIRED") || result.code === "2FA_REQUIRED") {
+        // NextAuth aplana el error en un genérico "CredentialsSignin"; el
+        // motivo real viaja en `code`, que es lo que ponen las subclases de
+        // CredentialsSignin definidas en auth.js.
+        const code = result.code;
+
+        if (code === "EMAIL_NOT_VERIFIED") {
+          // La cuenta existe y la contraseña era correcta, sólo falta el
+          // código. Sin `sent`, la pantalla deja reenviar de inmediato: el
+          // código del registro puede llevar días caducado.
+          router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+          return;
+        }
+
+        if (code === "ACCOUNT_SUSPENDED") {
+          setError("Esta cuenta está suspendida. Ponte en contacto con el soporte de Volta.");
+          setIsLoading(false);
+          return;
+        }
+
+        if (code === "2FA_REQUIRED") {
           setTwoFactorRequired(true);
           setIsLoading(false);
           return;
         }
-        if (result.error.includes("INVALID_2FA_CODE")) {
+
+        if (code === "INVALID_2FA_CODE") {
           setError("Código 2FA o código de respaldo incorrecto.");
           setIsLoading(false);
           return;
