@@ -5,7 +5,11 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { AlertTriangle, Clock, ArrowRight, X } from "lucide-react";
 
-import { LEMON_SQUEEZY_PRODUCT_URLS, buildLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy";
+import {
+  LEMON_SQUEEZY_PRODUCT_URLS,
+  buildLemonSqueezyCheckoutUrl,
+  openLemonSqueezyOverlay,
+} from "@/lib/lemonsqueezy";
 
 function TrialBannerContent() {
   const [isVisible, setIsVisible] = useState(true);
@@ -55,6 +59,7 @@ function TrialBannerContent() {
             {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
             <a
               href={checkoutUrl}
+              onClick={(e) => openLemonSqueezyOverlay(checkoutUrl, e)}
               className="lemonsqueezy-button py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer bg-primary text-white hover:bg-primary/90"
             >
               <span>Seleccionar Plan</span>
@@ -137,6 +142,7 @@ function TrialBannerContent() {
             {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
             <a
               href={checkoutUrl}
+              onClick={(e) => openLemonSqueezyOverlay(checkoutUrl, e)}
               className={`lemonsqueezy-button py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer ${
                 isExpired
                   ? "bg-error text-white hover:bg-error/90"

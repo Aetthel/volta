@@ -26,7 +26,11 @@ import { Button, Card, Badge } from "@/components/ui/volta-ui";
 import FaceIcon from "@/components/FaceIcon";
 import FullScreenSplash from "@/components/FullScreenSplash";
 import { COLOR_PALETTES, getThemeInlineStyles } from "@/lib/theme";
-import { LEMON_SQUEEZY_PRODUCT_URLS, buildLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy";
+import {
+  LEMON_SQUEEZY_PRODUCT_URLS,
+  buildLemonSqueezyCheckoutUrl,
+  openLemonSqueezyOverlay,
+} from "@/lib/lemonsqueezy";
 
 export default function RootPage() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -770,15 +774,21 @@ export default function RootPage() {
                 <div className="mt-8 space-y-3">
                   {session?.user ? (
                     /* TODO: Insertar URL del producto de Lemon Squeezy aquí */
-                    <a
-                      href={buildLemonSqueezyCheckoutUrl(
+                    (() => {
+                      const url = buildLemonSqueezyCheckoutUrl(
                         LEMON_SQUEEZY_PRODUCT_URLS.BASIC,
                         session.user
-                      )}
-                      className="lemonsqueezy-button w-full inline-flex items-center justify-center py-3 px-6 rounded-xl border border-outline text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors cursor-pointer text-center"
-                    >
-                      Contratar Plan Básico
-                    </a>
+                      );
+                      return (
+                        <a
+                          href={url}
+                          onClick={(e) => openLemonSqueezyOverlay(url, e)}
+                          className="lemonsqueezy-button w-full inline-flex items-center justify-center py-3 px-6 rounded-xl border border-outline text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors cursor-pointer text-center"
+                        >
+                          Contratar Plan Básico
+                        </a>
+                      );
+                    })()
                   ) : (
                     <Link href="/register">
                       <Button variant="outline" size="lg" className="w-full">
@@ -850,15 +860,21 @@ export default function RootPage() {
                 <div className="mt-8 space-y-3">
                   {session?.user ? (
                     /* TODO: Insertar URL del producto de Lemon Squeezy aquí */
-                    <a
-                      href={buildLemonSqueezyCheckoutUrl(
+                    (() => {
+                      const url = buildLemonSqueezyCheckoutUrl(
                         LEMON_SQUEEZY_PRODUCT_URLS.PRO,
                         session.user
-                      )}
-                      className="lemonsqueezy-button w-full inline-flex items-center justify-center py-3 px-6 rounded-xl bg-white text-primary font-semibold text-sm hover:bg-surface-container-lowest transition-colors cursor-pointer text-center"
-                    >
-                      Contratar Plan Pro
-                    </a>
+                      );
+                      return (
+                        <a
+                          href={url}
+                          onClick={(e) => openLemonSqueezyOverlay(url, e)}
+                          className="lemonsqueezy-button w-full inline-flex items-center justify-center py-3 px-6 rounded-xl bg-white text-primary font-semibold text-sm hover:bg-surface-container-lowest transition-colors cursor-pointer text-center"
+                        >
+                          Contratar Plan Pro
+                        </a>
+                      );
+                    })()
                   ) : (
                     <Link href="/register">
                       <Button

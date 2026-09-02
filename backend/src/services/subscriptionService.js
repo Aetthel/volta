@@ -159,14 +159,32 @@ export async function processWebhookEvent(payload, signature) {
   const eventName = parsedPayload?.meta?.event_name;
   const customData = parsedPayload?.meta?.custom_data || {};
   const attributes = parsedPayload?.data?.attributes || {};
-  const businessId = customData.business_id;
+  let businessId = customData.business_id || customData.businessId;
+
+  if (!businessId && (customData.user_id || customData.userId)) {
+    const userId = customData.user_id || customData.userId;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { businessId: true },
+    });
+    if (user?.businessId) {
+      businessId = user.businessId;
+    }
+  }
 
   console.log(`[LemonSqueezy Webhook] Received event: ${eventName} for business: ${businessId}`);
 
   if (!businessId) {
     // Try to find business by customer id
     const customerId = String(attributes.customer_id || "");
-    if (!customerId) return { processed: false, reason: "No businessId or customerId found" };
+    if (customerId) {
+      const foundBusiness = await prisma.business.findFirst({
+        where: { lemonSqueezyCustomerId: customerId },
+        select: { id: true },
+      });
+      if (foundBusiness) businessId = foundBusiness.id;
+    }
+    if (!businessId) return { processed: false, reason: "No businessId or customerId found" };
   }
 
   switch (eventName) {

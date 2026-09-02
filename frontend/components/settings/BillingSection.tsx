@@ -22,7 +22,11 @@ import {
 import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Badge, Skeleton } from "@/components/ui/volta-ui";
 import type { Invoice } from "@/types/domain";
 import { cn } from "@/lib/utils";
-import { LEMON_SQUEEZY_PRODUCT_URLS, buildLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy";
+import {
+  LEMON_SQUEEZY_PRODUCT_URLS,
+  buildLemonSqueezyCheckoutUrl,
+  openLemonSqueezyOverlay,
+} from "@/lib/lemonsqueezy";
 
 interface BillingSectionProps {
   onShowToast: (message: string) => void;
@@ -108,17 +112,23 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
             </div>
           </div>
           {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
-          <a
-            href={buildLemonSqueezyCheckoutUrl(
+          {(() => {
+            const url = buildLemonSqueezyCheckoutUrl(
               currentPlan === "BASIC"
                 ? LEMON_SQUEEZY_PRODUCT_URLS.BASIC
                 : LEMON_SQUEEZY_PRODUCT_URLS.PRO,
               session?.user
-            )}
-            className="lemonsqueezy-button bg-error text-white hover:bg-error/90 shrink-0 font-semibold text-xs py-2 px-3 rounded-lg inline-flex items-center justify-center transition-colors cursor-pointer"
-          >
-            Actualizar Pago
-          </a>
+            );
+            return (
+              <a
+                href={url}
+                onClick={(e) => openLemonSqueezyOverlay(url, e)}
+                className="lemonsqueezy-button bg-error text-white hover:bg-error/90 shrink-0 font-semibold text-xs py-2 px-3 rounded-lg inline-flex items-center justify-center transition-colors cursor-pointer"
+              >
+                Actualizar Pago
+              </a>
+            );
+          })()}
         </div>
       )}
 
@@ -224,20 +234,26 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
           <CardFooter className="border-t border-outline-variant/40 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
-              <a
-                href={buildLemonSqueezyCheckoutUrl(
+              {(() => {
+                const url = buildLemonSqueezyCheckoutUrl(
                   currentPlan === "BASIC"
                     ? LEMON_SQUEEZY_PRODUCT_URLS.PRO
                     : LEMON_SQUEEZY_PRODUCT_URLS.PRO,
                   session?.user
-                )}
-                className="lemonsqueezy-button inline-flex items-center justify-center gap-2 font-medium bg-primary text-white hover:bg-primary/90 py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-sm"
-              >
-                <Zap className="w-4 h-4" />
-                <span>
-                  {currentStatus === "ACTIVE" ? "Cambiar o Mejorar Plan" : "Activar Suscripción"}
-                </span>
-              </a>
+                );
+                return (
+                  <a
+                    href={url}
+                    onClick={(e) => openLemonSqueezyOverlay(url, e)}
+                    className="lemonsqueezy-button inline-flex items-center justify-center gap-2 font-medium bg-primary text-white hover:bg-primary/90 py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-sm"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>
+                      {currentStatus === "ACTIVE" ? "Cambiar o Mejorar Plan" : "Activar Suscripción"}
+                    </span>
+                  </a>
+                );
+              })()}
             </div>
 
             {currentStatus === "ACTIVE" && !isCancelledEnd && (
