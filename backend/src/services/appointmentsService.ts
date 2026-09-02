@@ -1,18 +1,20 @@
 import prisma from "../config/db.js";
+// @ts-ignore - botService is an existing JS module
 import { sendWelcomeMessage, sendConsentMessage } from "./botService.js";
 import { normalizeString, normalizePhone } from "../utils/index.js";
 import { validateBusinessHours } from "../utils/businessHours.js";
 import { logger } from "../utils/logger.js";
+import type { CreateAppointmentInput, UpdateAppointmentInput } from "../validators/index.js";
 
-export const getAppointmentsByBusiness = async (businessId) => {
-  return await prisma.appointment.findMany({
+export const getAppointmentsByBusiness = async (businessId: string) => {
+  return prisma.appointment.findMany({
     where: { businessId },
     include: { client: true, service: true },
     orderBy: { appointmentDate: "asc" },
   });
 };
 
-export const createAppointment = async (appointmentData) => {
+export const createAppointment = async (appointmentData: CreateAppointmentInput) => {
   const {
     clientName,
     clientPhone,
@@ -27,14 +29,14 @@ export const createAppointment = async (appointmentData) => {
   });
 
   if (!business) {
-    const error = new Error("Business not found");
+    const error = new Error("Business not found") as Error & { statusCode?: number };
     error.statusCode = 404;
     throw error;
   }
 
   // Look up service by name or ID to get duration and capacity
-  let serviceId = null;
-  let serviceName = reqService || null;
+  let serviceId: string | null = null;
+  let serviceName: string | null = reqService || null;
   let duration = 30;
   let capacity = 1;
 
@@ -56,7 +58,7 @@ export const createAppointment = async (appointmentData) => {
 
   const reqDate = new Date(appointmentDate);
   if (isNaN(reqDate.getTime())) {
-    const error = new Error("Fecha de cita no válida");
+    const error = new Error("Fecha de cita no válida") as Error & { statusCode?: number };
     error.statusCode = 400;
     throw error;
   }
@@ -65,7 +67,7 @@ export const createAppointment = async (appointmentData) => {
   if (business.hours && business.hours.length > 0) {
     const hoursCheck = validateBusinessHours(business.hours, reqDate, duration);
     if (!hoursCheck.valid) {
-      const error = new Error(hoursCheck.reason);
+      const error = new Error(hoursCheck.reason) as Error & { statusCode?: number };
       error.statusCode = 400;
       throw error;
     }
@@ -110,7 +112,7 @@ export const createAppointment = async (appointmentData) => {
   if (overlappingCount >= capacity) {
     const error = new Error(
       "El horario seleccionado ya está ocupado o no tiene capacidad disponible."
-    );
+    ) as Error & { statusCode?: number };
     error.statusCode = 409;
     throw error;
   }
@@ -119,7 +121,7 @@ export const createAppointment = async (appointmentData) => {
   const inputPhone = clientPhone ? normalizePhone(clientPhone) : "";
 
   // 3. Try to find client by exact phone number first (if phone provided)
-  let client = null;
+  let client: any = null;
   if (inputPhone) {
     client = await prisma.client.findFirst({
       where: {
@@ -178,17 +180,15 @@ export const createAppointment = async (appointmentData) => {
   });
 
   if (client.lopdStatus === "Aceptado") {
-    sendWelcomeMessage(appointment.id).catch((err) => {
+    sendWelcomeMessage(appointment.id).catch((err: unknown) => {
       logger.error("[Service] Error sending welcome message on appointment creation:", err);
     });
   } else if (client.lopdStatus === "Rechazado") {
-    // El cliente rechazó expresamente el consentimiento: no se le vuelve a pedir.
-    // Insistir por el mismo canal que acaba de rechazar sería contrario al RGPD.
     logger.info(
       `[Service] Cliente ${client.id} rechazó el consentimiento LOPD: no se envía solicitud.`
     );
   } else {
-    sendConsentMessage(businessId, client).catch((err) => {
+    sendConsentMessage(businessId, client).catch((err: unknown) => {
       logger.error("[Service] Error sending LOPD consent request:", err);
     });
   }
@@ -196,8 +196,12 @@ export const createAppointment = async (appointmentData) => {
   return appointment;
 };
 
-export const updateAppointment = async (id, updateData, businessId) => {
-  const data = {};
+export const updateAppointment = async (
+  id: string,
+  updateData: UpdateAppointmentInput,
+  businessId?: string
+) => {
+  const data: Record<string, any> = {};
   if (updateData.clientName) data.clientName = updateData.clientName;
   if (updateData.clientPhone) data.clientPhone = updateData.clientPhone;
   if (updateData.appointmentDate) data.appointmentDate = new Date(updateData.appointmentDate);
@@ -205,7 +209,7 @@ export const updateAppointment = async (id, updateData, businessId) => {
 
   if (updateData.serviceName !== undefined) {
     data.serviceName = updateData.serviceName;
-    if (updateData.serviceName) {
+    if (updateData.serviceName && businessId) {
       const dbService = await prisma.service.findFirst({
         where: {
           businessId,
@@ -223,20 +227,28 @@ export const updateAppointment = async (id, updateData, businessId) => {
     }
   }
 
-  return await prisma.appointment.update({
+  return prisma.appointment.update({
     where: { id },
     data,
   });
 };
 
-export const deleteAppointment = async (id) => {
-  return await prisma.appointment.delete({
+export const deleteAppointment = async (id: string) => {
+  return prisma.appointment.delete({
     where: { id },
   });
 };
 
-export const getAppointmentById = async (id) => {
-  return await prisma.appointment.findUnique({
+export const getAppointmentById = async (id: string) => {
+  return prisma.appointment.findUnique({
     where: { id },
   });
+};
+
+export default {
+  getAppointmentsByBusiness,
+  createAppointment,
+  updateAppointment,
+  deleteAppointment,
+  getAppointmentById,
 };

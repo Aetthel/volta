@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import QRCode from "qrcode";
 import prisma from "../config/db.js";
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { logger } from "../utils/logger";
 import {
@@ -13,30 +14,20 @@ import {
 // Base32 alphabet for standard RFC 3548 / RFC 4648
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-/** Validez del código OTP de alta. El texto del correo anuncia estos 10 minutos. */
 const OTP_TTL_MS = 10 * 60 * 1000;
-
-/**
- * Validez del token que la pantalla de verificación canjea por sesión. Es un
- * salto inmediato entre dos peticiones seguidas, así que basta con muy poco.
- */
 const VERIFICATION_LOGIN_TTL_MS = 2 * 60 * 1000;
 
-/** Nunca se guarda un token en claro: en la base sólo vive su SHA-256. */
-function hashToken(raw) {
+function hashToken(raw: string): string {
   return crypto.createHash("sha256").update(raw).digest("hex");
 }
 
-/**
- * Base32 encode a buffer into a standard TOTP secret string
- */
-function base32Encode(buffer) {
+function base32Encode(buffer: Buffer): string {
   let bits = 0;
   let value = 0;
   let output = "";
 
   for (let i = 0; i < buffer.length; i++) {
-    value = (value << 8) | buffer[i];
+    value = (value << 8) | buffer[i]!;
     bits += 8;
 
     while (bits >= 5) {
@@ -52,17 +43,14 @@ function base32Encode(buffer) {
   return output;
 }
 
-/**
- * Base32 decode a secret string into a buffer
- */
-function base32Decode(input) {
+function base32Decode(input: string): Buffer {
   const cleaned = input.toUpperCase().replace(/=+$/, "").replace(/[\s-]/g, "");
   let bits = 0;
   let value = 0;
-  const bytes = [];
+  const bytes: number[] = [];
 
   for (let i = 0; i < cleaned.length; i++) {
-    const idx = BASE32_ALPHABET.indexOf(cleaned[i]);
+    const idx = BASE32_ALPHABET.indexOf(cleaned[i]!);
     if (idx === -1) continue;
 
     value = (value << 5) | idx;
@@ -77,10 +65,7 @@ function base32Decode(input) {
   return Buffer.from(bytes);
 }
 
-/**
- * Generates a 6-digit TOTP code for a given secret and counter step
- */
-function generateTotpCode(secretBase32, timeStep) {
+function generateTotpCode(secretBase32: string, timeStep: number): string {
   const key = base32Decode(secretBase32);
   const timeBuffer = Buffer.alloc(8);
   timeBuffer.writeBigInt64BE(BigInt(timeStep), 0);
@@ -90,27 +75,23 @@ function generateTotpCode(secretBase32, timeStep) {
   const digest = hmac.digest();
 
   // Dynamic truncation (RFC 4226)
-  const offset = digest[digest.length - 1] & 0xf;
+  const offset = digest[digest.length - 1]! & 0xf;
   const code =
-    ((digest[offset] & 0x7f) << 24) |
-    ((digest[offset + 1] & 0xff) << 16) |
-    ((digest[offset + 2] & 0xff) << 8) |
-    (digest[offset + 3] & 0xff);
+    ((digest[offset]! & 0x7f) << 24) |
+    ((digest[offset + 1]! & 0xff) << 16) |
+    ((digest[offset + 2]! & 0xff) << 8) |
+    (digest[offset + 3]! & 0xff);
 
   return (code % 1000000).toString().padStart(6, "0");
 }
 
-/**
- * Verifies a 6-digit TOTP code allowing a +/- 1 step drift window (90s window)
- */
-export function verifyTotp(secretBase32, token) {
+export function verifyTotp(secretBase32?: string | null, token?: string | null): boolean {
   if (!secretBase32 || !token) return false;
   const cleanToken = token.trim().replace(/\s/g, "");
   if (!/^\d{6}$/.test(cleanToken)) return false;
 
   const currentStep = Math.floor(Date.now() / 1000 / 30);
 
-  // Check current, previous, and next 30s step to account for slight clock skew
   for (let step = currentStep - 1; step <= currentStep + 1; step++) {
     const expected = generateTotpCode(secretBase32, step);
     if (crypto.timingSafeEqual(Buffer.from(cleanToken), Buffer.from(expected))) {
@@ -121,32 +102,21 @@ export function verifyTotp(secretBase32, token) {
   return false;
 }
 
-/**
- * Hashes a plain password using bcrypt
- */
-export async function hashPassword(password) {
-  return await bcrypt.hash(password, 10);
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
 }
 
-/**
- * Verifies a password against a hash
- */
-export async function comparePassword(password, hash) {
-  return await bcrypt.compare(password, hash);
+export async function comparePassword(password: string, hash?: string | null): Promise<boolean> {
+  if (!hash) return false;
+  return bcrypt.compare(password, hash);
 }
 
-/**
- * Generates a 6-digit numeric OTP code
- */
-export function generateOtpCode() {
+export function generateOtpCode(): string {
   return crypto.randomInt(100000, 1000000).toString();
 }
 
-/**
- * Generates 8 single-use alphanumeric backup codes
- */
-export function generateBackupCodes() {
-  const codes = [];
+export function generateBackupCodes(): string[] {
+  const codes: string[] = [];
   for (let i = 0; i < 8; i++) {
     const raw = crypto.randomBytes(4).toString("hex").toUpperCase();
     codes.push(`${raw.slice(0, 4)}-${raw.slice(4, 8)}`);
@@ -154,10 +124,7 @@ export function generateBackupCodes() {
   return codes;
 }
 
-/**
- * Generates and sends a 6-digit OTP code to verify email
- */
-export async function sendUserVerificationOtp(user) {
+export async function sendUserVerificationOtp(user: { id: string; email: string; name?: string | null }) {
   const otpCode = generateOtpCode();
   const otpExpiresAt = new Date(Date.now() + OTP_TTL_MS);
 
@@ -175,9 +142,6 @@ export async function sendUserVerificationOtp(user) {
     code: otpCode,
   });
 
-  // Ahora que la verificación es obligatoria, un correo que no sale deja la
-  // cuenta encerrada. `sendRawEmail` devuelve el fallo en vez de lanzarlo, así
-  // que hay que mirarlo y propagarlo para que la interfaz pueda ofrecer reenvío.
   if (!delivery.success) {
     logger.error(
       `[AuthSecurity] No se pudo entregar el código de verificación a ${user.email}: ${delivery.error}. Código OTP generado para pruebas: ${otpCode}`
@@ -186,16 +150,10 @@ export async function sendUserVerificationOtp(user) {
     logger.info(`[AuthSecurity] Código OTP generado para ${user.email}: ${otpCode}`);
   }
 
-  return { success: true, emailSent: !!delivery.success };
+  return { success: true, emailSent: Boolean(delivery.success) };
 }
 
-/**
- * Emite el token de un solo uso que la pantalla de verificación canjea por una
- * sesión. Sustituye a pedir de nuevo la contraseña que el usuario acaba de
- * escribir en el registro, sin arrastrarla por la URL ni por el almacenamiento
- * del navegador.
- */
-async function issueVerificationLoginToken(userId) {
+async function issueVerificationLoginToken(userId: string): Promise<string> {
   const rawToken = crypto.randomBytes(32).toString("hex");
 
   await prisma.user.update({
@@ -209,20 +167,7 @@ async function issueVerificationLoginToken(userId) {
   return rawToken;
 }
 
-/**
- * Canjea el token de verificación por el usuario al que pertenece, gastándolo.
- *
- * El consumo va en un `updateMany` condicionado en lugar de un find + update:
- * así dos peticiones simultáneas con el mismo token sólo pueden ganar una, y el
- * `count` distingue el caso válido del token gastado, caducado o inexistente
- * sin ramas intermedias que se puedan colar.
- *
- * Se excluye a las cuentas con 2FA: esta vía no pide contraseña, y gastar el
- * token antes de plantear el desafío lo quemaría sin remedio. Una cuenta recién
- * registrada nunca tiene 2FA (se activa desde ajustes, ya con sesión), y quien
- * lo tenga siempre conserva el inicio de sesión normal.
- */
-export async function consumeVerificationLoginToken(email, rawToken) {
+export async function consumeVerificationLoginToken(email?: string | null, rawToken?: string | null) {
   const cleanEmail = (email || "").toLowerCase().trim();
   if (!cleanEmail || !rawToken) return null;
 
@@ -253,10 +198,7 @@ export async function consumeVerificationLoginToken(email, rawToken) {
   });
 }
 
-/**
- * Verifies an OTP code for account activation
- */
-export async function verifyUserOtp(email, code) {
+export async function verifyUserOtp(email: string, code: string) {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase().trim() },
     include: { business: true },
@@ -266,9 +208,6 @@ export async function verifyUserOtp(email, code) {
     throw new Error("Usuario no encontrado.");
   }
 
-  // Esta rama se alcanza sin haber comprobado el código, así que no puede
-  // devolver datos del usuario ni emitir el token de sesión: si lo hiciera,
-  // bastaría con conocer un correo ya verificado para suplantar la cuenta.
   if (user.emailVerified) {
     return { success: true, alreadyVerified: true };
   }
@@ -298,8 +237,6 @@ export async function verifyUserOtp(email, code) {
   const updatedUser = await prisma.user.update({
     where: { id: user.id },
     data: {
-      // El alta queda activada aquí: `status` es lo que mira `authorize()`.
-      // Una cuenta SUSPENDED no se reactiva por verificar el correo.
       status: user.status === "PENDING_VERIFICATION" ? "ACTIVE" : user.status,
       emailVerified: true,
       emailVerifiedAt: new Date(),
@@ -318,14 +255,10 @@ export async function verifyUserOtp(email, code) {
   return { success: true, user: updatedUser, loginToken };
 }
 
-/**
- * Requests a password reset and sends token via email
- */
-export async function requestPasswordReset(email) {
+export async function requestPasswordReset(email: string) {
   const cleanEmail = (email || "").toLowerCase().trim();
   const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
-  // Prevent account enumeration: return success even if user not found
   if (!user) {
     logger.info(`[AuthSecurity] Password reset requested for non-existent email: ${cleanEmail}`);
     return { success: true };
@@ -354,10 +287,7 @@ export async function requestPasswordReset(email) {
   return { success: true };
 }
 
-/**
- * Resets a password using a valid one-time token
- */
-export async function resetPasswordWithToken(email, rawToken, newPassword) {
+export async function resetPasswordWithToken(email: string, rawToken: string, newPassword: string) {
   const cleanEmail = (email || "").toLowerCase().trim();
   const hashedToken = crypto.createHash("sha256").update(rawToken.trim()).digest("hex");
 
@@ -388,10 +318,7 @@ export async function resetPasswordWithToken(email, rawToken, newPassword) {
       password: hashedPassword,
       resetPasswordToken: null,
       resetPasswordExpiresAt: null,
-      emailVerified: true, // Resetting via email proves ownership
-      // Y si esa prueba llega estando el alta pendiente, activa la cuenta. Sin
-      // esto quedaba verificada pero bloqueada, y en bucle: el acceso mandaría
-      // a verificar, y verificar respondería que ya está verificada.
+      emailVerified: true,
       ...(user.status === "PENDING_VERIFICATION" ? { status: "ACTIVE" } : {}),
     },
   });
@@ -405,10 +332,7 @@ export async function resetPasswordWithToken(email, rawToken, newPassword) {
   return { success: true };
 }
 
-/**
- * Initializes a new 2FA setup with QR code and secret
- */
-export async function setupTwoFactor(userId) {
+export async function setupTwoFactor(userId: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error("Usuario no encontrado.");
 
@@ -432,17 +356,13 @@ export async function setupTwoFactor(userId) {
   };
 }
 
-/**
- * Verifies a test code and enables 2FA for the user
- */
-export async function verifyAndEnableTwoFactor(userId, secret, code) {
+export async function verifyAndEnableTwoFactor(userId: string, secret: string, code: string) {
   const isValid = verifyTotp(secret, code);
   if (!isValid) {
     throw new Error("El código de 6 dígitos introducido es incorrecto.");
   }
 
   const backupCodes = generateBackupCodes();
-  // Hash backup codes before storing
   const hashedBackupCodes = await Promise.all(
     backupCodes.map((c) => hashPassword(c.replace(/-/g, "")))
   );
@@ -464,14 +384,11 @@ export async function verifyAndEnableTwoFactor(userId, secret, code) {
 
   return {
     success: true,
-    backupCodes, // Plain text shown once to the user
+    backupCodes,
   };
 }
 
-/**
- * Disables 2FA verifying user password
- */
-export async function disableTwoFactor(userId, currentPassword) {
+export async function disableTwoFactor(userId: string, currentPassword: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error("Usuario no encontrado.");
 
@@ -498,10 +415,7 @@ export async function disableTwoFactor(userId, currentPassword) {
   return { success: true };
 }
 
-/**
- * Validates a 2FA challenge (TOTP or Backup code) during login
- */
-export async function validateTwoFactorChallenge(userId, tokenOrCode) {
+export async function validateTwoFactorChallenge(userId: string, tokenOrCode: string): Promise<boolean> {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user || !user.twoFactorEnabled) return false;
 
@@ -517,10 +431,9 @@ export async function validateTwoFactorChallenge(userId, tokenOrCode) {
   // 2. Try Backup code
   const normalizedBackup = clean.replace(/[\s-]/g, "").toUpperCase();
   for (let i = 0; i < user.twoFactorBackupCodes.length; i++) {
-    const hashed = user.twoFactorBackupCodes[i];
+    const hashed = user.twoFactorBackupCodes[i]!;
     const isMatch = await comparePassword(normalizedBackup, hashed);
     if (isMatch) {
-      // Consume the used backup code
       const updatedCodes = user.twoFactorBackupCodes.filter((_, idx) => idx !== i);
       await prisma.user.update({
         where: { id: userId },
@@ -534,10 +447,7 @@ export async function validateTwoFactorChallenge(userId, tokenOrCode) {
   return false;
 }
 
-/**
- * Changes password verifying current password
- */
-export async function changeUserPassword(userId, currentPassword, newPassword) {
+export async function changeUserPassword(userId: string, currentPassword: string, newPassword: string) {
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw new Error("Usuario no encontrado.");
 

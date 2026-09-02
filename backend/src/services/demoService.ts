@@ -50,7 +50,7 @@ export const createDemo = async () => {
       },
     });
 
-    const demoUser = biz.users[0];
+    const demoUser = biz.users[0]!;
 
     await tx.alert.createMany({
       data: [
@@ -250,7 +250,7 @@ export const createDemo = async () => {
   });
 };
 
-export const deleteDemo = async (businessId) => {
+export const deleteDemo = async (businessId: string) => {
   const biz = await prisma.business.findUnique({ where: { id: businessId } });
   if (!biz || biz.subscriptionStatus !== "DEMO_SANDBOX") {
     return false;

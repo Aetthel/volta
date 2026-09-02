@@ -1,29 +1,34 @@
 import prisma from "../config/db.js";
 import whatsappManager from "./whatsappService.js";
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { computeHmac } from "../utils/crypto.js";
-import { maskPhone } from "../utils/logger.js";
-import { logger } from "../utils/logger.js";
+import { maskPhone, logger } from "../utils/logger.js";
+// @ts-ignore - whatsappQueue is an existing JS module
 import { enqueueWhatsAppMessage } from "../queues/whatsappQueue.js";
 
+export interface FormatMessageData {
+  clientName?: string | null;
+  appointmentDate?: Date | string | null;
+  businessName?: string | null;
+  serviceName?: string | null;
+  lopdUrl?: string | null;
+}
+
 /**
  * Formats a message template by replacing placeholders with actual data
  */
-/**
- * Formats a message template by replacing placeholders with actual data
- */
-function formatMessage(template, { clientName, appointmentDate, businessName, serviceName, lopdUrl }) {
+export function formatMessage(template: string | null | undefined, data: FormatMessageData): string | null {
   if (!template) return null;
 
-  const rawName = clientName ? clientName.trim() : "";
-  // Extract strictly first name (no surnames)
+  const rawName = data.clientName ? data.clientName.trim() : "";
   const firstName = rawName ? rawName.split(/\s+/)[0] : "";
 
   let dateStr = "";
   let timeStr = "";
 
-  if (appointmentDate) {
-    const date = new Date(appointmentDate);
+  if (data.appointmentDate) {
+    const date = new Date(data.appointmentDate);
     dateStr = date.toLocaleDateString("es-ES", {
       weekday: "long",
       day: "numeric",
@@ -33,28 +38,26 @@ function formatMessage(template, { clientName, appointmentDate, businessName, se
   }
 
   return template
-    // Single curly braces (UI variables)
     .replace(/\{nombre\}/gi, firstName)
     .replace(/\{nombre_completo\}/gi, rawName)
-    .replace(/\{link_lopd\}/gi, lopdUrl || "")
+    .replace(/\{link_lopd\}/gi, data.lopdUrl || "")
     .replace(/\{fecha\}/gi, dateStr)
     .replace(/\{hora\}/gi, timeStr)
-    .replace(/\{servicio\}/gi, serviceName || "")
-    .replace(/\{negocio\}/gi, businessName || "")
-    // Double curly braces (legacy support)
+    .replace(/\{servicio\}/gi, data.serviceName || "")
+    .replace(/\{negocio\}/gi, data.businessName || "")
     .replace(/\{\{clientName\}\}/gi, firstName)
     .replace(/\{\{clientFullName\}\}/gi, rawName)
-    .replace(/\{\{lopdUrl\}\}/gi, lopdUrl || "")
+    .replace(/\{\{lopdUrl\}\}/gi, data.lopdUrl || "")
     .replace(/\{\{appointmentDate\}\}/gi, dateStr)
     .replace(/\{\{appointmentTime\}\}/gi, timeStr)
-    .replace(/\{\{serviceName\}\}/gi, serviceName || "")
-    .replace(/\{\{businessName\}\}/gi, businessName || "");
+    .replace(/\{\{serviceName\}\}/gi, data.serviceName || "")
+    .replace(/\{\{businessName\}\}/gi, data.businessName || "");
 }
 
 /**
  * Sends an immediate welcome/booking confirmation message
  */
-async function sendWelcomeMessage(appointmentId) {
+export async function sendWelcomeMessage(appointmentId: string): Promise<void> {
   try {
     const appt = await prisma.appointment.findUnique({
       where: { id: appointmentId },
@@ -85,6 +88,8 @@ async function sendWelcomeMessage(appointmentId) {
       serviceName: appt.service?.name || "tu servicio",
     });
 
+    if (!message) return;
+
     // Enqueue job in Redis / BullMQ
     const job = await enqueueWhatsAppMessage("WELCOME_MESSAGE", {
       appointmentId,
@@ -108,12 +113,11 @@ async function sendWelcomeMessage(appointmentId) {
 /**
  * The Sentinel: Scans for pending appointments in the upcoming 24 hours and sends notifications
  */
-async function runSentinel() {
+export async function runSentinel(): Promise<void> {
   logger.info(`[Sentinel] Scanning upcoming appointments: ${new Date().toLocaleString()}`);
 
   const now = new Date();
   const windowStart = now;
-  // Lookahead window: up to 24 hours (with a 15-minute buffer: 24h + 15m)
   const windowEnd = new Date(now.getTime() + (24 * 60 + 15) * 60 * 1000);
 
   try {
@@ -143,7 +147,6 @@ async function runSentinel() {
           continue;
         }
 
-        // Fail fast: skip immediately if the business WhatsApp link is not connected
         if (
           appt.business.whatsappStatus === "DISCONNECTED" ||
           appt.business.whatsappStatus === "WAITING_QR"
@@ -169,7 +172,8 @@ async function runSentinel() {
           serviceName: appt.service?.name || "tu servicio",
         });
 
-        // Enqueue job to BullMQ / Redis
+        if (!message) continue;
+
         const job = await enqueueWhatsAppMessage("SENTINEL_REMINDER", {
           appointmentId: appt.id,
           businessId: appt.businessId,
@@ -177,9 +181,7 @@ async function runSentinel() {
           message,
         });
 
-        // Fallback for non-Redis local execution
         if (!job) {
-          // Anti-spam jitter: Random 3s - 6s delay between batch sends to simulate human typing
           const humanDelay = Math.floor(Math.random() * 3000) + 3000;
           await new Promise((resolve) => setTimeout(resolve, humanDelay));
 
@@ -208,7 +210,10 @@ async function runSentinel() {
 /**
  * Sends an automatic LOPD consent message to a client.
  */
-async function sendConsentMessage(businessId, client) {
+export async function sendConsentMessage(
+  businessId: string,
+  client: { id: string; name?: string | null; phone: string }
+): Promise<void> {
   const business = await prisma.business.findUnique({
     where: { id: businessId },
     select: { name: true, welcomeMessage: true },
@@ -231,6 +236,8 @@ async function sendConsentMessage(businessId, client) {
     lopdUrl: consentUrl,
   });
 
+  if (!message) return;
+
   logger.info(`[Bot] Triggering LOPD consent for client ${client.id} with message: "${message}"`);
 
   try {
@@ -249,9 +256,14 @@ async function sendConsentMessage(businessId, client) {
         `[WhatsApp] [Direct Fallback] LOPD consent message sent to ${maskPhone(client.phone)}`
       );
     }
-  } catch (wsErr) {
+  } catch (wsErr: any) {
     logger.error(`[WhatsApp] Failed to send LOPD consent message:`, wsErr.message);
   }
 }
 
-export { runSentinel, sendWelcomeMessage, sendConsentMessage, formatMessage };
+export default {
+  runSentinel,
+  sendWelcomeMessage,
+  sendConsentMessage,
+  formatMessage,
+};

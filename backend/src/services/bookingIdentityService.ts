@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import prisma from "../config/db.js";
+// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import whatsappManager from "./whatsappService.js";
 import { computeHmac, signToken, verifyToken, normalizePhone } from "../utils/index.js";
@@ -19,42 +20,40 @@ export const RETENTION_MS = 24 * 60 * 60 * 1000;
 
 export const BOOKING_TOKEN_SCOPE = "public-booking";
 
-const httpError = (statusCode, message, extra = {}) => {
-  const error = new Error(message);
+export interface BookingHttpError extends Error {
+  statusCode?: number;
+  retryAfterSeconds?: number;
+  expired?: boolean;
+  attemptsLeft?: number;
+  [key: string]: unknown;
+}
+
+const httpError = (statusCode: number, message: string, extra: Record<string, unknown> = {}): BookingHttpError => {
+  const error = new Error(message) as BookingHttpError;
   error.statusCode = statusCode;
   Object.assign(error, extra);
   return error;
 };
 
 /** Código de 6 dígitos con entropía criptográfica (no `Math.random`). */
-const generateCode = () => String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
+const generateCode = (): string => String(crypto.randomInt(0, 1_000_000)).padStart(6, "0");
 
-/**
- * El hash liga el código al negocio y al teléfono: un código filtrado no sirve
- * para verificar otro número ni en otro negocio, aunque coincidan los 6 dígitos.
- */
-const hashCode = (businessId, phone, code) =>
+const hashCode = (businessId: string, phone: string, code: string): string =>
   computeHmac(`${businessId}:${phone}:${code}`, config.bookingJwtSecret);
 
-const safeEqual = (a, b) => {
+const safeEqual = (a: unknown, b: unknown): boolean => {
   const bufA = Buffer.from(String(a));
   const bufB = Buffer.from(String(b));
   if (bufA.length !== bufB.length) return false;
   return crypto.timingSafeEqual(bufA, bufB);
 };
 
-const maskForDisplay = (phone) => {
+const maskForDisplay = (phone: string): string => {
   if (!phone || phone.length <= 3) return "***";
   return `${"•".repeat(Math.max(0, phone.length - 3))}${phone.slice(-3)}`;
 };
 
-/**
- * Avisa al negocio de que su portal de reservas no puede verificar a nadie.
- * La alerta va a los responsables (JEFE), no al empleado que esté de turno, y
- * se emite una sola vez mientras siga sin leerse: el fallo es continuo y no
- * tiene sentido llenarle el buzón con una alerta por visitante rebotado.
- */
-const alertBusinessGatewayDown = async (businessId) => {
+const alertBusinessGatewayDown = async (businessId: string): Promise<void> => {
   const title = "Reservas online bloqueadas: WhatsApp desconectado";
 
   try {
@@ -80,19 +79,18 @@ const alertBusinessGatewayDown = async (businessId) => {
         },
       });
     }
-  } catch (err) {
-    // Que falle el aviso no debe cambiar la respuesta que recibe el visitante.
+  } catch (err: any) {
     logger.error(`[BookingIdentity] No se pudo crear la alerta de gateway caído: ${err.message}`);
   }
 };
 
-const findClientByPhone = (businessId, phone) =>
+const findClientByPhone = (businessId: string, phone: string) =>
   prisma.client.findFirst({
     where: { businessId, phone },
     select: { id: true, name: true, surname: true },
   });
 
-const countRecentCodes = (businessId, phone) =>
+const countRecentCodes = (businessId: string, phone: string) =>
   prisma.bookingVerification.count({
     where: {
       businessId,
@@ -101,12 +99,14 @@ const countRecentCodes = (businessId, phone) =>
     },
   });
 
-/**
- * Primer paso: reconoce el teléfono y, si procede, envía el código.
- *
- * @returns {Promise<{state: "NAME_REQUIRED"|"OTP_SENT", ...}>}
- */
-export const startVerification = async ({ businessId, phone, fullName, ipAddress }) => {
+export interface StartVerificationParams {
+  businessId: string;
+  phone: string;
+  fullName?: string | null;
+  ipAddress?: string | null;
+}
+
+export const startVerification = async ({ businessId, phone, fullName, ipAddress }: StartVerificationParams) => {
   const canonicalPhone = normalizePhone(phone);
 
   if (!canonicalPhone || canonicalPhone.length < 9) {
@@ -117,10 +117,8 @@ export const startVerification = async ({ businessId, phone, fullName, ipAddress
   const isRegistered = Boolean(client);
   const trimmedName = typeof fullName === "string" ? fullName.trim() : "";
 
-  // El visitante que no consta como cliente tiene que decir quién es antes de
-  // que le mandemos nada: sin nombre, la reserva no podría crear su ficha.
   if (!isRegistered && trimmedName.length < 3) {
-    return { state: "NAME_REQUIRED", isRegistered: false };
+    return { state: "NAME_REQUIRED" as const, isRegistered: false };
   }
 
   const recentCodes = await countRecentCodes(businessId, canonicalPhone);
@@ -142,15 +140,13 @@ export const startVerification = async ({ businessId, phone, fullName, ipAddress
 
   const code = generateCode();
 
-  // Se envía antes de persistir a propósito: si el envío falla, el visitante no
-  // se queda con un intento gastado ni con un código válido que nunca recibió.
   try {
     await whatsappManager.sendMessage(
       businessId,
       canonicalPhone,
       `Tu código para completar la reserva es ${code}. Caduca en 5 minutos. Si no has sido tú, ignora este mensaje.`
     );
-  } catch (err) {
+  } catch (err: any) {
     logger.error(
       `[BookingIdentity] Fallo al enviar el código a ${maskPhone(canonicalPhone)}: ${err.message}`
     );
@@ -161,7 +157,6 @@ export const startVerification = async ({ businessId, phone, fullName, ipAddress
     );
   }
 
-  // Solo vale el último código pedido.
   await prisma.bookingVerification.updateMany({
     where: { businessId, phone: canonicalPhone, consumedAt: null },
     data: { consumedAt: new Date() },
@@ -183,7 +178,7 @@ export const startVerification = async ({ businessId, phone, fullName, ipAddress
   }
 
   return {
-    state: "OTP_SENT",
+    state: "OTP_SENT" as const,
     isRegistered,
     maskedPhone: maskForDisplay(canonicalPhone),
     expiresInSeconds: CODE_TTL_SECONDS,
@@ -191,8 +186,13 @@ export const startVerification = async ({ businessId, phone, fullName, ipAddress
   };
 };
 
-/** Emite la credencial de sesión del portal. */
-export const issueBookingToken = ({ businessId, phone, name }) => {
+export interface IssueBookingTokenParams {
+  businessId: string;
+  phone: string;
+  name?: string | null;
+}
+
+export const issueBookingToken = ({ businessId, phone, name }: IssueBookingTokenParams) => {
   const issuedAt = Math.floor(Date.now() / 1000);
   const expiresAt = issuedAt + SESSION_TTL_SECONDS;
 
@@ -204,21 +204,23 @@ export const issueBookingToken = ({ businessId, phone, name }) => {
   return { token, expiresAt: new Date(expiresAt * 1000).toISOString() };
 };
 
-/**
- * Valida el token de sesión. Devuelve `null` si la firma no cuadra, si ha
- * caducado, si no es del ámbito del portal público o si es de otro negocio.
- */
-export const verifyBookingToken = (token, businessId) => {
-  const payload = verifyToken(token, config.bookingJwtSecret);
+export const verifyBookingToken = (token?: string | null, businessId?: string | null) => {
+  if (!token) return null;
+  const payload = verifyToken<Record<string, any>>(token, config.bookingJwtSecret);
   if (!payload) return null;
   if (payload.scope !== BOOKING_TOKEN_SCOPE) return null;
   if (!payload.businessId || !payload.phone) return null;
   if (businessId && payload.businessId !== businessId) return null;
-  return { businessId: payload.businessId, phone: payload.phone, name: payload.name || null };
+  return { businessId: payload.businessId as string, phone: payload.phone as string, name: (payload.name as string) || null };
 };
 
-/** Segundo paso: comprueba el código y abre la sesión de reserva. */
-export const verifyCode = async ({ businessId, phone, code }) => {
+export interface VerifyCodeParams {
+  businessId: string;
+  phone: string;
+  code: string | number;
+}
+
+export const verifyCode = async ({ businessId, phone, code }: VerifyCodeParams) => {
   const canonicalPhone = normalizePhone(phone);
 
   const verification = await prisma.bookingVerification.findFirst({
@@ -247,7 +249,6 @@ export const verifyCode = async ({ businessId, phone, code }) => {
       where: { id: verification.id },
       data: {
         attempts: { increment: 1 },
-        // Al quinto fallo el código muere aquí mismo, sin esperar a otro intento.
         ...(verification.attempts + 1 >= MAX_ATTEMPTS ? { consumedAt: new Date() } : {}),
       },
     });
@@ -290,7 +291,6 @@ export const verifyCode = async ({ businessId, phone, code }) => {
   };
 };
 
-/** Purga de retención: se ejecuta a diario desde el cron del backend. */
 export const purgeExpiredVerifications = async () => {
   const { count } = await prisma.bookingVerification.deleteMany({
     where: { createdAt: { lt: new Date(Date.now() - RETENTION_MS) } },
@@ -301,4 +301,19 @@ export const purgeExpiredVerifications = async () => {
   }
 
   return count;
+};
+
+export default {
+  startVerification,
+  verifyCode,
+  issueBookingToken,
+  verifyBookingToken,
+  purgeExpiredVerifications,
+  CODE_TTL_SECONDS,
+  SESSION_TTL_SECONDS,
+  MAX_ATTEMPTS,
+  MAX_CODES_PER_WINDOW,
+  RESEND_WINDOW_MS,
+  RETENTION_MS,
+  BOOKING_TOKEN_SCOPE,
 };

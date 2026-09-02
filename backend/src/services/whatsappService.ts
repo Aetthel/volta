@@ -101,6 +101,10 @@ export class WhatsAppManager {
     }
   }
 
+  isReady(_businessId?: string): boolean {
+    return true;
+  }
+
   async getConnectionState(businessId: string): Promise<EvolutionConnectionState> {
     return evolutionApiClient.getConnectionState(businessId);
   }

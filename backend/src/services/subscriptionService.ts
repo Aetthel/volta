@@ -7,10 +7,16 @@ const LEMONSQUEEZY_WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
 const LEMONSQUEEZY_VARIANT_BASIC = process.env.LEMONSQUEEZY_VARIANT_BASIC || "variant_basic";
 const LEMONSQUEEZY_VARIANT_PRO = process.env.LEMONSQUEEZY_VARIANT_PRO || "variant_pro";
 
-/**
- * Get current business subscription details and invoices
- */
-export async function getSubscriptionDetails(businessId) {
+export type SubscriptionPlanType = "BASIC" | "PRO" | "ENTERPRISE";
+
+export interface CheckoutSessionParams {
+  businessId: string;
+  plan?: string;
+  userEmail?: string | null;
+  userName?: string | null;
+}
+
+export async function getSubscriptionDetails(businessId: string) {
   const business = await prisma.business.findUnique({
     where: { id: businessId },
     select: {
@@ -49,15 +55,12 @@ export async function getSubscriptionDetails(businessId) {
     isGracePeriodActive,
     daysLeftInTrial:
       business.trialExpiresAt && new Date(business.trialExpiresAt) > now
-        ? Math.ceil((new Date(business.trialExpiresAt) - now) / (1000 * 60 * 60 * 24))
+        ? Math.ceil((new Date(business.trialExpiresAt).getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
         : 0,
   };
 }
 
-/**
- * Create a Lemon Squeezy checkout session or return a mock checkout for local dev
- */
-export async function createCheckoutSession({ businessId, plan = "PRO", userEmail, userName }) {
+export async function createCheckoutSession({ businessId, plan = "PRO", userEmail, userName }: CheckoutSessionParams) {
   const business = await prisma.business.findUnique({
     where: { id: businessId },
   });
@@ -66,7 +69,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
     throw new Error("Negocio no encontrado");
   }
 
-  const selectedPlan = plan.toUpperCase() === "BASIC" ? "BASIC" : "PRO";
+  const selectedPlan: SubscriptionPlanType = plan.toUpperCase() === "BASIC" ? "BASIC" : "PRO";
   const variantId = selectedPlan === "BASIC" ? LEMONSQUEEZY_VARIANT_BASIC : LEMONSQUEEZY_VARIANT_PRO;
 
   // Real Lemon Squeezy API integration
@@ -114,7 +117,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
         }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as any;
       if (!response.ok || !data?.data?.attributes?.url) {
         console.error("[LemonSqueezy] Checkout error:", data);
         throw new Error(data?.errors?.[0]?.detail || "Error al crear sesión en Lemon Squeezy");
@@ -125,7 +128,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
         isMock: false,
         plan: selectedPlan,
       };
-    } catch (err) {
+    } catch (err: any) {
       console.warn("[LemonSqueezy] Falling back to local mock checkout:", err.message);
     }
   }
@@ -139,11 +142,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
   };
 }
 
-/**
- * Handle Lemon Squeezy webhook events
- */
-export async function processWebhookEvent(payload, signature) {
-  // Validate HMAC signature if secret is provided
+export async function processWebhookEvent(payload: any, signature?: string | null) {
   if (LEMONSQUEEZY_WEBHOOK_SECRET && signature) {
     const rawPayload = typeof payload === "string" ? payload : JSON.stringify(payload);
     const hmac = crypto.createHmac("sha256", LEMONSQUEEZY_WEBHOOK_SECRET);
@@ -175,7 +174,6 @@ export async function processWebhookEvent(payload, signature) {
   console.log(`[LemonSqueezy Webhook] Received event: ${eventName} for business: ${businessId}`);
 
   if (!businessId) {
-    // Try to find business by customer id
     const customerId = String(attributes.customer_id || "");
     if (customerId) {
       const foundBusiness = await prisma.business.findFirst({
@@ -209,7 +207,6 @@ export async function processWebhookEvent(payload, signature) {
         },
       });
 
-      // Register Invoice
       const invoiceCount = await prisma.invoice.count({ where: { businessId } });
       const year = new Date().getFullYear();
       const invoiceNumber = `INV-${year}-${String(invoiceCount + 1).padStart(4, "0")}`;
@@ -231,7 +228,6 @@ export async function processWebhookEvent(payload, signature) {
     }
 
     case "subscription_payment_failed": {
-      // 3 days grace period
       const gracePeriodExpiresAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
       await prisma.business.update({
         where: { id: businessId },
@@ -267,10 +263,7 @@ export async function processWebhookEvent(payload, signature) {
   }
 }
 
-/**
- * Direct activation for mock/local test environment
- */
-export async function activateMockSubscription(businessId, plan = "PRO") {
+export async function activateMockSubscription(businessId: string, plan = "PRO") {
   const selectedPlan = plan.toUpperCase() === "BASIC" ? "BASIC" : "PRO";
   const amount = selectedPlan === "BASIC" ? 30.0 : 40.0;
 
@@ -304,17 +297,13 @@ export async function activateMockSubscription(businessId, plan = "PRO") {
   return updated;
 }
 
-/**
- * Cancel subscription
- */
-export async function cancelSubscription(businessId) {
+export async function cancelSubscription(businessId: string) {
   const business = await prisma.business.findUnique({
     where: { id: businessId },
   });
 
   if (!business) throw new Error("Negocio no encontrado");
 
-  // Call Lemon Squeezy API if subscription ID exists
   if (LEMONSQUEEZY_API_KEY && business.lemonSqueezySubscriptionId) {
     try {
       await fetch(
@@ -341,3 +330,11 @@ export async function cancelSubscription(businessId) {
 
   return updated;
 }
+
+export default {
+  getSubscriptionDetails,
+  createCheckoutSession,
+  processWebhookEvent,
+  activateMockSubscription,
+  cancelSubscription,
+};

@@ -6,7 +6,7 @@ import { formatCurrency } from "../utils/formatters.js";
  * Cascade-delete a business and all its related data within a transaction.
  * Accepts an optional `tx` (Prisma transaction client) to compose with callers.
  */
-export const deleteBusinessCascade = async (businessId, tx) => {
+export const deleteBusinessCascade = async (businessId: string, tx?: any) => {
   const executor = tx || prisma;
   await executor.alert.deleteMany({ where: { user: { businessId } } });
   await executor.appointment.deleteMany({ where: { businessId } });
@@ -23,7 +23,14 @@ export const getAllBusinesses = async () => {
   });
 };
 
-export const createBusiness = async ({ name, email, phone, address }, password) => {
+export interface CreateBusinessPayload {
+  name: string;
+  email: string;
+  phone: string;
+  address?: string | null;
+}
+
+export const createBusiness = async ({ name, email, phone, address }: CreateBusinessPayload, password: string) => {
   return prisma.$transaction(async (tx) => {
     const hashedPass = await bcrypt.hash(password, 10);
 
@@ -112,7 +119,7 @@ export const createBusiness = async ({ name, email, phone, address }, password) 
   });
 };
 
-export const deleteBusiness = async (id) => {
+export const deleteBusiness = async (id: string) => {
   return prisma.$transaction(async (tx) => {
     await deleteBusinessCascade(id, tx);
   });
@@ -129,7 +136,7 @@ export const getDashboardData = async () => {
 
   const totalClients = await prisma.client.count();
 
-  const servicePrices = {
+  const servicePrices: Record<string, number> = {
     "Corte Caballero": 35,
     "Corte Dama": 45,
     "Coloración Premium": 85,
@@ -158,29 +165,29 @@ export const getDashboardData = async () => {
   ]);
 
   // Index data by businessId
-  const appointmentsByBiz = new Map();
+  const appointmentsByBiz = new Map<string, any[]>();
   for (const app of allAppointments) {
     if (!app.businessId) continue;
     if (!appointmentsByBiz.has(app.businessId)) {
       appointmentsByBiz.set(app.businessId, []);
     }
-    appointmentsByBiz.get(app.businessId).push(app);
+    appointmentsByBiz.get(app.businessId)!.push(app);
   }
 
-  const servicesByBiz = new Map();
+  const servicesByBiz = new Map<string, any[]>();
   for (const s of allServices) {
     if (!s.businessId) continue;
     if (!servicesByBiz.has(s.businessId)) {
       servicesByBiz.set(s.businessId, []);
     }
-    servicesByBiz.get(s.businessId).push(s);
+    servicesByBiz.get(s.businessId)!.push(s);
   }
 
-  const clientCountMap = new Map(
+  const clientCountMap = new Map<string, number>(
     clientCountsGrouped.map((item) => [item.businessId, item._count.id])
   );
 
-  const rankings = [];
+  const rankings: Array<{ name: string; revenue: number; clientsCount: number; change: string }> = [];
   let totalRevenue = 0;
   let totalThisMonth = 0;
   let totalLastMonth = 0;
@@ -195,7 +202,7 @@ export const getDashboardData = async () => {
     let bizLastMonth = 0;
 
     for (const app of appointments) {
-      let price = null;
+      let price: number | null = null;
 
       if (app.service && typeof app.service.price === "number") {
         price = app.service.price;
@@ -271,4 +278,12 @@ export const getDashboardData = async () => {
     growth: globalGrowth,
     rankings: formattedRankings,
   };
+};
+
+export default {
+  deleteBusinessCascade,
+  getAllBusinesses,
+  createBusiness,
+  deleteBusiness,
+  getDashboardData,
 };

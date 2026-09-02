@@ -87,7 +87,7 @@ export const getClientById = async (id: string) => {
   });
 };
 
-export const resendConsent = async (client: { businessId: string; phone: string; [key: string]: unknown }) => {
+export const resendConsent = async (client: { id: string; businessId: string; phone: string; [key: string]: unknown }) => {
   sendConsentMessage(client.businessId, client).catch((err: unknown) => {
     logger.error("[Clients Service] Error resending LOPD consent request:", err);
   });
