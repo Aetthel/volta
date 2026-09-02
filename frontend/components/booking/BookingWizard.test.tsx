@@ -34,7 +34,7 @@ const renderWizard = (
       identity={identity}
       selection={full}
       onSelectionChange={onSelectionChange}
-      authFetch={authFetch}
+      authFetch={authFetch as any}
     />
   );
 
@@ -94,7 +94,7 @@ describe("BookingWizard", () => {
     });
 
     const reserveCall = authFetch.mock.calls.find(([url]) => String(url).includes("/reserve"));
-    const body = JSON.parse(reserveCall[1].body);
+    const body = JSON.parse(reserveCall![1].body);
 
     expect(body).toEqual({
       businessId: "biz-1",

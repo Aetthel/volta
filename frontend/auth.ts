@@ -27,7 +27,7 @@ class InvalidTwoFactorCodeError extends CredentialsSignin {
 }
 
 /** Forma del usuario que se vuelca en el JWT, común a las dos vías de acceso. */
-function toSessionUser(user) {
+function toSessionUser(user: any) {
   return {
     id: user.id,
     name: user.name,
@@ -59,7 +59,7 @@ function toSessionUser(user) {
  * antes, cualquiera podría averiguar el estado de una cuenta ajena sin
  * conocerla.
  */
-function assertUserCanSignIn(user) {
+function assertUserCanSignIn(user: any) {
   if (user.status === "PENDING_VERIFICATION") {
     throw new EmailNotVerifiedError();
   }
