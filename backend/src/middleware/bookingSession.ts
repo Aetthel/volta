@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
-// @ts-ignore - bookingIdentityService is an existing JS module
 import { verifyBookingToken } from "../services/bookingIdentityService.js";
 
 export interface BookingIdentity {
   phone: string;
   businessId: string;
+  name?: string | null;
   fullName?: string | null;
   [key: string]: unknown;
 }

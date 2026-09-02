@@ -1,12 +1,10 @@
 import * as subscriptionService from "../services/subscriptionService.js";
 import { ApiResponse } from "../utils/index.js";
+import type { Request, Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
 
-/**
- * GET /api/subscription/current
- * Returns the current subscription, plan, and invoice history for the business
- */
-export async function getCurrentSubscription(req, res) {
-  const businessId = req.user.businessId;
+export async function getCurrentSubscription(req: AuthRequest, res: Response) {
+  const businessId = req.user?.businessId;
   if (!businessId) {
     return res.status(400).json({ error: "El usuario no tiene un negocio asociado" });
   }
@@ -19,12 +17,8 @@ export async function getCurrentSubscription(req, res) {
   return ApiResponse.success(res, details);
 }
 
-/**
- * POST /api/subscription/checkout-url
- * Generates a Lemon Squeezy checkout session or mock activation URL
- */
-export async function createCheckoutUrl(req, res) {
-  const businessId = req.user.businessId;
+export async function createCheckoutUrl(req: AuthRequest, res: Response) {
+  const businessId = req.user?.businessId;
   if (!businessId) {
     return res.status(400).json({ error: "El usuario no tiene un negocio asociado" });
   }
@@ -34,19 +28,15 @@ export async function createCheckoutUrl(req, res) {
   const checkoutData = await subscriptionService.createCheckoutSession({
     businessId,
     plan,
-    userEmail: req.user.email,
-    userName: req.user.name,
+    userEmail: req.user?.email,
+    userName: req.user?.name,
   });
 
   return ApiResponse.success(res, checkoutData);
 }
 
-/**
- * POST /api/subscription/cancel
- * Schedules subscription cancellation at end of current period
- */
-export async function cancelSubscription(req, res) {
-  const businessId = req.user.businessId;
+export async function cancelSubscription(req: AuthRequest, res: Response) {
+  const businessId = req.user?.businessId;
   if (!businessId) {
     return res.status(400).json({ error: "El usuario no tiene un negocio asociado" });
   }
@@ -58,13 +48,10 @@ export async function cancelSubscription(req, res) {
   });
 }
 
-/**
- * POST /api/subscription/mock-activate
- * Instant activation for local development/testing without real payment keys
- */
-export async function mockActivate(req, res) {
-  const businessId = req.user?.businessId || req.query.businessId || req.body.businessId;
-  const plan = req.body.plan || req.query.plan || "PRO";
+export async function mockActivate(req: AuthRequest, res: Response) {
+  const businessId =
+    req.user?.businessId || (req.query.businessId as string) || (req.body.businessId as string);
+  const plan = (req.body.plan as string) || (req.query.plan as string) || "PRO";
 
   if (!businessId) {
     return res.status(400).json({ error: "ID de negocio requerido" });
@@ -77,12 +64,8 @@ export async function mockActivate(req, res) {
   });
 }
 
-/**
- * GET /api/subscription/invoices
- * Returns all invoices for the authenticated business
- */
-export async function getInvoices(req, res) {
-  const businessId = req.user.businessId;
+export async function getInvoices(req: AuthRequest, res: Response) {
+  const businessId = req.user?.businessId;
   if (!businessId) {
     return res.status(400).json({ error: "El usuario no tiene un negocio asociado" });
   }
@@ -91,19 +74,24 @@ export async function getInvoices(req, res) {
   return ApiResponse.success(res, details?.invoices || []);
 }
 
-/**
- * POST /api/webhooks/lemonsqueezy
- * Webhook handler for Lemon Squeezy events
- */
-export async function handleWebhook(req, res) {
+export async function handleWebhook(req: Request & { rawBody?: string }, res: Response) {
   try {
-    const signature = req.headers["x-signature"];
+    const signature = req.headers["x-signature"] as string | undefined;
     const payload = req.rawBody || req.body;
 
     const result = await subscriptionService.processWebhookEvent(payload, signature);
     return res.status(200).json({ received: true, result });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[LemonSqueezy Webhook Error]", err.message);
     return res.status(400).json({ error: err.message });
   }
 }
+
+export default {
+  getCurrentSubscription,
+  createCheckoutUrl,
+  cancelSubscription,
+  mockActivate,
+  getInvoices,
+  handleWebhook,
+};

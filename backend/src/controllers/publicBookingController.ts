@@ -4,6 +4,8 @@ import { validateBusinessHours, calculateAvailableSlots } from "../utils/busines
 import { getHolidayForDate, getObservedHolidays } from "../utils/holidays.js";
 import * as bookingIdentityService from "../services/bookingIdentityService.js";
 import { z } from "zod";
+import type { Request, Response } from "express";
+import type { BookingRequest } from "../middleware/bookingSession.js";
 
 const createBookingSchema = z.object({
   businessId: z.string().min(1, "businessId es requerido"),
@@ -12,11 +14,7 @@ const createBookingSchema = z.object({
   clientEmail: z.string().email("Formato de correo no válido").optional().or(z.literal("")),
 });
 
-/**
- * El portal solo acepta reservas si el negocio las tiene activadas y su
- * suscripción sigue viva.
- */
-const isBookingOpen = (business) =>
+const isBookingOpen = (business: any) =>
   business &&
   business.enablePublicBooking !== false &&
   business.subscriptionStatus !== "EXPIRED" &&
@@ -25,13 +23,8 @@ const isBookingOpen = (business) =>
 const BOOKING_CLOSED_MESSAGE =
   "Las reservas públicas no están disponibles actualmente para este negocio.";
 
-/**
- * Datos de marca del negocio, sin sesión: es lo único que necesita la pantalla
- * de identificación para pintarse. El catálogo, los horarios y los datos de
- * contacto viven detrás de la verificación del teléfono.
- */
-export const getPublicBusinessProfile = async (req, res) => {
-  const { businessId } = req.params;
+export const getPublicBusinessProfile = async (req: Request, res: Response) => {
+  const { businessId } = req.params as { businessId: string };
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },
@@ -60,9 +53,8 @@ export const getPublicBusinessProfile = async (req, res) => {
   return ApiResponse.success(res, profile);
 };
 
-/** Catálogo completo. Exige sesión de reserva (`requireBookingSession`). */
-export const getPublicBusinessData = async (req, res) => {
-  const { businessId } = req.params;
+export const getPublicBusinessData = async (req: BookingRequest, res: Response) => {
+  const { businessId } = req.params as { businessId: string };
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },
@@ -96,8 +88,6 @@ export const getPublicBusinessData = async (req, res) => {
     return res.status(403).json({ error: BOOKING_CLOSED_MESSAGE });
   }
 
-  // Los festivos viajan ya resueltos a fechas: el asistente solo tiene que
-  // deshabilitarlas, sin duplicar el cálculo de la Pascua en el navegador.
   const holidayPreferences = await prisma.businessHoliday.findMany({
     where: { businessId },
     select: { holidayKey: true, isObserved: true },
@@ -109,15 +99,15 @@ export const getPublicBusinessData = async (req, res) => {
     ...publicData,
     holidays: getObservedHolidays(holidayPreferences, currentYear, currentYear + 1),
     identity: {
-      phone: req.bookingIdentity.phone,
-      name: req.bookingIdentity.name,
+      phone: req.bookingIdentity?.phone,
+      name: req.bookingIdentity?.name || req.bookingIdentity?.fullName,
     },
   });
 };
 
-export const getAvailableSlots = async (req, res) => {
-  const { businessId } = req.params;
-  const { serviceId, date } = req.query; // date in YYYY-MM-DD
+export const getAvailableSlots = async (req: Request, res: Response) => {
+  const { businessId } = req.params as { businessId: string };
+  const { serviceId, date } = req.query as { serviceId?: string; date?: string };
 
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(String(date))) {
     return res.status(400).json({ error: "Debe proporcionar una fecha válida (YYYY-MM-DD)." });
@@ -136,7 +126,6 @@ export const getAvailableSlots = async (req, res) => {
     where: { businessId },
   });
 
-  // Un festivo observado no ofrece ningún hueco, igual que un día cerrado.
   const holidayPreferences = await prisma.businessHoliday.findMany({
     where: { businessId },
     select: { holidayKey: true, isObserved: true },
@@ -145,7 +134,7 @@ export const getAvailableSlots = async (req, res) => {
   const [holidayYear, holidayMonth, holidayDay] = String(date).split("-").map(Number);
   const holiday = getHolidayForDate(
     holidayPreferences,
-    new Date(holidayYear, holidayMonth - 1, holidayDay)
+    new Date(holidayYear!, holidayMonth! - 1, holidayDay!)
   );
 
   if (holiday.isHoliday) {
@@ -166,8 +155,8 @@ export const getAvailableSlots = async (req, res) => {
   }
 
   const [year, month, day] = String(date).split("-").map(Number);
-  const dayStart = new Date(year, month - 1, day, 0, 0, 0, 0);
-  const dayEnd = new Date(year, month - 1, day, 23, 59, 59, 999);
+  const dayStart = new Date(year!, month! - 1, day!, 0, 0, 0, 0);
+  const dayEnd = new Date(year!, month! - 1, day!, 23, 59, 59, 999);
 
   const existingAppointments = await prisma.appointment.findMany({
     where: {
@@ -192,29 +181,28 @@ export const getAvailableSlots = async (req, res) => {
   return ApiResponse.success(res, { date, availableSlots: slots });
 };
 
-/** Comprueba que el negocio existe y admite reservas antes de gastar un código. */
-const assertBookingOpen = async (businessId) => {
+const assertBookingOpen = async (businessId: string) => {
   const business = await prisma.business.findUnique({
     where: { id: businessId },
     select: { id: true, enablePublicBooking: true, subscriptionStatus: true },
   });
 
   if (!business) {
-    const error = new Error("Negocio no encontrado");
+    const error: any = new Error("Negocio no encontrado");
     error.statusCode = 404;
     throw error;
   }
 
   if (!isBookingOpen(business)) {
-    const error = new Error(BOOKING_CLOSED_MESSAGE);
+    const error: any = new Error(BOOKING_CLOSED_MESSAGE);
     error.statusCode = 403;
     throw error;
   }
 };
 
-const respondWithError = (res, error) => {
+const respondWithError = (res: Response, error: any) => {
   if (error.statusCode) {
-    const body = { error: error.message };
+    const body: Record<string, any> = { error: error.message };
     if (error.retryAfterSeconds) body.retryAfterSeconds = error.retryAfterSeconds;
     if (error.attemptsLeft !== undefined) body.attemptsLeft = error.attemptsLeft;
     if (error.expired) body.expired = true;
@@ -223,12 +211,8 @@ const respondWithError = (res, error) => {
   throw error;
 };
 
-/**
- * Paso 1: reconoce el teléfono y envía el código, o pide el nombre completo si
- * ese teléfono no consta como cliente del negocio.
- */
-export const startIdentity = async (req, res) => {
-  const { businessId } = req.params;
+export const startIdentity = async (req: Request, res: Response) => {
+  const { businessId } = req.params as { businessId: string };
   const { phone, fullName } = req.body;
 
   try {
@@ -247,12 +231,10 @@ export const startIdentity = async (req, res) => {
   }
 };
 
-/** Reenvío de código: mismo camino que el alta, con el mismo límite. */
 export const resendIdentityCode = startIdentity;
 
-/** Paso 2: valida el código y abre la sesión de reserva. */
-export const verifyIdentity = async (req, res) => {
-  const { businessId } = req.params;
+export const verifyIdentity = async (req: Request, res: Response) => {
+  const { businessId } = req.params as { businessId: string };
   const { phone, code } = req.body;
 
   try {
@@ -266,21 +248,18 @@ export const verifyIdentity = async (req, res) => {
   }
 };
 
-export const createPublicBooking = async (req, res) => {
+export const createPublicBooking = async (req: BookingRequest, res: Response) => {
   const validationResult = createBookingSchema.safeParse(req.body);
 
   if (!validationResult.success) {
-    const firstError = validationResult.error.errors[0]?.message || "Datos de reserva no válidos.";
-    return res.status(400).json({ error: firstError, details: validationResult.error.errors });
+    const firstError = validationResult.error.issues[0]?.message || "Datos de reserva no válidos.";
+    return res.status(400).json({ error: firstError, details: validationResult.error.issues });
   }
 
   const { businessId, serviceId, appointmentDate, clientEmail } = validationResult.data;
 
-  // La identidad sale siempre del token verificado. Si el cuerpo trae un
-  // `clientPhone` o un `clientName`, se ignoran: son los datos que un atacante
-  // manipularía para reservar en nombre de otra persona.
-  const clientPhone = normalizePhone(req.bookingIdentity.phone);
-  const clientName = (req.bookingIdentity.name || "").trim();
+  const clientPhone = normalizePhone(req.bookingIdentity?.phone);
+  const clientName = (req.bookingIdentity?.name || req.bookingIdentity?.fullName || "").trim();
 
   if (!clientPhone || !clientName) {
     return res.status(401).json({
@@ -315,7 +294,6 @@ export const createPublicBooking = async (req, res) => {
     return res.status(400).json({ error: "Fecha de cita no válida" });
   }
 
-  // 1. Business Hours Validation
   if (business.hours && business.hours.length > 0) {
     const hoursCheck = validateBusinessHours(business.hours, targetDate, service.duration || 30);
     if (!hoursCheck.valid) {
@@ -323,8 +301,6 @@ export const createPublicBooking = async (req, res) => {
     }
   }
 
-  // 1.b Festivos: el portal no los ofrece, pero una petición directa sí podría
-  // colarlos, así que se rechazan aquí igual que un día fuera de horario.
   const holidayPreferences = await prisma.businessHoliday.findMany({
     where: { businessId },
     select: { holidayKey: true, isObserved: true },
@@ -337,7 +313,6 @@ export const createPublicBooking = async (req, res) => {
     });
   }
 
-  // 2. Slot Collision & Capacity Check in an atomic transaction
   const duration = service.duration || 30;
   const capacity = service.capacity || 1;
   const requestedStart = targetDate;
@@ -373,21 +348,18 @@ export const createPublicBooking = async (req, res) => {
       }).length;
 
       if (overlappingCount >= capacity) {
-        const error = new Error(
+        const error: any = new Error(
           "El horario seleccionado ya está ocupado o no tiene capacidad disponible."
         );
         error.statusCode = 409;
         throw error;
       }
 
-      // El teléfono es la clave del cliente dentro del negocio: el upsert sobre
-      // (businessId, phone) hace el alta idempotente, así que dos reservas
-      // simultáneas del mismo número nuevo no crean dos fichas.
       const client = await tx.client.upsert({
         where: { businessId_phone: { businessId, phone: clientPhone } },
         update: {},
         create: {
-          name: firstName,
+          name: firstName!,
           surname: restOfName.join(" "),
           phone: clientPhone,
           email: clientEmail ? clientEmail.trim() : null,
@@ -398,8 +370,6 @@ export const createPublicBooking = async (req, res) => {
         },
       });
 
-      // Un cliente que ya existía sin email aprovecha el que acaba de dar; nunca
-      // se pisa un dato que el negocio ya tenía.
       if (clientEmail && !client.email) {
         await tx.client.update({
           where: { id: client.id },
@@ -424,10 +394,20 @@ export const createPublicBooking = async (req, res) => {
     });
 
     return ApiResponse.created(res, result);
-  } catch (error) {
+  } catch (error: any) {
     if (error.statusCode) {
       return res.status(error.statusCode).json({ error: error.message });
     }
     return res.status(500).json({ error: "Error al crear la reserva" });
   }
+};
+
+export default {
+  getPublicBusinessProfile,
+  getPublicBusinessData,
+  getAvailableSlots,
+  startIdentity,
+  resendIdentityCode,
+  verifyIdentity,
+  createPublicBooking,
 };

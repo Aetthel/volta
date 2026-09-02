@@ -1,11 +1,9 @@
 import prisma from "../config/db.js";
 import { logger } from "../utils/logger.js";
 import intentClassifier, { INTENT_TAGS } from "../services/intentClassifier.js";
+import type { Request, Response } from "express";
 
-/**
- * Parses business ID from Evolution API instance name (e.g. biz_UUID)
- */
-function parseBusinessId(instanceName) {
+function parseBusinessId(instanceName?: string | null): string | null {
   if (!instanceName) return null;
   if (instanceName.startsWith("biz_")) {
     return instanceName.slice(4);
@@ -13,10 +11,7 @@ function parseBusinessId(instanceName) {
   return instanceName;
 }
 
-/**
- * Extracts plain text from WhatsApp message object
- */
-function extractMessageText(messageObj) {
+function extractMessageText(messageObj: any): string {
   if (!messageObj) return "";
   if (typeof messageObj === "string") return messageObj;
   return (
@@ -28,14 +23,11 @@ function extractMessageText(messageObj) {
   );
 }
 
-/**
- * Controller to handle incoming Evolution API Webhooks
- */
-export async function handleWhatsAppWebhook(req, res) {
+export async function handleWhatsAppWebhook(req: Request, res: Response) {
   const payload = req.body;
-  const pathEvent = (req.params?.event || req.params?.[0] || req.path?.replace(/^\/whatsapp\/?/, ""))?.replace(/^\/+/, "");
+  const pathEvent = (req.params?.event || (req.params as any)?.[0] || req.path?.replace(/^\/whatsapp\/?/, ""))?.replace(/^\/+/, "");
   const rawEvent = payload?.event || pathEvent || "";
-  const event = rawEvent.toLowerCase().replace(/[_-]/g, ".");
+  const event = String(rawEvent).toLowerCase().replace(/[_-]/g, ".");
   const instance = payload?.instance || "";
   const data = payload?.data || payload;
 
@@ -44,6 +36,10 @@ export async function handleWhatsAppWebhook(req, res) {
   }
 
   const businessId = parseBusinessId(instance);
+  if (!businessId) {
+    return res.status(200).json({ status: "ignored", reason: "invalid businessId", event: rawEvent });
+  }
+
   logger.info(`[WhatsApp Webhook] Received event: ${event || rawEvent} for business: ${businessId}`);
 
   try {
@@ -103,7 +99,7 @@ export async function handleWhatsAppWebhook(req, res) {
 
         // Classify the customer's intent
         const classification = await intentClassifier.classify(text);
-        const { tag, source } = classification;
+        const { tag } = classification;
 
         // Find associated appointment for this business and phone
         const appointment = await prisma.appointment.findFirst({
@@ -205,8 +201,10 @@ export async function handleWhatsAppWebhook(req, res) {
     }
 
     return res.status(200).json({ status: "success", event, businessId });
-  } catch (err) {
+  } catch (err: any) {
     logger.error("[WhatsApp Webhook] Error processing webhook payload:", err);
     return res.status(200).json({ status: "error", message: err.message });
   }
 }
+
+export default { handleWhatsAppWebhook };

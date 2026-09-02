@@ -1,13 +1,14 @@
 import whatsappManager from "../services/whatsappService.js";
 import * as businessService from "../services/businessService.js";
 import { ApiResponse } from "../utils/index.js";
-import { logger } from "../utils/logger.js";
+import type { Response } from "express";
+import type { AuthRequest } from "../middleware/auth.js";
 
-export const initClient = async (req, res) => {
+export const initClient = async (req: AuthRequest, res: Response) => {
   const { businessId } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -15,15 +16,19 @@ export const initClient = async (req, res) => {
   return ApiResponse.success(res, { message: "WhatsApp initialization started" });
 };
 
-export const getStatus = async (req, res) => {
-  const { businessId } = req.query;
+export const getStatus = async (req: AuthRequest, res: Response) => {
+  const { businessId } = req.query as { businessId?: string };
+
+  if (!businessId) {
+    return res.status(400).json({ error: "businessId es requerido" });
+  }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
-  let business = await businessService.getBusinessWhatsApp(businessId);
+  const business = await businessService.getBusinessWhatsApp(businessId);
 
   if (!business) {
     return res.status(404).json({ error: "Negocio no encontrado" });
@@ -53,11 +58,11 @@ export const getStatus = async (req, res) => {
   });
 };
 
-export const disconnectClient = async (req, res) => {
+export const disconnectClient = async (req: AuthRequest, res: Response) => {
   const { businessId } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -66,11 +71,15 @@ export const disconnectClient = async (req, res) => {
   return ApiResponse.success(res, { message: "WhatsApp disconnected successfully" });
 };
 
-export const getTemplates = async (req, res) => {
-  const { businessId } = req.query;
+export const getTemplates = async (req: AuthRequest, res: Response) => {
+  const { businessId } = req.query as { businessId?: string };
+
+  if (!businessId) {
+    return res.status(400).json({ error: "businessId es requerido" });
+  }
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -86,11 +95,11 @@ export const getTemplates = async (req, res) => {
   });
 };
 
-export const updateTemplates = async (req, res) => {
+export const updateTemplates = async (req: AuthRequest, res: Response) => {
   const { businessId, welcomeMessage, reminderMessage } = req.body;
 
   // Verify tenant isolation
-  if (req.user.role !== "ADMIN" && businessId !== req.user.businessId) {
+  if (req.user?.role !== "ADMIN" && businessId !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
@@ -100,4 +109,12 @@ export const updateTemplates = async (req, res) => {
   });
 
   return ApiResponse.success(res, updated);
+};
+
+export default {
+  initClient,
+  getStatus,
+  disconnectClient,
+  getTemplates,
+  updateTemplates,
 };
