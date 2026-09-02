@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FloatingInput } from "./floating-input";
+import { Input } from "./input";
 
 export interface CalendarSelectProps {
   id: string;
@@ -105,15 +105,14 @@ export const CalendarSelect: React.FC<CalendarSelectProps> = ({
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative">
-        <FloatingInput
+        <Input
           id={`${id}-trigger`}
-          label=""
+          placeholder="Seleccionar fecha"
           type="text"
           readOnly
           value={formatDateLabel(value)}
           onClick={() => setIsOpen(!isOpen)}
-          className={cn("cursor-pointer text-body-lg font-normal", className)}
-          variant={variant}
+          className={cn("cursor-pointer text-sm font-normal pr-10", className)}
         />
         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
       </div>
