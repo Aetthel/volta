@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
 import { TimeGridEventCard, layoutDayEvents } from "./TimeGridEventCard";
 import type { CalendarEvent } from "./EventCard";
 
@@ -13,6 +14,8 @@ interface CalendarDayViewProps {
   onDragEnd: () => void;
   onDrop: (date: Date, hour: number) => void;
   getColorClasses: (color: string) => { bg: string; text: string };
+  isDayClosed?: (date: Date) => boolean;
+  getClosedLabel?: (date: Date) => string | undefined;
 }
 
 export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
@@ -24,6 +27,8 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
   onDragEnd,
   onDrop,
   getColorClasses,
+  isDayClosed,
+  getClosedLabel,
 }) => {
   const START_HOUR = 8;
   const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR);
@@ -40,9 +45,15 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
   });
 
   const laidOutEvents = layoutDayEvents(dayEvents);
+  const closed = isDayClosed?.(currentDate) ?? false;
 
   return (
     <div className="w-full h-full overflow-auto">
+      {closed && (
+        <div className="border-b border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-on-surface-variant/70">
+          {getClosedLabel?.(currentDate) ?? "Cerrado"} — el negocio no abre este día
+        </div>
+      )}
       <div className="flex min-w-[500px] relative">
         {/* Time Column */}
         <div className="w-16 sm:w-24 flex-shrink-0 border-r border-outline-variant/30 select-none bg-surface-container-lowest/40">
@@ -58,20 +69,35 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
         </div>
 
         {/* Day Column */}
-        <div className="flex-1 relative" style={{ height: `${TOTAL_GRID_HEIGHT}px` }}>
+        <div
+          className={cn("flex-1 relative", closed && "bg-surface-container-high/40")}
+          style={{ height: `${TOTAL_GRID_HEIGHT}px` }}
+          aria-disabled={closed || undefined}
+        >
           {/* Background Hour Slots */}
           {hours.map((hour) => (
             <div
               key={hour}
+              data-day-slot
+              data-closed={closed || undefined}
               style={{ height: `${HOUR_HEIGHT}px` }}
-              className="border-b border-outline-variant/20 hover:bg-surface-container-low/50 cursor-pointer transition-colors"
-              onClick={() => {
-                const slotDate = new Date(currentDate);
-                slotDate.setHours(hour, 0, 0, 0);
-                onSlotClick(slotDate);
-              }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => onDrop(currentDate, hour)}
+              className={cn(
+                "border-b border-outline-variant/20 transition-colors",
+                closed ? "cursor-not-allowed" : "hover:bg-surface-container-low/50 cursor-pointer"
+              )}
+              onClick={
+                closed
+                  ? undefined
+                  : () => {
+                      const slotDate = new Date(currentDate);
+                      slotDate.setHours(hour, 0, 0, 0);
+                      onSlotClick(slotDate);
+                    }
+              }
+              // Sin preventDefault en onDragOver el navegador rechaza el soltar,
+              // así que el evento arrastrado vuelve a su hueco original.
+              onDragOver={closed ? undefined : (e) => e.preventDefault()}
+              onDrop={closed ? undefined : () => onDrop(currentDate, hour)}
             />
           ))}
 

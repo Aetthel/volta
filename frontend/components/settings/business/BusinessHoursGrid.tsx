@@ -3,16 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Clock, Save, Loader2, Sparkles } from "lucide-react";
 import type { BusinessHours, ToastState } from "@/types/settings";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  Button,
-  Skeleton,
-} from "@/components/ui/volta-ui";
+import { Button, Skeleton } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
 
@@ -23,10 +14,7 @@ interface BusinessHoursGridProps {
   setToast: (toast: ToastState) => void;
 }
 
-export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({
-  businessId,
-  setToast,
-}) => {
+export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({ businessId, setToast }) => {
   const [hours, setHours] = useState<BusinessHours[]>([]);
   const [loadingHours, setLoadingHours] = useState(false);
   const [savingHours, setSavingHours] = useState(false);
@@ -93,124 +81,125 @@ export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({
   };
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
+    <form onSubmit={handleSaveHours} className="flex h-full flex-col">
+      <div className="pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
             <span>Horario de Apertura</span>
-          </CardTitle>
+          </h3>
           <button
             type="button"
             onClick={applyMondayToWeekdays}
-            className="text-[11px] font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1"
+            className="text-[11px] font-semibold text-primary hover:underline cursor-pointer flex items-center gap-1 shrink-0"
             title="Aplica el horario del lunes a martes, miércoles, jueves y viernes"
           >
             <Sparkles className="w-3 h-3" />
             <span>Copiar L-V</span>
           </button>
         </div>
-        <CardDescription>
-          Configura los días y turnos de atención comercial de tu salón.
-        </CardDescription>
-      </CardHeader>
+        <p className="text-body-sm text-on-surface-variant mt-0.5">
+          Los días y turnos de atención, de lunes a domingo.
+        </p>
+      </div>
 
-      <form onSubmit={handleSaveHours}>
-        <CardContent className="flex flex-col gap-2.5 pt-1">
-          {loadingHours ? (
-            <div className="flex flex-col gap-3 py-2">
-              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-                <div key={i} className="flex items-center justify-between py-1">
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-6 w-32" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            hours.map((h, idx) => (
-              <div
-                key={h.dayOfWeek}
-                className="flex items-center justify-between gap-2 py-1.5 border-b border-outline-variant/30 last:border-0"
-              >
-                <span className="text-xs font-semibold text-on-surface w-24">
-                  {DAY_NAMES[h.dayOfWeek]}
-                </span>
-
-                <div className="flex items-center gap-2 flex-1 justify-end">
-                  {h.isClosed ? (
-                    <span className="text-xs font-bold text-error bg-error/10 px-2.5 py-0.5 rounded-full">
-                      Cerrado
-                    </span>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <input
-                        type="time"
-                        value={h.openTime || "09:00"}
-                        onChange={(e) => {
-                          const next = [...hours];
-                          next[idx] = { ...next[idx], openTime: e.target.value };
-                          setHours(next);
-                        }}
-                        className="bg-surface-container-low border border-outline-variant/60 rounded-lg px-2 py-1 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
-                      />
-                      <span className="text-on-surface-variant/60 font-light">-</span>
-                      <input
-                        type="time"
-                        value={h.closeTime || "20:00"}
-                        onChange={(e) => {
-                          const next = [...hours];
-                          next[idx] = { ...next[idx], closeTime: e.target.value };
-                          setHours(next);
-                        }}
-                        className="bg-surface-container-low border border-outline-variant/60 rounded-lg px-2 py-1 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
-                      />
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = [...hours];
-                      next[idx] = { ...next[idx], isClosed: !next[idx].isClosed };
-                      setHours(next);
-                    }}
-                    className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-md border transition-colors cursor-pointer shrink-0 ml-1",
-                      h.isClosed
-                        ? "text-primary border-primary/30 hover:bg-primary/10"
-                        : "text-on-surface-variant/70 border-outline-variant hover:bg-surface-container"
-                    )}
-                  >
-                    {h.isClosed ? "Abrir" : "Cerrar"}
-                  </button>
-                </div>
+      {/* `flex-1` + `justify-between`: los siete días se reparten la altura que
+          marca la columna de festivos, en vez de amontonarse arriba y dejar un
+          hueco muerto al final del panel. */}
+      <div className="flex flex-1 flex-col justify-between gap-2.5 pt-1">
+        {loadingHours ? (
+          <div className="flex flex-1 flex-col justify-between gap-3 py-2">
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div key={i} className="flex items-center justify-between py-1">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-6 w-32" />
               </div>
-            ))
-          )}
-        </CardContent>
+            ))}
+          </div>
+        ) : (
+          hours.map((h, idx) => (
+            <div
+              key={h.dayOfWeek}
+              className="flex items-center justify-between gap-2 py-1.5 border-b border-outline-variant/30 last:border-0"
+            >
+              <span className="text-xs font-semibold text-on-surface w-24">
+                {DAY_NAMES[h.dayOfWeek]}
+              </span>
 
-        <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end">
-          <Button
-            type="submit"
-            disabled={savingHours || loadingHours}
-            variant="default"
-            size="md"
-            className="flex items-center gap-2 font-medium"
-          >
-            {savingHours ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Guardando...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>Guardar Horarios</span>
-              </>
-            )}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+              <div className="flex items-center gap-2 flex-1 justify-end">
+                {h.isClosed ? (
+                  <span className="text-xs font-bold text-error bg-error/10 px-2.5 py-0.5 rounded-full">
+                    Cerrado
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <input
+                      type="time"
+                      value={h.openTime || "09:00"}
+                      onChange={(e) => {
+                        const next = [...hours];
+                        next[idx] = { ...next[idx], openTime: e.target.value };
+                        setHours(next);
+                      }}
+                      className="bg-surface-container-low border border-outline-variant/60 rounded-lg px-2 py-1 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
+                    />
+                    <span className="text-on-surface-variant/60 font-light">-</span>
+                    <input
+                      type="time"
+                      value={h.closeTime || "20:00"}
+                      onChange={(e) => {
+                        const next = [...hours];
+                        next[idx] = { ...next[idx], closeTime: e.target.value };
+                        setHours(next);
+                      }}
+                      className="bg-surface-container-low border border-outline-variant/60 rounded-lg px-2 py-1 text-xs text-on-surface focus:outline-none focus:border-primary font-mono"
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = [...hours];
+                    next[idx] = { ...next[idx], isClosed: !next[idx].isClosed };
+                    setHours(next);
+                  }}
+                  className={cn(
+                    "text-[10px] font-bold px-2 py-0.5 rounded-md border transition-colors cursor-pointer shrink-0 ml-1",
+                    h.isClosed
+                      ? "text-primary border-primary/30 hover:bg-primary/10"
+                      : "text-on-surface-variant/70 border-outline-variant hover:bg-surface-container"
+                  )}
+                >
+                  {h.isClosed ? "Abrir" : "Cerrar"}
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="mt-auto flex justify-end border-t border-outline-variant/40 pt-4">
+        <Button
+          type="submit"
+          disabled={savingHours || loadingHours}
+          variant="default"
+          size="md"
+          className="flex items-center gap-2 font-medium"
+        >
+          {savingHours ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Guardando...</span>
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4" />
+              <span>Guardar Horarios</span>
+            </>
+          )}
+        </Button>
+      </div>
+    </form>
   );
 };

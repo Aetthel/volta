@@ -1,5 +1,13 @@
 import * as businessService from "../services/businessService.js";
 import { ApiResponse } from "../utils/index.js";
+import {
+  getHolidayCatalogue,
+  getObservedHolidays,
+  isKnownHolidayKey,
+} from "../utils/holidays.js";
+
+/** Años que se devuelven al calendario: el actual y el siguiente. */
+const HOLIDAY_YEARS_AHEAD = 1;
 
 const defaultHours = [
   { dayOfWeek: 1, openTime: "09:00", closeTime: "20:00", isClosed: false },
@@ -78,6 +86,58 @@ export const getHours = async (req, res) => {
   }
 
   return ApiResponse.success(res, hours);
+};
+
+/**
+ * Festivos que el negocio observa, ya resueltos a fechas concretas. Es lo que
+ * consume el calendario de la agenda para pintarlos en gris.
+ */
+export const getHolidays = async (req, res) => {
+  const { id } = req.params;
+
+  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
+  }
+
+  const preferences = await businessService.getBusinessHolidays(id);
+  const currentYear = new Date().getFullYear();
+
+  return ApiResponse.success(res, {
+    holidays: getObservedHolidays(preferences, currentYear, currentYear + HOLIDAY_YEARS_AHEAD),
+    // El catálogo del año en curso alimenta la pantalla de Ajustes.
+    catalogue: getHolidayCatalogue(preferences, currentYear),
+  });
+};
+
+export const updateHolidays = async (req, res) => {
+  const { id } = req.params;
+  const holidaysData = req.body;
+
+  if (req.user.role !== "ADMIN" && id !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este negocio" });
+  }
+
+  const business = await businessService.getBusinessById(id);
+  if (!business) {
+    return res.status(404).json({ error: "Negocio no encontrado" });
+  }
+
+  // Una clave desconocida quedaría almacenada sin efecto ninguno y sería
+  // imposible de depurar después, así que se rechaza aquí.
+  const unknown = holidaysData.find((h) => !isKnownHolidayKey(h.holidayKey));
+  if (unknown) {
+    return res.status(400).json({ error: `Festivo no reconocido: ${unknown.holidayKey}` });
+  }
+
+  await businessService.updateBusinessHolidays(id, holidaysData);
+
+  const preferences = await businessService.getBusinessHolidays(id);
+  const currentYear = new Date().getFullYear();
+
+  return ApiResponse.success(res, {
+    holidays: getObservedHolidays(preferences, currentYear, currentYear + HOLIDAY_YEARS_AHEAD),
+    catalogue: getHolidayCatalogue(preferences, currentYear),
+  });
 };
 
 export const updateHours = async (req, res) => {
