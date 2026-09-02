@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { authenticate, requireRole } from "../middleware/auth.js";
 import { signToken } from "../utils/crypto.js";
 
@@ -6,12 +6,12 @@ const MOCK_API_KEY = process.env.API_KEY || "test-api-key";
 const MOCK_JWT_SECRET = process.env.BACKEND_JWT_SECRET || "test-jwt-secret";
 
 describe("authenticate middleware", () => {
-  let req, res, next;
+  let req: any, res: any, next: any;
 
   beforeEach(() => {
-    req = { header: jest.fn(), user: null };
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    next = jest.fn();
+    req = { header: vi.fn(), user: null };
+    res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    next = vi.fn();
   });
 
   it("should return 401 if API key is missing", async () => {
@@ -24,7 +24,7 @@ describe("authenticate middleware", () => {
   });
 
   it("should return 401 if API key is invalid", async () => {
-    req.header.mockImplementation((name) => {
+    req.header.mockImplementation((name: string) => {
       if (name === "x-api-key") return "wrong-key";
       return undefined;
     });
@@ -33,7 +33,7 @@ describe("authenticate middleware", () => {
   });
 
   it("should return 401 if JWT token is invalid", async () => {
-    req.header.mockImplementation((name) => {
+    req.header.mockImplementation((name: string) => {
       if (name === "x-api-key") return MOCK_API_KEY;
       if (name === "Authorization") return "Bearer invalid-token";
       return undefined;
@@ -46,7 +46,7 @@ describe("authenticate middleware", () => {
   });
 
   it("should return 401 if API key is valid but no JWT token", async () => {
-    req.header.mockImplementation((name) => {
+    req.header.mockImplementation((name: string) => {
       if (name === "x-api-key") return MOCK_API_KEY;
       return undefined;
     });
@@ -60,7 +60,7 @@ describe("authenticate middleware", () => {
   it("should call next with valid API key and valid JWT token", async () => {
     const payload = { id: "user-1", role: "ADMIN", businessId: "biz-1", email: "admin@test.com" };
     const token = signToken(payload, MOCK_JWT_SECRET);
-    req.header.mockImplementation((name) => {
+    req.header.mockImplementation((name: string) => {
       if (name === "x-api-key") return MOCK_API_KEY;
       if (name === "Authorization") return `Bearer ${token}`;
       return undefined;
@@ -77,12 +77,12 @@ describe("authenticate middleware", () => {
 });
 
 describe("requireRole middleware", () => {
-  let req, res, next;
+  let req: any, res: any, next: any;
 
   beforeEach(() => {
     req = { user: null };
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    next = jest.fn();
+    res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    next = vi.fn();
   });
 
   it("should return 403 if user has no role", () => {

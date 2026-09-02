@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import {
   getEasterSunday,
   getObservedHolidays,
@@ -40,7 +41,7 @@ describe("Festivos españoles", () => {
       const viernesSanto = holidays.find((h) => h.key === "VIERNES_SANTO");
 
       expect(viernesSanto).toBeDefined();
-      expect(viernesSanto.date).toBe("2026-04-03");
+      expect(viernesSanto?.date).toBe("2026-04-03");
     });
 
     test("no aplica los autonómicos mientras el negocio no los active", () => {
@@ -52,19 +53,19 @@ describe("Festivos españoles", () => {
 
     test("aplica un autonómico cuando el negocio lo activa", () => {
       const holidays = getObservedHolidays(
-        [{ holidayKey: "SAN_JUAN", isObserved: true }],
+        [{ holidayKey: "SAN_JUAN", isObserved: true }] as any,
         2026,
         2026
       );
       const sanJuan = holidays.find((h) => h.key === "SAN_JUAN");
 
       expect(sanJuan).toBeDefined();
-      expect(sanJuan.date).toBe("2026-06-24");
+      expect(sanJuan?.date).toBe("2026-06-24");
     });
 
     test("deja de aplicar un nacional si el negocio decide abrir ese día", () => {
       const holidays = getObservedHolidays(
-        [{ holidayKey: "FIESTA_NACIONAL", isObserved: false }],
+        [{ holidayKey: "FIESTA_NACIONAL", isObserved: false }] as any,
         2026,
         2026
       );
@@ -102,13 +103,13 @@ describe("Festivos españoles", () => {
 
       expect(getHolidayForDate([], sanJuan).isHoliday).toBe(false);
       expect(
-        getHolidayForDate([{ holidayKey: "SAN_JUAN", isObserved: true }], sanJuan).isHoliday
+        getHolidayForDate([{ holidayKey: "SAN_JUAN", isObserved: true }] as any, sanJuan).isHoliday
       ).toBe(true);
     });
 
     test("respeta que el negocio abra en un festivo nacional", () => {
       const result = getHolidayForDate(
-        [{ holidayKey: "NAVIDAD", isObserved: false }],
+        [{ holidayKey: "NAVIDAD", isObserved: false }] as any,
         new Date(2026, 11, 25)
       );
 
@@ -139,18 +140,18 @@ describe("Festivos españoles", () => {
         isObserved: false,
         isDefault: true,
       });
-      expect(sanJuan.note).toContain("Cataluña");
+      expect(sanJuan?.note).toContain("Cataluña");
     });
 
     test("marca como no predeterminado lo que el negocio ha decidido", () => {
       const catalogue = getHolidayCatalogue(
-        [{ holidayKey: "SAN_JUAN", isObserved: true }],
+        [{ holidayKey: "SAN_JUAN", isObserved: true }] as any,
         2026
       );
       const sanJuan = catalogue.find((h) => h.key === "SAN_JUAN");
 
-      expect(sanJuan.isObserved).toBe(true);
-      expect(sanJuan.isDefault).toBe(false);
+      expect(sanJuan?.isObserved).toBe(true);
+      expect(sanJuan?.isDefault).toBe(false);
     });
   });
 

@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { isValidId, validateId, validateBody } from "../middleware/validation.js";
 import { z } from "zod";
 
@@ -14,19 +14,19 @@ describe("isValidId", () => {
     expect(isValidId("id with spaces")).toBe(false);
     expect(isValidId("id/with/slashes")).toBe(false);
     expect(isValidId("id.with.dots")).toBe(false);
-    expect(isValidId(null)).toBe(false);
-    expect(isValidId(undefined)).toBe(false);
-    expect(isValidId(123)).toBe(false);
+    expect(isValidId(null as any)).toBe(false);
+    expect(isValidId(undefined as any)).toBe(false);
+    expect(isValidId(123 as any)).toBe(false);
   });
 });
 
 describe("validateId", () => {
-  let req, res, next;
+  let req: any, res: any, next: any;
 
   beforeEach(() => {
     req = { params: {}, query: {}, body: {} };
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    next = jest.fn();
+    res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    next = vi.fn();
   });
 
   it("should call next for valid ID in params", () => {
@@ -53,12 +53,12 @@ describe("validateId", () => {
 });
 
 describe("validateBody", () => {
-  let req, res, next;
+  let req: any, res: any, next: any;
 
   beforeEach(() => {
     req = { body: {} };
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    next = jest.fn();
+    res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    next = vi.fn();
   });
 
   it("should call next for valid body", () => {

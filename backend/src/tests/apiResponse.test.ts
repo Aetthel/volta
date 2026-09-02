@@ -1,11 +1,11 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { ApiResponse } from "../utils/apiResponse.js";
 
 describe("ApiResponse", () => {
-  let res;
+  let res: any;
 
   beforeEach(() => {
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
   });
 
   it("should return success with default 200", () => {

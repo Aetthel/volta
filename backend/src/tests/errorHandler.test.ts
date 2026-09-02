@@ -1,22 +1,22 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import errorHandler from "../middleware/errorHandler.js";
 
 describe("errorHandler middleware", () => {
-  let req, res, next;
+  let req: any, res: any, next: any;
 
   beforeEach(() => {
     req = { originalUrl: "/test", method: "GET" };
-    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-    next = jest.fn();
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
+    next = vi.fn();
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("should handle Prisma P2002 errors with 409 Conflict", () => {
-    const err = new Error("Unique constraint failed");
+    const err: any = new Error("Unique constraint failed");
     err.name = "PrismaClientKnownRequestError";
     err.code = "P2002";
     errorHandler(err, req, res, next);
@@ -27,7 +27,7 @@ describe("errorHandler middleware", () => {
   });
 
   it("should handle JSON parse errors with 400", () => {
-    const err = new SyntaxError("Unexpected token");
+    const err: any = new SyntaxError("Unexpected token");
     err.status = 400;
     err.body = {};
     errorHandler(err, req, res, next);
@@ -38,7 +38,7 @@ describe("errorHandler middleware", () => {
   });
 
   it("should handle custom errors with statusCode", () => {
-    const err = new Error("Not found");
+    const err: any = new Error("Not found");
     err.statusCode = 404;
     errorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(404);
@@ -48,7 +48,7 @@ describe("errorHandler middleware", () => {
   });
 
   it("should handle generic errors with 500", () => {
-    const err = new Error("Something went wrong");
+    const err: any = new Error("Something went wrong");
     errorHandler(err, req, res, next);
     expect(res.status).toHaveBeenCalledWith(500);
   });

@@ -19,8 +19,7 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push --accept-data-loss",
     "lint": "echo 'No linting configured for backend'",
-    "pretest": "prisma generate",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",
+    "test": "vitest run",
     "test:load": "node src/tests/load/concurrencyTest.js"
   },
   "dependencies": {
@@ -51,6 +50,7 @@
     "prisma": "^7.8.0",
     "supertest": "^7.2.2",
     "tsx": "^4.19.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

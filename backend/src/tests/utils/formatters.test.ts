@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { normalizePhone, normalizeString, formatCurrency } from "../../utils/formatters.js";
 import whatsappManager from "../../services/whatsappService.js";
 
@@ -24,16 +25,13 @@ describe("normalizePhone", () => {
 
   it("returns an empty string for empty input", () => {
     expect(normalizePhone("")).toBe("");
-    expect(normalizePhone(null)).toBe("");
-    expect(normalizePhone(undefined)).toBe("");
+    expect(normalizePhone(null as any)).toBe("");
+    expect(normalizePhone(undefined as any)).toBe("");
   });
 
   it("feeds cleanPhoneForWhatsApp without fighting it", () => {
-    // El canon se guarda sin el 34; el gateway lo vuelve a añadir al marcar.
     const canonical = normalizePhone("+34 600 11 22 33");
     expect(whatsappManager.cleanPhoneForWhatsApp(canonical)).toBe("34600112233");
-
-    // Y aplicarlo dos veces no duplica el prefijo.
     expect(whatsappManager.cleanPhoneForWhatsApp("34600112233")).toBe("34600112233");
   });
 });
@@ -45,18 +43,17 @@ describe("normalizeString", () => {
 
   it("returns an empty string for empty input", () => {
     expect(normalizeString("")).toBe("");
-    expect(normalizeString(null)).toBe("");
+    expect(normalizeString(null as any)).toBe("");
   });
 });
 
 describe("formatCurrency", () => {
   it("formats amounts with the Spanish convention", () => {
-    // El español no agrupa los millares de cuatro dígitos, sí a partir de cinco.
-    expect(formatCurrency(1234.5).replace(/ /g, " ")).toBe("1234,50 €");
-    expect(formatCurrency(12345.5).replace(/ /g, " ")).toBe("12.345,50 €");
+    expect(formatCurrency(1234.5).replace(/\s/g, " ")).toBe("1234,50 €");
+    expect(formatCurrency(12345.5).replace(/\s/g, " ")).toBe("12.345,50 €");
   });
 
   it("falls back to zero for non-numeric input", () => {
-    expect(formatCurrency("no-es-un-numero").replace(/ /g, " ")).toBe("0,00 €");
+    expect(formatCurrency("no-es-un-numero" as any).replace(/\s/g, " ")).toBe("0,00 €");
   });
 });

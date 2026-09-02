@@ -1,15 +1,15 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import app from "../index.js";
 import prisma from "../config/db.js";
 
 describe("GET /health", () => {
   beforeEach(() => {
-    jest.spyOn(prisma, "$queryRaw").mockResolvedValue([{ 1: 1 }]);
+    vi.spyOn(prisma, "$queryRaw").mockResolvedValue([{ 1: 1 }] as any);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("should return 200 OK with status: ok", async () => {

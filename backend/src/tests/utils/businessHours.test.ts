@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { validateBusinessHours, calculateAvailableSlots } from "../../utils/businessHours.js";
 
 describe("Business Hours & Slot Validation Utilities", () => {
@@ -11,14 +12,14 @@ describe("Business Hours & Slot Validation Utilities", () => {
     test("returns valid: true for appointment inside open hours", () => {
       // 2026-07-27 is Monday (day 1), 10:00 AM
       const validDate = new Date("2026-07-27T10:00:00");
-      const result = validateBusinessHours(mockBusinessHours, validDate, 30);
+      const result = validateBusinessHours(mockBusinessHours as any, validDate, 30);
       expect(result.valid).toBe(true);
     });
 
     test("returns valid: false if business is closed on that day", () => {
       // 2026-07-26 is Sunday (day 0)
       const sundayDate = new Date("2026-07-26T10:00:00");
-      const result = validateBusinessHours(mockBusinessHours, sundayDate, 30);
+      const result = validateBusinessHours(mockBusinessHours as any, sundayDate, 30);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("cerrado");
     });
@@ -26,7 +27,7 @@ describe("Business Hours & Slot Validation Utilities", () => {
     test("returns valid: false if appointment starts before open time", () => {
       // Monday 08:30 AM
       const earlyDate = new Date("2026-07-27T08:30:00");
-      const result = validateBusinessHours(mockBusinessHours, earlyDate, 30);
+      const result = validateBusinessHours(mockBusinessHours as any, earlyDate, 30);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("apertura");
     });
@@ -34,7 +35,7 @@ describe("Business Hours & Slot Validation Utilities", () => {
     test("returns valid: false if appointment ends after close time", () => {
       // Monday 19:45 PM for 30 min duration (ends 20:15)
       const lateDate = new Date("2026-07-27T19:45:00");
-      const result = validateBusinessHours(mockBusinessHours, lateDate, 30);
+      const result = validateBusinessHours(mockBusinessHours as any, lateDate, 30);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("cierre");
     });
@@ -52,8 +53,8 @@ describe("Business Hours & Slot Validation Utilities", () => {
       ];
 
       const slots = calculateAvailableSlots(
-        mockBusinessHours,
-        existingAppointments,
+        mockBusinessHours as any,
+        existingAppointments as any,
         dateStr,
         30,
         1,
@@ -68,7 +69,7 @@ describe("Business Hours & Slot Validation Utilities", () => {
 
     test("returns empty array for closed day", () => {
       const sundayDateStr = "2026-07-26"; // Sunday
-      const slots = calculateAvailableSlots(mockBusinessHours, [], sundayDateStr, 30, 1, 30);
+      const slots = calculateAvailableSlots(mockBusinessHours as any, [], sundayDateStr, 30, 1, 30);
       expect(slots).toEqual([]);
     });
   });

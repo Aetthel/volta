@@ -55,47 +55,49 @@ app.use(
   })
 );
 
-// Schedule the Sentinel to scan for upcoming 24h appointments every 15 minutes
-cron.schedule("*/15 * * * *", async () => {
-  try {
-    await runSentinel();
-  } catch (err) {
-    console.error("[Sentinel] Unhandled error in cron:", err);
-  }
-});
-
-// Clean up expired demos every 5 minutes
-cron.schedule("*/5 * * * *", async () => {
-  try {
-    const result = await cleanupExpiredDemos();
-    if (result && result.deletedCount > 0) {
-      console.log(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
+if (process.env.NODE_ENV !== "test") {
+  // Schedule the Sentinel to scan for upcoming 24h appointments every 15 minutes
+  cron.schedule("*/15 * * * *", async () => {
+    try {
+      await runSentinel();
+    } catch (err) {
+      console.error("[Sentinel] Unhandled error in cron:", err);
     }
-  } catch (err) {
-    console.error("[Demo Cleanup] Error:", err);
-  }
-});
+  });
 
-// Purge expired LOPD consent identifiers every day at 03:30, off-peak and away
-// from the Sentinel window so a long scan never overlaps with the evening send.
-cron.schedule("30 3 * * *", async () => {
-  try {
-    await purgeExpiredConsentIdentifiers();
-  } catch (err) {
-    console.error("[LOPD Purge] Error:", err);
-  }
-});
+  // Clean up expired demos every 5 minutes
+  cron.schedule("*/5 * * * *", async () => {
+    try {
+      const result = await cleanupExpiredDemos();
+      if (result && result.deletedCount > 0) {
+        console.log(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
+      }
+    } catch (err) {
+      console.error("[Demo Cleanup] Error:", err);
+    }
+  });
 
-// Purge public-booking verification data every day at 03:45, right after the
-// LOPD purge: the phone, name and IP of someone who never finished a booking
-// stop being necessary once the code has expired.
-cron.schedule("45 3 * * *", async () => {
-  try {
-    await purgeExpiredVerifications();
-  } catch (err) {
-    console.error("[Booking Verification Purge] Error:", err);
-  }
-});
+  // Purge expired LOPD consent identifiers every day at 03:30, off-peak and away
+  // from the Sentinel window so a long scan never overlaps with the evening send.
+  cron.schedule("30 3 * * *", async () => {
+    try {
+      await purgeExpiredConsentIdentifiers();
+    } catch (err) {
+      console.error("[LOPD Purge] Error:", err);
+    }
+  });
+
+  // Purge public-booking verification data every day at 03:45, right after the
+  // LOPD purge: the phone, name and IP of someone who never finished a booking
+  // stop being necessary once the code has expired.
+  cron.schedule("45 3 * * *", async () => {
+    try {
+      await purgeExpiredVerifications();
+    } catch (err) {
+      console.error("[Booking Verification Purge] Error:", err);
+    }
+  });
+}
 
 // CORS Middleware — only allow requests from configured frontend origins
 const ALLOWED_ORIGINS = (process.env.FRONTEND_URL || "http://localhost:3000")

@@ -1,17 +1,17 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import asyncHandler from "../utils/asyncHandler.js";
 
 describe("asyncHandler", () => {
-  let req, res, next;
+  let req: any, res: any, next: any;
 
   beforeEach(() => {
     req = {};
     res = {};
-    next = jest.fn();
+    next = vi.fn();
   });
 
   it("should call the handler on success", async () => {
-    const handler = jest.fn().mockResolvedValue(undefined);
+    const handler = vi.fn().mockResolvedValue(undefined);
     const wrapped = asyncHandler(handler);
     await wrapped(req, res, next);
     expect(handler).toHaveBeenCalledWith(req, res, next);
@@ -20,7 +20,7 @@ describe("asyncHandler", () => {
 
   it("should call next with error on async rejection", async () => {
     const error = new Error("Async error");
-    const handler = jest.fn().mockRejectedValue(error);
+    const handler = vi.fn().mockRejectedValue(error);
     const wrapped = asyncHandler(handler);
     await wrapped(req, res, next);
     expect(next).toHaveBeenCalledWith(error);
@@ -28,7 +28,7 @@ describe("asyncHandler", () => {
 
   it("should call next with error on sync throw", async () => {
     const error = new Error("Thrown error");
-    const handler = jest.fn().mockImplementation(() => {
+    const handler = vi.fn().mockImplementation(() => {
       throw error;
     });
     const wrapped = asyncHandler(handler);
