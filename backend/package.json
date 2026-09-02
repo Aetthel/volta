@@ -15,7 +15,7 @@
     "build": "pnpm prisma:generate",
     "start": "node src/index.js",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
+    "prisma:push": "prisma db push --accept-data-loss",
     "lint": "echo 'No linting configured for backend'",
     "pretest": "prisma generate",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --forceExit",

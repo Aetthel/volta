@@ -11,9 +11,9 @@ router.post(
   asyncHandler(subscriptionController.handleWebhook)
 );
 
-// POST /api/webhooks/whatsapp & /api/webhooks/whatsapp/:event & /api/webhooks/whatsapp/*
+// POST /api/webhooks/whatsapp and any sub-event path (/api/webhooks/whatsapp/contacts-update, etc.)
 router.post(
-  ["/whatsapp", "/whatsapp/:event", "/whatsapp/*"],
+  /^\/whatsapp(?:\/.*)?$/,
   asyncHandler(webhookController.handleWhatsAppWebhook)
 );
 
