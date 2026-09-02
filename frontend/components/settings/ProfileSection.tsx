@@ -15,7 +15,6 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  AlertCircle,
   Calendar,
   QrCode,
   Copy,
