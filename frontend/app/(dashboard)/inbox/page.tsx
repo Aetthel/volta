@@ -225,7 +225,7 @@ export default function InboxPage() {
           </div>
 
           {/* Minimalist Unified Notification Feed (Full Bleed Margin) */}
-          <div className="w-full flex-1 overflow-auto border-t border-outline-variant/30 flex flex-col bg-surface-container-lowest">
+          <div className="w-full flex-1 overflow-auto border-t border-outline-variant/30 flex flex-col bg-surface">
             {filteredAlerts.length > 0 ? (
               <div className="w-full divide-y divide-outline-variant/20">
                 {filteredAlerts.map((alert) => {
@@ -235,8 +235,8 @@ export default function InboxPage() {
                     <div
                       key={alert.id}
                       className={`
-                        group flex items-center justify-between px-6 py-4 sm:px-8 transition-colors hover:bg-surface-container-low/40 gap-3 sm:gap-4
-                        ${!alert.isRead ? "bg-primary/[0.02]" : "opacity-75 hover:opacity-100"}
+                        group flex items-center justify-between px-6 py-4 sm:px-8 transition-colors hover:bg-surface-container-low/60 gap-3 sm:gap-4
+                        ${!alert.isRead ? "bg-primary/[0.03]" : "opacity-75 hover:opacity-100"}
                       `}
                     >
                       {/* Left: Unread dot + Category Icon + Content */}
@@ -249,7 +249,7 @@ export default function InboxPage() {
                         />
 
                         {/* Icon */}
-                        <div className="w-8 h-8 rounded-xl bg-surface-container-high/60 flex items-center justify-center text-on-surface-variant shrink-0 group-hover:text-primary transition-colors">
+                        <div className="w-8 h-8 rounded-xl bg-surface-variant/60 flex items-center justify-center text-on-surface-variant shrink-0 group-hover:text-primary transition-colors">
                           <IconComponent className="w-4 h-4" />
                         </div>
 

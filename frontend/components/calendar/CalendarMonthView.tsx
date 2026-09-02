@@ -112,14 +112,6 @@ export const CalendarMonthView: React.FC<CalendarMonthViewProps> = ({
                 >
                   {day.getDate()}
                 </div>
-                {closed && (
-                  <span
-                    className="min-w-0 truncate text-[9px] font-semibold uppercase tracking-wide text-on-surface-variant/60 sm:text-[10px]"
-                    title={getClosedLabel?.(day) ?? "Cerrado"}
-                  >
-                    {getClosedLabel?.(day) ?? "Cerrado"}
-                  </span>
-                )}
               </div>
               <div className="space-y-1">
                 {dayEvents.slice(0, 4).map((event) => (
