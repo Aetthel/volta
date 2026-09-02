@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import { X, Lock, Check, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
-import { LEMON_SQUEEZY_PRODUCT_URLS, buildLemonSqueezyCheckoutUrl } from "@/lib/lemonsqueezy";
+import {
+  LEMON_SQUEEZY_PRODUCT_URLS,
+  buildLemonSqueezyCheckoutUrl,
+  openLemonSqueezyOverlay,
+} from "@/lib/lemonsqueezy";
 
 interface UpgradeProModalProps {
   isOpen: boolean;
@@ -90,9 +94,13 @@ export default function UpgradeProModal({
 
         {/* Actions */}
         <div className="flex flex-col gap-2.5 pt-2">
+          {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
           <a
             href={checkoutUrl}
-            onClick={onClose}
+            onClick={(e) => {
+              onClose();
+              openLemonSqueezyOverlay(checkoutUrl, e);
+            }}
             className="lemonsqueezy-button w-full flex items-center justify-center gap-2 text-sm font-semibold shadow-md cursor-pointer bg-primary text-white hover:bg-primary/90 py-3 px-4 rounded-xl transition-colors"
           >
             <span>Actualizar a Plan Pro (40€/mes)</span>

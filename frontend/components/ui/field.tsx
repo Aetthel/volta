@@ -59,7 +59,7 @@ export const FieldLabel = React.forwardRef<HTMLLabelElement, FieldLabelProps>(
       <label
         ref={ref}
         className={cn(
-          "font-label-lg text-label-lg text-on-surface select-none transition-colors duration-200",
+          "font-label-lg text-sm font-medium text-on-surface select-none transition-colors duration-200 flex items-center gap-1 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
           "group-data-[disabled]:text-on-surface/40",
           "group-data-[invalid]:text-error",
           className
@@ -80,7 +80,7 @@ export const FieldDescription = React.forwardRef<HTMLParagraphElement, FieldDesc
       <p
         ref={ref}
         className={cn(
-          "font-body-sm text-body-sm text-on-surface-variant/85",
+          "font-body-sm text-xs text-on-surface-variant/80 leading-relaxed",
           "group-data-[disabled]:text-on-surface/30",
           "group-data-[invalid]:text-error",
           className
@@ -91,6 +91,31 @@ export const FieldDescription = React.forwardRef<HTMLParagraphElement, FieldDesc
   }
 );
 FieldDescription.displayName = "FieldDescription";
+
+// FieldError
+export interface FieldErrorProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+
+export const FieldError = React.forwardRef<HTMLParagraphElement, FieldErrorProps>(
+  ({ className, children, ...props }, ref) => {
+    if (!children) return null;
+
+    return (
+      <p
+        ref={ref}
+        role="alert"
+        aria-live="polite"
+        className={cn(
+          "font-body-sm text-xs font-medium text-error flex items-center gap-1.5 mt-0.5",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </p>
+    );
+  }
+);
+FieldError.displayName = "FieldError";
 
 // InputGroup
 export interface InputGroupProps extends React.HTMLAttributes<HTMLDivElement> {}

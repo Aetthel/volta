@@ -33,13 +33,14 @@ function extractMessageText(messageObj) {
  */
 export async function handleWhatsAppWebhook(req, res) {
   const payload = req.body;
-  const rawEvent = payload?.event || req.params?.event || req.params?.[0] || "";
+  const pathEvent = (req.params?.event || req.params?.[0] || req.path?.replace(/^\/whatsapp\/?/, ""))?.replace(/^\/+/, "");
+  const rawEvent = payload?.event || pathEvent || "";
   const event = rawEvent.toLowerCase().replace(/[_-]/g, ".");
   const instance = payload?.instance || "";
   const data = payload?.data || payload;
 
   if (!instance) {
-    return res.status(200).json({ status: "ignored", reason: "missing instance" });
+    return res.status(200).json({ status: "ignored", reason: "missing instance", event: rawEvent });
   }
 
   const businessId = parseBusinessId(instance);

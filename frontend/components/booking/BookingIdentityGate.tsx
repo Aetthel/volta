@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, Loader2, MessageCircle, ShieldCheck, Store } from "lucide-react";
 import { Alert, Button, Card } from "@/components/ui/volta-ui";
+import { formatPhoneNumber } from "@/lib/utils";
 import type { BookingSession } from "@/hooks/useBookingSession";
 
 const CODE_LENGTH = 6;
@@ -268,7 +269,7 @@ export default function BookingIdentityGate({
                 autoComplete="tel"
                 autoFocus
                 value={phone}
-                onChange={(event) => setPhone(event.target.value)}
+                onChange={(event) => setPhone(formatPhoneNumber(event.target.value))}
                 placeholder="Ej. 600 11 22 33"
                 className="w-full px-4 py-3 bg-surface-container-lowest text-on-surface border border-outline-variant rounded-xl focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
               />

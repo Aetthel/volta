@@ -22,20 +22,38 @@ import Toast from "@/components/settings/Toast";
 import PageHeader from "@/components/PageHeader";
 import dynamicImport from "next/dynamic";
 
+function SectionLoader({ message }: { message?: string }) {
+  return (
+    <div className="w-full py-16 flex flex-col items-center justify-center gap-4 animate-in fade-in duration-200">
+      <div className="w-44 h-1 bg-on-surface/15 rounded-full overflow-hidden relative">
+        <div
+          className="absolute top-0 bottom-0 w-1/2 rounded-full animate-indeterminate-slide"
+          style={{ backgroundColor: "var(--color-primary, #006565)" }}
+        />
+      </div>
+      {message && (
+        <p className="text-xs text-on-surface-variant font-medium animate-fade-in">
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
+
 const ProfileSection = dynamicImport(() => import("@/components/settings/ProfileSection"), {
-  loading: () => <div className="p-8 text-center text-xs text-on-surface-variant animate-pulse">Cargando perfil...</div>,
+  loading: () => <SectionLoader message="Cargando perfil..." />,
 });
 const MessagesSection = dynamicImport(() => import("@/components/settings/MessagesSection"), {
-  loading: () => <div className="p-8 text-center text-xs text-on-surface-variant animate-pulse">Cargando mensajería...</div>,
+  loading: () => <SectionLoader message="Cargando mensajería..." />,
 });
 const BusinessSection = dynamicImport(() => import("@/components/settings/BusinessSection"), {
-  loading: () => <div className="p-8 text-center text-xs text-on-surface-variant animate-pulse">Cargando negocio...</div>,
+  loading: () => <SectionLoader message="Cargando negocio..." />,
 });
 const PersonalizationSection = dynamicImport(() => import("@/components/settings/PersonalizationSection"), {
-  loading: () => <div className="p-8 text-center text-xs text-on-surface-variant animate-pulse">Cargando personalización...</div>,
+  loading: () => <SectionLoader message="Cargando personalización..." />,
 });
 const BillingSection = dynamicImport(() => import("@/components/settings/BillingSection"), {
-  loading: () => <div className="p-8 text-center text-xs text-on-surface-variant animate-pulse">Cargando facturación...</div>,
+  loading: () => <SectionLoader message="Cargando facturación..." />,
 });
 import {
   Button,

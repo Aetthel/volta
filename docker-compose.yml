@@ -90,7 +90,7 @@ services:
       - /app/backend/node_modules
     ports:
       - "3001:3001"
-    command: sh -c "cd /app/backend && pnpm prisma:push && cd /app && pnpm --filter backend dev"
+    command: sh -c "cd /app/backend && pnpm prisma:generate && pnpm prisma:push && cd /app && pnpm --filter backend dev"
     deploy:
       resources:
         limits:
@@ -128,11 +128,16 @@ services:
       - CONFIG_SESSION_PHONE_CLIENT=Volta
       - CONFIG_SESSION_PHONE_NAME=Chrome
       - WEBHOOK_GLOBAL_ENABLED=true
-      - WEBHOOK_GLOBAL_URL=http://backend:3001/api/webhooks/whatsapp
+      - WEBHOOK_GLOBAL_URL=${EVOLUTION_WEBHOOK_URL:-http://backend:3001/api/webhooks/whatsapp}
       - WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=true
       - WEBHOOK_EVENTS_MESSAGES_UPSERT=true
       - WEBHOOK_EVENTS_CONNECTION_UPDATE=true
       - WEBHOOK_EVENTS_QRCODE_UPDATED=true
+      - WEBHOOK_EVENTS_CONTACTS_UPDATE=false
+      - WEBHOOK_EVENTS_CHATS_UPDATE=false
+      - WEBHOOK_EVENTS_MESSAGES_UPDATE=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

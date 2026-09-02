@@ -65,6 +65,15 @@ export const createUser = async (userData) => {
   if (data.password) {
     data.password = await hashPassword(data.password);
   }
+  if (data.businessId) {
+    const { businessId, ...rest } = data;
+    return prisma.user.create({
+      data: {
+        ...rest,
+        business: { connect: { id: businessId } },
+      },
+    });
+  }
   return prisma.user.create({ data });
 };
 

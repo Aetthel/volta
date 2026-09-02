@@ -96,14 +96,6 @@ export const CalendarWeekView: React.FC<CalendarWeekViewProps> = ({
                 >
                   {day.toLocaleDateString("es-ES", { month: "short", day: "numeric" })}
                 </div>
-                {closed && (
-                  <div
-                    className="mt-0.5 truncate text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/60"
-                    title={getClosedLabel?.(day) ?? "Cerrado"}
-                  >
-                    {getClosedLabel?.(day) ?? "Cerrado"}
-                  </div>
-                )}
               </div>
             );
           })}

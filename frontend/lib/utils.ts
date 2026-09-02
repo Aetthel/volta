@@ -164,3 +164,49 @@ export function formatDateTimeParts(value: string | Date | null | undefined): Da
 
   return { date: dateFormatter.format(parsed), time: timeFormatter.format(parsed) };
 }
+
+/**
+ * Formatea automáticamente un número de teléfono con espacios legibles
+ * tanto para números españoles (3-2-2-2) como internacionales (+34 ...).
+ */
+export function formatPhoneNumber(value: string): string {
+  if (!value) return "";
+
+  const trimmed = value.trim();
+  const hasPlus = trimmed.startsWith("+");
+  const digits = value.replace(/\D/g, "");
+
+  if (!digits) {
+    return hasPlus ? "+" : "";
+  }
+
+  // Si empieza con + o con prefijo 34 largo (más de 9 dígitos)
+  if (hasPlus || (digits.startsWith("34") && digits.length > 9)) {
+    const isSpain = digits.startsWith("34");
+    if (isSpain) {
+      const rest = digits.slice(2);
+      if (rest.length === 0) return "+34";
+      if (rest.length <= 3) return `+34 ${rest}`;
+      if (rest.length <= 5) return `+34 ${rest.slice(0, 3)} ${rest.slice(3)}`;
+      if (rest.length <= 7) return `+34 ${rest.slice(0, 3)} ${rest.slice(3, 5)} ${rest.slice(5)}`;
+      return `+34 ${rest.slice(0, 3)} ${rest.slice(3, 5)} ${rest.slice(5, 7)} ${rest.slice(7, 9)}`;
+    } else {
+      // Otros prefijos internacionales
+      if (digits.length <= 2) return `+${digits}`;
+      if (digits.length <= 5) return `+${digits.slice(0, 2)} ${digits.slice(2)}`;
+      if (digits.length <= 8) return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+      if (digits.length <= 11) return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+      return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 11)} ${digits.slice(11, 14)}`;
+    }
+  }
+
+  // Formato español estándar (9 dígitos): 600 12 34 56
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 3)} ${digits.slice(3)}`;
+  if (digits.length <= 7) return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)} ${digits.slice(3, 5)} ${digits.slice(5, 7)} ${digits.slice(7, 9)}`;
+
+  // Números más largos
+  return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 9)} ${digits.slice(9, 12)}`;
+}
+

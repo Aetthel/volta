@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardContent,
   CardFooter,
-  FloatingInput,
+  Input,
   Button,
   FieldGroup,
   Field,
@@ -73,9 +73,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             <FieldGroup className="grid grid-cols-1 gap-4">
               <Field>
                 <FieldLabel htmlFor="biz-name">Nombre Comercial</FieldLabel>
-                <FloatingInput
+                <Input
                   id="biz-name"
-                  label="Nombre del Negocio"
+                  placeholder="Nombre del Negocio"
                   type="text"
                   required
                   value={businessForm.name}
@@ -88,9 +88,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 
               <Field>
                 <FieldLabel htmlFor="biz-email">Correo Electrónico del Local</FieldLabel>
-                <FloatingInput
+                <Input
                   id="biz-email"
-                  label="Email de Notificaciones"
+                  placeholder="Email de Notificaciones"
                   type="email"
                   required
                   value={businessForm.email}
@@ -104,9 +104,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field>
                   <FieldLabel htmlFor="biz-phone">Teléfono de Contacto</FieldLabel>
-                  <FloatingInput
+                  <Input
                     id="biz-phone"
-                    label="Teléfono"
+                    placeholder="Teléfono"
                     type="tel"
                     value={businessForm.phone}
                     onChange={(e) =>
@@ -118,9 +118,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 
                 <Field>
                   <FieldLabel htmlFor="biz-address">Dirección Física</FieldLabel>
-                  <FloatingInput
+                  <Input
                     id="biz-address"
-                    label="Dirección"
+                    placeholder="Dirección"
                     type="text"
                     value={businessForm.address}
                     onChange={(e) =>
@@ -134,9 +134,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
               {!isEdit && (
                 <Field>
                   <FieldLabel htmlFor="biz-pass">Contraseña de Administrador</FieldLabel>
-                  <FloatingInput
+                  <Input
                     id="biz-pass"
-                    label="Contraseña inicial"
+                    placeholder="Contraseña inicial"
                     type="password"
                     required
                     value={businessForm.password || ""}

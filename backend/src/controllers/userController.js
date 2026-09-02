@@ -164,23 +164,24 @@ export const registerUser = async (req, res) => {
         subscriptionPlan: "PRO",
         subscriptionStatus: "TRIALING",
         trialExpiresAt,
+        users: {
+          create: {
+            name,
+            email: cleanEmail,
+            password: hashedPassword,
+            role: "JEFE",
+            // El alta pública es la única vía que nace pendiente: hasta que el
+            // usuario introduzca el código, `authorize()` no le abrirá sesión.
+            status: "PENDING_VERIFICATION",
+          },
+        },
+      },
+      include: {
+        users: true,
       },
     });
 
-    const createdUser = await tx.user.create({
-      data: {
-        name,
-        email: cleanEmail,
-        password: hashedPassword,
-        role: "JEFE",
-        businessId: createdBusiness.id,
-        // El alta pública es la única vía que nace pendiente: hasta que el
-        // usuario introduzca el código, `authorize()` no le abrirá sesión.
-        status: "PENDING_VERIFICATION",
-      },
-    });
-
-    return { business: createdBusiness, user: createdUser };
+    return { business: createdBusiness, user: createdBusiness.users[0] };
   });
 
   // Automatically trigger email OTP verification code.

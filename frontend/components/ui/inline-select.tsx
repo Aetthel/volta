@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FloatingInput } from "./floating-input";
+import { Input } from "./input";
 
 const DROPDOWN_MAX_HEIGHT = 240;
 const DROPDOWN_MIN_HEIGHT = 140;
@@ -91,15 +91,14 @@ export const InlineSelect: React.FC<InlineSelectProps> = ({
           </button>
         ) : (
           <>
-            <FloatingInput
+            <Input
               id={`${id}-trigger`}
-              label={label}
+              placeholder={label}
               type="text"
               readOnly
               value={displayValue}
               onClick={() => setIsOpen(!isOpen)}
-              className={cn("cursor-pointer text-body-lg font-normal", className)}
-              variant={variant}
+              className={cn("cursor-pointer text-sm font-normal pr-10", className)}
             />
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant pointer-events-none" />
           </>

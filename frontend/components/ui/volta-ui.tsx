@@ -2,6 +2,7 @@
 
 // Re-export all atomic UI components for Volta Design System
 export * from "./field";
+export * from "./fieldset";
 export * from "./card";
 export * from "./alert";
 export * from "./badge";
@@ -15,6 +16,7 @@ export * from "./context-menu";
 export * from "./segmented-control";
 export * from "./avatar";
 export { Button, type ButtonProps } from "./button";
+export { Input, type InputProps } from "./input";
 export { Select as NativeSelect, type NativeSelectProps, Select } from "./native-select";
 export { Textarea, type TextareaProps } from "./textarea";
 export { Skeleton, type SkeletonProps } from "./Skeleton";

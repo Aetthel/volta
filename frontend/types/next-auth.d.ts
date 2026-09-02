@@ -16,6 +16,7 @@ declare module "next-auth" {
       themeColor?: string;
       fontSizeLevel?: string;
       borderRadiusLevel?: string;
+      emailVerified?: boolean | null;
     } & DefaultSession["user"];
   }
 
@@ -52,6 +53,7 @@ declare module "@auth/core/types" {
       themeColor?: string;
       fontSizeLevel?: string;
       borderRadiusLevel?: string;
+      emailVerified?: boolean | null;
     } & DefaultSession["user"];
   }
 
@@ -87,6 +89,7 @@ declare module "next-auth/jwt" {
     themeColor?: string;
     fontSizeLevel?: string;
     borderRadiusLevel?: string;
+    emailVerified?: boolean | null;
   }
 }
 
@@ -105,5 +108,6 @@ declare module "@auth/core/jwt" {
     themeColor?: string;
     fontSizeLevel?: string;
     borderRadiusLevel?: string;
+    emailVerified?: boolean | null;
   }
 }

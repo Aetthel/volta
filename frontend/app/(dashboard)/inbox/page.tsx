@@ -123,235 +123,240 @@ export default function InboxPage() {
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
 
-        <main className="p-gutter max-w-container-max w-full mx-auto flex-1 flex flex-col">
-          {/* Header */}
-          <PageHeader
-            title="Inbox"
-            description="Centro de notificaciones y actividad de tu negocio"
-            actions={
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => markAllAsRead(selectedCategory !== "TODAS" ? selectedCategory : undefined)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-xl transition-colors cursor-pointer"
-                  title="Marcar todas como leídas"
-                >
-                  <CheckCheck className="w-4 h-4 text-primary" />
-                  <span className="hidden sm:inline">Marcar leídas</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowArchived(!showArchived)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-colors cursor-pointer ${
-                    showArchived
-                      ? "bg-primary/10 text-primary"
-                      : "text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50"
-                  }`}
-                  title={showArchived ? "Ver activas" : "Ver archivadas"}
-                >
-                  <Archive className="w-4 h-4" />
-                  <span className="hidden sm:inline">
-                    {showArchived ? "Activas" : `Archivadas (${totalArchivedCount})`}
-                  </span>
-                </button>
-              </div>
-            }
-          />
-
-          {/* Minimalist Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6">
-            {/* Category Segmented Control (Screenshot 1 style) */}
-            {!showArchived ? (
-              <div className="overflow-x-auto no-scrollbar">
-                <SegmentedControl
-                  value={selectedCategory}
-                  onChange={(val) => setSelectedCategory(val as AlertCategory | "TODAS")}
-                  options={[
-                    { value: "TODAS", label: "Todas" },
-                    { value: "APPOINTMENT", label: "Citas", icon: Calendar },
-                    { value: "WHATSAPP", label: "WhatsApp", icon: MessageSquare },
-                    { value: "CLIENT", label: "Clientes", icon: Users },
-                    { value: "BILLING", label: "Facturación", icon: CreditCard },
-                    { value: "SYSTEM", label: "Sistema", icon: Bell },
-                  ]}
-                />
-              </div>
-            ) : (
-              <div className="text-sm font-semibold text-on-surface-variant flex items-center gap-2">
-                <Archive className="w-4 h-4 text-primary" />
-                <span>Notificaciones Archivadas</span>
-              </div>
-            )}
-
-            {/* Quick Search & Filter */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="relative flex items-center bg-surface-variant/40 hover:bg-surface-variant/60 focus-within:bg-surface-container-lowest border border-outline-variant/40 rounded-xl px-3 py-1.5 transition-all w-full sm:w-56">
-                <Search className="w-3.5 h-3.5 text-on-surface-variant/60 shrink-0 mr-2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar..."
-                  className="bg-transparent border-0 outline-none text-xs text-on-surface placeholder:text-on-surface-variant/50 w-full"
-                />
-                {searchQuery && (
+        <main className="flex-1 flex flex-col w-full p-0">
+          {/* Top Header & Controls Toolbar */}
+          <div className="p-gutter max-w-container-max w-full mx-auto pt-6 pb-4 flex flex-col gap-4 bg-surface shrink-0">
+            {/* Header */}
+            <PageHeader
+              title="Inbox"
+              description="Centro de notificaciones y actividad de tu negocio"
+              actions={
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setSearchQuery("")}
-                    className="p-0.5 text-on-surface-variant/50 hover:text-on-surface"
+                    type="button"
+                    onClick={() => markAllAsRead(selectedCategory !== "TODAS" ? selectedCategory : undefined)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-variant/50 rounded-xl transition-colors cursor-pointer"
+                    title="Marcar todas como leídas"
                   >
-                    <X className="w-3 h-3" />
+                    <CheckCheck className="w-4 h-4 text-primary" />
+                    <span className="hidden sm:inline">Marcar leídas</span>
                   </button>
-                )}
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setOnlyUnread(!onlyUnread)}
-                className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                  onlyUnread
-                    ? "bg-primary/10 text-primary border-primary/30"
-                    : "text-on-surface-variant/60 hover:text-on-surface border-outline-variant/40 hover:bg-surface-variant/40"
-                }`}
-                title={onlyUnread ? "Mostrando solo no leídas" : "Filtrar por no leídas"}
-                aria-label="Solo no leídas"
-              >
-                <Filter className="w-3.5 h-3.5" />
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowArchived(!showArchived)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-colors cursor-pointer ${
+                      showArchived
+                        ? "bg-primary/10 text-primary"
+                        : "text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50"
+                    }`}
+                    title={showArchived ? "Ver activas" : "Ver archivadas"}
+                  >
+                    <Archive className="w-4 h-4" />
+                    <span className="hidden sm:inline">
+                      {showArchived ? "Activas" : `Archivadas (${totalArchivedCount})`}
+                    </span>
+                  </button>
+                </div>
+              }
+            />
+
+            {/* Minimalist Controls Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              {/* Category Segmented Control (Screenshot 1 style) */}
+              {!showArchived ? (
+                <div className="overflow-x-auto no-scrollbar">
+                  <SegmentedControl
+                    value={selectedCategory}
+                    onChange={(val) => setSelectedCategory(val as AlertCategory | "TODAS")}
+                    options={[
+                      { value: "TODAS", label: "Todas" },
+                      { value: "APPOINTMENT", label: "Citas", icon: Calendar },
+                      { value: "WHATSAPP", label: "WhatsApp", icon: MessageSquare },
+                      { value: "CLIENT", label: "Clientes", icon: Users },
+                      { value: "BILLING", label: "Facturación", icon: CreditCard },
+                      { value: "SYSTEM", label: "Sistema", icon: Bell },
+                    ]}
+                  />
+                </div>
+              ) : (
+                <div className="text-sm font-semibold text-on-surface-variant flex items-center gap-2">
+                  <Archive className="w-4 h-4 text-primary" />
+                  <span>Notificaciones Archivadas</span>
+                </div>
+              )}
+
+              {/* Quick Search & Filter */}
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="relative flex items-center bg-surface-variant/40 hover:bg-surface-variant/60 focus-within:bg-surface-container-lowest border border-outline-variant/40 rounded-xl px-3 py-1.5 transition-all w-full sm:w-56">
+                  <Search className="w-3.5 h-3.5 text-on-surface-variant/60 shrink-0 mr-2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar..."
+                    className="bg-transparent border-0 outline-none text-xs text-on-surface placeholder:text-on-surface-variant/50 w-full"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="p-0.5 text-on-surface-variant/50 hover:text-on-surface"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setOnlyUnread(!onlyUnread)}
+                  className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                    onlyUnread
+                      ? "bg-primary/10 text-primary border-primary/30"
+                      : "text-on-surface-variant/60 hover:text-on-surface border-outline-variant/40 hover:bg-surface-variant/40"
+                  }`}
+                  title={onlyUnread ? "Mostrando solo no leídas" : "Filtrar por no leídas"}
+                  aria-label="Solo no leídas"
+                >
+                  <Filter className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Minimalist Unified Notification Feed */}
-          {filteredAlerts.length > 0 ? (
-            <div className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-2xl divide-y divide-outline-variant/20 overflow-hidden shadow-xs">
-              {filteredAlerts.map((alert) => {
-                const IconComponent = getCategoryIcon(alert.category);
+          {/* Minimalist Unified Notification Feed (Full Bleed Margin) */}
+          <div className="w-full flex-1 overflow-auto border-t border-outline-variant/30 flex flex-col bg-surface">
+            {filteredAlerts.length > 0 ? (
+              <div className="w-full divide-y divide-outline-variant/20">
+                {filteredAlerts.map((alert) => {
+                  const IconComponent = getCategoryIcon(alert.category);
 
-                return (
-                  <div
-                    key={alert.id}
-                    className={`
-                      group flex items-center justify-between px-4 py-3.5 sm:px-5 sm:py-4 transition-colors hover:bg-surface-container-low/40 gap-3 sm:gap-4
-                      ${!alert.isRead ? "bg-primary/[0.02]" : "opacity-75 hover:opacity-100"}
-                    `}
-                  >
-                    {/* Left: Unread dot + Category Icon + Content */}
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {/* Unread Status Dot */}
-                      <span
-                        className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
-                          !alert.isRead ? "bg-primary" : "bg-transparent"
-                        }`}
-                      />
-
-                      {/* Icon */}
-                      <div className="w-8 h-8 rounded-xl bg-surface-container-high/60 flex items-center justify-center text-on-surface-variant shrink-0 group-hover:text-primary transition-colors">
-                        <IconComponent className="w-4 h-4" />
-                      </div>
-
-                      {/* Title & Description */}
-                      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2.5">
+                  return (
+                    <div
+                      key={alert.id}
+                      className={`
+                        group flex items-center justify-between px-6 py-4 sm:px-8 transition-colors hover:bg-surface-container-low/60 gap-3 sm:gap-4
+                        ${!alert.isRead ? "bg-primary/[0.03]" : "opacity-75 hover:opacity-100"}
+                      `}
+                    >
+                      {/* Left: Unread dot + Category Icon + Content */}
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {/* Unread Status Dot */}
                         <span
-                          className={`text-sm truncate leading-snug ${
-                            !alert.isRead
-                              ? "font-semibold text-on-surface"
-                              : "font-medium text-on-surface/80"
+                          className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
+                            !alert.isRead ? "bg-primary" : "bg-transparent"
                           }`}
-                        >
-                          {alert.title}
+                        />
+
+                        {/* Icon */}
+                        <div className="w-8 h-8 rounded-xl bg-surface-variant/60 flex items-center justify-center text-on-surface-variant shrink-0 group-hover:text-primary transition-colors">
+                          <IconComponent className="w-4 h-4" />
+                        </div>
+
+                        {/* Title & Description */}
+                        <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2.5">
+                          <span
+                            className={`text-sm truncate leading-snug ${
+                              !alert.isRead
+                                ? "font-semibold text-on-surface"
+                                : "font-medium text-on-surface/80"
+                            }`}
+                          >
+                            {alert.title}
+                          </span>
+
+                          <span className="hidden sm:inline text-on-surface-variant/30">•</span>
+
+                          <span className="text-xs text-on-surface-variant/70 truncate flex-1 leading-normal">
+                            {alert.description}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Action link, Relative time & Subtle hover actions */}
+                      <div className="flex items-center gap-3 shrink-0">
+                        {/* Action Link */}
+                        {alert.actionUrl && (
+                          <Link
+                            href={alert.actionUrl}
+                            onClick={() => {
+                              if (!alert.isRead) markAsRead(alert.id);
+                            }}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0"
+                          >
+                            <span>{alert.actionLabel || "Ver"}</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
+
+                        {/* Relative Time */}
+                        <span className="text-[11px] text-on-surface-variant/50 font-medium whitespace-nowrap">
+                          {getRelativeTime(alert.createdAt)}
                         </span>
 
-                        <span className="hidden sm:inline text-on-surface-variant/30">•</span>
+                        {/* Quick Hover Action Icons */}
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => markAsRead(alert.id)}
+                            className="p-1 text-on-surface-variant/60 hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors"
+                            title={alert.isRead ? "Ya leída" : "Marcar como leída"}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
 
-                        <span className="text-xs text-on-surface-variant/70 truncate flex-1 leading-normal">
-                          {alert.description}
-                        </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (alert.isArchived) {
+                                unarchiveAlert(alert.id);
+                              } else {
+                                archiveAlert(alert.id);
+                              }
+                            }}
+                            className="p-1 text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors"
+                            title={alert.isArchived ? "Desarchivar" : "Archivar"}
+                          >
+                            {alert.isArchived ? (
+                              <ArchiveRestore className="w-3.5 h-3.5" />
+                            ) : (
+                              <Archive className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => deleteAlert(alert.id)}
+                            className="p-1 text-on-surface-variant/40 hover:text-error hover:bg-error/10 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Right: Action link, Relative time & Subtle hover actions */}
-                    <div className="flex items-center gap-3 shrink-0">
-                      {/* Action Link */}
-                      {alert.actionUrl && (
-                        <Link
-                          href={alert.actionUrl}
-                          onClick={() => {
-                            if (!alert.isRead) markAsRead(alert.id);
-                          }}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline shrink-0"
-                        >
-                          <span>{alert.actionLabel || "Ver"}</span>
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </Link>
-                      )}
-
-                      {/* Relative Time */}
-                      <span className="text-[11px] text-on-surface-variant/50 font-medium whitespace-nowrap">
-                        {getRelativeTime(alert.createdAt)}
-                      </span>
-
-                      {/* Quick Hover Action Icons */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={() => markAsRead(alert.id)}
-                          className="p-1 text-on-surface-variant/60 hover:text-primary hover:bg-surface-container-high rounded-lg transition-colors"
-                          title={alert.isRead ? "Ya leída" : "Marcar como leída"}
-                        >
-                          <Check className="w-3.5 h-3.5" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (alert.isArchived) {
-                              unarchiveAlert(alert.id);
-                            } else {
-                              archiveAlert(alert.id);
-                            }
-                          }}
-                          className="p-1 text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container-high rounded-lg transition-colors"
-                          title={alert.isArchived ? "Desarchivar" : "Archivar"}
-                        >
-                          {alert.isArchived ? (
-                            <ArchiveRestore className="w-3.5 h-3.5" />
-                          ) : (
-                            <Archive className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => deleteAlert(alert.id)}
-                          className="p-1 text-on-surface-variant/40 hover:text-error hover:bg-error/10 rounded-lg transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            /* Minimalist Empty State */
-            <div className="w-full py-16 flex flex-col items-center justify-center text-center bg-surface-container-lowest border border-outline-variant/30 rounded-2xl">
-              <Inbox className="w-8 h-8 text-on-surface-variant/40 mb-2.5" />
-              <p className="text-sm font-semibold text-on-surface">
-                {showArchived
-                  ? "No hay notificaciones archivadas"
-                  : onlyUnread
-                    ? "No tienes notificaciones sin leer"
-                    : "Todo al día"}
-              </p>
-              <p className="text-xs text-on-surface-variant/60 max-w-xs mt-0.5">
-                {showArchived
-                  ? "Las notificaciones que archives aparecerán en esta sección."
-                  : "Te avisaremos cuando haya nuevas reservas o actividad."}
-              </p>
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            ) : (
+              /* Minimalist Empty State */
+              <div className="w-full py-24 flex flex-col items-center justify-center text-center">
+                <Inbox className="w-8 h-8 text-on-surface-variant/40 mb-2.5" />
+                <p className="text-sm font-semibold text-on-surface">
+                  {showArchived
+                    ? "No hay notificaciones archivadas"
+                    : onlyUnread
+                      ? "No tienes notificaciones sin leer"
+                      : "Todo al día"}
+                </p>
+                <p className="text-xs text-on-surface-variant/60 max-w-xs mt-0.5">
+                  {showArchived
+                    ? "Las notificaciones que archives aparecerán en esta sección."
+                    : "Te avisaremos cuando haya nuevas reservas o actividad."}
+                </p>
+              </div>
+            )}
+          </div>
         </main>
 
         <BottomNav />

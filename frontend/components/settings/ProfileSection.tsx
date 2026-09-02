@@ -88,7 +88,13 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     id?: string;
     createdAt?: string;
     twoFactorEnabled?: boolean;
+    emailVerified?: boolean;
+    status?: string;
   } | null>(null);
+
+  const isEmailVerified = Boolean(
+    userProfileData?.emailVerified ?? (session?.user as any)?.emailVerified ?? false
+  );
 
   const workerPhotoInputRef = useRef<HTMLInputElement>(null);
 
@@ -407,6 +413,23 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     ? "Jefe de Tienda"
                     : "Especialista / Empleado"}
               </Badge>
+              {isEmailVerified ? (
+                <Badge
+                  variant="outline"
+                  className="text-label-sm font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 gap-1 flex items-center"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span>Correo Verificado</span>
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="text-label-sm font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 gap-1 flex items-center"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <span>Correo No Verificado</span>
+                </Badge>
+              )}
             </div>
 
             <div className="flex items-center gap-x-5 gap-y-1 text-xs text-on-surface-variant/80 flex-wrap">
@@ -479,7 +502,26 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                 </Field>
 
                 <Field>
-                  <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
+                    {isEmailVerified ? (
+                      <span className="text-label-sm text-on-surface-variant/60 font-medium inline-flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <span>Verificado</span>
+                      </span>
+                    ) : (
+                      <span className="text-label-sm text-amber-600/90 dark:text-amber-400 font-medium inline-flex items-center gap-1">
+                        <span>No verificado</span>
+                        <span>·</span>
+                        <a
+                          href={`/verify-email?email=${encodeURIComponent(personalForm.email || session?.user?.email || "")}`}
+                          className="underline hover:text-amber-700 dark:hover:text-amber-300 font-semibold"
+                        >
+                          Verificar
+                        </a>
+                      </span>
+                    )}
+                  </div>
                   <FloatingInput
                     id="userEmail"
                     label="correo@empresa.com"

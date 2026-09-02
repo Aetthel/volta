@@ -70,7 +70,7 @@ async function ensureMockBusinessesExist() {
           email: "jefe@volta.es",
           password: demoPasswordHash,
           role: "JEFE",
-          businessId: demoBusiness.id,
+          business: { connect: { id: demoBusiness.id } },
         },
       });
       console.log(`[dbInit] Demo business and user created successfully (ID: ${demoBusiness.id})`);
