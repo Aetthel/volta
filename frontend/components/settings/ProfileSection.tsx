@@ -93,7 +93,13 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     id?: string;
     createdAt?: string;
     twoFactorEnabled?: boolean;
+    emailVerified?: boolean;
+    status?: string;
   } | null>(null);
+
+  const isEmailVerified = Boolean(
+    userProfileData?.emailVerified ?? (session?.user as any)?.emailVerified ?? false
+  );
 
   const workerPhotoInputRef = useRef<HTMLInputElement>(null);
 
@@ -411,6 +417,23 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                       ? "Jefe de Tienda"
                       : "Especialista / Empleado"}
                 </Badge>
+                {isEmailVerified ? (
+                  <Badge
+                    variant="outline"
+                    className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 gap-1 flex items-center"
+                  >
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>Correo Verificado</span>
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 gap-1 flex items-center"
+                  >
+                    <AlertCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>Correo No Verificado</span>
+                  </Badge>
+                )}
               </div>
 
               <div className="flex items-center gap-4 text-xs text-on-surface-variant/80 flex-wrap">
@@ -489,7 +512,20 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
+                    <div className="flex items-center justify-between mb-1">
+                      <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
+                      {isEmailVerified ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Verificado</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+                          <AlertCircle className="w-3 h-3 text-amber-600" />
+                          <span>No verificado</span>
+                        </span>
+                      )}
+                    </div>
                     <Input
                       id="userEmail"
                       placeholder="correo@empresa.com"
@@ -501,6 +537,20 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                       }
                       icon={Mail}
                     />
+                    {!isEmailVerified && (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs mt-2 text-amber-800 dark:text-amber-300 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                          Tu dirección de correo aún no está verificada.
+                        </span>
+                        <a
+                          href={`/verify-email?email=${encodeURIComponent(personalForm.email || session?.user?.email || "")}`}
+                          className="font-bold underline hover:text-amber-900 dark:hover:text-amber-200 shrink-0"
+                        >
+                          Verificar ahora →
+                        </a>
+                      </div>
+                    )}
                   </Field>
                 </FieldGroup>
               </CardContent>

@@ -48,6 +48,7 @@ function toSessionUser(user) {
     themeColor: user.business?.themeColor || "CLINICAL_ELEGANCE",
     fontSizeLevel: user.business?.fontSizeLevel || "MEDIUM",
     borderRadiusLevel: user.business?.borderRadiusLevel || "MEDIUM",
+    emailVerified: Boolean(user.emailVerified),
   };
 }
 

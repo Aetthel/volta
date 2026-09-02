@@ -492,7 +492,19 @@ function AdminProfileSection({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
+                <div className="flex items-center justify-between mb-1">
+                  <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
+                  {Boolean(session?.user?.emailVerified) ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/50">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span>Verificado</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50">
+                      <span>No verificado</span>
+                    </span>
+                  )}
+                </div>
                 <Input
                   id="adminEmail"
                   placeholder="correo@empresa.com"

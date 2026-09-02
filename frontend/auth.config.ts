@@ -54,6 +54,7 @@ export const authConfig: NextAuthConfig = {
         token.themeColor = user.themeColor || "TEAL";
         token.fontSizeLevel = user.fontSizeLevel || "MEDIUM";
         token.borderRadiusLevel = user.borderRadiusLevel || "MEDIUM";
+        token.emailVerified = (user as any).emailVerified ?? false;
       }
       if (trigger === "update" && session) {
         const themeColor =
@@ -98,6 +99,10 @@ export const authConfig: NextAuthConfig = {
           session.user?.business?.id;
         const role = session.role || session.user?.role;
         const id = session.id || session.user?.id;
+        const emailVerified =
+          session.emailVerified !== undefined
+            ? session.emailVerified
+            : session.user?.emailVerified;
 
         if (businessId) token.businessId = businessId;
         if (role) token.role = role;
@@ -110,6 +115,7 @@ export const authConfig: NextAuthConfig = {
         if (trialExpiresAt !== undefined) token.trialExpiresAt = trialExpiresAt;
         if (businessName) token.businessName = businessName;
         if (businessLogoUrl !== undefined) token.businessLogoUrl = businessLogoUrl;
+        if (emailVerified !== undefined) token.emailVerified = emailVerified;
       }
       return token;
     },
@@ -131,6 +137,7 @@ export const authConfig: NextAuthConfig = {
         session.user.themeColor = token.themeColor || "TEAL";
         session.user.fontSizeLevel = token.fontSizeLevel || "MEDIUM";
         session.user.borderRadiusLevel = token.borderRadiusLevel || "MEDIUM";
+        session.user.emailVerified = token.emailVerified ?? false;
       }
       return session;
     },
