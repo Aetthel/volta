@@ -141,7 +141,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
       ? `${window.location.origin}/booking/${businessId}`
       : `https://volta.app/booking/${businessId}`;
 
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(bookingUrl)}`;
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=0-0-0&bgcolor=255-255-255&margin=1&data=${encodeURIComponent(bookingUrl)}`;
 
   const handleDownloadQr = async () => {
     setDownloadingQr(true);

@@ -215,7 +215,7 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
                   src={
                     qrCode.startsWith("data:")
                       ? qrCode
-                      : `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrCode)}`
+                      : `https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=0-0-0&bgcolor=255-255-255&margin=1&data=${encodeURIComponent(qrCode)}`
                   }
                   alt="Código QR WhatsApp"
                   className="w-48 h-48 rounded-lg"

@@ -420,7 +420,7 @@ export async function setupTwoFactor(userId) {
     margin: 2,
     width: 280,
     color: {
-      dark: "#0f766e",
+      dark: "#000000",
       light: "#ffffff",
     },
   });
