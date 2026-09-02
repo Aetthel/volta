@@ -1,4 +1,5 @@
 export { authenticate, requireAuth, requireRole, requireApiKey } from "./auth.js";
+export type { AuthRequest, UserRole } from "./auth.js";
 export { requireBookingSession } from "./bookingSession.js";
 export type { BookingIdentity, BookingRequest } from "./bookingSession.js";
 export { errorHandler } from "./errorHandler.js";

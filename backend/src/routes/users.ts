@@ -6,6 +6,7 @@ import {
   validateId,
   validateBody,
   checkSubscriptionLimits,
+  type AuthRequest,
 } from "../middleware/index.js";
 import { createUserSchema, updateUserSchema, registerSchema } from "../validators/index.js";
 import * as userController from "../controllers/userController.js";
@@ -33,7 +34,7 @@ router.post(
 );
 
 // GET /api/users/check-permissions (Heartbeat permission check)
-router.get("/check-permissions", authenticate, (req, res) => {
+router.get("/check-permissions", authenticate, (req: AuthRequest, res) => {
   return res.json({
     status: "ok",
     authorized: true,
