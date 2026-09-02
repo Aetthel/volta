@@ -6,23 +6,19 @@ import {
   Loader2,
   Save,
   Smartphone,
-  CheckCircle2,
   Sparkles,
   Clock,
   RotateCcw,
 } from "lucide-react";
 import type { MessageTemplates, ToastState } from "@/types/settings";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  Button,
-} from "@/components/ui/volta-ui";
+import { Button } from "@/components/ui/volta-ui";
+import { SectionHeading } from "../SectionHeading";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
+
+/** Chip de variable dinámica: blanco sobre el panel gris de la barra. */
+const VARIABLE_CHIP =
+  "px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-surface-container-lowest text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs";
 
 const DEFAULT_WELCOME = `Hola {nombre}, ¡bienvenido/a a {negocio}! Por favor confirma tu consentimiento de privacidad en: {link_lopd}`;
 const DEFAULT_REMINDER = `Hola {nombre}, te recordamos tu cita de {servicio} para {fecha} a las {hora} en {negocio}. ¡Te esperamos!`;
@@ -122,57 +118,52 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
   }, [activeTemplateTab, templates.reminderMessage, templates.welcomeMessage, profileName]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      {/* Left Column: Template Editor (7 cols) */}
-      <Card className="lg:col-span-7 flex flex-col">
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
-                <Send className="w-4 h-4 text-primary" />
-                <span>Personalización de Plantillas</span>
-              </CardTitle>
-              <CardDescription>
-                Define el contenido exacto de los mensajes automáticos que recibirán tus clientes.
-              </CardDescription>
-            </div>
+    <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12 pt-8">
+      {/* Columna izquierda: editor de plantillas (7 cols) */}
+      <div className="lg:col-span-7 flex flex-col">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <SectionHeading
+            icon={Send}
+            title="Personalización de Plantillas"
+            description="Define el contenido exacto de los mensajes automáticos que recibirán tus clientes."
+            className="mb-0"
+          />
 
-            {/* Template Selector Tabs */}
-            <div className="flex items-center p-1 bg-surface-container-low border border-outline-variant/50 rounded-xl self-start sm:self-auto">
-              <button
-                type="button"
-                onClick={() => setActiveTemplateTab("reminder")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-                  activeTemplateTab === "reminder"
-                    ? "bg-white text-primary shadow-xs border border-outline-variant/40 font-bold"
-                    : "text-on-surface-variant/75 hover:text-on-surface"
-                )}
-              >
-                Recordatorio 24h
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTemplateTab("welcome")}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-                  activeTemplateTab === "welcome"
-                    ? "bg-white text-primary shadow-xs border border-outline-variant/40 font-bold"
-                    : "text-on-surface-variant/75 hover:text-on-surface"
-                )}
-              >
-                Bienvenida LOPD
-              </button>
-            </div>
+          {/* Selector de plantilla */}
+          <div className="flex items-center p-1 bg-surface-container-low border border-outline-variant/50 rounded-xl self-start sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={() => setActiveTemplateTab("reminder")}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
+                activeTemplateTab === "reminder"
+                  ? "bg-surface-container-lowest text-primary shadow-xs border border-outline-variant/40 font-bold"
+                  : "text-on-surface-variant/75 hover:text-on-surface"
+              )}
+            >
+              Recordatorio 24h
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTemplateTab("welcome")}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
+                activeTemplateTab === "welcome"
+                  ? "bg-surface-container-lowest text-primary shadow-xs border border-outline-variant/40 font-bold"
+                  : "text-on-surface-variant/75 hover:text-on-surface"
+              )}
+            >
+              Bienvenida LOPD
+            </button>
           </div>
-        </CardHeader>
+        </div>
 
-        <form onSubmit={handleSaveTemplates}>
-          <CardContent className="flex flex-col gap-4 pt-2">
+        <form onSubmit={handleSaveTemplates} className="mt-6">
+          <div className="flex flex-col gap-4">
             {/* Variable Chips Toolbar */}
             <div className="p-3 bg-surface-container-low rounded-xl border border-outline-variant/40 flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-on-surface-variant/80 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-label-sm font-bold text-on-surface-variant/80 uppercase tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-primary" />
                   Variables dinámicas (haz clic para insertar)
                 </span>
@@ -184,35 +175,35 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
                     <button
                       type="button"
                       onClick={() => insertVariable("{nombre}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{nombre}"}
                     </button>
                     <button
                       type="button"
                       onClick={() => insertVariable("{servicio}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{servicio}"}
                     </button>
                     <button
                       type="button"
                       onClick={() => insertVariable("{fecha}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{fecha}"}
                     </button>
                     <button
                       type="button"
                       onClick={() => insertVariable("{hora}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{hora}"}
                     </button>
                     <button
                       type="button"
                       onClick={() => insertVariable("{negocio}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{negocio}"}
                     </button>
@@ -222,21 +213,21 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
                     <button
                       type="button"
                       onClick={() => insertVariable("{nombre}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{nombre}"}
                     </button>
                     <button
                       type="button"
                       onClick={() => insertVariable("{negocio}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{negocio}"}
                     </button>
                     <button
                       type="button"
                       onClick={() => insertVariable("{link_lopd}")}
-                      className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-white text-primary border border-outline-variant/60 hover:border-primary hover:bg-primary/5 transition-all active:scale-95 cursor-pointer shadow-2xs"
+                      className={VARIABLE_CHIP}
                     >
                       + {"{link_lopd}"}
                     </button>
@@ -287,9 +278,9 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
                 />
               </div>
             )}
-          </CardContent>
+          </div>
 
-          <CardFooter className="border-t border-outline-variant/40 pt-4 flex items-center justify-between">
+          <div className="mt-6 flex items-center justify-between gap-3">
             <Button
               type="button"
               variant="ghost"
@@ -332,26 +323,25 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
                 </>
               )}
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
+      </div>
 
-      {/* Right Column: WhatsApp Live Smartphone Simulator (5 cols) */}
-      <div className="lg:col-span-5 flex flex-col gap-6">
-        <Card className="overflow-hidden border-2 border-outline-variant/60 shadow-md">
-          <CardHeader className="bg-surface-container-low pb-3 border-b border-outline-variant/40">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider text-on-surface">
-                  Vista Previa en Vivo
-                </span>
-              </div>
-              <span className="text-[11px] font-semibold text-on-surface-variant/70">
-                WhatsApp Chat
+      {/* Columna derecha: simulador de chat (5 cols). El marco se queda: no es un
+          contenedor de contenido, dibuja la pantalla de un móvil. */}
+      <div className="lg:col-span-5 flex flex-col mt-10 pt-8 border-t border-outline-variant/50 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-12">
+        <div className="rounded-xl overflow-hidden border border-outline-variant shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-surface-container-low border-b border-outline-variant/40">
+            <div className="flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider text-on-surface">
+                Vista Previa en Vivo
               </span>
             </div>
-          </CardHeader>
+            <span className="text-label-sm font-semibold text-on-surface-variant/70">
+              WhatsApp Chat
+            </span>
+          </div>
 
           {/* Smartphone Chat Screen */}
           <div className="bg-[#EFEAE2] dark:bg-[#0b141a] p-4 min-h-[320px] flex flex-col justify-between relative select-none">
@@ -394,31 +384,21 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        {/* Automation Rules Card */}
-        <Card className="p-5 bg-surface-container-low border border-outline-variant/50">
-          <div className="flex flex-col gap-3">
-            <span className="font-bold text-xs uppercase tracking-wider text-on-surface flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-primary" />
-              Disparadores Automáticos Activos
-            </span>
-            <div className="flex flex-col gap-2 text-xs text-on-surface-variant">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Recordatorio 24 horas antes del servicio</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Consentimiento LOPD al registrar nuevo cliente</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Sincronización instantánea de cancelaciones</span>
-              </div>
-            </div>
+        {/* Disparadores automáticos: título y filas centrados sobre el eje de la
+            columna, cada fila con su icono pegado al texto. */}
+        <div className="mt-8 flex flex-col gap-3 items-center text-center">
+          <span className="font-bold text-xs uppercase tracking-wider text-on-surface flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-primary" />
+            Disparadores Automáticos Activos
+          </span>
+          <div className="flex flex-col gap-2 items-center text-xs text-on-surface-variant">
+            <span>Recordatorio 24 horas antes del servicio</span>
+            <span>Consentimiento LOPD al registrar nuevo cliente</span>
+            <span>Sincronización instantánea de cancelaciones</span>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

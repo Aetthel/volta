@@ -15,24 +15,16 @@ import {
   Eye,
   EyeOff,
   CheckCircle2,
-  AlertCircle,
   Calendar,
   QrCode,
   Copy,
   Check,
-  Smartphone,
   ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BusinessProfile, ToastState } from "@/types/settings";
 import { apiClient } from "@/lib/apiClient";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
   FloatingInput,
   Button,
   Badge,
@@ -40,8 +32,11 @@ import {
   Field,
   FieldLabel,
   Avatar,
-  Alert,
 } from "@/components/ui/volta-ui";
+import { SectionHeading } from "./SectionHeading";
+
+/** Relleno blanco en los campos: son la capa interactiva sobre el fondo gris. */
+const INPUT_SURFACE = "bg-surface-container-lowest";
 
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuD4Ec4Zci7RmiQqA_-qTa0tdRpm9Wl1AVZQsYRoqmBCYgu-SrdSAZoK38if-6y3v-fI_rbpjvuXSX1DFFje1tbtmTQt0JTNiO8-dR8-QBSIhw6Ob2_GaRhoHHIUj_ssbabDqhqu3DNXv-QcDPpcQZCs0T6AirCFHbqrAQLOZ9Y-0DTH68gpUFZxyRQx4q2-DKgTBUU6cSPfG6LVM1L9xd3VaAr1PPApcF4Xlu4kLCaLYAbwyfkOOpjFQ234c3SqedBa-PqJ_pywDw";
@@ -360,152 +355,147 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
   const hasCustomPhoto = profile.workerPhoto && profile.workerPhoto !== DEFAULT_AVATAR;
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
-      {/* 1. Top Identity Card */}
-      <Card className="p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            {/* Avatar with instant upload trigger */}
-            <div className="relative group/avatar shrink-0">
-              <div
-                onClick={() => workerPhotoInputRef.current?.click()}
-                className="relative rounded-full cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/40"
-                title="Haz clic para cambiar foto de perfil"
-              >
-                <Avatar
-                  name={personalForm.name || session?.user?.name || "Usuario"}
-                  src={hasCustomPhoto ? profile.workerPhoto : null}
-                  type="person"
-                  size="xl"
-                  className="w-20 h-20 shadow-sm"
-                />
-
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full">
-                  <Camera className="w-5 h-5 text-white" />
-                </div>
-              </div>
-
-              <input
-                type="file"
-                ref={workerPhotoInputRef}
-                onChange={handleWorkerPhotoChange}
-                accept="image/*"
-                className="hidden"
+    <div className="animate-in fade-in duration-200">
+      {/* 1. Identidad — sin contenedor: el avatar ancla la página */}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8 border-b border-outline-variant/50">
+        <div className="flex items-center gap-5">
+          {/* Avatar con subida inmediata al hacer clic */}
+          <div className="relative group/avatar shrink-0">
+            <button
+              type="button"
+              onClick={() => workerPhotoInputRef.current?.click()}
+              className="relative block rounded-full cursor-pointer transition-shadow duration-200 hover:ring-2 hover:ring-primary/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              title="Cambiar foto de perfil"
+              aria-label="Cambiar foto de perfil"
+            >
+              <Avatar
+                name={personalForm.name || session?.user?.name || "Usuario"}
+                src={hasCustomPhoto ? profile.workerPhoto : null}
+                type="person"
+                size="xl"
+                className="w-20 h-20"
               />
-            </div>
 
-            {/* Name, Role & Metadata */}
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="font-title-lg text-xl font-bold text-on-surface">
-                  {personalForm.name || session?.user?.name || "Usuario de Volta"}
-                </h2>
-                <Badge
-                  variant="default"
-                  className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
-                >
-                  {role === "ADMIN"
-                    ? "Administrador Global"
-                    : role === "JEFE"
-                      ? "Jefe de Tienda"
-                      : "Especialista / Empleado"}
-                </Badge>
+              {/* Superposición al pasar el ratón */}
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity rounded-full">
+                <Camera className="w-5 h-5 text-white" />
               </div>
+            </button>
 
-              <div className="flex items-center gap-4 text-xs text-on-surface-variant/80 flex-wrap">
-                <span className="font-medium">
-                  ID: #GS-{userProfileData?.id?.slice(-3).toUpperCase() || "001"}
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-on-surface-variant/60" />
-                  Miembro desde {formatProfileDate(userProfileData?.createdAt || "")}
-                </span>
-              </div>
-            </div>
+            <input
+              type="file"
+              ref={workerPhotoInputRef}
+              onChange={handleWorkerPhotoChange}
+              accept="image/*"
+              className="hidden"
+            />
           </div>
 
-          {/* Avatar Actions */}
-          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => workerPhotoInputRef.current?.click()}
-              className="text-xs font-semibold gap-1.5"
-            >
-              <Camera className="w-3.5 h-3.5" />
-              <span>Cambiar foto</span>
-            </Button>
-            {hasCustomPhoto && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleRemovePhoto}
-                className="text-xs font-semibold text-error hover:text-error hover:bg-error/10 gap-1.5"
-                title="Eliminar foto de perfil"
+          {/* Nombre, rol y metadatos */}
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h2 className="font-title-lg text-xl font-bold text-on-surface">
+                {personalForm.name || session?.user?.name || "Usuario de Volta"}
+              </h2>
+              <Badge
+                variant="default"
+                className="text-label-sm font-semibold px-2.5 py-0.5 rounded-full"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Eliminar</span>
-              </Button>
-            )}
+                {role === "ADMIN"
+                  ? "Administrador Global"
+                  : role === "JEFE"
+                    ? "Jefe de Tienda"
+                    : "Especialista / Empleado"}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-x-5 gap-y-1 text-xs text-on-surface-variant/80 flex-wrap">
+              <span className="font-medium tabular-nums">
+                ID: #GS-{userProfileData?.id?.slice(-3).toUpperCase() || "001"}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-on-surface-variant/60" />
+                Miembro desde {formatProfileDate(userProfileData?.createdAt || "")}
+              </span>
+            </div>
           </div>
         </div>
-      </Card>
 
-      {/* 2. Main 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Columna Izquierda: Información Personal (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
-                <span>Información Personal</span>
-              </CardTitle>
-              <CardDescription>
-                Actualiza tu nombre público y el correo electrónico con el que accedes a la plataforma.
-              </CardDescription>
-            </CardHeader>
+        {/* Acciones sobre la foto */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => workerPhotoInputRef.current?.click()}
+            className="text-xs font-semibold gap-1.5"
+          >
+            <Camera className="w-3.5 h-3.5" />
+            <span>Cambiar foto</span>
+          </Button>
+          {hasCustomPhoto && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleRemovePhoto}
+              className="text-xs font-semibold text-error hover:text-error hover:bg-error/10 gap-1.5"
+              title="Eliminar foto de perfil"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Eliminar</span>
+            </Button>
+          )}
+        </div>
+      </section>
+
+      {/* 2. Dos columnas separadas por un filete, no por tarjetas */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
+        {/* Columna izquierda: identidad y acceso (7 cols) */}
+        <div className="lg:col-span-7 flex flex-col pt-8">
+          <section>
+            <SectionHeading
+              icon={User}
+              title="Información Personal"
+              description="Actualiza tu nombre público y el correo electrónico con el que accedes a la plataforma."
+            />
 
             <form onSubmit={handleSavePersonalInfo}>
-              <CardContent className="flex flex-col gap-5 pt-2">
-                <FieldGroup>
-                  <Field>
-                    <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
-                    <FloatingInput
-                      id="userName"
-                      label="Nombre y Apellidos"
-                      type="text"
-                      required
-                      value={personalForm.name}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setPersonalForm({ ...personalForm, name: e.target.value })
-                      }
-                      icon={User}
-                    />
-                  </Field>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
+                  <FloatingInput
+                    id="userName"
+                    label="Nombre y Apellidos"
+                    type="text"
+                    required
+                    value={personalForm.name}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPersonalForm({ ...personalForm, name: e.target.value })
+                    }
+                    icon={User}
+                    className={INPUT_SURFACE}
+                  />
+                </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
-                    <FloatingInput
-                      id="userEmail"
-                      label="correo@empresa.com"
-                      type="email"
-                      required
-                      value={personalForm.email}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setPersonalForm({ ...personalForm, email: e.target.value })
-                      }
-                      icon={Mail}
-                    />
-                  </Field>
-                </FieldGroup>
-              </CardContent>
+                <Field>
+                  <FieldLabel htmlFor="userEmail">Correo Electrónico</FieldLabel>
+                  <FloatingInput
+                    id="userEmail"
+                    label="correo@empresa.com"
+                    type="email"
+                    required
+                    value={personalForm.email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPersonalForm({ ...personalForm, email: e.target.value })
+                    }
+                    icon={Mail}
+                    className={INPUT_SURFACE}
+                  />
+                </Field>
+              </FieldGroup>
 
-              <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end">
+              <div className="flex justify-end mt-6">
                 <Button
                   type="submit"
                   disabled={savingInfo}
@@ -525,38 +515,33 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     </>
                   )}
                 </Button>
-              </CardFooter>
-            </form>
-          </Card>
-
-          {/* Two-Factor Authentication (2FA) Card */}
-          <Card className="p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary shrink-0">
-                  <Smartphone className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <h3 className="font-bold text-base text-on-surface">
-                      Autenticación en Dos Pasos (2FA)
-                    </h3>
-                    <Badge
-                      variant={twoFactorEnabled ? "default" : "outline"}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        twoFactorEnabled ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" : ""
-                      }`}
-                    >
-                      {twoFactorEnabled ? "ACTIVADO" : "DESACTIVADO"}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-on-surface-variant/80 leading-relaxed max-w-md">
-                    Protege tu cuenta exigiendo un código temporal de tu app autenticadora (Google Authenticator, Authy o 1Password) en cada inicio de sesión.
-                  </p>
-                </div>
               </div>
+            </form>
+          </section>
 
-              <div className="shrink-0 self-stretch sm:self-auto flex justify-end">
+          {/* Autenticación en dos pasos */}
+          <section className="mt-10 pt-8 border-t border-outline-variant/50">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
+              <SectionHeading
+                icon={ShieldCheck}
+                title="Autenticación en Dos Pasos"
+                description="Protege tu cuenta exigiendo un código temporal de tu app autenticadora (Google Authenticator, Authy o 1Password) en cada inicio de sesión."
+                className="mb-0"
+                trailing={
+                  <Badge
+                    variant={twoFactorEnabled ? "default" : "outline"}
+                    className={cn(
+                      "text-label-sm font-bold px-2 py-0.5 rounded-full uppercase tracking-wide",
+                      twoFactorEnabled &&
+                        "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
+                    )}
+                  >
+                    {twoFactorEnabled ? "Activado" : "Desactivado"}
+                  </Badge>
+                }
+              />
+
+              <div className="shrink-0 sm:mt-0.5">
                 {twoFactorEnabled ? (
                   <Button
                     type="button"
@@ -576,64 +561,66 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     disabled={loading2fa}
                     className="text-xs font-semibold gap-1.5"
                   >
-                    <ShieldCheck className="w-4 h-4" />
+                    {loading2fa ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <ShieldCheck className="w-4 h-4" />
+                    )}
                     <span>Activar 2FA</span>
                   </Button>
                 )}
               </div>
             </div>
-          </Card>
+          </section>
         </div>
 
-        {/* Columna Derecha: Seguridad y Contraseña (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
-                <Lock className="w-4 h-4 text-primary" />
-                <span>Cambio de Contraseña</span>
-              </CardTitle>
-              <CardDescription>
-                Introduce tu contraseña actual para confirmar tu identidad y define una nueva clave de acceso.
-              </CardDescription>
-            </CardHeader>
+        {/* Columna derecha: contraseña (5 cols). Más corta que la izquierda, así
+            que en escritorio se centra a media altura en lugar de dejar un
+            hueco muerto bajo el botón. */}
+        <div className="lg:col-span-5 flex flex-col justify-center pt-8 border-t border-outline-variant/50 mt-10 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:px-12">
+          <section>
+            <SectionHeading
+              icon={Lock}
+              title="Cambio de Contraseña"
+              description="Introduce tu contraseña actual para confirmar tu identidad y define una nueva clave de acceso."
+            />
 
             <form onSubmit={handleSavePassword}>
-              <CardContent className="flex flex-col gap-4 pt-2">
-                <FieldGroup>
-                  <Field>
-                    <FieldLabel htmlFor="currentPassword">Contraseña Actual</FieldLabel>
-                    <FloatingInput
-                      id="currentPassword"
-                      label="Contraseña actual"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={passwordForm.currentPassword}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-                      }
-                      icon={Key}
-                    />
-                  </Field>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="currentPassword">Contraseña Actual</FieldLabel>
+                  <FloatingInput
+                    id="currentPassword"
+                    label="Contraseña actual"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={passwordForm.currentPassword}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+                    }
+                    icon={Key}
+                    className={INPUT_SURFACE}
+                  />
+                </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="newPassword">Nueva Contraseña</FieldLabel>
-                    <div className="relative">
-                      <FloatingInput
-                        id="newPassword"
-                        label="Mínimo 8 caracteres"
-                        type={showPassword ? "text" : "password"}
-                        required
-                        value={passwordForm.newPassword}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setPasswordForm({ ...passwordForm, newPassword: e.target.value })
-                        }
-                        icon={Key}
-                      />
+                <Field>
+                  <FieldLabel htmlFor="newPassword">Nueva Contraseña</FieldLabel>
+                  <FloatingInput
+                    id="newPassword"
+                    label="Mínimo 8 caracteres"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={passwordForm.newPassword}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+                    }
+                    icon={Key}
+                    className={INPUT_SURFACE}
+                    endAction={
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface transition-colors p-1"
+                        className="text-on-surface-variant/60 hover:text-on-surface transition-colors p-1"
                         tabIndex={-1}
                         aria-label={showPassword ? "Ocultar contraseña" : "Ver contraseña"}
                       >
@@ -643,60 +630,61 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                           <Eye className="w-4 h-4" />
                         )}
                       </button>
-                    </div>
+                    }
+                  />
 
-                    {/* Password Strength Indicator */}
-                    {passwordForm.newPassword && (
-                      <div className="flex flex-col gap-1 mt-2">
-                        <div className="flex items-center justify-between text-[11px] font-semibold">
-                          <span className="text-on-surface-variant/70">Seguridad:</span>
-                          <span
-                            className={
-                              passwordStrength.score >= 3
-                                ? "text-primary font-bold"
-                                : passwordStrength.score === 2
-                                  ? "text-amber-600 font-bold"
-                                  : "text-error font-bold"
-                            }
-                          >
-                            {passwordStrength.label}
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden flex gap-1">
-                          {[1, 2, 3, 4].map((step) => (
-                            <div
-                              key={step}
-                              className={cn(
-                                "h-full flex-1 rounded-full transition-all duration-300",
-                                step <= passwordStrength.score
-                                  ? passwordStrength.color
-                                  : "bg-transparent"
-                              )}
-                            />
-                          ))}
-                        </div>
+                  {/* Indicador de fortaleza */}
+                  {passwordForm.newPassword && (
+                    <div className="flex flex-col gap-1 mt-2">
+                      <div className="flex items-center justify-between text-label-sm font-semibold">
+                        <span className="text-on-surface-variant/70">Seguridad:</span>
+                        <span
+                          className={
+                            passwordStrength.score >= 3
+                              ? "text-primary font-bold"
+                              : passwordStrength.score === 2
+                                ? "text-amber-600 font-bold"
+                                : "text-error font-bold"
+                          }
+                        >
+                          {passwordStrength.label}
+                        </span>
                       </div>
-                    )}
-                  </Field>
+                      <div className="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden flex gap-1">
+                        {[1, 2, 3, 4].map((step) => (
+                          <div
+                            key={step}
+                            className={cn(
+                              "h-full flex-1 rounded-full transition-all duration-300",
+                              step <= passwordStrength.score
+                                ? passwordStrength.color
+                                : "bg-transparent"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="confirmPassword">Confirmar Contraseña</FieldLabel>
-                    <FloatingInput
-                      id="confirmPassword"
-                      label="Repite la nueva contraseña"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={passwordForm.confirmPassword}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-                      }
-                      icon={Key}
-                    />
-                  </Field>
-                </FieldGroup>
-              </CardContent>
+                <Field>
+                  <FieldLabel htmlFor="confirmPassword">Confirmar Contraseña</FieldLabel>
+                  <FloatingInput
+                    id="confirmPassword"
+                    label="Repite la nueva contraseña"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={passwordForm.confirmPassword}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+                    }
+                    icon={Key}
+                    className={INPUT_SURFACE}
+                  />
+                </Field>
+              </FieldGroup>
 
-              <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end">
+              <div className="flex justify-end mt-6">
                 <Button
                   type="submit"
                   disabled={
@@ -721,9 +709,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     </>
                   )}
                 </Button>
-              </CardFooter>
+              </div>
             </form>
-          </Card>
+          </section>
         </div>
       </div>
 
@@ -750,7 +738,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
                 {/* Secret Key with Copy */}
                 <div className="mb-5">
-                  <label className="block text-[11px] font-semibold text-on-surface-variant mb-1 text-center">
+                  <label className="block text-label-sm font-semibold text-on-surface-variant mb-1 text-center">
                     ¿No puedes escanear? Clave manual:
                   </label>
                   <div className="flex items-center gap-2 p-2 bg-surface-container-high/40 border border-outline-variant/50 rounded-xl">

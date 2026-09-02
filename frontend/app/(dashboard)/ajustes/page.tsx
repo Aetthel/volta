@@ -39,12 +39,6 @@ const BillingSection = dynamicImport(() => import("@/components/settings/Billing
 });
 import {
   Button,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
   FieldGroup,
   Field,
   FieldLabel,
@@ -61,7 +55,6 @@ import {
   CreditCard,
   Palette,
   ChevronLeft,
-  ArrowRight,
   CheckCircle2,
   ShieldCheck,
 } from "lucide-react";
@@ -467,84 +460,88 @@ function AdminProfileSection({
   };
 
   return (
-    <div className="max-w-xl animate-in fade-in duration-200 mt-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-primary flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-primary" />
-            <span>Tu Perfil de Administrador</span>
-          </CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSaveAdminSettings}>
-          <CardContent className="flex flex-col gap-6">
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="adminName">Nombre Completo</FieldLabel>
-                <FloatingInput
-                  id="adminName"
-                  label="Nombre y Apellidos"
-                  value={adminForm.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAdminForm({ ...adminForm, name: e.target.value })
-                  }
-                  icon={User}
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
-                <FloatingInput
-                  id="adminEmail"
-                  label="correo@empresa.com"
-                  type="email"
-                  value={adminForm.email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAdminForm({ ...adminForm, email: e.target.value })
-                  }
-                  icon={Mail}
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="adminPassword">
-                  Nueva Contraseña (dejar en blanco para mantener)
-                </FieldLabel>
-                <FloatingInput
-                  id="adminPassword"
-                  label="Mínimo 6 caracteres"
-                  type="password"
-                  value={adminForm.password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setAdminForm({ ...adminForm, password: e.target.value })
-                  }
-                  icon={Key}
-                />
-              </Field>
-            </FieldGroup>
-          </CardContent>
-          <CardFooter className="border-t border-outline-variant/40 pt-4 flex justify-end gap-3">
-            <Button
-              type="submit"
-              disabled={savingAdmin}
-              variant="primary"
-              size="lg"
-              className="flex items-center gap-2 px-5 py-2.5 active:scale-95 font-medium"
-            >
-              {savingAdmin ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Guardando...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Guardar Cambios</span>
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+    <div className="max-w-xl animate-in fade-in duration-200 pt-6 border-t border-outline-variant/50">
+      <div className="flex flex-col gap-1.5 mb-6">
+        <h3 className="flex items-center gap-2.5 text-base font-bold text-on-surface">
+          <ShieldCheck className="w-4 h-4 text-primary shrink-0" strokeWidth={2.2} />
+          <span>Tu Perfil de Administrador</span>
+        </h3>
+        <p className="text-sm text-on-surface-variant/85 leading-relaxed">
+          Datos de acceso de la cuenta con la que administras toda la plataforma.
+        </p>
+      </div>
+
+      <form onSubmit={handleSaveAdminSettings}>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="adminName">Nombre Completo</FieldLabel>
+            <FloatingInput
+              id="adminName"
+              label="Nombre y Apellidos"
+              value={adminForm.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setAdminForm({ ...adminForm, name: e.target.value })
+              }
+              icon={User}
+              className="bg-surface-container-lowest"
+              required
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
+            <FloatingInput
+              id="adminEmail"
+              label="correo@empresa.com"
+              type="email"
+              value={adminForm.email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setAdminForm({ ...adminForm, email: e.target.value })
+              }
+              icon={Mail}
+              className="bg-surface-container-lowest"
+              required
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="adminPassword">
+              Nueva Contraseña (dejar en blanco para mantener)
+            </FieldLabel>
+            <FloatingInput
+              id="adminPassword"
+              label="Mínimo 6 caracteres"
+              type="password"
+              value={adminForm.password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setAdminForm({ ...adminForm, password: e.target.value })
+              }
+              icon={Key}
+              className="bg-surface-container-lowest"
+            />
+          </Field>
+        </FieldGroup>
+
+        <div className="flex justify-end mt-6">
+          <Button
+            type="submit"
+            disabled={savingAdmin}
+            variant="primary"
+            size="lg"
+            className="flex items-center gap-2 px-5 py-2.5 active:scale-95 font-medium"
+          >
+            {savingAdmin ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Guardando...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Guardar Cambios</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

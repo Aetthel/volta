@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { MessageSquare, Loader2, Lock, QrCode } from "lucide-react";
 import type { ToastState } from "@/types/settings";
 import dynamic from "next/dynamic";
-import { Card, Button, Badge } from "@/components/ui/volta-ui";
-import { cn } from "@/lib/utils";
+import { Button, Badge } from "@/components/ui/volta-ui";
+import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
 
 const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
@@ -98,27 +98,20 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
 
   return (
     <>
-      <Card className="p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div
-              className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs",
-                whatsappStatus === "CONNECTED"
-                  ? "bg-emerald-500/10 text-emerald-600"
-                  : whatsappStatus === "WAITING_QR"
-                    ? "bg-amber-500/10 text-amber-600"
-                    : "bg-primary/10 text-primary"
-              )}
-            >
-              <MessageSquare className="w-6 h-6" strokeWidth={1.8} />
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="font-title-lg text-lg font-bold text-on-surface">
-                  Canal de Mensajería WhatsApp
-                </h2>
+      <section className="pb-8 border-b border-outline-variant/50">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
+          <SectionHeading
+            icon={MessageSquare}
+            headingLevel={2}
+            title="Canal de Mensajería WhatsApp"
+            description={
+              hasWhatsApp
+                ? "Vincula tu cuenta de WhatsApp para enviar recordatorios automáticos 24h antes y confirmaciones inmediatas a los clientes."
+                : "Los recordatorios interactivos y confirmaciones por WhatsApp Bot están incluidos en el Plan Pro."
+            }
+            className="mb-0"
+            trailing={
+              <>
                 {whatsappStatus === "CONNECTED" ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -137,22 +130,19 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
                 )}
 
                 {!hasWhatsApp && (
-                  <Badge variant="outline" className="text-[10px] font-bold text-primary border-primary/30">
+                  <Badge
+                    variant="outline"
+                    className="text-label-sm font-bold text-primary border-primary/30"
+                  >
                     PLAN PRO
                   </Badge>
                 )}
-              </div>
-
-              <p className="text-sm text-on-surface-variant/85 leading-relaxed max-w-2xl">
-                {hasWhatsApp
-                  ? "Vincula tu cuenta de WhatsApp para enviar recordatorios automáticos 24h antes y confirmaciones inmediatas a los clientes."
-                  : "Los recordatorios interactivos y confirmaciones por WhatsApp Bot están incluidos en el Plan Pro."}
-              </p>
-            </div>
-          </div>
+              </>
+            }
+          />
 
           {/* Connection Action Button */}
-          <div className="flex items-center gap-3 shrink-0 self-stretch md:self-auto justify-end">
+          <div className="flex items-center gap-3 shrink-0 self-stretch md:self-auto md:mt-0.5 justify-end">
             {!hasWhatsApp ? (
               <Button
                 variant="default"
@@ -207,8 +197,9 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
 
         {/* QR Code Container (when WAITING_QR) */}
         {hasWhatsApp && whatsappStatus === "WAITING_QR" && (
-          <div className="mt-6 pt-6 border-t border-outline-variant/40 flex flex-col md:flex-row items-center justify-center gap-8 animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-white p-4 rounded-2xl border-2 border-outline-variant/60 shadow-lg flex flex-col items-center">
+          <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-8 animate-in fade-in zoom-in-95 duration-200">
+            {/* Fondo blanco obligatorio: es lo que hace escaneable el QR. */}
+            <div className="bg-white p-4 rounded-2xl border border-outline-variant shadow-sm flex flex-col items-center">
               {qrCode ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
@@ -228,7 +219,7 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
                   </span>
                 </div>
               )}
-              <span className="text-[11px] font-semibold text-on-surface-variant/70 mt-2.5">
+              <span className="text-label-sm font-semibold text-on-surface-variant/70 mt-2.5">
                 Se actualiza automáticamente
               </span>
             </div>
@@ -250,7 +241,7 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
             </div>
           </div>
         )}
-      </Card>
+      </section>
 
       <UpgradeProModal
         isOpen={isUpgradeOpen}

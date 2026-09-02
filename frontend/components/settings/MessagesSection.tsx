@@ -23,7 +23,7 @@ export default function MessagesSection({
   const hasWhatsApp = hasFeatureAccess(subscriptionPlan, subscriptionStatus, "whatsappTwoWayBot");
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
+    <div className="animate-in fade-in duration-200">
       {/* 1. WhatsApp Instance Connection & QR Scanner */}
       <WhatsAppConnectionCard
         businessId={businessId}
