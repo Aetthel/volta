@@ -315,62 +315,60 @@ export function EventManager({
       />
 
       {/* Main Grid View Container */}
-      <div className="flex-1 flex flex-col min-h-0 bg-surface overflow-auto">
-        <div className="max-w-container-max w-full mx-auto flex-1 flex flex-col min-h-0">
-          <div className="flex-1 min-h-0 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest overflow-hidden flex flex-col shadow-xs">
-            {view === "month" && (
-              <CalendarMonthView
-                currentDate={currentDate}
-                events={filteredEvents}
-                onEventClick={handleEventClick}
-                onSlotClick={handleSlotClick}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDrop={handleDrop}
-                getColorClasses={getColorClasses}
-                isDayClosed={isDayClosed}
-                getClosedLabel={getClosedLabel}
-              />
-            )}
+      <div className="flex-1 flex flex-col min-h-0 bg-surface overflow-auto border-t border-outline-variant/30">
+        <div className="w-full flex-1 flex flex-col min-h-0 bg-surface-container-lowest overflow-hidden">
+          {view === "month" && (
+            <CalendarMonthView
+              currentDate={currentDate}
+              events={filteredEvents}
+              onEventClick={handleEventClick}
+              onSlotClick={handleSlotClick}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+              getColorClasses={getColorClasses}
+              isDayClosed={isDayClosed}
+              getClosedLabel={getClosedLabel}
+            />
+          )}
 
-            {view === "week" && (
-              <CalendarWeekView
-                currentDate={currentDate}
-                events={filteredEvents}
-                onEventClick={handleEventClick}
-                onSlotClick={handleSlotClick}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDrop={handleDrop}
-                getColorClasses={getColorClasses}
-                isDayClosed={isDayClosed}
-                getClosedLabel={getClosedLabel}
-              />
-            )}
+          {view === "week" && (
+            <CalendarWeekView
+              currentDate={currentDate}
+              events={filteredEvents}
+              onEventClick={handleEventClick}
+              onSlotClick={handleSlotClick}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+              getColorClasses={getColorClasses}
+              isDayClosed={isDayClosed}
+              getClosedLabel={getClosedLabel}
+            />
+          )}
 
-            {view === "day" && (
-              <CalendarDayView
-                currentDate={currentDate}
-                events={filteredEvents}
-                onEventClick={handleEventClick}
-                onSlotClick={handleSlotClick}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDrop={handleDrop}
-                getColorClasses={getColorClasses}
-                isDayClosed={isDayClosed}
-                getClosedLabel={getClosedLabel}
-              />
-            )}
+          {view === "day" && (
+            <CalendarDayView
+              currentDate={currentDate}
+              events={filteredEvents}
+              onEventClick={handleEventClick}
+              onSlotClick={handleSlotClick}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+              getColorClasses={getColorClasses}
+              isDayClosed={isDayClosed}
+              getClosedLabel={getClosedLabel}
+            />
+          )}
 
-            {view === "list" && (
-              <CalendarListView
-                events={filteredEvents}
-                onEventClick={handleEventClick}
-                getColorClasses={getColorClasses}
-              />
-            )}
-          </div>
+          {view === "list" && (
+            <CalendarListView
+              events={filteredEvents}
+              onEventClick={handleEventClick}
+              getColorClasses={getColorClasses}
+            />
+          )}
         </div>
       </div>
 
