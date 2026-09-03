@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, Loader2, MessageCircle, ShieldCheck, Store } from "lucide-react";
-import { Alert, Button, Card } from "@/components/ui/volta-ui";
+import { ArrowRight, ChevronLeft, Loader2, MessageCircle, ShieldCheck } from "lucide-react";
+import { Alert, Button, Card, Avatar } from "@/components/ui/volta-ui";
 import { formatPhoneNumber } from "@/lib/utils";
 import type { BookingSession } from "@/hooks/useBookingSession";
 
@@ -16,6 +16,8 @@ interface BusinessProfile {
   name: string;
   address?: string | null;
   description?: string | null;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
 }
 
 interface BookingIdentityGateProps {
@@ -142,11 +144,12 @@ export default function BookingIdentityGate({
       setError("");
       setNotice("");
 
+      const cleanPhone = phone.replace(/\s+/g, "");
       try {
         const res = await fetch(`/api/backend/public/booking/${businessId}/identity/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: phone.trim(), fullName: name ?? undefined }),
+          body: JSON.stringify({ phone: cleanPhone, fullName: name ?? undefined }),
         });
         const data = await res.json();
 
@@ -179,11 +182,12 @@ export default function BookingIdentityGate({
       setSubmitting(true);
       setError("");
 
+      const cleanPhone = phone.replace(/\s+/g, "");
       try {
         const res = await fetch(`/api/backend/public/booking/${businessId}/identity/verify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: phone.trim(), code: candidate }),
+          body: JSON.stringify({ phone: cleanPhone, code: candidate }),
         });
         const data = await res.json();
 
@@ -196,7 +200,7 @@ export default function BookingIdentityGate({
         onVerified({
           token: data.bookingToken,
           expiresAt: data.expiresAt,
-          identity: { phone: phone.trim(), name: data.displayName },
+          identity: { phone: cleanPhone, name: data.displayName },
         });
       } catch {
         setError("Error de conexión al verificar el código.");
@@ -220,8 +224,14 @@ export default function BookingIdentityGate({
       <div className="w-full max-w-md mx-auto flex-1 flex flex-col justify-center">
         {/* Marca del negocio */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-            <Store className="w-8 h-8" />
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Avatar
+              name={business.name}
+              src={business.logoUrl || business.coverUrl}
+              type="business"
+              size="xl"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-sm border border-outline-variant/60 object-cover text-2xl font-bold"
+            />
           </div>
           <h1 className="font-display text-headline-md font-bold text-on-surface">
             {business.name}

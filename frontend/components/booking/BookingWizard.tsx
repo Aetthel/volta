@@ -8,12 +8,11 @@ import {
   Clock,
   Lock,
   Phone,
-  Store,
   User,
   Users,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { Alert, Button, Card } from "@/components/ui/volta-ui";
+import { Alert, Button, Card, Avatar } from "@/components/ui/volta-ui";
 import { Calendar } from "@/components/ui/calendar";
 import type { BookingIdentity } from "@/hooks/useBookingSession";
 
@@ -46,6 +45,8 @@ export interface BookingBusinessData {
   id: string;
   name: string;
   address?: string | null;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
   themeColor?: string;
   services: BookingService[];
   hours?: BookingBusinessHours[];
@@ -265,9 +266,13 @@ export default function BookingWizard({
         {/* Cabecera con la identidad ya verificada */}
         <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 sm:p-6 mb-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4 text-center sm:text-left">
-            <div className="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Store className="w-7 h-7" />
-            </div>
+            <Avatar
+              name={business.name}
+              src={business.logoUrl || business.coverUrl}
+              type="business"
+              size="lg"
+              className="w-14 h-14 rounded-xl shrink-0 shadow-xs border border-outline-variant/60 object-cover text-xl font-bold"
+            />
             <div>
               <h1 className="font-display text-headline-md font-bold text-on-surface">
                 {business.name}
