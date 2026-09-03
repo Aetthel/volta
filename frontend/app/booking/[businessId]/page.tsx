@@ -141,7 +141,13 @@ export default function PublicBookingPage({
     return (
       <BookingIdentityGate
         businessId={businessId}
-        business={{ name: profile.name, address: profile.address }}
+        business={{
+          name: profile.name,
+          address: profile.address,
+          description: profile.description,
+          logoUrl: profile.logoUrl,
+          coverUrl: profile.coverUrl,
+        }}
         onVerified={handleVerified}
       />
     );

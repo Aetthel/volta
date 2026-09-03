@@ -4,6 +4,7 @@ import { sendConsentMessage } from "./botService.js";
 // @ts-ignore - whatsappService is an existing JS module
 import whatsappManager from "./whatsappService.js";
 import { maskPhone, logger } from "../utils/logger.js";
+import { normalizePhone } from "../utils/index.js";
 import type { CreateClientInput, UpdateClientInput } from "../validators/index.js";
 
 export const getClientsByBusiness = async (businessId: string) => {
@@ -31,7 +32,7 @@ export const createClient = async (clientData: CreateClientInput) => {
       name,
       surname: surname || "",
       email: email || null,
-      phone,
+      phone: normalizePhone(phone) || phone,
       lopdStatus: "Pendiente",
       businessId,
     },
@@ -63,7 +64,7 @@ export const updateClient = async (id: string, clientData: UpdateClientInput) =>
       ...(name !== undefined && { name }),
       ...(surname !== undefined && { surname: surname || "" }),
       ...(email !== undefined && { email: email || null }),
-      ...(phone !== undefined && { phone }),
+      ...(phone !== undefined && { phone: normalizePhone(phone) || phone }),
       ...(parsedLastVisit !== undefined && { lastVisit: parsedLastVisit }),
       ...(frequentService !== undefined && { frequentService }),
     },

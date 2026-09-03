@@ -84,11 +84,54 @@ const alertBusinessGatewayDown = async (businessId: string): Promise<void> => {
   }
 };
 
-const findClientByPhone = (businessId: string, phone: string) =>
-  prisma.client.findFirst({
+const findClientByPhone = async (businessId: string, phone: string) => {
+  // 1. Coincidencia exacta directa (indexada)
+  const client = await prisma.client.findFirst({
     where: { businessId, phone },
     select: { id: true, name: true, surname: true },
   });
+  if (client) return client;
+
+  // 2. Coincidencia con variantes habituales con espacios o prefijo internacional
+  const variants = [
+    phone,
+    phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, "$1 $2 $3 $4"),
+    phone.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3"),
+    `+34 ${phone.replace(/(\d{3})(\d{2})(\d{2})(\d{2})/, "$1 $2 $3 $4")}`,
+    `+34 ${phone.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3")}`,
+    `+34${phone}`,
+  ];
+
+  const variantClient = await prisma.client.findFirst({
+    where: {
+      businessId,
+      phone: { in: variants },
+    },
+    select: { id: true, name: true, surname: true },
+  });
+  if (variantClient) return variantClient;
+
+  // 3. Fallback SQL despojando caracteres no numéricos
+  try {
+    const rawMatches: Array<{ id: string; name: string; surname: string }> = await prisma.$queryRaw`
+      SELECT id, name, surname
+      FROM "Client"
+      WHERE "businessId" = ${businessId}
+        AND (
+          phone = ${phone}
+          OR REGEXP_REPLACE(phone, '[^0-9]', '', 'g') = ${phone}
+          OR REGEXP_REPLACE(phone, '[^0-9]', '', 'g') = ${'34' + phone}
+          OR REGEXP_REPLACE(REGEXP_REPLACE(phone, '[^0-9]', '', 'g'), '^34', '') = ${phone}
+        )
+      LIMIT 1;
+    `;
+    if (rawMatches && rawMatches.length > 0) return rawMatches[0];
+  } catch (err: any) {
+    logger.warn(`[BookingIdentity] Fallback query matching error: ${err.message}`);
+  }
+
+  return null;
+};
 
 const countRecentCodes = (businessId: string, phone: string) =>
   prisma.bookingVerification.count({
