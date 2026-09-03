@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { describe, it, expect } from "vitest";
 import { enqueueWhatsAppMessage } from "../../queues/whatsappQueue.js";
 import { createWhatsAppWorker } from "../../workers/whatsappWorker.js";
 

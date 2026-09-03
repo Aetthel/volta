@@ -1,11 +1,11 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../index.js";
 import prisma from "../../config/db.js";
 
 describe("POST /api/users/register", () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("should return 400 if email is missing", async () => {
@@ -21,9 +21,7 @@ describe("POST /api/users/register", () => {
   });
 
   it("should return 400 if email is already taken", async () => {
-    jest
-      .spyOn(prisma.user, "findFirst")
-      .mockResolvedValue({ id: "u1", email: "existing@volta.es" });
+    vi.spyOn(prisma.user, "findFirst").mockResolvedValue({ id: "u1", email: "existing@volta.es" } as any);
 
     const res = await request(app).post("/api/users/register").send({
       name: "Test User",
@@ -38,7 +36,7 @@ describe("POST /api/users/register", () => {
   });
 
   it("should return 201 Created and return sanitized user and business on successful registration", async () => {
-    const createUser = jest.fn().mockResolvedValue({
+    const createUser = vi.fn().mockResolvedValue({
       id: "u-new",
       name: "New Owner",
       email: "newowner@volta.es",
@@ -48,11 +46,11 @@ describe("POST /api/users/register", () => {
       password: "hashedpassword",
     });
 
-    jest.spyOn(prisma.user, "findFirst").mockResolvedValue(null);
-    jest.spyOn(prisma, "$transaction").mockImplementation(async (cb) => {
+    vi.spyOn(prisma.user, "findFirst").mockResolvedValue(null);
+    vi.spyOn(prisma, "$transaction").mockImplementation(async (cb: any) => {
       return cb({
         business: {
-          create: jest.fn().mockResolvedValue({
+          create: vi.fn().mockResolvedValue({
             id: "b-new",
             name: "New Salon",
             businessType: "Peluquería / Barbería",

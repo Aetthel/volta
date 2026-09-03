@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../index.js";
 import prisma from "../../config/db.js";
@@ -8,7 +8,7 @@ describe("Demo Routes (/api/demo)", () => {
   const validApiKey = config.apiKey || " VoltaApiKey ";
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("POST /api/demo", () => {
@@ -18,13 +18,13 @@ describe("Demo Routes (/api/demo)", () => {
     });
 
     it("should return 201 Created with generated sandbox credentials when valid API key is sent", async () => {
-      const mockTx = {
-        business: { create: jest.fn().mockResolvedValue({ id: "demo-1" }) },
-        user: { create: jest.fn().mockResolvedValue({ id: "u-demo-1" }) },
-        alert: { createMany: jest.fn().mockResolvedValue({ count: 5 }) },
+      const mockTx: any = {
+        business: { create: vi.fn().mockResolvedValue({ id: "demo-1" }) },
+        user: { create: vi.fn().mockResolvedValue({ id: "u-demo-1" }) },
+        alert: { createMany: vi.fn().mockResolvedValue({ count: 5 }) },
         service: {
-          createMany: jest.fn().mockResolvedValue({ count: 6 }),
-          findMany: jest.fn().mockResolvedValue([
+          createMany: vi.fn().mockResolvedValue({ count: 6 }),
+          findMany: vi.fn().mockResolvedValue([
             { id: "s0", name: "Corte Caballero" },
             { id: "s1", name: "Corte Dama" },
             { id: "s2", name: "Coloración Premium" },
@@ -32,16 +32,16 @@ describe("Demo Routes (/api/demo)", () => {
             { id: "s4", name: "Manicura" },
           ]),
         },
-        businessHours: { createMany: jest.fn().mockResolvedValue({ count: 7 }) },
+        businessHours: { createMany: vi.fn().mockResolvedValue({ count: 7 }) },
         client: {
-          create: jest
+          create: vi
             .fn()
             .mockResolvedValue({ id: "c1", name: "Ana", surname: "García", phone: "+34611234567" }),
         },
-        appointment: { create: jest.fn().mockResolvedValue({ id: "a1" }) },
+        appointment: { create: vi.fn().mockResolvedValue({ id: "a1" }) },
       };
 
-      jest.spyOn(prisma, "$transaction").mockImplementation(async (cb) => {
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (cb: any) => {
         return cb(mockTx);
       });
 
@@ -62,22 +62,22 @@ describe("Demo Routes (/api/demo)", () => {
     });
 
     it("should return 200 OK when demo is deleted successfully", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
         id: "demo-123",
         subscriptionStatus: "DEMO_SANDBOX",
-      });
+      } as any);
 
-      const mockTx = {
-        alert: { deleteMany: jest.fn().mockResolvedValue({}) },
-        appointment: { deleteMany: jest.fn().mockResolvedValue({}) },
-        client: { deleteMany: jest.fn().mockResolvedValue({}) },
-        service: { deleteMany: jest.fn().mockResolvedValue({}) },
-        businessHours: { deleteMany: jest.fn().mockResolvedValue({}) },
-        user: { deleteMany: jest.fn().mockResolvedValue({}) },
-        business: { delete: jest.fn().mockResolvedValue({}) },
+      const mockTx: any = {
+        alert: { deleteMany: vi.fn().mockResolvedValue({}) },
+        appointment: { deleteMany: vi.fn().mockResolvedValue({}) },
+        client: { deleteMany: vi.fn().mockResolvedValue({}) },
+        service: { deleteMany: vi.fn().mockResolvedValue({}) },
+        businessHours: { deleteMany: vi.fn().mockResolvedValue({}) },
+        user: { deleteMany: vi.fn().mockResolvedValue({}) },
+        business: { delete: vi.fn().mockResolvedValue({}) },
       };
 
-      jest.spyOn(prisma, "$transaction").mockImplementation(async (cb) => {
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (cb: any) => {
         return cb(mockTx);
       });
 

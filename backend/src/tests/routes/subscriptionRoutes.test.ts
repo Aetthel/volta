@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../index.js";
 import prisma from "../../config/db.js";
@@ -11,13 +11,13 @@ describe("Subscription Routes (/api/subscription & /api/webhooks)", () => {
   const mockUser = {
     id: "user-1",
     email: "owner@salon.com",
-    role: "JEFE",
+    role: "JEFE" as const,
     businessId: "biz-1",
   };
   const token = signToken(mockUser, jwtSecret);
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("GET /api/subscription/current", () => {
@@ -27,13 +27,13 @@ describe("Subscription Routes (/api/subscription & /api/webhooks)", () => {
     });
 
     it("should return 200 with subscription details for authenticated JEFE", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
         id: "biz-1",
         name: "Test Salon",
         subscriptionPlan: "PRO",
         subscriptionStatus: "ACTIVE",
         invoices: [],
-      });
+      } as any);
 
       const res = await request(app)
         .get("/api/subscription/current")
@@ -47,10 +47,10 @@ describe("Subscription Routes (/api/subscription & /api/webhooks)", () => {
 
   describe("POST /api/subscription/checkout-url", () => {
     it("should return checkout session data", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
         id: "biz-1",
         name: "Test Salon",
-      });
+      } as any);
 
       const res = await request(app)
         .post("/api/subscription/checkout-url")
@@ -83,9 +83,9 @@ describe("Subscription Routes (/api/subscription & /api/webhooks)", () => {
         },
       };
 
-      jest.spyOn(prisma.business, "update").mockResolvedValue({ id: "biz-1" });
-      jest.spyOn(prisma.invoice, "count").mockResolvedValue(0);
-      jest.spyOn(prisma.invoice, "create").mockResolvedValue({ id: "inv-1" });
+      vi.spyOn(prisma.business, "update").mockResolvedValue({ id: "biz-1" } as any);
+      vi.spyOn(prisma.invoice, "count").mockResolvedValue(0);
+      vi.spyOn(prisma.invoice, "create").mockResolvedValue({ id: "inv-1" } as any);
 
       const res = await request(app)
         .post("/api/webhooks/lemonsqueezy")

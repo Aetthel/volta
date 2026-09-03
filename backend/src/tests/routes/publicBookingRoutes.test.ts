@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi, describe, it, expect, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../index.js";
 import prisma from "../../config/db.js";
@@ -29,22 +29,22 @@ const tokenFor = (businessId = BUSINESS_ID, name = "Ana García") =>
 const futureDate = () => {
   const date = new Date(Date.now() + 24 * 60 * 60 * 1000);
   date.setHours(10, 0, 0, 0);
-  const pad = (n) => String(n).padStart(2, "0");
+  const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T10:00:00`;
 };
 
 describe("public booking portal", () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("identity gate", () => {
     it("exposes only branding on the ungated profile endpoint", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
         ...openBusiness,
         hours: undefined,
         services: undefined,
-      });
+      } as any);
 
       const res = await request(app).get(`/api/public/booking/${BUSINESS_ID}/profile`);
 
@@ -57,9 +57,9 @@ describe("public booking portal", () => {
     });
 
     it("asks for the full name when the phone is not a client of the business", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue(openBusiness);
-      jest.spyOn(prisma.client, "findFirst").mockResolvedValue(null);
-      const sendSpy = jest.spyOn(whatsappManager, "sendMessage").mockResolvedValue({});
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue(openBusiness as any);
+      vi.spyOn(prisma.client, "findFirst").mockResolvedValue(null);
+      const sendSpy = vi.spyOn(whatsappManager, "sendMessage").mockResolvedValue({} as any);
 
       const res = await request(app)
         .post(`/api/public/booking/${BUSINESS_ID}/identity/start`)
@@ -71,19 +71,19 @@ describe("public booking portal", () => {
     });
 
     it("never returns the code in the response body", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue(openBusiness);
-      jest.spyOn(prisma.client, "findFirst").mockResolvedValue({ id: "c1", name: "Ana", surname: "G" });
-      jest.spyOn(prisma.bookingVerification, "count").mockResolvedValue(0);
-      jest.spyOn(prisma.bookingVerification, "updateMany").mockResolvedValue({ count: 0 });
-      jest.spyOn(prisma.bookingVerification, "create").mockResolvedValue({});
-      jest.spyOn(whatsappManager, "isReady").mockReturnValue(true);
-      const sendSpy = jest.spyOn(whatsappManager, "sendMessage").mockResolvedValue({});
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue(openBusiness as any);
+      vi.spyOn(prisma.client, "findFirst").mockResolvedValue({ id: "c1", name: "Ana", surname: "G" } as any);
+      vi.spyOn(prisma.bookingVerification, "count").mockResolvedValue(0);
+      vi.spyOn(prisma.bookingVerification, "updateMany").mockResolvedValue({ count: 0 } as any);
+      vi.spyOn(prisma.bookingVerification, "create").mockResolvedValue({} as any);
+      vi.spyOn(whatsappManager, "isReady").mockReturnValue(true);
+      const sendSpy = vi.spyOn(whatsappManager, "sendMessage").mockResolvedValue({} as any);
 
       const res = await request(app)
         .post(`/api/public/booking/${BUSINESS_ID}/identity/start`)
         .send({ phone: "600112233" });
 
-      const sentCode = sendSpy.mock.calls[0][2].match(/\b(\d{6})\b/)[1];
+      const sentCode = sendSpy.mock.calls[0][2].match(/\b(\d{6})\b/)?.[1];
       expect(res.status).toBe(200);
       expect(res.body.state).toBe("OTP_SENT");
       expect(JSON.stringify(res.body)).not.toContain(sentCode);
@@ -98,10 +98,8 @@ describe("public booking portal", () => {
     });
 
     it("does not start a verification for a business with bookings disabled", async () => {
-      jest
-        .spyOn(prisma.business, "findUnique")
-        .mockResolvedValue({ ...openBusiness, enablePublicBooking: false });
-      const sendSpy = jest.spyOn(whatsappManager, "sendMessage").mockResolvedValue({});
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, enablePublicBooking: false } as any);
+      const sendSpy = vi.spyOn(whatsappManager, "sendMessage").mockResolvedValue({} as any);
 
       const res = await request(app)
         .post(`/api/public/booking/${BUSINESS_ID}/identity/start`)
@@ -129,7 +127,7 @@ describe("public booking portal", () => {
     });
 
     it("refuses a reservation without a booking session", async () => {
-      const createSpy = jest.spyOn(prisma, "$transaction");
+      const createSpy = vi.spyOn(prisma, "$transaction");
 
       const res = await request(app)
         .post("/api/public/booking/reserve")
@@ -149,25 +147,25 @@ describe("public booking portal", () => {
     });
 
     it("refuses an expired token", async () => {
-      jest.useFakeTimers().setSystemTime(new Date("2026-08-28T10:00:00Z"));
+      vi.useFakeTimers().setSystemTime(new Date("2026-08-28T10:00:00Z"));
       const token = tokenFor();
-      jest.setSystemTime(new Date("2026-08-28T11:00:00Z"));
+      vi.setSystemTime(new Date("2026-08-28T11:00:00Z"));
 
       const res = await request(app)
         .get(`/api/public/booking/${BUSINESS_ID}`)
         .set("x-booking-token", token);
 
-      jest.useRealTimers();
+      vi.useRealTimers();
       expect(res.status).toBe(401);
     });
 
     it("serves the catalogue with a valid session", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
         ...openBusiness,
         email: "hola@volta.com",
         phone: "961112233",
         services: [{ id: "s1", name: "Corte", duration: 30, price: 20, capacity: 1 }],
-      });
+      } as any);
 
       const res = await request(app)
         .get(`/api/public/booking/${BUSINESS_ID}`)
@@ -193,20 +191,19 @@ describe("public booking portal", () => {
     });
 
     it("accepts the local wall-clock time the portal shows the client", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue(null);
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue(null);
 
       const res = await request(app)
         .post("/api/public/booking/reserve")
         .set("x-booking-token", validSession())
         .send({ businessId: BUSINESS_ID, serviceId: "s1", appointmentDate: futureDate() });
 
-      // Llega al controlador (404 de negocio), no lo frena el validador de fecha.
       expect(res.status).toBe(404);
       expect(res.body.error).toContain("Negocio no encontrado");
     });
 
     it("returns 404 if target business is not found", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue(null);
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue(null);
 
       const res = await request(app)
         .post("/api/public/booking/reserve")
@@ -222,28 +219,28 @@ describe("public booking portal", () => {
     });
 
     it("books with the verified identity and ignores a tampered phone in the body", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, hours: [] });
-      jest.spyOn(prisma.service, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, hours: [] } as any);
+      vi.spyOn(prisma.service, "findUnique").mockResolvedValue({
         id: "s1",
         businessId: BUSINESS_ID,
         name: "Corte",
         duration: 30,
         capacity: 1,
         isActive: true,
-      });
+      } as any);
 
-      const created = {};
-      jest.spyOn(prisma, "$transaction").mockImplementation(async (fn) =>
+      const created: any = {};
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (fn: any) =>
         fn({
           appointment: {
             findMany: async () => [],
-            create: async ({ data }) => {
+            create: async ({ data }: any) => {
               Object.assign(created, data);
               return { id: "a1", ...data };
             },
           },
           client: {
-            upsert: async ({ where, create }) => {
+            upsert: async ({ where, create }: any) => {
               created.upsertWhere = where;
               return { id: "c1", email: null, ...create };
             },
@@ -273,19 +270,19 @@ describe("public booking portal", () => {
     });
 
     it("returns 409 without creating anything when the slot is full", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, hours: [] });
-      jest.spyOn(prisma.service, "findUnique").mockResolvedValue({
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, hours: [] } as any);
+      vi.spyOn(prisma.service, "findUnique").mockResolvedValue({
         id: "s1",
         businessId: BUSINESS_ID,
         name: "Corte",
         duration: 30,
         capacity: 1,
         isActive: true,
-      });
+      } as any);
 
-      const clientUpsert = jest.fn();
+      const clientUpsert = vi.fn();
       const target = new Date(futureDate());
-      jest.spyOn(prisma, "$transaction").mockImplementation(async (fn) =>
+      vi.spyOn(prisma, "$transaction").mockImplementation(async (fn: any) =>
         fn({
           appointment: {
             findMany: async () => [
