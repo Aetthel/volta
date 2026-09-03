@@ -19,9 +19,32 @@ export interface TimeGridEventCardProps {
   widthPercent?: number;
 }
 
+/**
+ * Alto de una hora en la rejilla. Vive aquí porque la geometría del chip se
+ * calcula contra este valor: si la vista de semana y la de día usaran otro, los
+ * chips se cortarían. Ambas lo importan de aquí.
+ */
+export const HOUR_HEIGHT = 72;
+
+/** Relleno vertical del chip (`py-1`, arriba y abajo). */
+const CHIP_PAD_Y = 8;
+
+/**
+ * Caja de línea real de la tipografía del chip.
+ *
+ * 13 px y no 14 es lo que hace que una cita de 30 minutos muestre servicio Y
+ * cliente: con HOUR_HEIGHT a 72 el chip mide 34 px, quedan 26 útiles, y a 13 px
+ * por línea entran dos. Cambiar cualquiera de los dos números por debajo de esa
+ * relación devuelve la cita corta a una sola línea con el título recortado.
+ *
+ * Los tamaños van en píxeles fijos y no en `text-label-*` a propósito: esas
+ * escalan con la preferencia de tamaño de letra del usuario, y al hacerlo
+ * desbordarían un alto que se calcula en píxeles contra HOUR_HEIGHT.
+ */
+const CHIP_LINE = 13;
+
 export function layoutDayEvents(events: CalendarEvent[]) {
   const START_HOUR = 8;
-  const HOUR_HEIGHT = 64;
 
   const sorted = [...events].sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 
@@ -102,8 +125,13 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
     return `${minutes}m`;
   };
 
-  const isShort = height < 38;
-  const isMedium = height >= 38 && height < 60;
+  // Cuántas líneas caben de verdad en este chip. Antes eran umbrales fijos
+  // (38 / 60) que no cuadraban con el alto real del contenido, y la última fila
+  // se renderizaba igualmente y salía cortada a media letra.
+  const lineCount = Math.max(1, Math.floor((height - CHIP_PAD_Y) / CHIP_LINE));
+  const showClient = lineCount >= 2 && Boolean(event.clientName);
+  const showTimeRange = lineCount >= 3;
+  const showTags = lineCount >= 4 && Boolean(event.tags?.length);
 
   return (
     <div
@@ -123,68 +151,69 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
         width: `calc(${widthPercent}% - 4px)`,
       }}
       className={cn(
-        "absolute z-10 cursor-pointer rounded-md p-1.5 transition-all duration-150 overflow-hidden shadow-xs flex flex-col justify-start select-none",
+        "absolute z-10 cursor-pointer rounded-md px-2 py-1 transition-all duration-150 shadow-xs flex flex-col select-none",
         colorClasses.bg,
         "text-white",
         isHovered && "z-30 ring-2 ring-white/80 shadow-md brightness-105"
       )}
     >
-      {/* Card Content based on available height */}
-      {isShort ? (
-        <div className="flex items-center gap-1.5 leading-tight truncate text-[11px]">
-          <span className="font-bold truncate">{event.title}</span>
+      {/* El recorte vive aquí y no en el contenedor: el tooltip de hover es
+          hermano de este bloque, así que puede desbordar el chip. Colgado del
+          contenedor recortado, como estaba, no se veía nunca. */}
+      <div
+        className={cn(
+          "flex h-full min-h-0 flex-col overflow-hidden",
+          lineCount === 1 ? "justify-center" : "justify-start"
+        )}
+      >
+      {/* Una sola línea: el título manda. Ni hora de inicio ni rango — la
+          posición del chip en la rejilla ya dice a qué hora empieza, y repetirlo
+          dejaba título y cliente en puntos suspensivos. */}
+      {lineCount === 1 ? (
+        <div className="flex items-baseline gap-1.5 min-w-0">
+          <span className="font-semibold text-[11px] leading-none truncate">{event.title}</span>
           {event.clientName && (
-            <span className="opacity-90 text-[10px] truncate">· {event.clientName}</span>
-          )}
-          <span className="opacity-80 text-[10px] shrink-0 font-medium ml-auto">
-            {formatTime(event.startTime)}
-          </span>
-        </div>
-      ) : isMedium ? (
-        <div className="flex flex-col h-full justify-between leading-tight overflow-hidden">
-          <div>
-            <div className="font-bold text-xs truncate">{event.title}</div>
-            {event.clientName && (
-              <div className="text-[11px] opacity-90 truncate font-medium">{event.clientName}</div>
-            )}
-          </div>
-          <div className="flex items-center justify-between gap-1 text-[10px] opacity-80 truncate">
-            <span>
-              {formatTime(event.startTime)} - {formatTime(event.endTime)}
+            <span className="text-[10px] leading-none opacity-85 truncate">
+              {event.clientName}
             </span>
-          </div>
+          )}
         </div>
       ) : (
-        <div className="flex flex-col h-full justify-between overflow-hidden">
-          <div>
-            <div className="font-bold text-xs truncate">{event.title}</div>
-            {event.clientName && (
-              <div className="text-[11px] opacity-95 truncate font-medium mt-0.5">
-                {event.clientName}
-              </div>
-            )}
-            <div className="flex items-center gap-1 text-[10px] opacity-85 mt-1">
-              <Clock className="w-3 h-3 shrink-0 opacity-80" />
-              <span>
-                {formatTime(event.startTime)} - {formatTime(event.endTime)}
-              </span>
-              <span className="opacity-75">({getDuration()})</span>
+        <>
+          <div className="font-semibold text-[11px] leading-[13px] truncate">{event.title}</div>
+
+          {showClient && (
+            <div className="text-[10px] leading-[13px] opacity-90 truncate">
+              {event.clientName}
             </div>
-          </div>
-          {event.tags && event.tags.length > 0 && (
+          )}
+
+          {/* La duración entre paréntesis desaparece: es deducible del rango y
+              era justo la pieza que empujaba la fila fuera del chip. */}
+          {showTimeRange && (
+            <div className="flex items-center gap-1 text-[10px] leading-[13px] opacity-80 min-w-0">
+              <Clock className="w-3 h-3 shrink-0 opacity-80" />
+              <span className="truncate">
+                {formatTime(event.startTime)}–{formatTime(event.endTime)}
+              </span>
+            </div>
+          )}
+
+          {showTags && (
             <div className="flex flex-wrap gap-1 mt-auto pt-1">
-              {event.tags.map((tag) => (
+              {event.tags!.map((tag) => (
                 <span
                   key={tag}
-                  className="px-1.5 py-0.5 text-[9px] font-semibold rounded bg-white/20 text-white backdrop-blur-xs"
+                  className="px-1.5 py-0.5 text-[9px] leading-none font-semibold rounded bg-white/20 text-white backdrop-blur-xs"
                 >
                   {tag}
                 </span>
               ))}
             </div>
           )}
-        </div>
+        </>
       )}
+      </div>
 
       {/* Hover Card / Tooltip Popup */}
       {isHovered && (

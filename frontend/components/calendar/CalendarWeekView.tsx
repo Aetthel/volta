@@ -2,7 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { TimeGridEventCard, layoutDayEvents } from "./TimeGridEventCard";
+import { TimeGridEventCard, layoutDayEvents, HOUR_HEIGHT } from "./TimeGridEventCard";
 import type { CalendarEvent } from "./EventCard";
 
 interface CalendarWeekViewProps {
@@ -42,7 +42,6 @@ export const CalendarWeekView: React.FC<CalendarWeekViewProps> = ({
 
   const START_HOUR = 8;
   const hours = Array.from({ length: 14 }, (_, i) => i + START_HOUR);
-  const HOUR_HEIGHT = 64;
   const TOTAL_GRID_HEIGHT = hours.length * HOUR_HEIGHT;
 
   return (
