@@ -5,7 +5,12 @@ import { cn } from "@/lib/utils";
 
 // FloatingInput
 export interface FloatingInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  /**
+   * Etiqueta flotante sobre el borde. Omitirla cuando el campo ya lleve un
+   * `FieldLabel` encima: si no, las dos etiquetas se superponen. Sin ella, el
+   * nombre accesible lo aporta ese `FieldLabel` a través de `htmlFor`/`id`.
+   */
+  label?: string;
   icon?: React.ComponentType<any>;
   endAction?: React.ReactNode;
   variant?: "outlined" | "minimal" | "borderless";
@@ -62,6 +67,7 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
         />
 
         {/* Floating Label */}
+        {label && (
         <label
           htmlFor={id}
           className={cn(
@@ -87,6 +93,7 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
         >
           {label}
         </label>
+        )}
 
         {/* End Action */}
         {endAction && (

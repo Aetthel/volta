@@ -495,7 +495,6 @@ function AdminProfileSection({
             <FieldLabel htmlFor="adminName">Nombre Completo</FieldLabel>
             <FloatingInput
               id="adminName"
-              label="Nombre y Apellidos"
               value={adminForm.name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setAdminForm({ ...adminForm, name: e.target.value })
@@ -509,7 +508,6 @@ function AdminProfileSection({
             <FieldLabel htmlFor="adminEmail">Correo Electrónico</FieldLabel>
             <FloatingInput
               id="adminEmail"
-              label="correo@empresa.com"
               type="email"
               value={adminForm.email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -526,7 +524,6 @@ function AdminProfileSection({
             </FieldLabel>
             <FloatingInput
               id="adminPassword"
-              label="Mínimo 6 caracteres"
               type="password"
               value={adminForm.password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

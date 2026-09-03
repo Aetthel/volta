@@ -489,7 +489,6 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
                   <FloatingInput
                     id="userName"
-                    label="Nombre y Apellidos"
                     type="text"
                     required
                     value={personalForm.name}
@@ -524,7 +523,6 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   </div>
                   <FloatingInput
                     id="userEmail"
-                    label="correo@empresa.com"
                     type="email"
                     required
                     value={personalForm.email}
@@ -633,7 +631,6 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   <FieldLabel htmlFor="currentPassword">Contraseña Actual</FieldLabel>
                   <FloatingInput
                     id="currentPassword"
-                    label="Contraseña actual"
                     type={showPassword ? "text" : "password"}
                     required
                     value={passwordForm.currentPassword}
@@ -649,7 +646,6 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   <FieldLabel htmlFor="newPassword">Nueva Contraseña</FieldLabel>
                   <FloatingInput
                     id="newPassword"
-                    label="Mínimo 8 caracteres"
                     type={showPassword ? "text" : "password"}
                     required
                     value={passwordForm.newPassword}
@@ -713,7 +709,6 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                   <FieldLabel htmlFor="confirmPassword">Confirmar Contraseña</FieldLabel>
                   <FloatingInput
                     id="confirmPassword"
-                    label="Repite la nueva contraseña"
                     type={showPassword ? "text" : "password"}
                     required
                     value={passwordForm.confirmPassword}

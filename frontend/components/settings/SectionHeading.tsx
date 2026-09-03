@@ -37,7 +37,10 @@ export function SectionHeading({
         {trailing}
       </div>
       {description && (
-        <p className="text-sm text-on-surface-variant/85 leading-relaxed max-w-[62ch]">
+        // Sangrado igual al ancho del icono (1rem) más su separación (0.625rem),
+        // para que la descripción arranque bajo la primera letra del título y no
+        // bajo el icono. Va en margen y no en relleno para no comerse la medida.
+        <p className="ml-6.5 text-sm text-on-surface-variant/85 leading-relaxed max-w-[62ch]">
           {description}
         </p>
       )}
