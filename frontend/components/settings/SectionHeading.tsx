@@ -33,15 +33,12 @@ export function SectionHeading({
   return (
     <div className={cn("flex flex-col gap-1.5 mb-6", className)}>
       <div className="flex items-center gap-2.5 flex-wrap">
-        <Icon className="w-4 h-4 text-primary shrink-0" strokeWidth={2.2} />
-        <Heading className="text-base font-bold text-on-surface">{title}</Heading>
+        <Icon className="w-5 h-5 text-primary shrink-0" strokeWidth={2.2} />
+        <Heading className="text-lg sm:text-xl font-bold text-on-surface tracking-tight">{title}</Heading>
         {trailing}
       </div>
       {description && (
-        // Sangrado igual al ancho del icono (1rem) más su separación (0.625rem),
-        // para que la descripción arranque bajo la primera letra del título y no
-        // bajo el icono. Va en margen y no en relleno para no comerse la medida.
-        <p className="ml-6.5 text-sm text-on-surface-variant/85 leading-relaxed max-w-[62ch]">
+        <p className="text-sm text-on-surface-variant/85 leading-relaxed max-w-[68ch]">
           {description}
         </p>
       )}

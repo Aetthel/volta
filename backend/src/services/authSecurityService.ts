@@ -1,9 +1,8 @@
 import crypto from "node:crypto";
 import bcrypt from "bcryptjs";
 import QRCode from "qrcode";
-import prisma from "../config/db.js";
-// @ts-ignore - config is an existing JS module
-import config from "../config/index.js";
+import prisma from "../config/db";
+import config from "../config/index";
 import { logger } from "../utils/logger";
 import {
   sendOtpEmail,

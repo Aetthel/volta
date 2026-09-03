@@ -35,10 +35,10 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
           <div
             className={cn(
               "absolute top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within/input:text-primary pointer-events-none z-10",
-              variant === "minimal" || variant === "borderless" ? "left-3" : "left-4"
+              variant === "minimal" || variant === "borderless" ? "left-2.5" : "left-3"
             )}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-4 h-4" />
           </div>
         )}
 
@@ -49,18 +49,18 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
           type={type}
           placeholder=" "
           className={cn(
-            "peer block w-full bg-transparent text-body-lg text-on-surface focus:outline-none transition-all",
+            "peer block w-full bg-transparent text-sm text-on-surface focus:outline-none transition-all",
             variant === "minimal" || variant === "borderless"
-              ? "border-0 rounded-none focus:ring-0 py-2 px-0 shadow-none"
-              : "border border-outline rounded-xl focus:border-primary focus:border-2 py-3.5 pr-4",
+              ? "border-0 rounded-none focus:ring-0 py-1.5 px-0 shadow-none"
+              : "border border-outline-variant/70 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/15 py-2.5 pr-3.5",
             variant === "minimal" || variant === "borderless"
               ? Icon
-                ? "pl-8"
+                ? "pl-7"
                 : "pl-0"
               : Icon
-                ? "pl-12"
-                : "pl-4",
-            endAction ? "pr-12" : "pr-4",
+                ? "pl-9"
+                : "pl-3",
+            endAction ? "pr-10" : "pr-3.5",
             className
           )}
           {...props}
@@ -77,18 +77,18 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
               : "bg-surface-container-lowest px-1.5",
             type === "date" || type === "time"
               ? variant === "minimal" || variant === "borderless"
-                ? "-top-2.5 scale-[0.82] text-primary"
+                ? "-top-2 scale-[0.82] text-primary"
                 : "top-0 scale-[0.82] text-primary"
               : variant === "minimal" || variant === "borderless"
-                ? "top-1/2 -translate-y-1/2 text-body-lg peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
-                : "top-1/2 -translate-y-1/2 text-body-lg peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
+                ? "top-1/2 -translate-y-1/2 text-sm peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:pointer-events-none"
+                : "top-1/2 -translate-y-1/2 text-sm peer-focus:top-0 peer-focus:scale-[0.82] peer-focus:text-primary peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:scale-[0.82]",
             variant === "minimal" || variant === "borderless"
               ? Icon
-                ? "left-11"
-                : "left-3"
+                ? "left-8"
+                : "left-2.5"
               : Icon
-                ? "left-12"
-                : "left-4"
+                ? "left-9"
+                : "left-3"
           )}
         >
           {label}

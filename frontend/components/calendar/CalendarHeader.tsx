@@ -37,6 +37,7 @@ export interface ColorItem {
   value: string;
   bg: string;
   text: string;
+  border?: string;
 }
 
 interface CalendarHeaderProps {
@@ -257,7 +258,14 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                   onCheckedChange={() => toggleColor(color.value)}
                 >
                   <div className="flex items-center gap-2">
-                    <div className={cn("h-3 w-3 rounded", color.bg)} />
+                    <div
+                      style={
+                        color.bg.startsWith("#")
+                          ? { backgroundColor: color.bg, borderColor: color.border || "rgba(0,0,0,0.1)" }
+                          : undefined
+                      }
+                      className={cn("h-3 w-3 rounded border", !color.bg.startsWith("#") && color.bg)}
+                    />
                     {color.name}
                   </div>
                 </DropdownMenuCheckboxItem>

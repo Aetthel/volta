@@ -2,7 +2,7 @@ import { PrismaClient } from "../generated/client/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 // @ts-ignore - pg types
 import pkg from "pg";
-import config from "./index.js";
+import config from "./index";
 
 const { Pool } = pkg;
 

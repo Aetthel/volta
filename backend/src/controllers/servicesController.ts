@@ -41,6 +41,13 @@ export const createService = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
+  const PASTEL_COLOR_IDS = ["teal", "lavender", "rose", "amber", "sky", "purple", "coral"];
+  let assignedColor = color;
+  if (!assignedColor || assignedColor === "TEAL") {
+    const existingServices = await catalogService.getServicesByBusiness(businessId, false);
+    assignedColor = PASTEL_COLOR_IDS[existingServices.length % PASTEL_COLOR_IDS.length];
+  }
+
   const service = await catalogService.createService({
     businessId,
     name,
@@ -49,7 +56,7 @@ export const createService = async (req: AuthRequest, res: Response) => {
     price,
     capacity: capacity !== undefined ? parseInt(capacity, 10) : 1,
     type,
-    color,
+    color: assignedColor,
   });
 
   // Invalidate cache reactively

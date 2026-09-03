@@ -113,20 +113,27 @@ export function useNewAppointmentForm(
       });
 
     // Fetch services
-    fetch(`/api/backend/services?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setServices(data);
-        } else {
-          setServices([]);
-        }
-      })
-      .catch((e) => {
-        console.error("Error loading services:", e);
-        setServices([]);
-      });
+    fetchServices();
   }, [isOpen, businessId]);
+
+  const fetchServices = async (selectServiceName?: string) => {
+    if (!businessId) return;
+    try {
+      const res = await fetch(`/api/backend/services?businessId=${businessId}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setServices(data);
+        if (selectServiceName) {
+          setFormData((prev) => ({ ...prev, service: selectServiceName }));
+        }
+      } else {
+        setServices([]);
+      }
+    } catch (e) {
+      console.error("Error loading services:", e);
+      setServices([]);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -260,27 +267,6 @@ export function useNewAppointmentForm(
         service: formData.service,
       });
 
-      if (!isGroup) {
-        const exist = clientsList.some((c) => {
-          const existingName = normalizeString(`${c.name} ${c.surname || ""}`);
-          const inputName = normalizeString(formData.clientName);
-          const existingPhone = normalizePhone(c.phone);
-          const inputPhone = normalizePhone(formData.clientPhone);
-
-          return existingName === inputName || existingPhone === inputPhone;
-        });
-
-        if (!exist && formData.clientName.trim().length > 0) {
-          setToastPhone(formData.clientPhone);
-          setShowConsentToast(true);
-          setTimeout(() => {
-            setShowConsentToast(false);
-            resetFormAndClose();
-          }, 2500);
-          return;
-        }
-      }
-
       resetFormAndClose();
     } catch (err) {
       console.error("Error saving appointment:", err);
@@ -400,5 +386,8 @@ export function useNewAppointmentForm(
     handleMinChange,
     handleMinBlur,
     serviceOptions,
+    services,
+    fetchServices,
+    businessId,
   };
 }

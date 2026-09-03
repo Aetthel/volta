@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { CalendarDays, Save, Loader2 } from "lucide-react";
+import { CalendarDays, Loader2, Check } from "lucide-react";
 import type { ToastState } from "@/types/settings";
-import { Button, Skeleton } from "@/components/ui/volta-ui";
+import { Skeleton } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
 
@@ -41,7 +41,7 @@ export const BusinessHolidaysGrid: React.FC<BusinessHolidaysGridProps> = ({
 }) => {
   const [catalogue, setCatalogue] = useState<HolidayCatalogueItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   const fetchHolidays = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") return;
@@ -58,30 +58,22 @@ export const BusinessHolidaysGrid: React.FC<BusinessHolidaysGridProps> = ({
     fetchHolidays();
   }, [fetchHolidays]);
 
-  const toggleHoliday = (key: string) => {
-    setCatalogue((prev) =>
-      prev.map((h) => (h.key === key ? { ...h, isObserved: !h.isObserved } : h))
-    );
-  };
-
-  const handleSave = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsSaving(true);
+  const toggleHoliday = async (key: string) => {
+    const next = catalogue.map((h) => (h.key === key ? { ...h, isObserved: !h.isObserved } : h));
+    setCatalogue(next);
+    if (!businessId || businessId === "mock-business-id") return;
+    setSaveStatus("saving");
     try {
-      // Se envía el catálogo entero: el backend guarda solo lo que se aparta del
-      // valor por defecto y así una decisión puede volver atrás sin dejar rastro.
-      const payload = catalogue.map((h) => ({ holidayKey: h.key, isObserved: h.isObserved }));
+      const payload = next.map((h) => ({ holidayKey: h.key, isObserved: h.isObserved }));
       const res = await apiClient.business.updateHolidays<HolidaysResponse>(businessId, payload);
       if (res.error) throw new Error(res.error);
-
       if (Array.isArray(res.data?.catalogue)) setCatalogue(res.data.catalogue);
-      setToast({ show: true, text: "¡Festivos actualizados correctamente!" });
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2500);
+    } catch {
+      setSaveStatus("idle");
+      setToast({ show: true, text: "Error al guardar los festivos" });
       setTimeout(() => setToast({ show: false, text: "" }), 3000);
-    } catch (err: any) {
-      setToast({ show: true, text: err.message || "Error al guardar los festivos" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -124,14 +116,27 @@ export const BusinessHolidaysGrid: React.FC<BusinessHolidaysGridProps> = ({
   );
 
   return (
-    <form onSubmit={handleSave} className="flex h-full flex-col">
+    <div className="flex h-full flex-col">
       <div className="pb-3">
-        <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-          <CalendarDays className="w-4 h-4 text-primary" />
-          <span>Festivos</span>
-        </h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-lg sm:text-xl font-bold text-on-surface flex items-center gap-2.5 tracking-tight">
+            <CalendarDays className="w-5 h-5 text-primary shrink-0" strokeWidth={2.2} />
+            <span>Festivos</span>
+          </h3>
+          {saveStatus === "saving" ? (
+            <span className="inline-flex items-center gap-1.5 text-xs text-on-surface-variant animate-pulse">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+              <span>Guardando...</span>
+            </span>
+          ) : saveStatus === "saved" ? (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 animate-in fade-in">
+              <Check className="w-3.5 h-3.5" />
+              <span>Guardado</span>
+            </span>
+          ) : null}
+        </div>
         <p className="text-body-sm text-on-surface-variant mt-0.5">
-          Bloquean la agenda y el portal de reservas. Semana Santa se recalcula sola cada año.
+          Bloquean la agenda y el portal de reservas. Se guardan automáticamente al marcar.
         </p>
       </div>
 
@@ -173,28 +178,6 @@ export const BusinessHolidaysGrid: React.FC<BusinessHolidaysGridProps> = ({
           </>
         )}
       </div>
-
-      <div className="mt-auto flex justify-end border-t border-outline-variant/40 pt-4">
-        <Button
-          type="submit"
-          disabled={isSaving || isLoading}
-          variant="default"
-          size="md"
-          className="flex items-center gap-2 font-medium"
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Guardando...</span>
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4" />
-              <span>Guardar Festivos</span>
-            </>
-          )}
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 };

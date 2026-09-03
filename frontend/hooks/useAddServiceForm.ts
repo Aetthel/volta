@@ -29,7 +29,7 @@ const EMPTY_FORM: ServiceFormData = {
   duration: "45",
   capacity: "1",
   type: "INDIVIDUAL",
-  color: "TEAL",
+  color: "",
   description: "",
 };
 
@@ -61,7 +61,7 @@ export function useAddServiceForm(
         duration: String(serviceToEdit.duration) ?? "45",
         capacity: String(serviceToEdit.capacity ?? 1),
         type: serviceToEdit.type ?? "INDIVIDUAL",
-        color: serviceToEdit.color ?? "TEAL",
+        color: serviceToEdit.color ?? "",
         description: serviceToEdit.description ?? "",
       });
       return;
@@ -86,10 +86,6 @@ export function useAddServiceForm(
     }));
   };
 
-  const handleColorSelect = (colorId: string) => {
-    setFormData((prev) => ({ ...prev, color: colorId }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -100,7 +96,7 @@ export function useAddServiceForm(
       duration: parseInt(formData.duration, 10),
       capacity: formData.type === "INDIVIDUAL" ? 1 : parseInt(formData.capacity, 10) || 12,
       type: formData.type,
-      color: formData.color,
+      color: formData.color || undefined,
       description: formData.description,
     });
 
@@ -113,7 +109,6 @@ export function useAddServiceForm(
     isEditMode,
     handleChange,
     handleTypeChange,
-    handleColorSelect,
     handleSubmit,
   };
 }

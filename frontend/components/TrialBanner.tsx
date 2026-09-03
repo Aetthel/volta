@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { AlertTriangle, Clock, ArrowRight, X } from "lucide-react";
 
@@ -50,21 +50,22 @@ function TrialBannerContent() {
             <Clock className="w-4 h-4 text-primary shrink-0" />
             <div className="truncate">
               <span>
-                <strong>Modo de Prueba:</strong> Te quedan <strong>{minsLeft} min</strong> de
-                sesión efímera. Configura tu plan para conservar tus datos.
+                <strong>Modo Demostración:</strong> Te quedan <strong>{minsLeft} min</strong> de
+                sesión efímera. Regístrate gratis para conservar tus datos y configurar tu negocio.
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
-            <a
-              href={checkoutUrl}
-              onClick={(e) => openLemonSqueezyOverlay(checkoutUrl, e)}
-              className="lemonsqueezy-button py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer bg-primary text-white hover:bg-primary/90"
+            <button
+              type="button"
+              onClick={async () => {
+                await signOut({ callbackUrl: "/register" });
+              }}
+              className="py-1 px-3 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer bg-primary text-white hover:bg-primary/90 shadow-2xs"
             >
-              <span>Seleccionar Plan</span>
+              <span>Registrarse Gratis</span>
               <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            </button>
             <button
               onClick={() => setIsVisible(false)}
               className="p-1 rounded-md opacity-60 hover:opacity-100 transition-opacity cursor-pointer"

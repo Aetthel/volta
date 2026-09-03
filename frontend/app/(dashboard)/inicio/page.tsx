@@ -203,6 +203,7 @@ export default function DashboardPage() {
   };
 
   const handleSaveAppointment = () => {
+    setIsAppointmentModalOpen(false);
     fetchData();
   };
 

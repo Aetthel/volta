@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { hasFeatureAccess, PlanFeature } from "@/lib/permissions";
 
 export type NavItemData = {
@@ -15,6 +15,7 @@ export type NavItemData = {
   requiresFeature?: PlanFeature;
   lockedTitle?: string;
   lockedDescription?: string;
+  isDemoLocked?: boolean;
   children?: NavItemData[];
 };
 
@@ -48,16 +49,48 @@ function NavItem({
   isCollapsed: boolean;
   subscriptionPlan: string;
   subscriptionStatus: string;
-  onOpenUpgrade: (info: { title?: string; description?: string }) => void;
+  onOpenUpgrade: (info: { title?: string; description?: string; mode?: "pro" | "register" }) => void;
   onOpenSearch: () => void;
   level?: number;
 }) {
-  const isActive = item.href ? activeHref === item.href : false;
-  const isLocked = item.requiresFeature
-    ? !hasFeatureAccess(subscriptionPlan, subscriptionStatus, item.requiresFeature)
+  const isSubtopic = level > 0;
+  const hasChildren = !!(item.children && item.children.length > 0);
+
+  const isChildActive = !!(
+    hasChildren &&
+    item.children?.some(
+      (child) => child.href && activeHref === child.href
+    )
+  );
+
+  const isExactActive = item.href ? activeHref === item.href : false;
+
+  const isParentRouteActive = item.href
+    ? activeHref.split("?")[0] === item.href.split("?")[0]
     : false;
-  const hasChildren = !!item.children;
-  const [isOpen, setIsOpen] = useState(false);
+
+  // Active state:
+  // Top-level item is active if exact match, or if on its parent route / has active child
+  // Subtopic is active only when exact match
+  const isActive = isSubtopic
+    ? isExactActive
+    : isExactActive || isParentRouteActive || isChildActive;
+
+  // Auto-expand if child is active or user is on this parent route
+  const [isOpen, setIsOpen] = useState(isChildActive || isParentRouteActive);
+
+  React.useEffect(() => {
+    if (isChildActive || isParentRouteActive) {
+      setIsOpen(true);
+    }
+  }, [isChildActive, isParentRouteActive]);
+
+  const isDemoSandbox = subscriptionStatus === "DEMO_SANDBOX";
+  const isLocked =
+    (item.isDemoLocked && isDemoSandbox) ||
+    (item.requiresFeature
+      ? !hasFeatureAccess(subscriptionPlan, subscriptionStatus, item.requiresFeature)
+      : false);
 
   const isClickable = !!item.href || isLocked || item.id === "search" || hasChildren;
 
@@ -74,33 +107,46 @@ function NavItem({
     if (isLocked) {
       e.preventDefault();
       onOpenUpgrade({
-        title: item.lockedTitle || "Desbloquea esta función",
-        description: item.lockedDescription,
+        title:
+          item.lockedTitle ||
+          (item.isDemoLocked && isDemoSandbox
+            ? "Regístrate para acceder a Ajustes"
+            : "Desbloquea esta función"),
+        description:
+          item.lockedDescription ||
+          (item.isDemoLocked && isDemoSandbox
+            ? "En el modo demostración los ajustes están bloqueados. Regístrate gratis para personalizar tu negocio."
+            : undefined),
+        mode: item.isDemoLocked && isDemoSandbox ? "register" : "pro",
       });
       return;
     }
     if (hasChildren) {
-      e.preventDefault();
-      setIsOpen(!isOpen);
+      setIsOpen((prev) => !prev);
+      // If it has href, do not preventDefault to allow navigation
     }
   };
 
   const content = (
     <div
-      className={`group flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-150 select-none ${
+      className={`group flex items-center justify-between px-3 rounded-lg transition-all duration-150 select-none ${
+        isSubtopic ? "py-2" : "py-2.5 min-h-[40px]"
+      } ${
         isClickable ? "cursor-pointer" : "cursor-default"
       } ${
         isCollapsed ? "justify-center px-1.5" : ""
       } ${
         isActive && !isLocked
-          ? "bg-primary/10 text-primary font-semibold shadow-2xs"
+          ? isSubtopic
+            ? "bg-primary/15 text-primary font-bold shadow-2xs"
+            : "bg-primary/10 text-primary font-semibold shadow-2xs"
           : isLocked
             ? "text-on-surface-variant/60 hover:bg-primary/5 hover:text-on-surface"
             : isClickable
               ? "text-on-surface-variant hover:bg-primary/5 hover:text-primary"
               : "text-on-surface-variant/70 hover:bg-primary/5"
       }`}
-      style={{ paddingLeft: !isCollapsed ? `${level * 12 + 12}px` : undefined }}
+      style={{ paddingLeft: !isCollapsed ? (isSubtopic ? `${level * 16 + 16}px` : undefined) : undefined }}
       onClick={handleClick}
       title={
         isCollapsed
@@ -113,7 +159,9 @@ function NavItem({
       <div className="flex items-center gap-3 min-w-0">
         <div className="relative flex items-center justify-center shrink-0">
           <item.icon
-            className={`w-[18px] h-[18px] transition-colors ${
+            className={`${
+              isSubtopic ? "w-4 h-4" : "w-[18px] h-[18px]"
+            } transition-colors ${
               isActive && !isLocked
                 ? "text-primary"
                 : "text-on-surface-variant/80 group-hover:text-primary"
@@ -125,7 +173,7 @@ function NavItem({
           )}
         </div>
         {!isCollapsed && (
-          <span className="text-sm font-medium tracking-normal truncate">
+          <span className={`${isSubtopic ? "text-[13px]" : "text-sm"} font-medium tracking-normal truncate`}>
             {item.title}
           </span>
         )}
@@ -140,9 +188,13 @@ function NavItem({
           )}
           {renderBadge(item.badge)}
           {hasChildren && (
-            <ChevronRight
-              className={`w-4 h-4 text-on-surface-variant/60 group-hover:text-primary transition-transform duration-200 ${
-                isOpen ? "rotate-90" : ""
+            <ChevronDown
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isOpen ? "rotate-180" : ""
+              } ${
+                isActive && !isLocked
+                  ? "text-primary"
+                  : "text-on-surface-variant/60 group-hover:text-primary"
               }`}
               strokeWidth={2}
             />
@@ -155,7 +207,7 @@ function NavItem({
   return (
     <div className="flex flex-col w-full">
       {item.href && !isLocked && item.id !== "search" ? (
-        <Link href={item.href} className="w-full">
+        <Link href={item.href} className="w-full block">
           {content}
         </Link>
       ) : (
@@ -169,10 +221,6 @@ function NavItem({
           }`}
         >
           <div className="overflow-hidden min-h-0 relative flex flex-col gap-0.5 mt-0.5">
-            <div
-              className="absolute top-0 bottom-0 border-l border-outline-variant/40"
-              style={{ left: `${level * 12 + 20}px` }}
-            />
             {item.children!.map((child) => (
               <NavItem
                 key={child.id}
@@ -199,7 +247,7 @@ interface SidebarNavProps {
   isCollapsed: boolean;
   subscriptionPlan: string;
   subscriptionStatus: string;
-  onOpenUpgrade: (info: { title?: string; description?: string }) => void;
+  onOpenUpgrade: (info: { title?: string; description?: string; mode?: "pro" | "register" }) => void;
   onOpenSearch: () => void;
 }
 

@@ -3,11 +3,18 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableModal } from "@/lib/useDraggableModal";
-import { X, Clock, User, Users, Phone, Briefcase, Calendar as CalendarIcon } from "lucide-react";
+import { X, Clock, User, Users, Phone, Briefcase, Calendar as CalendarIcon, Plus } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button, Alert, SegmentedControl } from "@/components/ui/volta-ui";
 import { Calendar } from "@/components/ui/calendar";
 import UserAvatar from "@/components/UserAvatar";
 import { useNewAppointmentForm } from "@/hooks/useNewAppointmentForm";
+import { apiClient } from "@/lib/apiClient";
+import { getNextServiceColor } from "@/lib/serviceColors";
+
+const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
+  ssr: false,
+});
 
 interface NewAppointmentModalProps {
   isOpen: boolean;
@@ -109,7 +116,50 @@ export default function NewAppointmentModal({
     handleMinChange,
     handleMinBlur,
     serviceOptions,
+    services,
+    fetchServices,
+    businessId,
   } = useNewAppointmentForm(isOpen, initialDate, initialTime, onSave, onClose);
+
+  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  const modalCardRef = useRef<HTMLDivElement>(null);
+  const [serviceTriggerRect, setServiceTriggerRect] = useState<{
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const handleOpenAddService = () => {
+    if (modalCardRef.current) {
+      setServiceTriggerRect(modalCardRef.current.getBoundingClientRect());
+    }
+    setIsAddServiceOpen(true);
+  };
+
+  const handleSaveNewService = async (serviceData: {
+    id?: string;
+    name: string;
+    price: number;
+    duration: number;
+    description?: string;
+    capacity?: number;
+    type?: "INDIVIDUAL" | "GROUP";
+    color?: string;
+  }) => {
+    const color = getNextServiceColor(services.length);
+    const res = await apiClient.services.create({
+      ...serviceData,
+      color,
+      businessId,
+    });
+    if (!res.error) {
+      await fetchServices(serviceData.name);
+      setIsAddServiceOpen(false);
+    }
+  };
 
   const { position, handleMouseDown } = useDraggableModal({
     isOpen,
@@ -170,6 +220,7 @@ export default function NewAppointmentModal({
 
       {/* Modal Content Card */}
       <div
+        ref={modalCardRef}
         style={{
           position: "fixed",
           left: `${position.x}px`,
@@ -222,22 +273,39 @@ export default function NewAppointmentModal({
           <div className="px-5 pt-3 pb-4 flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
             {/* Servicio Selection */}
             <div>
-              <label
-                htmlFor="service"
-                className="text-xs font-medium text-on-surface mb-1 flex items-center gap-1.5"
-              >
-                <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span>
-                  {bookingType === "GROUP" ? "Clase de Grupo" : "Servicio"}{" "}
-                  <span className="text-error">*</span>
-                </span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label
+                  htmlFor="service"
+                  className="text-xs font-medium text-on-surface flex items-center gap-1.5"
+                >
+                  <Briefcase className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                  <span>
+                    {bookingType === "GROUP" ? "Clase de Grupo" : "Servicio"}{" "}
+                    <span className="text-error">*</span>
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleOpenAddService}
+                  className="text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Crear servicio al instante"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Nuevo servicio</span>
+                </button>
+              </div>
               <select
                 id="service"
                 name="service"
                 required
                 value={formData.service}
-                onChange={(e) => setFormData((prev) => ({ ...prev, service: e.target.value }))}
+                onChange={(e) => {
+                  if (e.target.value === "__NEW_SERVICE__") {
+                    handleOpenAddService();
+                    return;
+                  }
+                  setFormData((prev) => ({ ...prev, service: e.target.value }));
+                }}
                 className="w-full px-3 py-1.5 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all cursor-pointer"
               >
                 {serviceOptions.length === 0 ? (
@@ -247,13 +315,26 @@ export default function NewAppointmentModal({
                       : "No hay servicios disponibles"}
                   </option>
                 ) : (
-                  serviceOptions.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label} {opt.sublabel ? `(${opt.sublabel})` : ""}
-                    </option>
-                  ))
+                  <>
+                    {serviceOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label} {opt.sublabel ? `(${opt.sublabel})` : ""}
+                      </option>
+                    ))}
+                    <option value="__NEW_SERVICE__">+ Crear nuevo servicio...</option>
+                  </>
                 )}
               </select>
+              {serviceOptions.length === 0 && (
+                <button
+                  type="button"
+                  onClick={handleOpenAddService}
+                  className="mt-1.5 w-full py-1.5 px-2.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/15 rounded-lg border border-primary/20 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Crear tu primer {bookingType === "GROUP" ? "clase de grupo" : "servicio"}</span>
+                </button>
+              )}
             </div>
 
             {/* Cliente(s) Selection (with Autocomplete) */}
@@ -558,6 +639,15 @@ export default function NewAppointmentModal({
           </div>
         </Alert>
       )}
+
+      {/* Modal para crear servicio directamente al lado sin salir de la cita */}
+      <AddServiceModal
+        isOpen={isAddServiceOpen}
+        onClose={() => setIsAddServiceOpen(false)}
+        onSave={handleSaveNewService}
+        triggerRect={serviceTriggerRect}
+        zIndex={120}
+      />
     </div>,
     document.body
   );

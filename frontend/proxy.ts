@@ -35,9 +35,13 @@ export default auth((req) => {
 
   const user = req.auth?.user;
   const role = typeof user?.role === "string" ? user.role.toUpperCase() : "JEFE";
+  const isDemo = (user as any)?.subscriptionStatus === "DEMO_SANDBOX";
 
   // 2. Redirección si usuario ya autenticado intenta acceder a la Landing, Login o Register
   if (isLoggedIn && user && isPublicAuthRoute) {
+    if (isDemo && (pathname === "/register" || pathname === "/login")) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL(role === "ADMIN" ? "/admin" : "/inicio", nextUrl));
   }
 

@@ -19,6 +19,7 @@ export const getBusinessById = async (id: string) => {
       themeColor: true,
       fontSizeLevel: true,
       borderRadiusLevel: true,
+      enablePublicBooking: true,
     },
   });
 };
@@ -39,6 +40,7 @@ export const updateBusiness = async (id: string, updateData: UpdateBusinessInput
       themeColor: true,
       fontSizeLevel: true,
       borderRadiusLevel: true,
+      enablePublicBooking: true,
     },
   });
 };

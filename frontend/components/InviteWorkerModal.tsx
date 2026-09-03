@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableModal } from "@/lib/useDraggableModal";
-import { X, User, Mail, Key, ShieldCheck, UserPlus } from "lucide-react";
+import { X, User, Mail, Key, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/volta-ui";
 
 export interface WorkerToEdit {
@@ -145,27 +145,22 @@ export default function InviteWorkerModal({
         {/* Header */}
         <div
           onMouseDown={handleMouseDown}
-          className="px-5 py-4 border-b border-outline-variant/40 flex items-center justify-between cursor-move select-none bg-surface-container-low/30"
+          className="px-5 pt-3.5 pb-3 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none shrink-0"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <UserPlus className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-semibold text-on-surface leading-tight">
-                {isEditMode ? "Editar Miembro del Equipo" : "Invitar Trabajador"}
-              </h2>
-              <p className="text-[11px] text-on-surface-variant leading-tight mt-0.5">
-                {isEditMode
-                  ? "Actualiza los datos o el rol del trabajador."
-                  : "Añade un nuevo miembro a tu equipo y asígnale su rol."}
-              </p>
-            </div>
+          <div className="flex flex-col">
+            <h2 className="text-base font-bold text-on-surface tracking-tight">
+              {isEditMode ? "Editar Miembro del Equipo" : "Invitar Trabajador"}
+            </h2>
+            <p className="text-xs text-on-surface-variant mt-0.5">
+              {isEditMode
+                ? "Actualiza los datos o el rol del trabajador"
+                : "Añade un nuevo miembro a tu equipo y asígnale su rol"}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container-high transition-colors cursor-pointer"
+            className="p-1 rounded-lg text-on-surface-variant/70 hover:text-on-surface hover:bg-surface-container-high/60 transition-colors cursor-pointer -mr-1"
             aria-label="Cerrar modal"
           >
             <X className="w-4 h-4" />

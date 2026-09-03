@@ -14,6 +14,7 @@ import { CalendarDayView } from "./calendar/CalendarDayView";
 import { CalendarListView } from "./calendar/CalendarListView";
 import { EventEditDialog } from "./calendar/EventEditDialog";
 import type { CalendarEvent } from "./calendar/EventCard";
+import { SERVICE_PALETTES, getServicePalette } from "@/lib/serviceColors";
 
 const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
   ssr: false,
@@ -47,14 +48,13 @@ export interface EventManagerProps {
   getClosedLabel?: (date: Date) => string | undefined;
 }
 
-export const defaultColors: ColorItem[] = [
-  { name: "Teal Volta", value: "TEAL", bg: "bg-[#377E7F]", text: "text-white" },
-  { name: "Teal Intenso", value: "DEEP_TEAL", bg: "bg-[#285F60]", text: "text-white" },
-  { name: "Mineral", value: "SAGE", bg: "bg-[#4A8B8C]", text: "text-white" },
-  { name: "Pizarra", value: "SLATE", bg: "bg-[#3B6E8C]", text: "text-white" },
-  { name: "Bosque", value: "FOREST", bg: "bg-[#2E6554]", text: "text-white" },
-  { name: "Petróleo", value: "PETROL", bg: "bg-[#2F5359]", text: "text-white" },
-];
+export const defaultColors: ColorItem[] = SERVICE_PALETTES.map((p) => ({
+  name: p.name,
+  value: p.id,
+  bg: p.bg,
+  text: p.text,
+  border: p.border,
+}));
 
 export function EventManager({
   events: initialEvents = [],
@@ -144,8 +144,18 @@ export function EventManager({
 
   const getColorClasses = useCallback(
     (colorValue: string) => {
-      const color = colors.find((c) => c.value === colorValue);
-      return color || colors[0] || defaultColors[0];
+      const customColor = colors.find(
+        (c) => c.value === colorValue || c.value.toLowerCase() === colorValue?.toLowerCase()
+      );
+      if (customColor) return customColor;
+      const palette = getServicePalette(colorValue);
+      return {
+        name: palette.name,
+        value: palette.id,
+        bg: palette.bg,
+        text: palette.text,
+        border: palette.border,
+      };
     },
     [colors]
   );

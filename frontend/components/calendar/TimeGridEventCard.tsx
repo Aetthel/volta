@@ -14,7 +14,7 @@ export interface TimeGridEventCardProps {
   onEventClick: (event: CalendarEvent) => void;
   onDragStart: (event: CalendarEvent) => void;
   onDragEnd: () => void;
-  getColorClasses: (color: string) => { bg: string; text: string };
+  getColorClasses: (color: string) => { bg: string; text: string; border?: string };
   leftOffsetPercent?: number;
   widthPercent?: number;
 }
@@ -133,6 +133,10 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
   const showTimeRange = lineCount >= 3;
   const showTags = lineCount >= 4 && Boolean(event.tags?.length);
 
+  const isHexBg = colorClasses.bg.startsWith("#");
+  const isHexText = colorClasses.text.startsWith("#");
+  const isHexBorder = Boolean(colorClasses.border?.startsWith("#"));
+
   return (
     <div
       draggable
@@ -149,12 +153,15 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
         height: `${height}px`,
         left: `calc(${leftOffsetPercent}% + 2px)`,
         width: `calc(${widthPercent}% - 4px)`,
+        backgroundColor: isHexBg ? colorClasses.bg : undefined,
+        color: isHexText ? colorClasses.text : undefined,
+        borderColor: isHexBorder ? colorClasses.border : undefined,
       }}
       className={cn(
-        "absolute z-10 cursor-pointer rounded-md px-2 py-1 transition-all duration-150 shadow-xs flex flex-col select-none",
-        colorClasses.bg,
-        "text-white",
-        isHovered && "z-30 ring-2 ring-white/80 shadow-md brightness-105"
+        "absolute z-10 cursor-pointer rounded-md px-2 py-1 transition-all duration-150 shadow-2xs border flex flex-col select-none",
+        !isHexBg && colorClasses.bg,
+        !isHexText && colorClasses.text,
+        isHovered && "z-30 ring-2 ring-primary/30 shadow-md brightness-95"
       )}
     >
       {/* El recorte vive aquí y no en el contenedor: el tooltip de hover es
@@ -194,7 +201,7 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
             <div className="flex items-center gap-1 text-[10px] leading-[13px] opacity-80 min-w-0">
               <Clock className="w-3 h-3 shrink-0 opacity-80" />
               <span className="truncate">
-                {formatTime(event.startTime)}–{formatTime(event.endTime)}
+                {formatTime(event.startTime)} - {formatTime(event.endTime)}
               </span>
             </div>
           )}
@@ -204,7 +211,7 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
               {event.tags!.map((tag) => (
                 <span
                   key={tag}
-                  className="px-1.5 py-0.5 text-[9px] leading-none font-semibold rounded bg-white/20 text-white backdrop-blur-xs"
+                  className="px-1.5 py-0.5 text-[9px] leading-none font-semibold rounded bg-black/10 text-current backdrop-blur-xs"
                 >
                   {tag}
                 </span>

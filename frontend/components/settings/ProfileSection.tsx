@@ -56,7 +56,8 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     name: session?.user?.name || "",
     email: session?.user?.email || "",
   });
-  const [savingInfo, setSavingInfo] = useState(false);
+  const [personalSaveStatus, setPersonalSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const personalSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Password Form State
   const [passwordForm, setPasswordForm] = useState({
@@ -172,40 +173,44 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     setTimeout(() => setToast({ show: false, text: "" }), 3000);
   };
 
-  // Save Personal Info
-  const handleSavePersonalInfo = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!session?.user?.id) return;
+  // Auto-save Personal Info
+  const persistPersonalInfo = React.useCallback(
+    async (nextForm: typeof personalForm) => {
+      if (!session?.user?.id) return;
+      if (!nextForm.name.trim() || !nextForm.email.trim()) return;
 
-    if (!personalForm.name.trim() || !personalForm.email.trim()) {
-      setToast({ show: true, text: "Por favor, completa el nombre y el correo electrónico" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
-      return;
-    }
-
-    setSavingInfo(true);
-    try {
-      const res = await apiClient.team.update(session.user.id, {
-        name: personalForm.name.trim(),
-        email: personalForm.email.trim().toLowerCase(),
-      });
-      if (res.error) throw new Error(res.error);
-
-      if (update && res.data) {
-        await update({
-          ...session,
-          user: { ...session?.user, name: res.data.name, email: res.data.email },
+      setPersonalSaveStatus("saving");
+      try {
+        const res = await apiClient.team.update(session.user.id, {
+          name: nextForm.name.trim(),
+          email: nextForm.email.trim().toLowerCase(),
         });
-      }
+        if (res.error) throw new Error(res.error);
 
-      setToast({ show: true, text: "¡Información personal guardada con éxito!" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
-    } catch (err: any) {
-      setToast({ show: true, text: err.message || "Error al guardar los cambios." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
-    } finally {
-      setSavingInfo(false);
-    }
+        if (update && res.data) {
+          await update({
+            ...session,
+            user: { ...session?.user, name: res.data.name, email: res.data.email },
+          });
+        }
+
+        setPersonalSaveStatus("saved");
+        setTimeout(() => setPersonalSaveStatus("idle"), 2500);
+      } catch {
+        setPersonalSaveStatus("idle");
+        setToast({ show: true, text: "Error al guardar información personal" });
+        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      }
+    },
+    [session, update, setToast]
+  );
+
+  const schedulePersistPersonalInfo = (nextForm: typeof personalForm) => {
+    setPersonalForm(nextForm);
+    if (personalSaveTimeoutRef.current) clearTimeout(personalSaveTimeoutRef.current);
+    personalSaveTimeoutRef.current = setTimeout(() => {
+      persistPersonalInfo(nextForm);
+    }, 800);
   };
 
   // Save Password
@@ -363,7 +368,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
   return (
     <div className="animate-in fade-in duration-200">
       {/* 1. Identidad — sin contenedor: el avatar ancla la página */}
-      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-outline-variant/50">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10">
         <div className="flex items-center gap-5">
           {/* Avatar con subida inmediata al hacer clic */}
           <div className="relative group/avatar shrink-0">
@@ -413,23 +418,6 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     ? "Jefe de Tienda"
                     : "Especialista / Empleado"}
               </Badge>
-              {isEmailVerified ? (
-                <Badge
-                  variant="outline"
-                  className="text-label-sm font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 gap-1 flex items-center"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>Correo Verificado</span>
-                </Badge>
-              ) : (
-                <Badge
-                  variant="outline"
-                  className="text-label-sm font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30 gap-1 flex items-center"
-                >
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                  <span>Correo No Verificado</span>
-                </Badge>
-              )}
             </div>
 
             <div className="flex items-center gap-x-5 gap-y-1 text-xs text-on-surface-variant/80 flex-wrap">
@@ -480,10 +468,23 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
             <SectionHeading
               icon={User}
               title="Información Personal"
-              description="Actualiza tu nombre público y el correo electrónico con el que accedes a la plataforma."
+              description="Actualiza tu nombre público y el correo electrónico con el que accedes a la plataforma. Se guarda solo al escribir."
+              trailing={
+                personalSaveStatus === "saving" ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-on-surface-variant animate-pulse">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                    <span>Guardando...</span>
+                  </span>
+                ) : personalSaveStatus === "saved" ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 animate-in fade-in">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Guardado</span>
+                  </span>
+                ) : null
+              }
             />
 
-            <form onSubmit={handleSavePersonalInfo}>
+            <div className="space-y-4">
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor="userName">Nombre Completo</FieldLabel>
@@ -493,8 +494,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     required
                     value={personalForm.name}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPersonalForm({ ...personalForm, name: e.target.value })
+                      schedulePersistPersonalInfo({ ...personalForm, name: e.target.value })
                     }
+                    onBlur={() => persistPersonalInfo(personalForm)}
                     icon={User}
                     className={INPUT_SURFACE}
                   />
@@ -527,40 +529,19 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
                     required
                     value={personalForm.email}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPersonalForm({ ...personalForm, email: e.target.value })
+                      schedulePersistPersonalInfo({ ...personalForm, email: e.target.value })
                     }
+                    onBlur={() => persistPersonalInfo(personalForm)}
                     icon={Mail}
                     className={INPUT_SURFACE}
                   />
                 </Field>
               </FieldGroup>
-
-              <div className="flex justify-end mt-6">
-                <Button
-                  type="submit"
-                  disabled={savingInfo}
-                  variant="primary"
-                  size="md"
-                  className="flex items-center gap-2 font-medium"
-                >
-                  {savingInfo ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Guardando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      <span>Guardar Cambios</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
+            </div>
           </section>
 
           {/* Autenticación en dos pasos */}
-          <section className="mt-12 pt-10 border-t border-outline-variant/50">
+          <section className="mt-12 pt-6">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
               <SectionHeading
                 icon={ShieldCheck}
@@ -614,10 +595,8 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
           </section>
         </div>
 
-        {/* Columna derecha: contraseña (5 cols). Más corta que la izquierda, así
-            que en escritorio se centra a media altura en lugar de dejar un
-            hueco muerto bajo el botón. */}
-        <div className="lg:col-span-5 flex flex-col justify-center pt-10 border-t border-outline-variant/50 mt-12 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:px-12">
+        {/* Columna derecha: contraseña (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col justify-center pt-10 mt-12 lg:mt-0 lg:pt-0 lg:px-8">
           <section>
             <SectionHeading
               icon={Lock}

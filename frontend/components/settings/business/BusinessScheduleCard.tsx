@@ -1,8 +1,6 @@
 "use client";
 
 import type { ToastState } from "@/types/settings";
-import { CalendarClock } from "lucide-react";
-import { SectionHeading } from "../SectionHeading";
 import { BusinessHoursGrid } from "./BusinessHoursGrid";
 import { BusinessHolidaysGrid } from "./BusinessHolidaysGrid";
 
@@ -23,22 +21,14 @@ export const BusinessScheduleCard: React.FC<BusinessScheduleCardProps> = ({
   setToast,
 }) => {
   return (
-    <section className="w-full pt-12 border-t border-outline-variant/50">
-      <SectionHeading
-        icon={CalendarClock}
-        title="Disponibilidad"
-        description="Cuándo atiende tu negocio. Lo que cierres aquí se bloquea en la agenda y en el portal de reservas de clientes."
-      />
-
+    <section className="w-full pt-10">
       <div>
-        {/* En pantallas estrechas las columnas se apilan; el separador pasa de
-            vertical a horizontal para no dejar una línea suelta a media altura. */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-          <div className="lg:border-r lg:border-outline-variant/40 lg:pr-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+          <div>
             <BusinessHoursGrid businessId={businessId} setToast={setToast} />
           </div>
 
-          <div className="border-t border-outline-variant/40 pt-6 lg:border-t-0 lg:pt-0">
+          <div>
             <BusinessHolidaysGrid businessId={businessId} setToast={setToast} />
           </div>
         </div>

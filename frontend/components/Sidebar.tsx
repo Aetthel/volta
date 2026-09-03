@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import {
@@ -17,11 +17,15 @@ import {
   BarChart3,
   UserCheck,
   FileText,
+  User,
+  MessageSquare,
+  Palette,
+  CreditCard,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { useAlerts } from "@/lib/alerts";
 import { WorkspaceSwitcher } from "./sidebar/WorkspaceSwitcher";
-import { SidebarNav, type NavGroupData } from "./sidebar/SidebarNav";
+import { SidebarNav, type NavGroupData, type NavItemData } from "./sidebar/SidebarNav";
 import { CommandPaletteModal } from "./sidebar/CommandPaletteModal";
 
 import UpgradeProModal from "@/components/UpgradeProModal";
@@ -37,6 +41,10 @@ const DEFAULT_WIDTH = 260;
 
 export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams.get("tab") || searchParams.get("seccion");
+  const fullActiveHref = currentTab ? `${pathname}?tab=${currentTab}` : pathname;
+
   const { data: session } = useSession();
   const { unreadCount } = useAlerts();
 
@@ -86,6 +94,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     open: boolean;
     title?: string;
     description?: string;
+    mode?: "pro" | "register";
   }>({ open: false });
 
   const lastWidthRef = useRef(DEFAULT_WIDTH);
@@ -175,6 +184,62 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  const settingsChildren: NavItemData[] = [
+    {
+      id: "settings-perfil",
+      title: "Perfil y Seguridad",
+      href: "/ajustes?tab=perfil",
+      icon: User,
+    },
+  ];
+
+  if (role === "JEFE" || role === "EMPLEADO") {
+    settingsChildren.push({
+      id: "settings-mensajeria",
+      title: "Mensajes y WhatsApp",
+      href: "/ajustes?tab=mensajeria",
+      icon: MessageSquare,
+    });
+  }
+
+  if (role === "JEFE") {
+    settingsChildren.push({
+      id: "settings-gestion",
+      title: "Gestión del Negocio",
+      href: "/ajustes?tab=gestion",
+      icon: Store,
+    });
+    settingsChildren.push({
+      id: "settings-personalizacion",
+      title: "Personalización",
+      href: "/ajustes?tab=personalizacion",
+      icon: Palette,
+    });
+  }
+
+  if (role === "ADMIN" || role === "JEFE") {
+    settingsChildren.push({
+      id: "settings-facturacion",
+      title: "Facturación",
+      href: "/ajustes?tab=facturacion",
+      icon: CreditCard,
+    });
+  }
+
+  const isDemoSandbox = subscriptionStatus === "DEMO_SANDBOX";
+
+  const settingsItem: NavItemData = {
+    id: "settings",
+    title: "Ajustes",
+    href: isDemoSandbox ? undefined : "/ajustes",
+    icon: Settings,
+    isDemoLocked: isDemoSandbox,
+    lockedTitle: "Regístrate para acceder a Ajustes",
+    lockedDescription:
+      "Estás explorando Volta en modo demo efímero. Crea tu cuenta gratuita para configurar los horarios, servicios, datos comerciales y WhatsApp de tu negocio.",
+    children: isDemoSandbox ? undefined : settingsChildren,
+  };
+
   const navGroups: NavGroupData[] = [];
 
   if (role === "ADMIN") {
@@ -195,9 +260,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     });
     navGroups.push({
       heading: "Ajustes",
-      items: [
-        { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
-      ],
+      items: [settingsItem],
     });
   } else {
     // 1. Categoría: Principal
@@ -231,7 +294,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     navGroups.push({
       heading: "Ajustes",
       items: [
-        { id: "settings", title: "Preferencias", href: "/ajustes", icon: Settings },
+        settingsItem,
         { id: "reports", title: "Reportes", icon: FileText, badge: "Próximamente" },
       ],
     });
@@ -258,7 +321,7 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         {/* Navigation Items List */}
         <SidebarNav
           navGroups={navGroups}
-          pathname={pathname}
+          pathname={fullActiveHref}
           isCollapsed={displayCollapsed}
           subscriptionPlan={subscriptionPlan}
           subscriptionStatus={subscriptionStatus}
@@ -301,12 +364,13 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         setSearchInputVal={setSearchInputVal}
       />
 
-      {/* Embedded Upgrade Modal for Pro features */}
+      {/* Embedded Upgrade Modal for Pro features or Demo Registration */}
       <UpgradeProModal
         isOpen={upgradeModalInfo.open}
         onClose={() => setUpgradeModalInfo((prev) => ({ ...prev, open: false }))}
         title={upgradeModalInfo.title}
         description={upgradeModalInfo.description}
+        mode={upgradeModalInfo.mode}
       />
     </>
   );

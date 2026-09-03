@@ -1,5 +1,4 @@
-// @ts-ignore - config is an existing JS module
-import config from "../config/index.js";
+import config from "../config/index";
 import { logger } from "../utils/logger";
 
 interface BaseTemplateOptions {

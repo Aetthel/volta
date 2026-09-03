@@ -98,7 +98,7 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
 
   return (
     <>
-      <section className="pb-8 border-b border-outline-variant/50">
+      <section className="pb-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
           <SectionHeading
             icon={MessageSquare}

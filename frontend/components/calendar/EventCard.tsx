@@ -25,7 +25,7 @@ interface EventCardProps {
   onEventClick: (event: CalendarEvent) => void;
   onDragStart: (event: CalendarEvent) => void;
   onDragEnd: () => void;
-  getColorClasses: (color: string) => { bg: string; text: string };
+  getColorClasses: (color: string) => { bg: string; text: string; border?: string };
   variant?: "default" | "compact" | "detailed";
 }
 
@@ -39,6 +39,9 @@ export const EventCard: React.FC<EventCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const colorClasses = getColorClasses(event.color);
+  const isHexBg = colorClasses.bg.startsWith("#");
+  const isHexText = colorClasses.text.startsWith("#");
+  const isHexBorder = Boolean(colorClasses.border?.startsWith("#"));
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("es-ES", {
@@ -72,10 +75,16 @@ export const EventCard: React.FC<EventCardProps> = ({
         className="relative cursor-pointer event-card"
       >
         <div
+          style={{
+            backgroundColor: isHexBg ? colorClasses.bg : undefined,
+            color: isHexText ? colorClasses.text : undefined,
+            borderColor: isHexBorder ? colorClasses.border : undefined,
+          }}
           className={cn(
-            "rounded px-1.5 py-0.5 text-xs font-medium transition-all duration-300",
-            colorClasses.bg,
-            "text-white truncate animate-in fade-in slide-in-from-top-1",
+            "rounded px-1.5 py-0.5 text-xs font-medium transition-all duration-300 border",
+            !isHexBg && colorClasses.bg,
+            !isHexText && colorClasses.text,
+            "truncate animate-in fade-in slide-in-from-top-1",
             isHovered && "scale-105 shadow-lg z-10"
           )}
         >
@@ -130,11 +139,17 @@ export const EventCard: React.FC<EventCardProps> = ({
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        style={{
+          backgroundColor: isHexBg ? colorClasses.bg : undefined,
+          color: isHexText ? colorClasses.text : undefined,
+          borderColor: isHexBorder ? colorClasses.border : undefined,
+        }}
         className={cn(
-          "cursor-pointer rounded-lg p-3 transition-all duration-300 event-card",
-          colorClasses.bg,
-          "text-white animate-in fade-in slide-in-from-left-2",
-          isHovered && "scale-[1.03] shadow-2xl ring-2 ring-white/50"
+          "cursor-pointer rounded-lg p-3 transition-all duration-300 event-card border",
+          !isHexBg && colorClasses.bg,
+          !isHexText && colorClasses.text,
+          "animate-in fade-in slide-in-from-left-2",
+          isHovered && "scale-[1.03] shadow-2xl ring-2 ring-primary/40"
         )}
       >
         <div className="font-semibold">{event.title}</div>
@@ -177,10 +192,16 @@ export const EventCard: React.FC<EventCardProps> = ({
       className="relative event-card"
     >
       <div
+        style={{
+          backgroundColor: isHexBg ? colorClasses.bg : undefined,
+          color: isHexText ? colorClasses.text : undefined,
+          borderColor: isHexBorder ? colorClasses.border : undefined,
+        }}
         className={cn(
-          "cursor-pointer rounded px-2 py-1 text-xs font-medium transition-all duration-300",
-          colorClasses.bg,
-          "text-white animate-in fade-in slide-in-from-left-1",
+          "cursor-pointer rounded px-2 py-1 text-xs font-medium transition-all duration-300 border",
+          !isHexBg && colorClasses.bg,
+          !isHexText && colorClasses.text,
+          "animate-in fade-in slide-in-from-left-1",
           isHovered && "scale-105 shadow-lg z-10"
         )}
       >

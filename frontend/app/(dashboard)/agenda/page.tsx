@@ -15,6 +15,7 @@ import { useBusinessSchedule } from "@/lib/hooks/useBusinessSchedule";
 
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
+import { getServicePalette } from "@/lib/serviceColors";
 
 interface ServiceItem {
   id?: string;
@@ -44,8 +45,6 @@ interface AppointmentItem {
   };
 }
 
-const VALID_COLORS = ["TEAL", "DEEP_TEAL", "SAGE", "SLATE", "FOREST", "PETROL"];
-
 function getServiceDuration(app: AppointmentItem, servicesList: ServiceItem[]): number {
   if (app.service?.duration && typeof app.service.duration === "number") {
     return app.service.duration;
@@ -62,21 +61,22 @@ function getServiceDuration(app: AppointmentItem, servicesList: ServiceItem[]): 
 }
 
 function getServiceColor(app: AppointmentItem, servicesList: ServiceItem[]): string {
-  if (app.service?.color && VALID_COLORS.includes(app.service.color.toUpperCase())) {
-    return app.service.color.toUpperCase();
-  }
+  const serviceId = app.service?.name ? undefined : undefined;
+  const sName = (app.serviceName || app.service?.name || app.client?.frequentService || "").trim().toLowerCase();
 
-  const serviceName = (app.serviceName || app.client?.frequentService || "Servicio General").trim();
-
-  const dbService = servicesList.find(
-    (s) => s.name?.toLowerCase().trim() === serviceName.toLowerCase()
+  const matchedIndex = servicesList.findIndex(
+    (s) => s.name?.toLowerCase().trim() === sName
   );
-  if (dbService?.color && VALID_COLORS.includes(dbService.color.toUpperCase())) {
-    return dbService.color.toUpperCase();
+
+  if (matchedIndex !== -1) {
+    return getServicePalette(servicesList[matchedIndex], matchedIndex).id;
   }
 
-  // Consistent Volta Primary Brand Teal
-  return "TEAL";
+  if (app.service?.color) {
+    return getServicePalette(app.service.color).id;
+  }
+
+  return getServicePalette(sName || app.id).id;
 }
 
 function formatShortClientName(fullName: string): string {
@@ -362,10 +362,8 @@ export default function AgendaPage() {
            mismo hueco y el backend la rechazaba con 409, así que la reserva sí
            existía pero la UI daba error y no refrescaba. */
         onSave={() => {
+          setIsAppointmentModalOpen(false);
           showToast("Cita registrada exitosamente", "success");
-          // El propio modal se cierra (llama a onClose) cuando termina de
-          // mostrar el aviso de consentimiento LOPD; cerrarlo desde aquí lo
-          // desmontaba antes de que ese aviso llegara a verse.
           fetchDashboardData();
         }}
       />

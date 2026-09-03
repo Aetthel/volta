@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/volta-ui";
 import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
+import { getServicePalette, getNextServiceColor } from "@/lib/serviceColors";
 
 const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
   ssr: false,
@@ -61,11 +62,17 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
     price: number;
     duration: number;
     description?: string;
+    capacity?: number;
+    type?: "INDIVIDUAL" | "GROUP";
+    color?: string;
   }) => {
     const isEdit = !!serviceData.id;
+    const color = isEdit
+      ? serviceData.color
+      : getNextServiceColor(services.length);
     const res = isEdit
       ? await apiClient.services.update(serviceData.id!, { ...serviceData, businessId })
-      : await apiClient.services.create({ ...serviceData, businessId });
+      : await apiClient.services.create({ ...serviceData, color, businessId });
 
     if (res.error) {
       setToast({ show: true, text: "Error al guardar el servicio" });
@@ -102,7 +109,7 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
 
   return (
     <>
-      <section className="pt-12 pb-10 border-t border-outline-variant/50">
+      <section className="pt-12 pb-10">
         <div className="flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <SectionHeading
@@ -193,28 +200,45 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {filteredServices.map((service: Service) => (
-                <div
-                  key={service.id}
-                  className="hover:bg-surface-container-high/40 transition-colors p-3.5 rounded-xl border border-outline-variant/50 flex items-center justify-between gap-3 group relative"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">
-                      <Briefcase className="w-5 h-5" strokeWidth={1.75} />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-bold text-on-surface truncate">
-                        {service.name}
-                      </span>
-                      <div className="flex items-center gap-2 text-xs text-on-surface-variant/80">
-                        <span className="font-semibold text-primary">
-                          {formatCurrency(service.price)}
-                        </span>
-                        <span>•</span>
-                        <span>{service.duration} min</span>
+              {filteredServices.map((service: Service, idx: number) => {
+                const palette = getServicePalette(service, idx);
+                return (
+                  <div
+                    key={service.id}
+                    className="hover:bg-surface-container-high/40 transition-colors p-3.5 rounded-xl border border-outline-variant/50 flex items-center justify-between gap-3 group relative"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        style={{
+                          backgroundColor: palette.bg,
+                          color: palette.text,
+                          borderColor: palette.border,
+                        }}
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs border"
+                      >
+                        <Briefcase className="w-5 h-5" strokeWidth={1.75} />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-on-surface truncate">
+                            {service.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-on-surface-variant/80">
+                          <span className="font-semibold text-primary">
+                            {formatCurrency(service.price)}
+                          </span>
+                          <span>•</span>
+                          <span>{service.duration} min</span>
+                          {service.type === "GROUP" && (
+                            <>
+                              <span>•</span>
+                              <span>Aforo: {service.capacity || 1}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
                   <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
                     <Button
@@ -244,7 +268,8 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
                     </Button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

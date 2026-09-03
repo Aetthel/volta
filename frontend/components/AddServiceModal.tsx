@@ -11,7 +11,6 @@ import {
   Users,
   User,
   FileText,
-  Palette,
 } from "lucide-react";
 import { Button, SegmentedControl } from "@/components/ui/volta-ui";
 import { useAddServiceForm, ServiceToEdit } from "@/hooks/useAddServiceForm";
@@ -39,23 +38,14 @@ interface AddServiceModalProps {
     width: number;
     height: number;
   } | null;
+  zIndex?: number;
 }
 
 // La altura es orientativa (posiciona el modal al abrirlo); el tope real lo pone
 // MODAL_MAX_HEIGHT sobre el viewport.
 const MODAL_WIDTH = 500;
-const MODAL_HEIGHT = 520;
+const MODAL_HEIGHT = 460;
 const MODAL_MAX_HEIGHT = "calc(100vh - 24px)";
-
-const COLOR_OPTIONS = [
-  { id: "TEAL", bg: "bg-[#377E7F]", ring: "ring-[#377E7F]", label: "Teal Volta" },
-  { id: "PURPLE", bg: "bg-purple-600", ring: "ring-purple-600", label: "Púrpura" },
-  { id: "ROSE", bg: "bg-rose-500", ring: "ring-rose-500", label: "Rosa" },
-  { id: "AMBER", bg: "bg-amber-500", ring: "ring-amber-500", label: "Ámbar" },
-  { id: "INDIGO", bg: "bg-indigo-600", ring: "ring-indigo-600", label: "Índigo" },
-  { id: "EMERALD", bg: "bg-emerald-500", ring: "ring-emerald-500", label: "Esmeralda" },
-  { id: "SKY", bg: "bg-sky-500", ring: "ring-sky-500", label: "Azul Cielo" },
-];
 
 export default function AddServiceModal({
   isOpen,
@@ -63,13 +53,13 @@ export default function AddServiceModal({
   onSave,
   serviceToEdit,
   triggerRect,
+  zIndex = 100,
 }: AddServiceModalProps) {
   const {
     formData,
     isEditMode,
     handleChange,
     handleTypeChange,
-    handleColorSelect,
     handleSubmit,
   } = useAddServiceForm(isOpen, serviceToEdit, onSave, onClose);
 
@@ -88,7 +78,10 @@ export default function AddServiceModal({
   if (!isOpen || !mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] pointer-events-none">
+    <div
+      style={{ zIndex }}
+      className="fixed inset-0 pointer-events-none"
+    >
       {/* Backdrop — transparent without blur or darkening */}
       <div className="absolute inset-0 bg-transparent pointer-events-auto" onClick={onClose} />
 
@@ -110,9 +103,8 @@ export default function AddServiceModal({
           className="px-5 pt-3.5 pb-3 flex justify-between items-start border-b border-outline-variant/30 bg-surface-container-low/40 cursor-grab active:cursor-grabbing select-none shrink-0"
         >
           <div className="flex flex-col">
-            <h2 className="text-base font-bold text-on-surface tracking-tight flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-primary" />
-              <span>{isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}</span>
+            <h2 className="text-base font-bold text-on-surface tracking-tight">
+              {isEditMode ? "Editar Servicio" : "Añadir Nuevo Servicio"}
             </h2>
             <p className="text-xs text-on-surface-variant mt-0.5">
               {isEditMode
@@ -166,38 +158,6 @@ export default function AddServiceModal({
                 onChange={handleChange}
                 className="w-full px-3 py-1.5 text-sm bg-surface-container-low/60 border border-outline-variant/70 rounded-lg text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-container-lowest transition-all"
               />
-            </div>
-
-            {/* Color de Tarjeta en Agenda */}
-            <div>
-              <label className="text-xs font-medium text-on-surface mb-1 flex items-center gap-1.5">
-                <Palette className="w-3.5 h-3.5 text-on-surface shrink-0" />
-                <span>Color en Agenda</span>
-              </label>
-              <div className="flex items-center gap-2.5">
-                {COLOR_OPTIONS.map((c) => {
-                  const isSelected = formData.color === c.id;
-                  return (
-                    <button
-                      key={c.id}
-                      type="button"
-                      title={c.label}
-                      onClick={() => handleColorSelect(c.id)}
-                      className={cn(
-                        "w-7 h-7 rounded-full cursor-pointer transition-transform hover:scale-110 flex items-center justify-center",
-                        c.bg,
-                        isSelected
-                          ? "ring-2 ring-offset-2 ring-primary scale-110"
-                          : "opacity-80 hover:opacity-100"
-                      )}
-                    >
-                      {isSelected && (
-                        <span className="w-2 h-2 rounded-full bg-white block shadow-xs" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {/* Duración, Precio y Aforo Máx */}

@@ -126,6 +126,7 @@ export const updateBusinessSchema = z.object({
   themeColor: z.string().optional(),
   fontSizeLevel: z.string().optional(),
   borderRadiusLevel: z.string().optional(),
+  enablePublicBooking: z.boolean().optional(),
 });
 export type UpdateBusinessInput = z.infer<typeof updateBusinessSchema>;
 

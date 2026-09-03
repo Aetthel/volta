@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   getThemeColor,
@@ -15,7 +15,9 @@ import {
 } from "@/lib/theme";
 import type { BusinessProfile, ToastState } from "@/types/settings";
 
+import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
 import Toast from "@/components/settings/Toast";
@@ -62,6 +64,7 @@ import {
   FieldLabel,
   FloatingInput,
 } from "@/components/ui/volta-ui";
+import NewAppointmentModal from "@/components/NewAppointmentModal";
 import {
   User,
   Mail,
@@ -75,6 +78,9 @@ import {
   ChevronLeft,
   CheckCircle2,
   ShieldCheck,
+  Plus,
+  Lock,
+  ArrowRight,
 } from "lucide-react";
 
 const DEFAULT_AVATAR =
@@ -234,6 +240,7 @@ function AjustesContent() {
             themeColor: activeColor,
             fontSizeLevel: activeFont,
             borderRadiusLevel: activeRadius,
+            enablePublicBooking: data.enablePublicBooking !== false,
           }));
         }
       })
@@ -262,24 +269,18 @@ function AjustesContent() {
   const handleSelectCategory = useCallback(
     (categoryId: string) => {
       setActiveTab(categoryId);
-      const url = new URL(window.location.href);
-      url.searchParams.set("tab", categoryId);
-      url.searchParams.delete("seccion");
-      window.history.pushState(null, "", url.pathname + url.search);
+      router.push(`/ajustes?tab=${categoryId}`, { scroll: false });
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    []
+    [router]
   );
 
   // Handle returning to the Cards Overview
   const handleBackToOverview = useCallback(() => {
     setActiveTab(null);
-    const url = new URL(window.location.href);
-    url.searchParams.delete("tab");
-    url.searchParams.delete("seccion");
-    window.history.pushState(null, "", url.pathname);
+    router.push("/ajustes", { scroll: false });
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [router]);
 
   // Find active category metadata if one is selected
   const currentCategory = useMemo(() => {
@@ -287,9 +288,63 @@ function AjustesContent() {
     return visibleCategories.find((c) => c.id === activeTab) || null;
   }, [activeTab, visibleCategories]);
 
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [appointmentModalTriggerRect, setAppointmentModalTriggerRect] = useState<DOMRect | null>(null);
+
+  const handleOpenNewAppointment = (e?: React.MouseEvent) => {
+    setAppointmentModalTriggerRect(e ? e.currentTarget.getBoundingClientRect() : null);
+    setIsAppointmentModalOpen(true);
+  };
+
+  const isDemoSandbox = session?.user?.subscriptionStatus === "DEMO_SANDBOX";
+
+  if (isDemoSandbox) {
+    return (
+      <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
+        <Sidebar onNewAppointmentClick={handleOpenNewAppointment} />
+        <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
+          <TrialBanner />
+          <Header />
+          <main className="p-gutter max-w-xl w-full mx-auto flex-1 flex flex-col items-center justify-center text-center py-20 animate-in fade-in duration-200">
+            <div className="text-primary flex items-center justify-center mb-4">
+              <Lock className="w-10 h-10 text-primary" strokeWidth={1.75} />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full mb-3">
+              Modo Demostración
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-on-surface tracking-tight mb-3">
+              Ajustes bloqueados en modo demo
+            </h1>
+            <p className="text-sm text-on-surface-variant leading-relaxed mb-8 max-w-md">
+              Estás explorando Volta en una sesión de prueba efímera. Para configurar tus propios horarios, servicios, datos comerciales y WhatsApp, regístrate gratis.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
+              <button
+                type="button"
+                onClick={async () => {
+                  await signOut({ callbackUrl: "/register" });
+                }}
+                className="w-full flex items-center justify-center gap-2 text-sm font-semibold shadow-md bg-primary text-white hover:bg-primary/90 py-3 px-5 rounded-xl transition-colors cursor-pointer"
+              >
+                <span>Registrarse Gratis</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <Link
+                href="/inicio"
+                className="w-full flex items-center justify-center text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container py-3 px-5 rounded-xl transition-colors"
+              >
+                Volver al Inicio
+              </Link>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-surface flex flex-col md:flex-row pb-24 md:pb-0">
-      <Sidebar onNewAppointmentClick={() => {}} />
+      <Sidebar onNewAppointmentClick={handleOpenNewAppointment} />
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
@@ -422,8 +477,31 @@ function AjustesContent() {
             </div>
           )}
         </main>
+        {/* Mobile floating button */}
+        <Button
+          onClick={handleOpenNewAppointment}
+          variant="ghost"
+          className="md:hidden fixed bottom-20 right-6 z-40 p-4 bg-primary text-white rounded-full shadow-lg border-none"
+        >
+          <Plus className="w-6 h-6" />
+        </Button>
+
         <BottomNav />
       </div>
+
+      <NewAppointmentModal
+        isOpen={isAppointmentModalOpen}
+        onClose={() => {
+          setIsAppointmentModalOpen(false);
+          setAppointmentModalTriggerRect(null);
+        }}
+        onSave={() => {
+          setIsAppointmentModalOpen(false);
+          setToast({ show: true, text: "Cita registrada exitosamente" });
+          setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        }}
+        triggerRect={appointmentModalTriggerRect}
+      />
     </div>
   );
 }
@@ -478,7 +556,7 @@ function AdminProfileSection({
   };
 
   return (
-    <div className="max-w-xl animate-in fade-in duration-200 pt-6 border-t border-outline-variant/50">
+    <div className="max-w-xl animate-in fade-in duration-200 pt-6">
       <div className="flex flex-col gap-1.5 mb-6">
         <h3 className="flex items-center gap-2.5 text-base font-bold text-on-surface">
           <ShieldCheck className="w-4 h-4 text-primary shrink-0" strokeWidth={2.2} />

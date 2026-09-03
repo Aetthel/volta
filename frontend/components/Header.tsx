@@ -8,6 +8,8 @@ import {
   LogOut,
   Users,
   Check,
+  UserPlus,
+  ArrowRight,
 } from "lucide-react";
 import { apiClient } from "@/lib/apiClient";
 import { Avatar, AvatarGroup } from "@/components/ui/volta-ui";
@@ -225,14 +227,31 @@ function HeaderContent({}: HeaderProps) {
                 <span>Gestión de Equipo</span>
               </Link>
 
-              <Link
-                href="/ajustes"
-                onClick={() => setIsDropdownOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-on-surface hover:bg-surface-variant/50 hover:text-primary rounded-xl transition-colors cursor-pointer"
-              >
-                <Settings className="w-4 h-4 text-on-surface-variant/70" />
-                <span>Ajustes de Cuenta</span>
-              </Link>
+              {session?.user?.subscriptionStatus === "DEMO_SANDBOX" ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsDropdownOpen(false);
+                    await signOut({ callbackUrl: "/register" });
+                  }}
+                  className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-colors cursor-pointer w-full text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <UserPlus className="w-4 h-4 text-primary" />
+                    <span>Crear Cuenta Gratis</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-primary" />
+                </button>
+              ) : (
+                <Link
+                  href="/ajustes"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-on-surface hover:bg-surface-variant/50 hover:text-primary rounded-xl transition-colors cursor-pointer"
+                >
+                  <Settings className="w-4 h-4 text-on-surface-variant/70" />
+                  <span>Ajustes de Cuenta</span>
+                </Link>
+              )}
             </div>
 
             {/* Sign Out Action */}

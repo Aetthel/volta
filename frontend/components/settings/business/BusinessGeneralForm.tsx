@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   Store,
   Camera,
-  Save,
   Loader2,
   Trash2,
   Globe,
@@ -59,11 +58,12 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     address: profile.address || "",
     description: profile.description || "",
   });
-  const [savingBusiness, setSavingBusiness] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [downloadingQr, setDownloadingQr] = useState(false);
 
   const businessLogoInputRef = useRef<HTMLInputElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setBusinessForm({
@@ -74,6 +74,42 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
       description: profile.description || "",
     });
   }, [profile]);
+
+  const persistBusiness = useCallback(
+    async (nextForm: typeof businessForm) => {
+      if (!businessId || businessId === "mock-business-id") return;
+      if (!nextForm.name?.trim()) return; // Don't persist empty business name
+      setSaveStatus("saving");
+      try {
+        const res = await apiClient.business.update(businessId, nextForm);
+        if (res.error) throw new Error(res.error);
+
+        setProfile((prev) => ({ ...prev, ...nextForm }));
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2500);
+
+        if (update && res.data) {
+          await update({
+            ...session,
+            user: { ...session?.user, name: res.data.name, email: res.data.email },
+          });
+        }
+      } catch {
+        setSaveStatus("idle");
+        setToast({ show: true, text: "Error al guardar información comercial" });
+        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      }
+    },
+    [businessId, session, update, setProfile, setToast]
+  );
+
+  const schedulePersistBusiness = (nextForm: typeof businessForm) => {
+    setBusinessForm(nextForm);
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      persistBusiness(nextForm);
+    }, 800);
+  };
 
   const handleBusinessLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -102,31 +138,6 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     setTimeout(() => setToast({ show: false, text: "" }), 3000);
   };
 
-  const handleSaveBusiness = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingBusiness(true);
-    try {
-      const res = await apiClient.business.update(businessId, businessForm);
-      if (res.error) throw new Error(res.error);
-
-      setProfile((prev) => ({ ...prev, ...businessForm }));
-      setToast({ show: true, text: "¡Datos comerciales guardados con éxito!" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
-
-      if (update && res.data) {
-        await update({
-          ...session,
-          user: { ...session?.user, name: res.data.name, email: res.data.email },
-        });
-      }
-    } catch (err: any) {
-      setToast({ show: true, text: err.message || "Error al guardar el negocio." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
-    } finally {
-      setSavingBusiness(false);
-    }
-  };
-
   const handleToggleBooking = async () => {
     const newValue = profile.enablePublicBooking === false ? true : false;
     setProfile((prev) => ({ ...prev, enablePublicBooking: newValue }));
@@ -138,10 +149,17 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     setTimeout(() => setToast({ show: false, text: "" }), 3000);
   };
 
-  const bookingUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/booking/${businessId}`
-      : `https://volta.app/booking/${businessId}`;
+  const [mountedOrigin, setMountedOrigin] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setMountedOrigin(window.location.origin);
+    }
+  }, []);
+
+  const bookingUrl = mountedOrigin
+    ? `${mountedOrigin}/booking/${businessId}`
+    : `https://volta.app/booking/${businessId}`;
 
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=0-0-0&bgcolor=255-255-255&margin=1&data=${encodeURIComponent(bookingUrl)}`;
 
@@ -170,7 +188,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
   return (
     <>
       {/* 1. Identidad del negocio — sin contenedor: el logo ancla la página */}
-      <section className="pb-10 border-b border-outline-variant/50">
+      <section className="pb-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             {/* Logo with instant upload trigger */}
@@ -263,7 +281,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
       </section>
 
       {/* 2. Página pública de reservas y QR */}
-      <section className="pt-12 pb-10 border-b border-outline-variant/50">
+      <section className="pt-12 pb-10">
         <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-5">
           <SectionHeading
             icon={Globe}
@@ -297,12 +315,12 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
         </div>
 
         {profile.enablePublicBooking !== false && (
-          // Sangrado igual al del texto descriptivo del encabezado, para que el
-          // enlace cuelgue justo debajo de "Tus clientes…" y no del icono.
-          <div className="mt-6 ml-6.5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-center gap-2 bg-surface-container-lowest px-3.5 py-2.5 rounded-xl border border-outline-variant/60 w-full md:max-w-md overflow-hidden">
               <Globe className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-xs font-mono text-on-surface truncate flex-1">{bookingUrl}</span>
+              <span suppressHydrationWarning className="text-xs font-mono text-on-surface truncate flex-1">
+                {bookingUrl}
+              </span>
               <Button
                 type="button"
                 variant="ghost"
@@ -365,95 +383,100 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
         <SectionHeading
           icon={Store}
           title="Información Comercial"
-          description="Datos visibles para tus clientes en la web de reservas y confirmaciones."
+          description="Datos visibles para tus clientes en la web de reservas y confirmaciones. Se guardan automáticamente al escribir."
+          trailing={
+            saveStatus === "saving" ? (
+              <span className="inline-flex items-center gap-1.5 text-xs text-on-surface-variant animate-pulse">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                <span>Guardando...</span>
+              </span>
+            ) : saveStatus === "saved" ? (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 animate-in fade-in">
+                <Check className="w-3.5 h-3.5" />
+                <span>Guardado</span>
+              </span>
+            ) : null
+          }
         />
 
-        <form onSubmit={handleSaveBusiness}>
-          <div className="space-y-6">
-            <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field>
-                  <FieldLabel>
-                    Nombre Comercial <span className="text-error">*</span>
-                  </FieldLabel>
-                  <Input
-                    placeholder="Ej. Peluquería Volta"
-                    className={FIELD_SURFACE}
-                    value={businessForm.name}
-                    onChange={(e) => setBusinessForm({ ...businessForm, name: e.target.value })}
-                    required
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel>Teléfono de Contacto</FieldLabel>
-                  <Input
-                    placeholder="+34 600 000 000"
-                    className={FIELD_SURFACE}
-                    type="tel"
-                    value={businessForm.phone}
-                    onChange={(e) => setBusinessForm({ ...businessForm, phone: e.target.value })}
-                  />
-                </Field>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field>
-                  <FieldLabel>Email de Contacto</FieldLabel>
-                  <Input
-                    placeholder="contacto@empresa.com"
-                    className={FIELD_SURFACE}
-                    type="email"
-                    value={businessForm.email}
-                    onChange={(e) => setBusinessForm({ ...businessForm, email: e.target.value })}
-                  />
-                </Field>
-
-                <Field>
-                  <FieldLabel>Dirección Física</FieldLabel>
-                  <Input
-                    placeholder="Calle Mayor 12, Madrid"
-                    className={FIELD_SURFACE}
-                    value={businessForm.address}
-                    onChange={(e) => setBusinessForm({ ...businessForm, address: e.target.value })}
-                  />
-                </Field>
-              </div>
-
+        <div className="space-y-6">
+          <FieldGroup>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field>
-                <FieldLabel>Descripción del Negocio / Especialidades</FieldLabel>
-                <Textarea
-                  placeholder="Describe los servicios o especialidades de tu negocio..."
+                <FieldLabel>
+                  Nombre Comercial <span className="text-error">*</span>
+                </FieldLabel>
+                <Input
+                  placeholder="Ej. Peluquería Volta"
                   className={FIELD_SURFACE}
-                  value={businessForm.description}
-                  onChange={(e) => setBusinessForm({ ...businessForm, description: e.target.value })}
-                  rows={3}
+                  value={businessForm.name}
+                  onChange={(e) =>
+                    schedulePersistBusiness({ ...businessForm, name: e.target.value })
+                  }
+                  onBlur={() => persistBusiness(businessForm)}
+                  required
                 />
               </Field>
-            </FieldGroup>
-          </div>
 
-          <div className="mt-6 flex justify-end gap-3">
-            <Button
-              type="submit"
-              variant="default"
-              disabled={savingBusiness}
-              className="gap-2"
-            >
-              {savingBusiness ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Guardando...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>Guardar Cambios</span>
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+              <Field>
+                <FieldLabel>Teléfono de Contacto</FieldLabel>
+                <Input
+                  placeholder="+34 600 000 000"
+                  className={FIELD_SURFACE}
+                  type="tel"
+                  value={businessForm.phone}
+                  onChange={(e) =>
+                    schedulePersistBusiness({ ...businessForm, phone: e.target.value })
+                  }
+                  onBlur={() => persistBusiness(businessForm)}
+                />
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel>Email de Contacto</FieldLabel>
+                <Input
+                  placeholder="contacto@empresa.com"
+                  className={FIELD_SURFACE}
+                  type="email"
+                  value={businessForm.email}
+                  onChange={(e) =>
+                    schedulePersistBusiness({ ...businessForm, email: e.target.value })
+                  }
+                  onBlur={() => persistBusiness(businessForm)}
+                />
+              </Field>
+
+              <Field>
+                <FieldLabel>Dirección Física</FieldLabel>
+                <Input
+                  placeholder="Calle Mayor 12, Madrid"
+                  className={FIELD_SURFACE}
+                  value={businessForm.address}
+                  onChange={(e) =>
+                    schedulePersistBusiness({ ...businessForm, address: e.target.value })
+                  }
+                  onBlur={() => persistBusiness(businessForm)}
+                />
+              </Field>
+            </div>
+
+            <Field>
+              <FieldLabel>Descripción del Negocio / Especialidades</FieldLabel>
+              <Textarea
+                placeholder="Describe los servicios o especialidades de tu negocio..."
+                className={FIELD_SURFACE}
+                value={businessForm.description}
+                onChange={(e) =>
+                  schedulePersistBusiness({ ...businessForm, description: e.target.value })
+                }
+                onBlur={() => persistBusiness(businessForm)}
+                rows={3}
+              />
+            </Field>
+          </FieldGroup>
+        </div>
       </section>
     </>
   );

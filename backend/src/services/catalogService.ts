@@ -1,4 +1,4 @@
-import prisma from "../config/db.js";
+import prisma from "../config/db";
 import type { CreateServiceInput, UpdateServiceInput } from "../validators/index.js";
 
 export const getServicesByBusiness = async (businessId: string, activeOnly = true) => {

@@ -18,6 +18,8 @@ import {
   Building2,
   FileText,
   Loader2,
+  X,
+  ArrowRight,
 } from "lucide-react";
 import { Button, Badge, Skeleton } from "@/components/ui/volta-ui";
 import { SectionHeading } from "./SectionHeading";
@@ -97,11 +99,23 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
   const daysLeft = subscriptionData?.daysLeftInTrial ?? 0;
   const isCancelledEnd = subscriptionData?.cancelAtPeriodEnd;
 
+  const isBasicCurrent = currentPlan === "BASIC";
+  const isProCurrent = currentPlan === "PRO";
+
+  const basicCheckoutUrl = buildLemonSqueezyCheckoutUrl(
+    LEMON_SQUEEZY_PRODUCT_URLS.BASIC,
+    session?.user
+  );
+  const proCheckoutUrl = buildLemonSqueezyCheckoutUrl(
+    LEMON_SQUEEZY_PRODUCT_URLS.PRO,
+    session?.user
+  );
+
   return (
     <div className="animate-in fade-in duration-200">
       {/* 1. Grace Period Alert (if active) */}
       {isGraceActive && (
-        <div className="mb-10 p-4 bg-error/10 border border-error/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-error">
+        <div className="mb-8 p-4 bg-error/10 border border-error/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-error">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-6 h-6 shrink-0" />
             <div>
@@ -112,250 +126,272 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
               </p>
             </div>
           </div>
-          {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
-          {(() => {
-            const url = buildLemonSqueezyCheckoutUrl(
-              currentPlan === "BASIC"
-                ? LEMON_SQUEEZY_PRODUCT_URLS.BASIC
-                : LEMON_SQUEEZY_PRODUCT_URLS.PRO,
-              session?.user
-            );
-            return (
-              <a
-                href={url}
-                onClick={(e) => openLemonSqueezyOverlay(url, e)}
-                className="lemonsqueezy-button bg-error text-white hover:bg-error/90 shrink-0 font-semibold text-xs py-2 px-3 rounded-lg inline-flex items-center justify-center transition-colors cursor-pointer"
-              >
-                Actualizar Pago
-              </a>
-            );
-          })()}
+          <a
+            href={isBasicCurrent ? basicCheckoutUrl : proCheckoutUrl}
+            onClick={(e) => openLemonSqueezyOverlay(isBasicCurrent ? basicCheckoutUrl : proCheckoutUrl, e)}
+            className="lemonsqueezy-button bg-error text-white hover:bg-error/90 shrink-0 font-semibold text-xs py-2 px-3 rounded-lg inline-flex items-center justify-center transition-colors cursor-pointer"
+          >
+            Actualizar Pago
+          </a>
         </div>
       )}
 
-      {/* 2. Retícula de dos columnas, separadas por un filete y no por tarjetas */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
-        {/* Columna izquierda: plan y prestaciones (7 cols). Se centra a media
-            altura para que arranque a la par de los bloques de la derecha en vez
-            de quedar pegada arriba con el pie estirado al fondo. */}
-        <div className="lg:col-span-7 flex flex-col justify-center">
+      {/* Cancellation Scheduled Alert */}
+      {isCancelledEnd && (
+        <div className="mb-8 p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center gap-3 text-amber-800 dark:text-amber-300">
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <div className="text-xs">
+            <span className="font-bold">Cancelación programada:</span> Tu suscripción finalizará al término de tu ciclo de facturación actual. Hasta entonces mantienes todas las funciones activas.
+          </div>
+        </div>
+      )}
+
+      {/* Trialing Notice */}
+      {currentStatus === "TRIALING" && (
+        <div className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-between gap-4 text-primary">
+          <div className="flex items-center gap-3">
+            <Clock className="w-5 h-5 shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold">Periodo de Prueba Gratuita Activo:</span>{" "}
+              {daysLeft > 0
+                ? `Te quedan ${daysLeft} días de prueba completa. Elige tu plan para continuar sin interrupciones.`
+                : "Tu prueba finaliza pronto. Selecciona un plan para mantener tu negocio activo."}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Dos Tarjetas Paralelas: Plan Básico y Plan Pro */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch pt-2">
+        {/* TARJETA 1: PLAN BÁSICO */}
+        <div
+          className={cn(
+            "rounded-2xl border transition-all duration-200 p-6 flex flex-col justify-between",
+            isBasicCurrent
+              ? "bg-surface-container-lowest border-primary/50 shadow-xs ring-1 ring-primary/20"
+              : "bg-surface-container-lowest/60 border-outline-variant/60 hover:border-outline-variant hover:shadow-xs"
+          )}
+        >
           <div>
-            <div className="pb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
-                      <Zap className="w-5 h-5 text-primary" />
-                      <span>Plan Volta {currentPlan === "BASIC" ? "Básico" : "Pro"}</span>
-                    </h2>
-                    {currentStatus === "ACTIVE" && !isCancelledEnd && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        Suscripción Activa
-                      </span>
-                    )}
-                    {currentStatus === "TRIALING" && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-                        <Clock className="w-3 h-3 text-primary" />
-                        {daysLeft > 0 ? `Prueba Gratuita (${daysLeft} días restantes)` : "Prueba Gratuita"}
-                      </span>
-                    )}
-                    {isCancelledEnd && (
-                      <Badge variant="error">Cancelación Programada</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-on-surface-variant/85 leading-relaxed max-w-[62ch]">
-                    {currentPlan === "BASIC"
-                      ? "Ideal para profesionales individuales o pequeños locales con reservas básicas."
-                      : "La solución completa con automatizaciones WhatsApp 2 vías, multi-agenda y analítica avanzada."}
+            {/* Cabecera */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-container text-on-surface flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-on-surface tracking-tight">Plan Básico</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Para empezar sin complicaciones
                   </p>
                 </div>
-
-                {/* Price Tag */}
-                <div className="text-left sm:text-right shrink-0">
-                  <div className="text-2xl font-bold text-on-surface">
-                    {currentPlan === "BASIC" ? "30,00€" : "40,00€"}
-                  </div>
-                  <span className="text-label-sm font-medium text-on-surface-variant">
-                    + IVA / mes
-                  </span>
-                </div>
               </div>
+              {isBasicCurrent && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Plan Actual
+                </span>
+              )}
             </div>
 
-            <div className="flex flex-col gap-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
-                Características incluidas en tu plan:
-              </span>
+            {/* Precio */}
+            <div className="mt-5 pb-5 border-b border-outline-variant/30 flex items-baseline gap-1.5">
+              <span className="text-3xl font-extrabold text-on-surface tracking-tight">30,00€</span>
+              <span className="text-xs font-medium text-on-surface-variant">+ IVA / mes</span>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-on-surface-variant">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    {currentPlan === "BASIC"
-                      ? "1 Calendario y local"
-                      : "Multi-calendario y sedes ilimitadas"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    {currentPlan === "BASIC"
-                      ? "1 Especialista incluido (+5€ extra)"
-                      : "2 Especialistas incluidos (+5€ extra)"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    {currentPlan === "BASIC"
-                      ? "Hasta 100 citas online / mes"
-                      : "Reservas y citas ilimitadas"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    {currentPlan === "BASIC"
-                      ? "Recordatorios Email y SMS"
-                      : "WhatsApp Bot interactivo 2 vías"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Gestión de clientes y consentimiento LOPD</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Portal público de reservas con código QR</span>
-                </div>
+            {/* Lista de características */}
+            <div className="py-5 flex flex-col gap-3 text-xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70">
+                Prestaciones incluidas:
+              </span>
+              <div className="flex items-center gap-2.5 text-on-surface">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>1 Calendario y local único</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>1 Especialista incluido (+5€ extra)</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Hasta 100 citas online / mes</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Recordatorios automáticos por Email y SMS</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Gestión de clientes y consentimiento LOPD</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Portal de reservas y código QR público</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface-variant/50 line-through">
+                <X className="w-4 h-4 text-on-surface-variant/40 shrink-0" />
+                <span>Bot de WhatsApp interactivo 2 vías</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface-variant/50 line-through">
+                <X className="w-4 h-4 text-on-surface-variant/40 shrink-0" />
+                <span>Pagos online y anticipos de fianza</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
-              {(() => {
-                const url = buildLemonSqueezyCheckoutUrl(
-                  currentPlan === "BASIC"
-                    ? LEMON_SQUEEZY_PRODUCT_URLS.PRO
-                    : LEMON_SQUEEZY_PRODUCT_URLS.PRO,
-                  session?.user
-                );
-                return (
-                  <a
-                    href={url}
-                    onClick={(e) => openLemonSqueezyOverlay(url, e)}
-                    className="lemonsqueezy-button inline-flex items-center justify-center gap-2 font-medium bg-primary text-white hover:bg-primary/90 py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-sm"
-                  >
-                    <Zap className="w-4 h-4" />
-                    <span>
-                      {currentStatus === "ACTIVE" ? "Cambiar o Mejorar Plan" : "Activar Suscripción"}
-                    </span>
-                  </a>
-                );
-              })()}
-            </div>
-
-            {currentStatus === "ACTIVE" && !isCancelledEnd && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-error hover:text-error hover:bg-error/10 font-semibold"
-                disabled={isCancelling}
-                onClick={handleCancelSubscription}
+          {/* Botón Acción Básico */}
+          <div className="pt-4 border-t border-outline-variant/30">
+            {isBasicCurrent && currentStatus === "ACTIVE" ? (
+              <div className="w-full py-2.5 px-4 rounded-xl text-center text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 select-none">
+                Tu Plan Actual Activo
+              </div>
+            ) : (
+              <a
+                href={basicCheckoutUrl}
+                onClick={(e) => openLemonSqueezyOverlay(basicCheckoutUrl, e)}
+                className="lemonsqueezy-button w-full inline-flex items-center justify-center gap-2 font-medium bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/70 py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-2xs"
               >
-                {isCancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                <span>Cancelar Suscripción</span>
-              </Button>
+                <span>
+                  {isBasicCurrent && currentStatus === "TRIALING"
+                    ? "Confirmar Plan Básico (30€)"
+                    : "Elegir Plan Básico"}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
             )}
           </div>
         </div>
 
-        {/* Columna derecha: pago y capacidad (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col mt-10 pt-10 border-t border-outline-variant/50 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-12">
-          <section>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
-                  <CreditCard className="w-4 h-4 text-primary" />
-                  Método de Pago y Facturación
-                </span>
-                {/* Fondo blanco en vez del velo verde al 10%: sobre el gris de
-                    la página el tinte apenas se distinguía y dejaba el texto
-                    flojo. En blanco, el emerald-700 sube a ~7:1 de contraste. */}
-                <span className="text-label-sm font-bold px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-emerald-700 border border-emerald-600/30 flex items-center gap-1 shrink-0">
-                  <ShieldCheck className="w-3 h-3" />
-                  SSL Seguro
-                </span>
-              </div>
+        {/* TARJETA 2: PLAN PRO */}
+        <div
+          className={cn(
+            "rounded-2xl border transition-all duration-200 p-6 flex flex-col justify-between relative",
+            isProCurrent
+              ? "bg-surface-container-lowest border-primary shadow-sm ring-2 ring-primary/20"
+              : "bg-surface-container-lowest border-outline-variant/80 hover:border-primary/50 shadow-xs"
+          )}
+        >
+          {/* Badge Recomendado */}
+          <div className="absolute -top-3 right-6">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-primary text-white px-3 py-1 rounded-full shadow-xs">
+              Recomendado
+            </span>
+          </div>
 
-              <div className="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/40">
+          <div>
+            {/* Cabecera */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <CreditCard className="w-5 h-5" />
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
-                <div className="flex flex-col text-xs">
-                  <span className="font-bold text-on-surface">Pagos Internacionales Seguros</span>
-                  <span className="text-on-surface-variant/80">
-                    Tarjeta, Apple Pay, Google Pay procesados por Lemon Squeezy (MoR).
-                  </span>
+                <div>
+                  <h3 className="text-lg font-bold text-on-surface tracking-tight">Plan Pro</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Automatizaciones y multi-sede
+                  </p>
                 </div>
               </div>
-
-              <p className="text-[11px] text-on-surface-variant/80 leading-relaxed">
-                Todas las transacciones cumplen con la normativa fiscal de la UE (IVA intracomunitario) y la directiva PSD2 con autenticación reforzada SCA.
-              </p>
+              {isProCurrent && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Plan Actual
+                </span>
+              )}
             </div>
-          </section>
 
-          {/* Capacidad y recursos */}
-          <section className="mt-8 pt-8 border-t border-outline-variant/50">
-            <div className="flex flex-col gap-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
-                <Building2 className="w-4 h-4 text-primary" />
-                Capacidad y Recursos del Negocio
+            {/* Precio */}
+            <div className="mt-5 pb-5 border-b border-outline-variant/30 flex items-baseline gap-1.5">
+              <span className="text-3xl font-extrabold text-on-surface tracking-tight">40,00€</span>
+              <span className="text-xs font-medium text-on-surface-variant">+ IVA / mes</span>
+            </div>
+
+            {/* Lista de características */}
+            <div className="py-5 flex flex-col gap-3 text-xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary font-semibold">
+                Todo lo del plan Básico, y además:
               </span>
-
-              <div className="flex flex-col gap-2.5 text-xs text-on-surface-variant">
-                <div className="flex items-center justify-between py-1 border-b border-outline-variant/30">
-                  <span className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-primary" />
-                    Especialistas en equipo:
-                  </span>
-                  <span className="font-bold text-on-surface">
-                    {currentPlan === "BASIC" ? "1 incluido" : "2 incluidos"}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between py-1 border-b border-outline-variant/30">
-                  <span className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-primary" />
-                    Citas mensuales:
-                  </span>
-                  <span className="font-bold text-on-surface">
-                    {currentPlan === "BASIC" ? "100 citas/mes" : "Ilimitadas"}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between py-1">
-                  <span className="flex items-center gap-2">
-                    <MessageSquare className="w-3.5 h-3.5 text-primary" />
-                    WhatsApp 2 Vías:
-                  </span>
-                  <span className="font-bold text-on-surface">
-                    {currentPlan === "BASIC" ? "No disponible" : "Activo"}
-                  </span>
-                </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>Multi-calendario y sedes ilimitadas</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>2 Especialistas incluidos (+5€ extra)</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>Reservas y citas online ilimitadas</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>WhatsApp Bot interactivo bidireccional</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>Pagos online y cobro de depósitos/señas</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>Analítica avanzada de negocio e informes</span>
+              </div>
+              <div className="flex items-center gap-2.5 text-on-surface font-medium">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <span>Soporte prioritario por chat</span>
               </div>
             </div>
-          </section>
+          </div>
+
+          {/* Botón Acción Pro */}
+          <div className="pt-4 border-t border-outline-variant/30">
+            {isProCurrent && currentStatus === "ACTIVE" ? (
+              <div className="w-full py-2.5 px-4 rounded-xl text-center text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 select-none">
+                Tu Plan Actual Activo
+              </div>
+            ) : (
+              <a
+                href={proCheckoutUrl}
+                onClick={(e) => openLemonSqueezyOverlay(proCheckoutUrl, e)}
+                className="lemonsqueezy-button w-full inline-flex items-center justify-center gap-2 font-medium bg-primary text-white hover:bg-primary/90 py-2.5 px-4 rounded-xl text-sm transition-colors cursor-pointer shadow-sm"
+              >
+                <span>
+                  {isProCurrent && currentStatus === "TRIALING"
+                    ? "Activar Plan Pro (40€)"
+                    : "Mejorar a Plan Pro"}
+                </span>
+                <Zap className="w-4 h-4" />
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Barra inferior de seguridad y gestión de suscripción */}
+      <div className="mt-8 p-4 rounded-xl bg-surface-container-low/50 border border-outline-variant/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 text-xs text-on-surface-variant">
+          <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+          <span>
+            Pagos procesados de forma segura con cifrado SSL bancario por <strong>Lemon Squeezy</strong> (Merchant of Record). Compatible con Tarjeta de Crédito/Débito, Apple Pay y Google Pay.
+          </span>
+        </div>
+
+        {currentStatus === "ACTIVE" && !isCancelledEnd && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-error hover:text-error hover:bg-error/10 font-medium shrink-0"
+            disabled={isCancelling}
+            onClick={handleCancelSubscription}
+          >
+            {isCancelling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+            <span>Cancelar Suscripción</span>
+          </Button>
+        )}
+      </div>
+
       {/* 3. Historial de facturas */}
-      <section className="mt-12 pt-12 pb-10 border-t border-outline-variant/50">
+      <section className="mt-12 pt-12 pb-10">
         <SectionHeading
           icon={FileText}
           title="Historial de Facturas y Recibos"
