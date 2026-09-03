@@ -101,8 +101,10 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
         </div>
       </div>
 
-      {/* Edge-to-Edge SVG Curved Area Chart Container without inner border box */}
-      <div className="relative w-full h-[200px] overflow-hidden my-1">
+      {/* Sin `overflow-hidden`: el tooltip es hijo de este contenedor y con
+          recorte se comía la tarjeta en el primer y el último día. Los trazados
+          del SVG no desbordan el viewBox, así que no hay nada más que recortar. */}
+      <div className="relative w-full h-[200px] my-1">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className="w-full h-full overflow-visible"
@@ -177,28 +179,34 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
                 {/* Vertical hover guide line */}
                 {isHovered && (
                   <>
+                    {/* Guía sobre el token de la paleta en vez de un gris suelto,
+                        y continua: la de puntos añadía ruido a un gráfico cuya
+                        rejilla ya es discontinua visualmente. */}
                     <line
                       x1={ip.x}
                       y1={paddingTop}
                       x2={ip.x}
                       y2={svgHeight - paddingBottom}
-                      stroke="#9ca3af"
+                      stroke="var(--color-on-surface)"
                       strokeWidth="1"
-                      strokeDasharray="3 3"
-                      strokeOpacity="0.5"
+                      strokeOpacity="0.16"
                     />
+                    {/* Halo del color de la serie bajo cada punto: marca el dato
+                        activo sin engordar el punto ni robar contraste. */}
+                    <circle cx={ip.x} cy={ip.y} r="9" fill="#f87171" fillOpacity="0.18" />
                     <circle
                       cx={ip.x}
                       cy={ip.y}
-                      r="4.5"
+                      r="4"
                       fill="#f87171"
                       stroke="#ffffff"
                       strokeWidth="2"
                     />
+                    <circle cx={cp.x} cy={cp.y} r="9" fill="#2dd4bf" fillOpacity="0.18" />
                     <circle
                       cx={cp.x}
                       cy={cp.y}
-                      r="4.5"
+                      r="4"
                       fill="#2dd4bf"
                       stroke="#ffffff"
                       strokeWidth="2"
@@ -222,28 +230,74 @@ export const WeeklyPerformanceChart: React.FC<WeeklyPerformanceChartProps> = ({
         </svg>
 
         {/* Hover Tooltip Card */}
-        {hoveredIdx !== null && incomePoints[hoveredIdx] && clientsPoints[hoveredIdx] && (
-          <div
-            className="absolute z-30 bg-surface-container-lowest border border-outline-variant/80 rounded-xl p-3 shadow-xl pointer-events-none text-xs flex flex-col gap-1 -translate-x-1/2 -translate-y-full mb-2 animate-in fade-in zoom-in-95 duration-100"
-            style={{
-              left: `${(incomePoints[hoveredIdx].x / svgWidth) * 100}%`,
-              top: `${(Math.min(incomePoints[hoveredIdx].y, clientsPoints[hoveredIdx].y) / svgHeight) * 100}%`,
-            }}
-          >
-            <span className="font-bold text-on-surface border-b border-outline-variant/20 pb-1">
-              {data[hoveredIdx].name}
-              {data[hoveredIdx].isCurrent ? " (Hoy)" : ""}
-            </span>
-            <div className="flex items-center gap-2 text-rose-600 font-semibold mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-[#f87171]" />
-              <span>Ingresos: {data[hoveredIdx].income} €</span>
-            </div>
-            <div className="flex items-center gap-2 text-teal-600 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-[#2dd4bf]" />
-              <span>Clientes: {data[hoveredIdx].clients}</span>
-            </div>
-          </div>
-        )}
+        {hoveredIdx !== null &&
+          incomePoints[hoveredIdx] &&
+          clientsPoints[hoveredIdx] &&
+          (() => {
+            const xPct = (incomePoints[hoveredIdx].x / svgWidth) * 100;
+            const yPct =
+              (Math.min(incomePoints[hoveredIdx].y, clientsPoints[hoveredIdx].y) / svgHeight) * 100;
+
+            // Cerca de los extremos la tarjeta se ancla al borde en vez de
+            // centrarse sobre el punto: centrada, en Lun y Dom la mitad caía
+            // fuera del gráfico. En el punto alto se coloca debajo para no
+            // salirse por arriba.
+            const anchorLeft = xPct < 22;
+            const anchorRight = xPct > 78;
+            const placeBelow = yPct < 45;
+
+            return (
+              // Pastilla en el teal de marca (`primary`) en vez de tarjeta
+              // blanca con borde: sobre un gráfico de trazos finos y rellenos
+              // pastel, una tarjeta clara compite; una oscura flota y ata el
+              // tooltip a la identidad de la app.
+              <div
+                className={cn(
+                  "absolute z-30 min-w-max rounded-lg bg-primary px-3 py-2.5",
+                  "shadow-[0_10px_30px_-8px_rgba(0,60,60,0.45)] pointer-events-none whitespace-nowrap",
+                  "animate-in fade-in zoom-in-95 duration-100",
+                  !anchorLeft && !anchorRight && "-translate-x-1/2",
+                  placeBelow ? "mt-3.5" : "-translate-y-full -mt-3.5"
+                )}
+                style={{
+                  top: `${yPct}%`,
+                  ...(anchorLeft
+                    ? { left: 0 }
+                    : anchorRight
+                      ? { right: 0 }
+                      : { left: `${xPct}%` }),
+                }}
+              >
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-on-primary/70">
+                  {data[hoveredIdx].name}
+                  {data[hoveredIdx].isCurrent && (
+                    <span className="text-primary-fixed"> · Hoy</span>
+                  )}
+                </div>
+
+                {/* Retícula de dos columnas: los valores quedan alineados entre
+                    sí aunque las etiquetas midan distinto. La cifra pesa más que
+                    la etiqueta porque es el dato que se viene a consultar. */}
+                <div className="mt-1.5 grid grid-cols-[auto_auto] items-baseline gap-x-6 gap-y-1">
+                  <span className="flex items-center gap-2 text-[11px] text-on-primary/75">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#f87171] shrink-0" />
+                    Ingresos
+                  </span>
+                  <span className="justify-self-end text-[13px] font-bold tabular-nums text-on-primary">
+                    {data[hoveredIdx].income} €
+                  </span>
+
+                  <span className="flex items-center gap-2 text-[11px] text-on-primary/75">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2dd4bf] ring-1 ring-white/70 shrink-0" />
+                    Clientes
+                  </span>
+                  <span className="justify-self-end text-[13px] font-bold tabular-nums text-on-primary">
+                    {data[hoveredIdx].clients}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
       </div>
 
       {/* X-Axis Day Labels Edge-to-Edge */}
