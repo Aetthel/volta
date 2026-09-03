@@ -19,7 +19,8 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
-import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Badge, Skeleton } from "@/components/ui/volta-ui";
+import { Button, Badge, Skeleton } from "@/components/ui/volta-ui";
+import { SectionHeading } from "./SectionHeading";
 import type { Invoice } from "@/types/domain";
 import { cn } from "@/lib/utils";
 import {
@@ -97,10 +98,10 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
   const isCancelledEnd = subscriptionData?.cancelAtPeriodEnd;
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
+    <div className="animate-in fade-in duration-200">
       {/* 1. Grace Period Alert (if active) */}
       {isGraceActive && (
-        <div className="p-4 bg-error/10 border-2 border-error/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-error">
+        <div className="mb-10 p-4 bg-error/10 border border-error/30 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-error">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-6 h-6 shrink-0" />
             <div>
@@ -132,19 +133,21 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
         </div>
       )}
 
-      {/* 2. Main 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Plan Details & Capabilities (7 cols) */}
-        <Card className="lg:col-span-7 flex flex-col justify-between">
+      {/* 2. Retícula de dos columnas, separadas por un filete y no por tarjetas */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
+        {/* Columna izquierda: plan y prestaciones (7 cols). Se centra a media
+            altura para que arranque a la par de los bloques de la derecha en vez
+            de quedar pegada arriba con el pie estirado al fondo. */}
+        <div className="lg:col-span-7 flex flex-col justify-center">
           <div>
-            <CardHeader className="pb-4 border-b border-outline-variant/40">
+            <div className="pb-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <CardTitle className="text-xl font-bold text-on-surface flex items-center gap-2">
+                    <h2 className="text-xl font-bold text-on-surface flex items-center gap-2">
                       <Zap className="w-5 h-5 text-primary" />
                       <span>Plan Volta {currentPlan === "BASIC" ? "Básico" : "Pro"}</span>
-                    </CardTitle>
+                    </h2>
                     {currentStatus === "ACTIVE" && !isCancelledEnd && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                         <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -161,11 +164,11 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                       <Badge variant="error">Cancelación Programada</Badge>
                     )}
                   </div>
-                  <CardDescription className="text-xs text-on-surface-variant/80">
+                  <p className="text-sm text-on-surface-variant/85 leading-relaxed max-w-[62ch]">
                     {currentPlan === "BASIC"
                       ? "Ideal para profesionales individuales o pequeños locales con reservas básicas."
                       : "La solución completa con automatizaciones WhatsApp 2 vías, multi-agenda y analítica avanzada."}
-                  </CardDescription>
+                  </p>
                 </div>
 
                 {/* Price Tag */}
@@ -173,14 +176,14 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                   <div className="text-2xl font-bold text-on-surface">
                     {currentPlan === "BASIC" ? "30,00€" : "40,00€"}
                   </div>
-                  <span className="text-[11px] font-medium text-on-surface-variant">
+                  <span className="text-label-sm font-medium text-on-surface-variant">
                     + IVA / mes
                   </span>
                 </div>
               </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="pt-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
               <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 Características incluidas en tu plan:
@@ -228,10 +231,10 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                   <span>Portal público de reservas con código QR</span>
                 </div>
               </div>
-            </CardContent>
+            </div>
           </div>
 
-          <CardFooter className="border-t border-outline-variant/40 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
               {(() => {
@@ -268,26 +271,28 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                 <span>Cancelar Suscripción</span>
               </Button>
             )}
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
-        {/* Right Column: Security, Payment & Capacity (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          {/* Payment Method & Security Card */}
-          <Card className="p-5 bg-surface-container-low border border-outline-variant/50">
+        {/* Columna derecha: pago y capacidad (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col mt-10 pt-10 border-t border-outline-variant/50 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:pl-12">
+          <section>
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4 text-primary" />
                   Método de Pago y Facturación
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 flex items-center gap-1">
+                {/* Fondo blanco en vez del velo verde al 10%: sobre el gris de
+                    la página el tinte apenas se distinguía y dejaba el texto
+                    flojo. En blanco, el emerald-700 sube a ~7:1 de contraste. */}
+                <span className="text-label-sm font-bold px-2.5 py-0.5 rounded-full bg-surface-container-lowest text-emerald-700 border border-emerald-600/30 flex items-center gap-1 shrink-0">
                   <ShieldCheck className="w-3 h-3" />
                   SSL Seguro
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 p-3 bg-white dark:bg-black/20 rounded-xl border border-outline-variant/40">
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/40">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                   <CreditCard className="w-5 h-5" />
                 </div>
@@ -303,10 +308,10 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                 Todas las transacciones cumplen con la normativa fiscal de la UE (IVA intracomunitario) y la directiva PSD2 con autenticación reforzada SCA.
               </p>
             </div>
-          </Card>
+          </section>
 
-          {/* Business Limits / Capacity Card */}
-          <Card className="p-5 bg-surface-container-low border border-outline-variant/50">
+          {/* Capacidad y recursos */}
+          <section className="mt-8 pt-8 border-t border-outline-variant/50">
             <div className="flex flex-col gap-3">
               <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
                 <Building2 className="w-4 h-4 text-primary" />
@@ -345,27 +350,25 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
                 </div>
               </div>
             </div>
-          </Card>
+          </section>
         </div>
       </div>
 
-      {/* 3. Invoices History Table */}
-      <Card className="flex flex-col overflow-hidden">
-        <CardHeader className="pb-3 border-b border-outline-variant/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
-                <FileText className="w-4 h-4 text-primary" />
-                <span>Historial de Facturas y Recibos</span>
-              </CardTitle>
-              <CardDescription>
-                Descarga tus facturas oficiales con desglose de impuestos emitidas tras cada cobro.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+      {/* 3. Historial de facturas */}
+      <section className="mt-12 pt-12 pb-10 border-t border-outline-variant/50">
+        <SectionHeading
+          icon={FileText}
+          title="Historial de Facturas y Recibos"
+          description={
+            <>
+              Descarga tus facturas oficiales con desglose de impuestos
+              <br />
+              emitidas tras cada cobro.
+            </>
+          }
+        />
 
-        <CardContent className="p-0">
+        <div>
           {isLoading ? (
             <div className="p-8 flex flex-col gap-3">
               {[1, 2, 3].map((i) => (
@@ -447,8 +450,8 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
               </table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 }

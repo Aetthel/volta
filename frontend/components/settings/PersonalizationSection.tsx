@@ -17,15 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { COLOR_PALETTES, FONT_SCALES, RADIUS_SCALES, applyThemeColors } from "@/lib/theme";
 import type { BusinessProfile } from "@/types/settings";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Button,
-  Badge,
-} from "@/components/ui/volta-ui";
+import { Button, Badge } from "@/components/ui/volta-ui";
 
 import { useTheme } from "@/hooks/useTheme";
 
@@ -75,13 +67,13 @@ export default function PersonalizationSection({
 
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
-      {/* 2-Column Responsive Layout: Options (Left 7 cols) & Live UI Simulator (Right 5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Theme Customization Controls (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col gap-6">
-          {/* 1. Color Palette Card */}
-          <Card className="p-6">
+    <div className="animate-in fade-in duration-200">
+      {/* Dos columnas: controles a la izquierda, simulador a la derecha */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
+        {/* Columna izquierda: controles del tema (7 cols) */}
+        <div className="lg:col-span-7 flex flex-col">
+          {/* 1. Paleta de color */}
+          <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Palette className="w-5 h-5 text-primary" />
@@ -147,10 +139,10 @@ export default function PersonalizationSection({
                 );
               })}
             </div>
-          </Card>
+          </section>
 
-          {/* 2. Typography & Border Radius Card */}
-          <Card className="p-6">
+          {/* 2. Tipografía y radio de bordes */}
+          <section className="mt-10 pt-10 border-t border-outline-variant/50">
             <div className="flex flex-col gap-6">
               {/* Font Size */}
               <div className="flex flex-col gap-3">
@@ -220,13 +212,14 @@ export default function PersonalizationSection({
                 </div>
               </div>
             </div>
-          </Card>
+          </section>
         </div>
 
-        {/* Right Column: Live UI Simulator (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
-          <Card className="overflow-hidden border-2 border-outline-variant/60 shadow-md">
-            <CardHeader className="bg-surface-container-low pb-3 border-b border-outline-variant/40">
+        {/* Columna derecha: simulador (5 cols). El marco se queda: no es un
+            contenedor de contenido, es la maqueta que demuestra el tema. */}
+        <div className="lg:col-span-5 flex flex-col justify-center mt-10 pt-10 border-t border-outline-variant/50 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:px-12">
+          <div className="rounded-xl overflow-hidden border border-outline-variant shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+            <div className="px-4 py-3 bg-surface-container-low border-b border-outline-variant/40">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Eye className="w-4 h-4 text-primary" />
@@ -234,13 +227,13 @@ export default function PersonalizationSection({
                     Vista Previa en Vivo
                   </span>
                 </div>
-                <span className="text-[11px] font-semibold text-on-surface-variant/70">
+                <span className="text-label-sm font-semibold text-on-surface-variant/70">
                   UI Mockup
                 </span>
               </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="p-5 flex flex-col gap-4 bg-surface">
+            <div className="p-5 flex flex-col gap-4 bg-surface">
               {/* Sample Card Box with custom radius and color */}
               <div
                 className="p-4 bg-surface-container-low border border-outline-variant/60 shadow-xs flex flex-col gap-3 transition-all"
@@ -327,8 +320,8 @@ export default function PersonalizationSection({
                   {currentPalette.name}
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
 export interface SectionHeadingProps {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   title: string;
-  description?: string;
+  /** Acepta JSX para poder forzar un salto de línea concreto con `<br />`. */
+  description?: React.ReactNode;
   /** Contenido a la derecha del título: badges de estado, píldoras, etc. */
   trailing?: React.ReactNode;
   /** 2 cuando el bloque cuelga directamente del título de página. */
