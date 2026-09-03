@@ -1,13 +1,8 @@
 "use client";
 
 import type { ToastState } from "@/types/settings";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/volta-ui";
+import { CalendarClock } from "lucide-react";
+import { SectionHeading } from "../SectionHeading";
 import { BusinessHoursGrid } from "./BusinessHoursGrid";
 import { BusinessHolidaysGrid } from "./BusinessHolidaysGrid";
 
@@ -28,16 +23,14 @@ export const BusinessScheduleCard: React.FC<BusinessScheduleCardProps> = ({
   setToast,
 }) => {
   return (
-    <Card className="flex w-full flex-col">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-bold text-on-surface">Disponibilidad</CardTitle>
-        <CardDescription>
-          Cuándo atiende tu negocio. Lo que cierres aquí se bloquea en la agenda y en el portal de
-          reservas de clientes.
-        </CardDescription>
-      </CardHeader>
+    <section className="w-full pt-12 border-t border-outline-variant/50">
+      <SectionHeading
+        icon={CalendarClock}
+        title="Disponibilidad"
+        description="Cuándo atiende tu negocio. Lo que cierres aquí se bloquea en la agenda y en el portal de reservas de clientes."
+      />
 
-      <CardContent className="pt-2">
+      <div>
         {/* En pantallas estrechas las columnas se apilan; el separador pasa de
             vertical a horizontal para no dejar una línea suelta a media altura. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
@@ -49,7 +42,7 @@ export const BusinessScheduleCard: React.FC<BusinessScheduleCardProps> = ({
             <BusinessHolidaysGrid businessId={businessId} setToast={setToast} />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 };

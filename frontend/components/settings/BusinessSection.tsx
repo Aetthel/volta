@@ -19,7 +19,7 @@ export default function BusinessSection({
   setToast,
 }: BusinessSectionProps) {
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in duration-200 mt-2">
+    <div className="animate-in fade-in duration-200">
       {/* 1. Top Identity, Contact & Public Booking Portal */}
       <BusinessGeneralForm
         profile={profile}

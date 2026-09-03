@@ -363,7 +363,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
   return (
     <div className="animate-in fade-in duration-200">
       {/* 1. Identidad — sin contenedor: el avatar ancla la página */}
-      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-8 border-b border-outline-variant/50">
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-10 border-b border-outline-variant/50">
         <div className="flex items-center gap-5">
           {/* Avatar con subida inmediata al hacer clic */}
           <div className="relative group/avatar shrink-0">
@@ -475,7 +475,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
       {/* 2. Dos columnas separadas por un filete, no por tarjetas */}
       <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
         {/* Columna izquierda: identidad y acceso (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col pt-8">
+        <div className="lg:col-span-7 flex flex-col pt-12">
           <section>
             <SectionHeading
               icon={User}
@@ -560,7 +560,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
           </section>
 
           {/* Autenticación en dos pasos */}
-          <section className="mt-10 pt-8 border-t border-outline-variant/50">
+          <section className="mt-12 pt-10 border-t border-outline-variant/50">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
               <SectionHeading
                 icon={ShieldCheck}
@@ -617,7 +617,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
         {/* Columna derecha: contraseña (5 cols). Más corta que la izquierda, así
             que en escritorio se centra a media altura en lugar de dejar un
             hueco muerto bajo el botón. */}
-        <div className="lg:col-span-5 flex flex-col justify-center pt-8 border-t border-outline-variant/50 mt-10 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:px-12">
+        <div className="lg:col-span-5 flex flex-col justify-center pt-10 border-t border-outline-variant/50 mt-12 lg:mt-0 lg:pt-0 lg:border-t-0 lg:border-l lg:px-12">
           <section>
             <SectionHeading
               icon={Lock}

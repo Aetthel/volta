@@ -18,12 +18,6 @@ import {
 } from "lucide-react";
 import type { BusinessProfile, ToastState } from "@/types/settings";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
   Input,
   Textarea,
   Button,
@@ -33,7 +27,15 @@ import {
   FieldLabel,
   Avatar,
 } from "@/components/ui/volta-ui";
+import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
+
+/**
+ * Sin tarjetas blancas de fondo, los campos son la única capa interactiva sobre
+ * el gris de la página: `Input` y `Textarea` vienen con `bg-surface`, que es
+ * justo el color del fondo, así que aquí se les pone blanco.
+ */
+const FIELD_SURFACE = "bg-surface-container-lowest";
 
 interface BusinessGeneralFormProps {
   profile: BusinessProfile;
@@ -167,8 +169,8 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
 
   return (
     <>
-      {/* 1. Top Business Identity Card */}
-      <Card className="p-6">
+      {/* 1. Identidad del negocio — sin contenedor: el logo ancla la página */}
+      <section className="pb-10 border-b border-outline-variant/50">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             {/* Logo with instant upload trigger */}
@@ -258,36 +260,30 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
             )}
           </div>
         </div>
-      </Card>
+      </section>
 
-      {/* 2. Public Booking Portal & QR Card */}
-      <Card className="p-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-secondary-container/50 border border-secondary-container flex items-center justify-center shrink-0">
-              <Globe className="w-6 h-6 text-on-secondary-container" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-3">
-                <h3 className="font-title-md font-bold text-on-surface">Página de Reservas Online</h3>
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                    profile.enablePublicBooking !== false
-                      ? "bg-secondary-container text-on-secondary-container"
-                      : "bg-surface-variant text-on-surface-variant"
-                  }`}
-                >
-                  {profile.enablePublicBooking !== false ? "Activa" : "Desactivada"}
-                </span>
-              </div>
-              <p className="text-body-sm text-on-surface-variant max-w-xl">
-                Tus clientes pueden acceder a este enlace o escanear el QR en tu local para agendar
-                citas de forma autónoma las 24 horas.
-              </p>
-            </div>
-          </div>
+      {/* 2. Página pública de reservas y QR */}
+      <section className="pt-12 pb-10 border-b border-outline-variant/50">
+        <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-5">
+          <SectionHeading
+            icon={Globe}
+            title="Página de Reservas Online"
+            description="Tus clientes pueden acceder a este enlace o escanear el QR en tu local para agendar citas de forma autónoma las 24 horas."
+            className="mb-0"
+            trailing={
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                  profile.enablePublicBooking !== false
+                    ? "bg-secondary-container text-on-secondary-container"
+                    : "bg-surface-variant text-on-surface-variant"
+                }`}
+              >
+                {profile.enablePublicBooking !== false ? "Activa" : "Desactivada"}
+              </span>
+            }
+          />
 
-          <div className="flex items-center gap-3 w-full md:w-auto justify-end flex-wrap">
+          <div className="flex items-center gap-3 w-full md:w-auto justify-end flex-wrap shrink-0 md:mt-0.5">
             <Button
               type="button"
               variant={profile.enablePublicBooking !== false ? "outline" : "default"}
@@ -301,8 +297,10 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
         </div>
 
         {profile.enablePublicBooking !== false && (
-          <div className="mt-6 pt-6 border-t border-outline-variant/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-2 bg-surface-container px-3.5 py-2.5 rounded-xl border border-outline-variant/60 w-full md:max-w-md overflow-hidden">
+          // Sangrado igual al del texto descriptivo del encabezado, para que el
+          // enlace cuelgue justo debajo de "Tus clientes…" y no del icono.
+          <div className="mt-6 ml-6.5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 bg-surface-container-lowest px-3.5 py-2.5 rounded-xl border border-outline-variant/60 w-full md:max-w-md overflow-hidden">
               <Globe className="w-4 h-4 text-primary shrink-0" />
               <span className="text-xs font-mono text-on-surface truncate flex-1">{bookingUrl}</span>
               <Button
@@ -360,26 +358,18 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
             </div>
           </div>
         )}
-      </Card>
+      </section>
 
-      {/* 3. General Information Form Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Store className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle>Información Comercial</CardTitle>
-              <CardDescription>
-                Datos visibles para tus clientes en la web de reservas y confirmaciones.
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
+      {/* 3. Información comercial */}
+      <section className="pt-12 pb-10">
+        <SectionHeading
+          icon={Store}
+          title="Información Comercial"
+          description="Datos visibles para tus clientes en la web de reservas y confirmaciones."
+        />
 
         <form onSubmit={handleSaveBusiness}>
-          <CardContent className="space-y-6">
+          <div className="space-y-6">
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field>
@@ -388,6 +378,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                   </FieldLabel>
                   <Input
                     placeholder="Ej. Peluquería Volta"
+                    className={FIELD_SURFACE}
                     value={businessForm.name}
                     onChange={(e) => setBusinessForm({ ...businessForm, name: e.target.value })}
                     required
@@ -398,6 +389,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                   <FieldLabel>Teléfono de Contacto</FieldLabel>
                   <Input
                     placeholder="+34 600 000 000"
+                    className={FIELD_SURFACE}
                     type="tel"
                     value={businessForm.phone}
                     onChange={(e) => setBusinessForm({ ...businessForm, phone: e.target.value })}
@@ -410,6 +402,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                   <FieldLabel>Email de Contacto</FieldLabel>
                   <Input
                     placeholder="contacto@empresa.com"
+                    className={FIELD_SURFACE}
                     type="email"
                     value={businessForm.email}
                     onChange={(e) => setBusinessForm({ ...businessForm, email: e.target.value })}
@@ -420,6 +413,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                   <FieldLabel>Dirección Física</FieldLabel>
                   <Input
                     placeholder="Calle Mayor 12, Madrid"
+                    className={FIELD_SURFACE}
                     value={businessForm.address}
                     onChange={(e) => setBusinessForm({ ...businessForm, address: e.target.value })}
                   />
@@ -430,15 +424,16 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                 <FieldLabel>Descripción del Negocio / Especialidades</FieldLabel>
                 <Textarea
                   placeholder="Describe los servicios o especialidades de tu negocio..."
+                  className={FIELD_SURFACE}
                   value={businessForm.description}
                   onChange={(e) => setBusinessForm({ ...businessForm, description: e.target.value })}
                   rows={3}
                 />
               </Field>
             </FieldGroup>
-          </CardContent>
+          </div>
 
-          <CardFooter className="flex justify-end gap-3 border-t border-outline-variant/30 pt-4">
+          <div className="mt-6 flex justify-end gap-3">
             <Button
               type="submit"
               variant="default"
@@ -457,9 +452,9 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                 </>
               )}
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
+      </section>
     </>
   );
 };

@@ -6,15 +6,11 @@ import type { Service, ToastState } from "@/types/settings";
 import dynamic from "next/dynamic";
 import { formatCurrency } from "@/lib/utils";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
   Button,
   Badge,
   Skeleton,
 } from "@/components/ui/volta-ui";
+import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
 
 const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
@@ -106,23 +102,20 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
 
   return (
     <>
-      <Card className="flex flex-col">
-        <CardHeader className="pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-base font-bold text-on-surface flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-primary" />
-                  <span>Catálogo de Servicios</span>
-                </CardTitle>
+      <section className="pt-12 pb-10 border-t border-outline-variant/50">
+        <div className="flex flex-col">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <SectionHeading
+              icon={Briefcase}
+              title="Catálogo de Servicios"
+              description="Servicios disponibles para agendar citas en el salón o por reserva online."
+              className="mb-0"
+              trailing={
                 <Badge variant="secondary" className="text-xs font-bold px-2 py-0.5">
                   {services.length} {services.length === 1 ? "servicio" : "servicios"}
                 </Badge>
-              </div>
-              <CardDescription>
-                Servicios disponibles para agendar citas en el salón o por reserva online.
-              </CardDescription>
-            </div>
+              }
+            />
 
             <Button
               type="button"
@@ -134,7 +127,7 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
                 setServiceToEdit(null);
                 setIsAddServiceModalOpen(true);
               }}
-              className="flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto"
+              className="flex items-center gap-1.5 font-medium shrink-0 self-start sm:self-auto sm:mt-0.5"
             >
               <Plus className="w-4 h-4" />
               <span>Añadir Servicio</span>
@@ -153,15 +146,15 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
               />
             </div>
           )}
-        </CardHeader>
+        </div>
 
-        <CardContent className="pt-0">
+        <div className="mt-6">
           {loadingServices ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-2">
               {[1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 flex items-center gap-3 animate-pulse"
+                  className="p-4 rounded-xl border border-outline-variant/30 flex items-center gap-3 animate-pulse"
                 >
                   <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
                   <div className="flex flex-col gap-1.5 flex-1">
@@ -172,7 +165,7 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
               ))}
             </div>
           ) : services.length === 0 ? (
-            <div className="p-8 text-center flex flex-col items-center justify-center gap-3 border-2 border-dashed border-outline-variant/50 rounded-2xl bg-surface-container-lowest">
+            <div className="p-8 text-center flex flex-col items-center justify-center gap-3 border-2 border-dashed border-outline-variant/50 rounded-2xl">
               <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
                 <Briefcase className="w-6 h-6" />
               </div>
@@ -203,7 +196,7 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
               {filteredServices.map((service: Service) => (
                 <div
                   key={service.id}
-                  className="bg-surface-container-low hover:bg-surface-container-high/40 transition-colors p-3.5 rounded-xl border border-outline-variant/50 flex items-center justify-between gap-3 group relative"
+                  className="hover:bg-surface-container-high/40 transition-colors p-3.5 rounded-xl border border-outline-variant/50 flex items-center justify-between gap-3 group relative"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">
@@ -254,8 +247,8 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <AddServiceModal
         isOpen={isAddServiceModalOpen}
