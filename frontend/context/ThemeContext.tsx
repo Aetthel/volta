@@ -55,20 +55,22 @@ export function ThemeProvider({
     const sessionFont = session?.user?.fontSizeLevel;
     const sessionRadius = session?.user?.borderRadiusLevel;
 
-    const effectiveColor = getThemeColor(sessionColor || preferences.themeColor);
-    const effectiveFont = getFontSizeLevel(sessionFont || preferences.fontSizeLevel);
-    const effectiveRadius = getBorderRadiusLevel(sessionRadius || preferences.borderRadiusLevel);
+    setPreferences((prev) => {
+      const effectiveColor = getThemeColor(sessionColor || prev.themeColor);
+      const effectiveFont = getFontSizeLevel(sessionFont || prev.fontSizeLevel);
+      const effectiveRadius = getBorderRadiusLevel(sessionRadius || prev.borderRadiusLevel);
 
-    const merged: ThemePreferences = {
-      themeColor: effectiveColor,
-      fontSizeLevel: effectiveFont,
-      borderRadiusLevel: effectiveRadius,
-    };
+      const merged: ThemePreferences = {
+        themeColor: effectiveColor,
+        fontSizeLevel: effectiveFont,
+        borderRadiusLevel: effectiveRadius,
+      };
 
-    setPreferences(merged);
-    applyThemePreferences(root, merged);
-    setThemeCookie(merged);
-    isInitialized.current = true;
+      applyThemePreferences(root, merged);
+      setThemeCookie(merged);
+      isInitialized.current = true;
+      return merged;
+    });
   }, [
     session?.user?.themeColor,
     session?.user?.fontSizeLevel,

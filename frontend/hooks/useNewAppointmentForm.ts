@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { formatPhoneNumber } from "@/lib/utils";
 
@@ -95,6 +95,25 @@ export function useNewAppointmentForm(
     });
   }, [isOpen, initialDate, initialTime]);
 
+  const fetchServices = useCallback(async (selectServiceName?: string) => {
+    if (!businessId) return;
+    try {
+      const res = await fetch(`/api/backend/services?businessId=${businessId}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setServices(data);
+        if (selectServiceName) {
+          setFormData((prev) => ({ ...prev, service: selectServiceName }));
+        }
+      } else {
+        setServices([]);
+      }
+    } catch (e) {
+      console.error("Error loading services:", e);
+      setServices([]);
+    }
+  }, [businessId]);
+
   // Load clients and services on modal open
   useEffect(() => {
     if (!isOpen || !businessId) return;
@@ -114,26 +133,7 @@ export function useNewAppointmentForm(
 
     // Fetch services
     fetchServices();
-  }, [isOpen, businessId]);
-
-  const fetchServices = async (selectServiceName?: string) => {
-    if (!businessId) return;
-    try {
-      const res = await fetch(`/api/backend/services?businessId=${businessId}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setServices(data);
-        if (selectServiceName) {
-          setFormData((prev) => ({ ...prev, service: selectServiceName }));
-        }
-      } else {
-        setServices([]);
-      }
-    } catch (e) {
-      console.error("Error loading services:", e);
-      setServices([]);
-    }
-  };
+  }, [isOpen, businessId, fetchServices]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
