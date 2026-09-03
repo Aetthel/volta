@@ -254,7 +254,7 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
               >
                 <span>
                   {isBasicCurrent && currentStatus === "TRIALING"
-                    ? "Confirmar Plan Básico (30€)"
+                    ? "Activar Plan Básico"
                     : "Elegir Plan Básico"}
                 </span>
                 <ArrowRight className="w-4 h-4" />
@@ -357,10 +357,10 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
               >
                 <span>
                   {isProCurrent && currentStatus === "TRIALING"
-                    ? "Activar Plan Pro (40€)"
+                    ? "Activar Plan Pro"
                     : "Mejorar a Plan Pro"}
                 </span>
-                <Zap className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" />
               </a>
             )}
           </div>

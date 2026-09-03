@@ -178,7 +178,21 @@ export const registerUser = async (req: Request, res: Response) => {
       },
     });
 
-    return { business: createdBusiness, user: (createdBusiness as any).users[0] };
+    let createdUser = createdBusiness?.users?.[0];
+    if (!createdUser && tx.user?.create) {
+      createdUser = await tx.user.create({
+        data: {
+          name,
+          email: cleanEmail,
+          password: hashedPassword,
+          role: "JEFE",
+          status: "PENDING_VERIFICATION",
+          businessId: createdBusiness.id,
+        },
+      });
+    }
+
+    return { business: createdBusiness, user: createdUser };
   });
 
   // Automatically trigger email OTP verification code.

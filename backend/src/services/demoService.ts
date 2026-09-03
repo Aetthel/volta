@@ -50,7 +50,18 @@ export const createDemo = async () => {
       },
     });
 
-    const demoUser = biz.users[0]!;
+    let demoUser = biz?.users?.[0];
+    if (!demoUser && tx.user?.create) {
+      demoUser = await tx.user.create({
+        data: {
+          name: "Dueño Demo",
+          email,
+          password: hashedPass,
+          role: "JEFE",
+          businessId: biz.id,
+        },
+      });
+    }
 
     await tx.alert.createMany({
       data: [
