@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "main": "src/index.js",
+  "_comment_exports": "El mapa apunta al fuente, no a un build: si un servicio se migra a TypeScript hay que actualizar aquí su extensión. Turbopack NO remapea .js->.ts en los destinos de un exports map, y un desajuste tumba la ruta del proxy entera con 'Module not found'.",
   "exports": {
     "./db": "./src/config/db.js",
     "./bot": "./src/services/botService.js",
-    "./whatsapp": "./src/services/whatsappService.js",
-    "./auth-security": "./src/services/authSecurityService.js"
+    "./whatsapp": "./src/services/whatsappService.ts",
+    "./auth-security": "./src/services/authSecurityService.ts"
   },
   "scripts": {
     "dev": "tsx watch src/index.js",

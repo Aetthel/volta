@@ -3,12 +3,12 @@ import bcrypt from "bcryptjs";
 import QRCode from "qrcode";
 import prisma from "../config/db.js";
 import config from "../config/index.js";
-import { logger } from "../utils/logger.js";
+import { logger } from "../utils/logger";
 import {
   sendOtpEmail,
   sendPasswordResetEmail,
   sendSecurityAlertEmail,
-} from "./emailService.js";
+} from "./emailService";
 
 // Base32 alphabet for standard RFC 3548 / RFC 4648
 const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
