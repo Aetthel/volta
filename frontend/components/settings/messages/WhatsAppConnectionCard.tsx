@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { MessageSquare, Loader2, Lock, QrCode } from "lucide-react";
-import type { ToastState } from "@/types/settings";
 import dynamic from "next/dynamic";
-import { Button, Badge } from "@/components/ui/volta-ui";
+import { Button, Badge, toast } from "@/components/ui/volta-ui";
 import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
 
@@ -15,13 +14,11 @@ const UpgradeProModal = dynamic(() => import("@/components/UpgradeProModal"), {
 interface WhatsAppConnectionCardProps {
   businessId: string;
   hasWhatsApp: boolean;
-  setToast: (toast: ToastState) => void;
 }
 
 export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
   businessId,
   hasWhatsApp,
-  setToast,
 }) => {
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const [whatsappStatus, setWhatsappStatus] = useState("DISCONNECTED");
@@ -91,8 +88,7 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
       setWhatsappStatus("DISCONNECTED");
       setQrCode(null);
       setPollingActive(false);
-      setToast({ show: true, text: "WhatsApp desconectado correctamente." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.success("WhatsApp desconectado correctamente.");
     } catch {}
   };
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import type { ToastState } from "@/types/settings";
 import { hasFeatureAccess } from "@/lib/permissions";
 import { WhatsAppConnectionCard } from "./messages/WhatsAppConnectionCard";
 import { WhatsAppTemplatesEditor } from "./messages/WhatsAppTemplatesEditor";
@@ -9,13 +8,11 @@ import { WhatsAppTemplatesEditor } from "./messages/WhatsAppTemplatesEditor";
 interface MessagesSectionProps {
   businessId: string;
   profileName: string;
-  setToast: (toast: ToastState) => void;
 }
 
 export default function MessagesSection({
   businessId,
   profileName,
-  setToast,
 }: MessagesSectionProps) {
   const { data: session } = useSession();
   const subscriptionPlan = session?.user?.subscriptionPlan || "BASIC";
@@ -28,14 +25,12 @@ export default function MessagesSection({
       <WhatsAppConnectionCard
         businessId={businessId}
         hasWhatsApp={hasWhatsApp}
-        setToast={setToast}
       />
 
       {/* 2. Message Templates Editor & Live Phone Simulator */}
       <WhatsAppTemplatesEditor
         businessId={businessId}
         profileName={profileName}
-        setToast={setToast}
       />
     </div>
   );

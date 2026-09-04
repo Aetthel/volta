@@ -57,8 +57,3 @@ export interface MessageTemplates {
   welcomeMessage: string;
   reminderMessage: string;
 }
-
-export type ToastState = {
-  show: boolean;
-  text: string;
-};

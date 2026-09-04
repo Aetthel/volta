@@ -139,8 +139,6 @@ export default function NewAppointmentModal({
     suggestions,
     showSuggestions,
     setShowSuggestions,
-    showConsentToast,
-    toastPhone,
     submitError,
     isSubmitting,
     handleChange,
@@ -809,22 +807,6 @@ export default function NewAppointmentModal({
             />
           </div>
         </>
-      )}
-
-      {/* LOPD WhatsApp Consent Toast Overlay */}
-      {showConsentToast && (
-        <Alert
-          variant="default"
-          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
-        >
-          <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-on-secondary-container text-body-md">Cita Reservada</p>
-            <p className="text-body-sm text-on-secondary-container/80">
-              Enlace de consentimiento LOPD enviado a{" "}
-              <span className="font-semibold">{toastPhone}</span> por WhatsApp.
-            </p>
-          </div>
-        </Alert>
       )}
 
       {/* Modal para crear servicio directamente al lado sin salir de la cita */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { apiClient } from "@/lib/apiClient";
+import { toast } from "@/components/ui/volta-ui";
 
 export type LopdStatus = "Aceptado" | "Pendiente" | "Rechazado";
 
@@ -97,12 +98,6 @@ export function useClientsList(businessId: string) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // Feedback Toasts
-  const [showConsentToast, setShowConsentToast] = useState(false);
-  const [toastPhone, setToastPhone] = useState("");
-  const [showGeneralToast, setShowGeneralToast] = useState(false);
-  const [toastText, setToastText] = useState("");
-
   const fetchData = useCallback(async () => {
     if (!businessId) return;
     setIsLoading(true);
@@ -162,17 +157,13 @@ export function useClientsList(businessId: string) {
         });
 
         if (res.error) {
-          setToastText("Error al actualizar el cliente");
-          setShowGeneralToast(true);
-          setTimeout(() => setShowGeneralToast(false), 3000);
+          toast.error(res.error || "Error al actualizar el cliente");
           return;
         }
 
         fetchData();
         onSuccess?.();
-        setToastText("Cliente actualizado correctamente");
-        setShowGeneralToast(true);
-        setTimeout(() => setShowGeneralToast(false), 3000);
+        toast.success("Cliente actualizado correctamente");
         return;
       }
 
@@ -186,17 +177,13 @@ export function useClientsList(businessId: string) {
       });
 
       if (res.error) {
-        setToastText(res.error || "Error al guardar el cliente");
-        setShowGeneralToast(true);
-        setTimeout(() => setShowGeneralToast(false), 3000);
+        toast.error(res.error || "Error al guardar el cliente");
         return;
       }
 
       fetchData();
       onSuccess?.();
-      setToastText("Cliente guardado correctamente");
-      setShowGeneralToast(true);
-      setTimeout(() => setShowGeneralToast(false), 3000);
+      toast.success("Cliente guardado correctamente");
     },
     [businessId, fetchData]
   );
@@ -207,14 +194,12 @@ export function useClientsList(businessId: string) {
 
       const res = await apiClient.clients.delete(id);
       if (res.error) {
-        alert(res.error || "Error al eliminar el cliente");
+        toast.error(res.error || "Error al eliminar el cliente");
         return;
       }
 
       fetchData();
-      setToastText("Cliente eliminado correctamente");
-      setShowGeneralToast(true);
-      setTimeout(() => setShowGeneralToast(false), 3000);
+      toast.success("Cliente eliminado correctamente");
     },
     [fetchData]
   );
@@ -228,9 +213,11 @@ export function useClientsList(businessId: string) {
       `Hola ${client.name}, para cumplir con la normativa de protección de datos (LOPD) y poder gestionar tus citas, por favor confirma tu consentimiento en el siguiente enlace:\n${consentUrl}`
     );
     window.open(`https://wa.me/${cleanPhone}?text=${message}`, "_blank");
-    setToastPhone(client.phone);
-    setShowConsentToast(true);
-    setTimeout(() => setShowConsentToast(false), 4000);
+    toast.whatsapp({
+      title: "Consentimiento Reenviado",
+      message: "Mensaje LOPD reenviado por WhatsApp a",
+      phone: client.phone,
+    });
   }, []);
 
   const handleSendCustomMessage = useCallback((client: ClientItem) => {
@@ -344,9 +331,5 @@ export function useClientsList(businessId: string) {
     handleSendWhatsAppConsent,
     handleSendCustomMessage,
     handleExportCSV,
-    showConsentToast,
-    toastPhone,
-    showGeneralToast,
-    toastText,
   };
 }

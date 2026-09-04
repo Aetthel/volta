@@ -8,8 +8,8 @@ import {
   RotateCcw,
   Check,
 } from "lucide-react";
-import type { MessageTemplates, ToastState } from "@/types/settings";
-import { Button } from "@/components/ui/volta-ui";
+import type { MessageTemplates } from "@/types/settings";
+import { Button, toast } from "@/components/ui/volta-ui";
 import { SectionHeading } from "../SectionHeading";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
@@ -24,13 +24,11 @@ const DEFAULT_REMINDER = `Hola {nombre}, te recordamos tu cita de {servicio} par
 interface WhatsAppTemplatesEditorProps {
   businessId: string;
   profileName: string;
-  setToast: (toast: ToastState) => void;
 }
 
 export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = ({
   businessId,
   profileName,
-  setToast,
 }) => {
   const [templates, setTemplates] = useState<MessageTemplates>({
     welcomeMessage: "",
@@ -73,11 +71,10 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
         setTimeout(() => setSaveStatus("idle"), 2500);
       } catch {
         setSaveStatus("idle");
-        setToast({ show: true, text: "Error al guardar plantillas" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.error("Error al guardar plantillas");
       }
     },
-    [businessId, setToast]
+    [businessId]
   );
 
   const scheduleAutoSave = (newTemplates: MessageTemplates) => {

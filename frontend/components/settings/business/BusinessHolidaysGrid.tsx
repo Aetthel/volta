@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CalendarDays, Loader2, Check } from "lucide-react";
-import type { ToastState } from "@/types/settings";
-import { Skeleton } from "@/components/ui/volta-ui";
+import { Skeleton, toast } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
 
@@ -24,7 +23,6 @@ interface HolidaysResponse {
 
 interface BusinessHolidaysGridProps {
   businessId: string;
-  setToast: (toast: ToastState) => void;
 }
 
 const formatHolidayDate = (isoDate: string) => {
@@ -37,7 +35,6 @@ const formatHolidayDate = (isoDate: string) => {
 
 export const BusinessHolidaysGrid: React.FC<BusinessHolidaysGridProps> = ({
   businessId,
-  setToast,
 }) => {
   const [catalogue, setCatalogue] = useState<HolidayCatalogueItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,8 +69,7 @@ export const BusinessHolidaysGrid: React.FC<BusinessHolidaysGridProps> = ({
       setTimeout(() => setSaveStatus("idle"), 2500);
     } catch {
       setSaveStatus("idle");
-      setToast({ show: true, text: "Error al guardar los festivos" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error("Error al guardar los festivos");
     }
   };
 

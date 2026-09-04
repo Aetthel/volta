@@ -11,6 +11,7 @@ import SecurityGuard from "@/components/SecurityGuard";
 
 import WelcomeModal from "@/components/WelcomeModal";
 import LemonSqueezyInitializer from "@/components/LemonSqueezyInitializer";
+import { Toaster } from "@/components/ui/volta-ui";
 
 export default function Providers({
   session,
@@ -31,6 +32,7 @@ export default function Providers({
             <TopProgressBar />
           </Suspense>
           <WelcomeModal />
+          <Toaster />
           {children}
         </AlertsProvider>
       </ThemeProvider>

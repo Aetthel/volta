@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { apiClient } from "@/lib/apiClient";
+import { toast } from "@/components/ui/volta-ui";
 
 export interface TeamMember {
   id: string;
@@ -84,10 +85,6 @@ export function useTeamList(businessId: string, currentUserId?: string) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // Toast
-  const [showToast, setShowToast] = useState(false);
-  const [toastText, setToastText] = useState("");
-
   const fetchMembers = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") {
       setIsLoading(false);
@@ -152,13 +149,12 @@ export function useTeamList(businessId: string, currentUserId?: string) {
           });
 
       if (res.error) {
+        toast.error(res.error || "Error al procesar el trabajador.");
         throw new Error(res.error || "Error al procesar el trabajador.");
       }
 
       fetchMembers();
-      setToastText(isEdit ? "Trabajador actualizado con éxito." : "Trabajador invitado correctamente.");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.success(isEdit ? "Trabajador actualizado con éxito." : "Trabajador invitado correctamente.");
     },
     [businessId, fetchMembers]
   );
@@ -166,7 +162,7 @@ export function useTeamList(businessId: string, currentUserId?: string) {
   const handleDeleteWorker = useCallback(
     async (id: string, name: string) => {
       if (id === currentUserId) {
-        alert("No puedes eliminar tu propia cuenta activa.");
+        toast.error("No puedes eliminar tu propia cuenta activa.");
         return;
       }
 
@@ -176,14 +172,12 @@ export function useTeamList(businessId: string, currentUserId?: string) {
 
       const res = await apiClient.team.delete(id);
       if (res.error) {
-        alert(res.error || "Error al eliminar trabajador.");
+        toast.error(res.error || "Error al eliminar trabajador.");
         return;
       }
 
       fetchMembers();
-      setToastText(`Se ha eliminado a ${name} del equipo.`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      toast.success(`Se ha eliminado a ${name} del equipo.`);
     },
     [currentUserId, fetchMembers]
   );
@@ -241,7 +235,5 @@ export function useTeamList(businessId: string, currentUserId?: string) {
     paginatedMembers,
     handleSaveWorker,
     handleDeleteWorker,
-    showToast,
-    toastText,
   };
 }

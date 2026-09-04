@@ -5,13 +5,12 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
-import { Plus, CheckCircle2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Alert } from "@/components/ui/volta-ui";
 import { useTeamList } from "@/lib/hooks/useTeamList";
 import { TeamFiltersBar } from "@/components/team/TeamFiltersBar";
 import { TeamTable } from "@/components/team/TeamTable";
@@ -50,8 +49,6 @@ export default function EquipoPage() {
     paginatedMembers,
     handleSaveWorker,
     handleDeleteWorker,
-    showToast,
-    toastText,
   } = useTeamList(businessId, currentUserId);
 
   useEffect(() => {
@@ -172,16 +169,6 @@ export default function EquipoPage() {
             fetchMembers();
           }}
         />
-      )}
-
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
-          <Alert variant="info" className="flex items-center gap-2 shadow-lg bg-surface border border-primary/20">
-            <CheckCircle2 className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">{toastText}</span>
-          </Alert>
-        </div>
       )}
     </div>
   );

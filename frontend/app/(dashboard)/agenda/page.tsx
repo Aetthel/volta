@@ -9,7 +9,7 @@ import { Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import QueryActionTrigger from "@/components/QueryActionTrigger";
-import { Button, Skeleton } from "@/components/ui/volta-ui";
+import { Button, Skeleton, toast } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
 import { useBusinessSchedule } from "@/lib/hooks/useBusinessSchedule";
@@ -132,17 +132,6 @@ export default function AgendaPage() {
   const [workers, setWorkers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [toast, setToast] = useState<{ show: boolean; text: string; type: "success" | "error" }>({
-    show: false,
-    text: "",
-    type: "success",
-  });
-
-  const showToast = (text: string, type: "success" | "error" = "success") => {
-    setToast({ show: true, text, type });
-    setTimeout(() => setToast({ show: false, text: "", type: "success" }), 3500);
-  };
-
   const fetchDashboardData = useCallback(() => {
     if (!businessId) return;
     setIsLoading(true);
@@ -253,14 +242,14 @@ export default function AgendaPage() {
       });
 
       if (res.ok) {
-        showToast("Cita creada correctamente", "success");
+        toast.success("Cita creada correctamente");
         fetchDashboardData();
       } else {
-        showToast("Error al guardar la cita", "error");
+        toast.error("Error al guardar la cita");
       }
     } catch (e) {
       console.error("Error creating appointment:", e);
-      showToast("Error de conexión al guardar cita", "error");
+      toast.error("Error de conexión al guardar cita");
     }
   };
 
@@ -286,14 +275,14 @@ export default function AgendaPage() {
       });
 
       if (res.ok) {
-        showToast("Cita actualizada correctamente", "success");
+        toast.success("Cita actualizada correctamente");
         fetchDashboardData();
       } else {
-        showToast("Error al actualizar la cita", "error");
+        toast.error("Error al actualizar la cita");
       }
     } catch (e) {
       console.error("Error updating appointment:", e);
-      showToast("Error de conexión al actualizar cita", "error");
+      toast.error("Error de conexión al actualizar cita");
     }
   };
 
@@ -305,14 +294,14 @@ export default function AgendaPage() {
       });
 
       if (res.ok) {
-        showToast("Cita eliminada correctamente", "success");
+        toast.success("Cita eliminada correctamente");
         fetchDashboardData();
       } else {
-        showToast("Error al eliminar la cita", "error");
+        toast.error("Error al eliminar la cita");
       }
     } catch (e) {
       console.error("Error deleting appointment:", e);
-      showToast("Error de conexión al eliminar cita", "error");
+      toast.error("Error de conexión al eliminar cita");
     }
   };
 
@@ -345,19 +334,18 @@ export default function AgendaPage() {
       if (res.ok) {
         const payload = await res.json().catch(() => null);
         const removed = payload?.deletedSessions;
-        showToast(
-          typeof removed === "number"
-            ? `Clase semanal cancelada (${removed} sesiones eliminadas)`
-            : "Clase semanal cancelada",
-          "success"
-        );
+        if (typeof removed === "number") {
+          toast.success(`Clase semanal cancelada (${removed} sesiones eliminadas)`);
+        } else {
+          toast.success("Clase semanal cancelada");
+        }
         fetchDashboardData();
       } else {
-        showToast("Error al cancelar la clase semanal", "error");
+        toast.error("Error al cancelar la clase semanal");
       }
     } catch (e) {
       console.error("Error deleting class schedule:", e);
-      showToast("Error de conexión al cancelar la clase", "error");
+      toast.error("Error de conexión al cancelar la clase");
     }
   };
 
@@ -450,12 +438,11 @@ export default function AgendaPage() {
         onSave={(result) => {
           setIsAppointmentModalOpen(false);
           const createdSessions = (result as { createdSessions?: number })?.createdSessions;
-          showToast(
-            typeof createdSessions === "number"
-              ? `Clase semanal programada (${createdSessions} sesiones creadas)`
-              : "Cita registrada exitosamente",
-            "success"
-          );
+          if (typeof createdSessions === "number") {
+            toast.success(`Clase semanal programada (${createdSessions} sesiones creadas)`);
+          } else {
+            toast.success("Cita registrada exitosamente");
+          }
           fetchDashboardData();
         }}
       />
@@ -464,7 +451,7 @@ export default function AgendaPage() {
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
         onSave={() => {
-          showToast("Cliente registrado correctamente", "success");
+          toast.success("Cliente registrado correctamente");
           setIsClientModalOpen(false);
           fetchDashboardData();
         }}
@@ -530,20 +517,6 @@ export default function AgendaPage() {
                 Cancelar
               </Button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {toast.show && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">
-          <div
-            className={`px-4 py-3 rounded-xl shadow-xl text-sm font-medium border flex items-center gap-2 ${
-              toast.type === "success"
-                ? "bg-emerald-500 text-white border-emerald-600"
-                : "bg-error text-on-error border-red-600"
-            }`}
-          >
-            <span>{toast.text}</span>
           </div>
         </div>
       )}

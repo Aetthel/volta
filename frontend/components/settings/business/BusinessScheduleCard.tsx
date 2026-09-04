@@ -1,12 +1,10 @@
 "use client";
 
-import type { ToastState } from "@/types/settings";
 import { BusinessHoursGrid } from "./BusinessHoursGrid";
 import { BusinessHolidaysGrid } from "./BusinessHolidaysGrid";
 
 interface BusinessScheduleCardProps {
   businessId: string;
-  setToast: (toast: ToastState) => void;
 }
 
 /**
@@ -14,22 +12,21 @@ interface BusinessScheduleCardProps {
  * izquierda y los festivos a la derecha.
  *
  * Cada panel guarda por su cuenta porque golpean endpoints distintos
- * (`/hours` y `/holidays`), de ahí que cada columna tenga su propio botón.
+ * (`/hours` y `/holidays`).
  */
 export const BusinessScheduleCard: React.FC<BusinessScheduleCardProps> = ({
   businessId,
-  setToast,
 }) => {
   return (
     <section className="w-full pt-10">
       <div>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
           <div>
-            <BusinessHoursGrid businessId={businessId} setToast={setToast} />
+            <BusinessHoursGrid businessId={businessId} />
           </div>
 
           <div>
-            <BusinessHolidaysGrid businessId={businessId} setToast={setToast} />
+            <BusinessHolidaysGrid businessId={businessId} />
           </div>
         </div>
       </div>

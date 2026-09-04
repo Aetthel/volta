@@ -13,14 +13,14 @@ import {
   FONT_SCALES,
   RADIUS_SCALES,
 } from "@/lib/theme";
-import type { BusinessProfile, ToastState } from "@/types/settings";
+import type { BusinessProfile } from "@/types/settings";
+import { toast } from "@/components/ui/volta-ui";
 
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
-import Toast from "@/components/settings/Toast";
 import PageHeader from "@/components/PageHeader";
 import dynamicImport from "next/dynamic";
 
@@ -185,8 +185,6 @@ function AjustesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [toast, setToast] = useState<ToastState>({ show: false, text: "" });
-
   // Determine active tab from URL query param (or null for Cards Overview)
   const tabFromUrl = searchParams.get("tab") || searchParams.get("seccion");
   const [activeTab, setActiveTab] = useState<string | null>(tabFromUrl || null);
@@ -348,8 +346,6 @@ function AjustesContent() {
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
         <main className="p-gutter max-w-container-max w-full mx-auto flex-1 relative">
-          <Toast toast={toast} />
-
           {/* OVERVIEW VIEW: Cards Grid */}
           {!currentCategory ? (
             <div className="animate-in fade-in duration-200">
@@ -436,17 +432,16 @@ function AjustesContent() {
 
               {/* Section Settings Content */}
               {role === "ADMIN" && activeTab === "perfil" ? (
-                <AdminProfileSection toast={toast} setToast={setToast} />
+                <AdminProfileSection />
               ) : (
                 <>
                   {activeTab === "perfil" && (
-                    <ProfileSection profile={profile} setProfile={setProfile} setToast={setToast} />
+                    <ProfileSection profile={profile} setProfile={setProfile} />
                   )}
                   {activeTab === "mensajeria" && (
                     <MessagesSection
                       businessId={businessId}
                       profileName={profile.name}
-                      setToast={setToast}
                     />
                   )}
                   {activeTab === "gestion" && (
@@ -454,16 +449,10 @@ function AjustesContent() {
                       profile={profile}
                       setProfile={setProfile}
                       businessId={businessId}
-                      setToast={setToast}
                     />
                   )}
                   {activeTab === "facturacion" && (
-                    <BillingSection
-                      onShowToast={(text) => {
-                        setToast({ show: true, text });
-                        setTimeout(() => setToast({ show: false, text: "" }), 3000);
-                      }}
-                    />
+                    <BillingSection />
                   )}
                   {activeTab === "personalizacion" && (
                     <PersonalizationSection
@@ -497,8 +486,7 @@ function AjustesContent() {
         }}
         onSave={() => {
           setIsAppointmentModalOpen(false);
-          setToast({ show: true, text: "Cita registrada exitosamente" });
-          setTimeout(() => setToast({ show: false, text: "" }), 3000);
+          toast.success("Cita registrada exitosamente");
         }}
         triggerRect={appointmentModalTriggerRect}
       />
@@ -507,13 +495,7 @@ function AjustesContent() {
 }
 
 // ADMIN Profile Form Section
-function AdminProfileSection({
-  toast,
-  setToast,
-}: {
-  toast: ToastState;
-  setToast: (t: ToastState) => void;
-}) {
+function AdminProfileSection() {
   const { data: session, update } = useSession();
   const [adminForm, setAdminForm] = useState({ name: "", email: "", password: "" });
   const [savingAdmin, setSavingAdmin] = useState(false);
@@ -547,11 +529,10 @@ function AdminProfileSection({
       })
       .then(async (updatedUser) => {
         update({ name: updatedUser.name, email: updatedUser.email });
-        setToast({ show: true, text: "¡Ajustes de administrador guardados!" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.success("¡Ajustes de administrador guardados!");
         setAdminForm((prev) => ({ ...prev, password: "" }));
       })
-      .catch((err) => alert(err.message))
+      .catch((err) => toast.error(err.message || "Error al guardar ajustes"))
       .finally(() => setSavingAdmin(false));
   };
 

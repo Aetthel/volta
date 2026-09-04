@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Clock, Loader2, Sparkles, Check } from "lucide-react";
-import type { BusinessHours, ToastState } from "@/types/settings";
-import { Skeleton } from "@/components/ui/volta-ui";
+import type { BusinessHours } from "@/types/settings";
+import { Skeleton, toast } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
 
@@ -11,10 +11,9 @@ const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Vierne
 
 interface BusinessHoursGridProps {
   businessId: string;
-  setToast: (toast: ToastState) => void;
 }
 
-export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({ businessId, setToast }) => {
+export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({ businessId }) => {
   const [hours, setHours] = useState<BusinessHours[]>([]);
   const [loadingHours, setLoadingHours] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -54,11 +53,10 @@ export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({ businessId
         setTimeout(() => setSaveStatus("idle"), 2500);
       } catch {
         setSaveStatus("idle");
-        setToast({ show: true, text: "Error al guardar horarios" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.error("Error al guardar horarios");
       }
     },
-    [businessId, setToast]
+    [businessId]
   );
 
   const schedulePersistHours = (nextHours: BusinessHours[], delay = 400) => {
@@ -90,8 +88,7 @@ export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({ businessId
     });
 
     schedulePersistHours(next, 0);
-    setToast({ show: true, text: "Horario de lunes aplicado a días laborables (L-V)" });
-    setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    toast.success("Horario de lunes aplicado a días laborables (L-V)");
   };
 
   return (

@@ -22,7 +22,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { BusinessProfile, ToastState } from "@/types/settings";
+import type { BusinessProfile } from "@/types/settings";
 import { apiClient } from "@/lib/apiClient";
 import {
   FloatingInput,
@@ -32,6 +32,7 @@ import {
   Field,
   FieldLabel,
   Avatar,
+  toast,
 } from "@/components/ui/volta-ui";
 import { SectionHeading } from "./SectionHeading";
 
@@ -44,10 +45,9 @@ const DEFAULT_AVATAR =
 interface ProfileSectionProps {
   profile: BusinessProfile;
   setProfile: React.Dispatch<React.SetStateAction<BusinessProfile>>;
-  setToast: (toast: ToastState) => void;
 }
 
-export default function ProfileSection({ profile, setProfile, setToast }: ProfileSectionProps) {
+export default function ProfileSection({ profile, setProfile }: ProfileSectionProps) {
   const { data: session, update } = useSession();
   const role = session?.user?.role || "EMPLEADO";
 
@@ -143,8 +143,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setToast({ show: true, text: "La imagen no debe superar los 5MB" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.error("La imagen no debe superar los 5MB");
         return;
       }
       const reader = new FileReader();
@@ -155,8 +154,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
           localStorage.setItem("stylist_worker_photo", photoData);
           window.dispatchEvent(new Event("stylist_worker_photo_changed"));
         }
-        setToast({ show: true, text: "Foto de perfil actualizada correctamente" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.success("Foto de perfil actualizada correctamente");
       };
       reader.readAsDataURL(file);
     }
@@ -169,8 +167,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
       localStorage.removeItem("stylist_worker_photo");
       window.dispatchEvent(new Event("stylist_worker_photo_changed"));
     }
-    setToast({ show: true, text: "Foto de perfil eliminada" });
-    setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    toast.success("Foto de perfil eliminada");
   };
 
   // Auto-save Personal Info
@@ -198,11 +195,10 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
         setTimeout(() => setPersonalSaveStatus("idle"), 2500);
       } catch {
         setPersonalSaveStatus("idle");
-        setToast({ show: true, text: "Error al guardar información personal" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.error("Error al guardar información personal");
       }
     },
-    [session, update, setToast]
+    [session, update]
   );
 
   const schedulePersistPersonalInfo = (nextForm: typeof personalForm) => {
@@ -219,20 +215,17 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
     if (!session?.user?.id) return;
 
     if (!passwordForm.currentPassword) {
-      setToast({ show: true, text: "Introduce tu contraseña actual" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error("Introduce tu contraseña actual");
       return;
     }
 
     if (!passwordForm.newPassword || passwordForm.newPassword.length < 8) {
-      setToast({ show: true, text: "La nueva contraseña debe tener al menos 8 caracteres" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error("La nueva contraseña debe tener al menos 8 caracteres");
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setToast({ show: true, text: "Las contraseñas no coinciden" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error("Las contraseñas no coinciden");
       return;
     }
 
@@ -246,11 +239,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
       if (res.error) throw new Error(res.error);
 
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      setToast({ show: true, text: "¡Contraseña actualizada correctamente!" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.success("¡Contraseña actualizada correctamente!");
     } catch (err: any) {
-      setToast({ show: true, text: err.message || "Error al actualizar la contraseña." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error(err.message || "Error al actualizar la contraseña.");
     } finally {
       setSavingPassword(false);
     }
@@ -267,8 +258,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
         setIs2faModalOpen(true);
       }
     } catch (err: any) {
-      setToast({ show: true, text: err.message || "Error al preparar 2FA." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error(err.message || "Error al preparar 2FA.");
     } finally {
       setLoading2fa(false);
     }
@@ -293,11 +283,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
       } else {
         setIs2faModalOpen(false);
       }
-      setToast({ show: true, text: "¡Autenticación en Dos Pasos activada!" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.success("¡Autenticación en Dos Pasos activada!");
     } catch (err: any) {
-      setToast({ show: true, text: err.message || "Código inválido." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error(err.message || "Código inválido.");
     } finally {
       setLoading2fa(false);
     }
@@ -318,11 +306,9 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
       setTwoFactorEnabled(false);
       setIsDisable2faModalOpen(false);
       setDisablePasswordInput("");
-      setToast({ show: true, text: "Autenticación en Dos Pasos desactivada." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.success("Autenticación en Dos Pasos desactivada.");
     } catch (err: any) {
-      setToast({ show: true, text: err.message || "Error al desactivar 2FA." });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error(err.message || "Error al desactivar 2FA.");
     } finally {
       setLoading2fa(false);
     }

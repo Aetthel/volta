@@ -5,13 +5,12 @@ export const dynamic = "force-dynamic";
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
-import { Plus, ShieldCheck, MessageCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import QueryActionTrigger from "@/components/QueryActionTrigger";
 import TrialBanner from "@/components/TrialBanner";
 import Header from "@/components/Header";
-import { Alert } from "@/components/ui/volta-ui";
 import { Button } from "@/components/ui/button";
 import { useClientsList, type ClientItem } from "@/lib/hooks/useClientsList";
 import { ClientFiltersBar } from "@/components/clients/ClientFiltersBar";
@@ -57,10 +56,6 @@ export default function ClientesPage() {
     handleSendWhatsAppConsent,
     handleSendCustomMessage,
     handleExportCSV,
-    showConsentToast,
-    toastPhone,
-    showGeneralToast,
-    toastText,
   } = useClientsList(businessId);
 
   useEffect(() => {
@@ -211,39 +206,6 @@ export default function ClientesPage() {
         }}
         onSave={() => fetchData()}
       />
-
-      {/* Feedback Toasts */}
-      {showConsentToast && (
-        <Alert
-          variant="info"
-          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
-        >
-          <ShieldCheck className="w-5 h-5 text-secondary shrink-0" />
-          <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-on-secondary-container text-sm">
-              Consentimiento Reenviado
-            </p>
-            <p className="text-xs text-on-secondary-container/80">
-              Mensaje LOPD reenviado a <span className="font-semibold">{toastPhone}</span> por WhatsApp.
-            </p>
-          </div>
-        </Alert>
-      )}
-
-      {showGeneralToast && (
-        <Alert
-          variant="info"
-          className="fixed top-6 right-6 z-[60] flex items-center gap-3 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm"
-        >
-          <MessageCircle className="w-5 h-5 text-secondary shrink-0" />
-          <div className="flex flex-col gap-0.5">
-            <p className="font-semibold text-on-secondary-container text-sm">
-              Información
-            </p>
-            <p className="text-xs text-on-secondary-container/80">{toastText}</p>
-          </div>
-        </Alert>
-      )}
     </div>
   );
 }

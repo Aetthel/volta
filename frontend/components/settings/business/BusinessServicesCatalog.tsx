@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Briefcase, Plus, Pencil, Trash2, Search } from "lucide-react";
-import type { Service, ToastState } from "@/types/settings";
+import type { Service } from "@/types/settings";
 import dynamic from "next/dynamic";
 import { formatCurrency } from "@/lib/utils";
 import {
   Button,
   Badge,
   Skeleton,
+  toast,
 } from "@/components/ui/volta-ui";
 import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
@@ -20,12 +21,10 @@ const AddServiceModal = dynamic(() => import("@/components/AddServiceModal"), {
 
 interface BusinessServicesCatalogProps {
   businessId: string;
-  setToast: (toast: ToastState) => void;
 }
 
 export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = ({
   businessId,
-  setToast,
 }) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loadingServices, setLoadingServices] = useState(false);
@@ -75,30 +74,23 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
       : await apiClient.services.create({ ...serviceData, color, businessId });
 
     if (res.error) {
-      setToast({ show: true, text: "Error al guardar el servicio" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error("Error al guardar el servicio");
       return;
     }
 
     fetchServices();
-    setToast({
-      show: true,
-      text: isEdit ? "Servicio actualizado correctamente." : "Servicio añadido correctamente.",
-    });
-    setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    toast.success(isEdit ? "Servicio actualizado correctamente." : "Servicio añadido correctamente.");
   };
 
   const handleDeleteService = async (serviceId: string) => {
     if (!window.confirm("¿Seguro que deseas eliminar este servicio?")) return;
     const res = await apiClient.services.delete(serviceId);
     if (res.error) {
-      setToast({ show: true, text: "Error al eliminar el servicio" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.error("Error al eliminar el servicio");
       return;
     }
     fetchServices();
-    setToast({ show: true, text: "Servicio eliminado correctamente." });
-    setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    toast.success("Servicio eliminado correctamente.");
   };
 
   const filteredServices = useMemo(() => {

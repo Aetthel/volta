@@ -21,7 +21,7 @@ import {
   X,
   ArrowRight,
 } from "lucide-react";
-import { Button, Badge, Skeleton } from "@/components/ui/volta-ui";
+import { Button, Badge, Skeleton, toast } from "@/components/ui/volta-ui";
 import { SectionHeading } from "./SectionHeading";
 import type { Invoice } from "@/types/domain";
 import { cn } from "@/lib/utils";
@@ -31,11 +31,7 @@ import {
   openLemonSqueezyOverlay,
 } from "@/lib/lemonsqueezy";
 
-interface BillingSectionProps {
-  onShowToast: (message: string) => void;
-}
-
-export default function BillingSection({ onShowToast }: BillingSectionProps) {
+export default function BillingSection() {
   const { data: session } = useSession();
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -78,14 +74,14 @@ export default function BillingSection({ onShowToast }: BillingSectionProps) {
       });
 
       if (res.ok) {
-        onShowToast("Suscripción cancelada al término del periodo actual");
+        toast.success("Suscripción cancelada al término del periodo actual");
         fetchBillingData();
       } else {
         const errData = await res.json();
-        onShowToast(errData.error || "No se pudo cancelar la suscripción");
+        toast.error(errData.error || "No se pudo cancelar la suscripción");
       }
     } catch {
-      onShowToast("Error de conexión al cancelar la suscripción");
+      toast.error("Error de conexión al cancelar la suscripción");
     } finally {
       setIsCancelling(false);
     }

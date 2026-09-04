@@ -52,14 +52,14 @@ beforeEach(() => {
 
 describe("BusinessScheduleCard", () => {
   it("reúne horario y festivos en un solo contenedor", async () => {
-    render(<BusinessScheduleCard businessId="biz-1" setToast={vi.fn()} />);
+    render(<BusinessScheduleCard businessId="biz-1" />);
 
     expect(await screen.findByText("Horario de Apertura")).toBeInTheDocument();
     expect(screen.getByText("Festivos")).toBeInTheDocument();
   });
 
   it("coloca los dos paneles en columnas separadas", async () => {
-    const { container } = render(<BusinessScheduleCard businessId="biz-1" setToast={vi.fn()} />);
+    const { container } = render(<BusinessScheduleCard businessId="biz-1" />);
 
     expect(await screen.findByText("Horario de Apertura")).toBeInTheDocument();
     const grid = container.querySelector(".lg\\:grid-cols-2");
@@ -72,7 +72,7 @@ describe("BusinessScheduleCard", () => {
     updateHolidays.mockResolvedValue({ data: { catalogue: CATALOGUE } });
     updateHours.mockResolvedValue({ data: HOURS });
 
-    render(<BusinessScheduleCard businessId="biz-1" setToast={vi.fn()} />);
+    render(<BusinessScheduleCard businessId="biz-1" />);
 
     expect(await screen.findByText("Horario de Apertura")).toBeInTheDocument();
     expect(screen.getByText("Festivos")).toBeInTheDocument();
@@ -97,7 +97,7 @@ describe("BusinessScheduleCard", () => {
   });
 
   it("muestra los días de la semana y los festivos agrupados por ámbito", async () => {
-    render(<BusinessScheduleCard businessId="biz-1" setToast={vi.fn()} />);
+    render(<BusinessScheduleCard businessId="biz-1" />);
 
     expect(await screen.findByText("Lunes")).toBeInTheDocument();
     expect(screen.getByText("Domingo")).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe("BusinessScheduleCard", () => {
   });
 
   it("pide los datos de cada panel al negocio indicado", async () => {
-    render(<BusinessScheduleCard businessId="biz-1" setToast={vi.fn()} />);
+    render(<BusinessScheduleCard businessId="biz-1" />);
 
     await waitFor(() => expect(getHours).toHaveBeenCalledWith("biz-1"));
     expect(getHolidays).toHaveBeenCalledWith("biz-1");

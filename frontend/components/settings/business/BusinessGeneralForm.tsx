@@ -15,7 +15,7 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
-import type { BusinessProfile, ToastState } from "@/types/settings";
+import type { BusinessProfile } from "@/types/settings";
 import {
   Input,
   Textarea,
@@ -25,6 +25,7 @@ import {
   Field,
   FieldLabel,
   Avatar,
+  toast,
 } from "@/components/ui/volta-ui";
 import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
@@ -40,14 +41,12 @@ interface BusinessGeneralFormProps {
   profile: BusinessProfile;
   setProfile: React.Dispatch<React.SetStateAction<BusinessProfile>>;
   businessId: string;
-  setToast: (toast: ToastState) => void;
 }
 
 export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
   profile,
   setProfile,
   businessId,
-  setToast,
 }) => {
   const { data: session, update } = useSession();
 
@@ -96,11 +95,10 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
         }
       } catch {
         setSaveStatus("idle");
-        setToast({ show: true, text: "Error al guardar información comercial" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.error("Error al guardar información comercial");
       }
     },
-    [businessId, session, update, setProfile, setToast]
+    [businessId, session, update, setProfile]
   );
 
   const schedulePersistBusiness = (nextForm: typeof businessForm) => {
@@ -115,8 +113,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setToast({ show: true, text: "La imagen no debe superar los 5MB" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.error("La imagen no debe superar los 5MB");
         return;
       }
       const reader = new FileReader();
@@ -124,8 +121,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
         const logoData = reader.result as string;
         setProfile((prev) => ({ ...prev, logoUrl: logoData }));
         await apiClient.business.update(businessId, { logoUrl: logoData });
-        setToast({ show: true, text: "Logotipo comercial actualizado" });
-        setTimeout(() => setToast({ show: false, text: "" }), 3000);
+        toast.success("Logotipo comercial actualizado");
       };
       reader.readAsDataURL(file);
     }
@@ -134,19 +130,14 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
   const handleRemoveLogo = async () => {
     setProfile((prev) => ({ ...prev, logoUrl: null }));
     await apiClient.business.update(businessId, { logoUrl: null });
-    setToast({ show: true, text: "Logotipo eliminado" });
-    setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    toast.success("Logotipo eliminado");
   };
 
   const handleToggleBooking = async () => {
     const newValue = profile.enablePublicBooking === false ? true : false;
     setProfile((prev) => ({ ...prev, enablePublicBooking: newValue }));
     await apiClient.business.update(businessId, { enablePublicBooking: newValue });
-    setToast({
-      show: true,
-      text: newValue ? "Reservas online activadas" : "Reservas online desactivadas",
-    });
-    setTimeout(() => setToast({ show: false, text: "" }), 3000);
+    toast.success(newValue ? "Reservas online activadas" : "Reservas online desactivadas");
   };
 
   const [mountedOrigin, setMountedOrigin] = useState("");
@@ -176,8 +167,7 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
-      setToast({ show: true, text: "¡Código QR descargado!" });
-      setTimeout(() => setToast({ show: false, text: "" }), 3000);
+      toast.success("¡Código QR descargado!");
     } catch {
       window.open(qrImageUrl, "_blank");
     } finally {

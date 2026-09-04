@@ -61,6 +61,7 @@ import {
   CardTitle,
   Empty,
   Separator,
+  toast,
   ContextMenu,
   ContextMenuTrigger,
   ContextMenuContent,
@@ -198,12 +199,19 @@ export default function DashboardPage() {
         if (!res.ok) throw new Error("Error deleting appointment");
         return res.json();
       })
-      .then(() => fetchData())
-      .catch((err) => console.error("Error deleting appointment:", err));
+      .then(() => {
+        toast.success("Cita eliminada correctamente");
+        fetchData();
+      })
+      .catch((err) => {
+        console.error("Error deleting appointment:", err);
+        toast.error("Error al eliminar la cita");
+      });
   };
 
   const handleSaveAppointment = () => {
     setIsAppointmentModalOpen(false);
+    toast.success("Cita registrada exitosamente");
     fetchData();
   };
 
@@ -719,7 +727,11 @@ export default function DashboardPage() {
       <AddClientModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        onSave={() => fetchData()}
+        onSave={() => {
+          setIsClientModalOpen(false);
+          toast.success("Cliente registrado correctamente");
+          fetchData();
+        }}
         triggerRect={clientModalTriggerRect}
       />
     </div>

@@ -90,14 +90,22 @@ const config: AppConfig = {
   emailFrom: parsedEnv.EMAIL_FROM,
 };
 
-if (process.env.NODE_ENV === "production" && config.bookingJwtSecret === "test-booking-jwt-secret") {
+const isBuildOrTest =
+  process.env.NEXT_PHASE === "phase-production-build" ||
+  process.env.NODE_ENV === "test";
+
+if (
+  process.env.NODE_ENV === "production" &&
+  !isBuildOrTest &&
+  config.bookingJwtSecret === "test-booking-jwt-secret"
+) {
   console.error(
     " \x1b[31m[FATAL] BOOKING_JWT_SECRET no esta definida: el portal publico de reservas emitiria tokens firmados con el secreto por defecto. \x1b[0m"
   );
   process.exit(1);
 }
 
-if (process.env.NODE_ENV === "production" && !config.resendApiKey) {
+if (process.env.NODE_ENV === "production" && !isBuildOrTest && !config.resendApiKey) {
   console.warn(
     "\x1b[33m[WARN] RESEND_API_KEY no está definida: los correos de recuperación de contraseña y verificación NO se enviarán, solo se registrarán en el log.\x1b[0m"
   );

@@ -95,8 +95,6 @@ export function useNewAppointmentForm(
   const [groupClients, setGroupClients] = useState<Array<{ id?: string; name: string; phone?: string }>>([]);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showConsentToast, setShowConsentToast] = useState(false);
-  const [toastPhone, setToastPhone] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -485,8 +483,6 @@ export function useNewAppointmentForm(
     suggestions,
     showSuggestions,
     setShowSuggestions,
-    showConsentToast,
-    toastPhone,
     submitError,
     isSubmitting,
     handleChange,
