@@ -86,6 +86,46 @@ export const updateAppointmentSchema = z.object({
 });
 export type UpdateAppointmentInput = z.infer<typeof updateAppointmentSchema>;
 
+// Class Schedules (clases de grupo recurrentes) Validation Schemas
+const isoDay = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe tener formato YYYY-MM-DD");
+const timeOfDay = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "La hora debe tener formato HH:MM");
+const scheduleAttendee = z.object({
+  name: z.string().min(1, "El nombre del alumno es requerido"),
+  phone: z.string().optional().nullable(),
+  clientId: z.string().optional().nullable(),
+});
+
+export const createClassScheduleSchema = z
+  .object({
+    businessId: z.string().min(1, "El ID de negocio es requerido"),
+    service: z.string().optional().nullable(),
+    serviceId: z.string().optional().nullable(),
+    // Convenio de Date.getDay(): 0 = domingo.
+    daysOfWeek: z
+      .array(z.number().int().min(0).max(6))
+      .min(1, "Selecciona al menos un día de la semana"),
+    startTime: timeOfDay,
+    startDate: isoDay,
+    endDate: isoDay.optional().nullable(),
+    repeatClients: z.boolean().optional(),
+    attendees: z.array(scheduleAttendee).optional(),
+  })
+  .refine((data) => !!(data.service || data.serviceId), {
+    message: "Selecciona la clase de grupo que se repite",
+    path: ["service"],
+  });
+export type CreateClassScheduleInput = z.infer<typeof createClassScheduleSchema>;
+
+export const updateClassScheduleSchema = z.object({
+  daysOfWeek: z.array(z.number().int().min(0).max(6)).min(1).optional(),
+  startTime: timeOfDay.optional(),
+  endDate: isoDay.optional().nullable(),
+  repeatClients: z.boolean().optional(),
+  attendees: z.array(scheduleAttendee).optional(),
+  isActive: z.boolean().optional(),
+});
+export type UpdateClassScheduleInput = z.infer<typeof updateClassScheduleSchema>;
+
 // Services Validation Schemas
 export const createServiceSchema = z.object({
   businessId: z.string().min(1, "El ID de negocio es requerido"),

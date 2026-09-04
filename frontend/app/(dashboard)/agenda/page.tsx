@@ -118,6 +118,13 @@ export default function AgendaPage() {
   const [focusedDay, setFocusedDay] = useState<string>("");
   const [prefilledDate, setPrefilledDate] = useState<string>("");
   const [prefilledTime, setPrefilledTime] = useState<string>("");
+  // Sesión de una clase semanal pendiente de decidir si se borra sola o con
+  // toda su serie.
+  const [seriesDeleteTarget, setSeriesDeleteTarget] = useState<{
+    appointmentId: string;
+    classScheduleId: string;
+    title: string;
+  } | null>(null);
 
   const [rawDbAppointments, setRawDbAppointments] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
@@ -214,7 +221,9 @@ export default function AgendaPage() {
         endTime,
         color,
         category: serviceName,
-        tags: [statusTag],
+        // La etiqueta distingue de un vistazo las sesiones que se repiten solas
+        // de las que alguien creó a mano ese día.
+        tags: app.classScheduleId ? [statusTag, "Semanal"] : [statusTag],
         rawAppointment: app,
       };
     });
@@ -225,7 +234,7 @@ export default function AgendaPage() {
   }, [services]);
 
   const availableTags = useMemo(() => {
-    return ["Pendiente", "Completada", "Cancelada"];
+    return ["Pendiente", "Completada", "Cancelada", "Semanal"];
   }, []);
 
   const handleEventCreate = async (newEvent: Omit<Event, "id">) => {
@@ -288,7 +297,7 @@ export default function AgendaPage() {
     }
   };
 
-  const handleEventDelete = async (id: string) => {
+  const deleteSingleAppointment = async (id: string) => {
     try {
       // Mismo motivo que en el update: el id va en la ruta, no en la query.
       const res = await fetch(`/api/backend/appointments/${id}`, {
@@ -304,6 +313,51 @@ export default function AgendaPage() {
     } catch (e) {
       console.error("Error deleting appointment:", e);
       showToast("Error de conexión al eliminar cita", "error");
+    }
+  };
+
+  /**
+   * Borrar una sesión de una clase semanal es ambiguo: puede ser "ese martes no
+   * hay clase" o "se acabó la clase de los martes". Se pregunta en vez de decidir,
+   * porque el segundo caso borra meses de agenda.
+   */
+  const handleEventDelete = async (id: string) => {
+    const appointment = rawDbAppointments.find((a) => a.id === id);
+
+    if (appointment?.classScheduleId) {
+      setSeriesDeleteTarget({
+        appointmentId: id,
+        classScheduleId: appointment.classScheduleId,
+        title: appointment.serviceName || appointment.clientName || "esta clase",
+      });
+      return;
+    }
+
+    await deleteSingleAppointment(id);
+  };
+
+  const handleDeleteWholeSeries = async (classScheduleId: string) => {
+    try {
+      const res = await fetch(`/api/backend/class-schedules/${classScheduleId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        const payload = await res.json().catch(() => null);
+        const removed = payload?.deletedSessions;
+        showToast(
+          typeof removed === "number"
+            ? `Clase semanal cancelada (${removed} sesiones eliminadas)`
+            : "Clase semanal cancelada",
+          "success"
+        );
+        fetchDashboardData();
+      } else {
+        showToast("Error al cancelar la clase semanal", "error");
+      }
+    } catch (e) {
+      console.error("Error deleting class schedule:", e);
+      showToast("Error de conexión al cancelar la clase", "error");
     }
   };
 
@@ -393,9 +447,15 @@ export default function AgendaPage() {
            confirmado la cita. Repetir el POST creaba una segunda cita en el
            mismo hueco y el backend la rechazaba con 409, así que la reserva sí
            existía pero la UI daba error y no refrescaba. */
-        onSave={() => {
+        onSave={(result) => {
           setIsAppointmentModalOpen(false);
-          showToast("Cita registrada exitosamente", "success");
+          const createdSessions = (result as { createdSessions?: number })?.createdSessions;
+          showToast(
+            typeof createdSessions === "number"
+              ? `Clase semanal programada (${createdSessions} sesiones creadas)`
+              : "Cita registrada exitosamente",
+            "success"
+          );
           fetchDashboardData();
         }}
       />
@@ -409,6 +469,70 @@ export default function AgendaPage() {
           fetchDashboardData();
         }}
       />
+
+      {/* Alcance del borrado de una clase semanal. Se resuelve aquí, y no dentro
+        del calendario, porque el calendario solo conoce eventos y esta decisión
+        es sobre la programación que hay detrás. */}
+      {seriesDeleteTarget && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-scrim/40"
+            onClick={() => setSeriesDeleteTarget(null)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="series-delete-title"
+            className="relative w-full max-w-sm bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant/60 p-5 animate-in fade-in zoom-in-95 duration-150"
+          >
+            <h2
+              id="series-delete-title"
+              className="text-base font-bold text-on-surface tracking-tight"
+            >
+              Eliminar clase semanal
+            </h2>
+            <p className="text-xs text-on-surface-variant mt-1">
+              <span className="font-medium text-on-surface">{seriesDeleteTarget.title}</span> se
+              repite todas las semanas. ¿Qué quieres eliminar?
+            </p>
+
+            <div className="flex flex-col gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const { appointmentId } = seriesDeleteTarget;
+                  setSeriesDeleteTarget(null);
+                  await deleteSingleAppointment(appointmentId);
+                }}
+                className="w-full justify-start text-xs font-medium cursor-pointer"
+              >
+                Solo esta sesión
+              </Button>
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const { classScheduleId } = seriesDeleteTarget;
+                  setSeriesDeleteTarget(null);
+                  await handleDeleteWholeSeries(classScheduleId);
+                }}
+                className="w-full justify-start text-xs font-medium text-error border-error/40 hover:bg-error/10 cursor-pointer"
+              >
+                Toda la serie y las sesiones futuras
+              </Button>
+            </div>
+
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="ghost"
+                onClick={() => setSeriesDeleteTarget(null)}
+                className="text-xs font-medium cursor-pointer"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast.show && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300">

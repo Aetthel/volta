@@ -3,7 +3,17 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useDraggableModal } from "@/lib/useDraggableModal";
-import { X, Clock, User, Users, Phone, Briefcase, Calendar as CalendarIcon, Plus } from "lucide-react";
+import {
+  X,
+  Clock,
+  User,
+  Users,
+  Phone,
+  Briefcase,
+  Calendar as CalendarIcon,
+  Plus,
+  Repeat,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { Button, Alert, SegmentedControl } from "@/components/ui/volta-ui";
 import { Calendar } from "@/components/ui/calendar";
@@ -84,6 +94,29 @@ const dateLabelFormatter = new Intl.DateTimeFormat("es-ES", {
   year: "numeric",
 });
 
+/**
+ * Días para elegir el patrón de repetición, empezando en lunes como el calendario
+ * español. `value` sigue el convenio de Date.getDay() (0 = domingo), que es el que
+ * viaja al backend.
+ */
+const WEEKDAY_CHIPS = [
+  { value: 1, short: "L", name: "lunes" },
+  { value: 2, short: "M", name: "martes" },
+  { value: 3, short: "X", name: "miércoles" },
+  { value: 4, short: "J", name: "jueves" },
+  { value: 5, short: "V", name: "viernes" },
+  { value: 6, short: "S", name: "sábado" },
+  { value: 0, short: "D", name: "domingo" },
+] as const;
+
+/** "los martes y jueves", en el orden en que se leen en el calendario. */
+const formatWeekdayList = (days: number[]) => {
+  const names = WEEKDAY_CHIPS.filter((day) => days.includes(day.value)).map((day) => day.name);
+  if (names.length === 0) return "";
+  if (names.length === 1) return `los ${names[0]}`;
+  return `los ${names.slice(0, -1).join(", ")} y ${names[names.length - 1]}`;
+};
+
 export default function NewAppointmentModal({
   isOpen,
   onClose,
@@ -97,6 +130,9 @@ export default function NewAppointmentModal({
     setBookingType,
     formData,
     setFormData,
+    recurrence,
+    setRecurrence,
+    toggleRecurrenceDay,
     groupClients,
     handleAddManualGroupClient,
     handleRemoveGroupClient,
@@ -213,6 +249,21 @@ export default function NewAppointmentModal({
   const [selectedHour, selectedMin] = (formData.time || "10:00").split(":");
   const selectedDate = fromLocalDateString(formData.date);
 
+  const isRecurringClass = bookingType === "GROUP" && recurrence.enabled;
+
+  const recurrenceSummary = (() => {
+    if (recurrence.daysOfWeek.length === 0) {
+      return "Marca al menos un día de la semana.";
+    }
+
+    const endDate = fromLocalDateString(recurrence.endDate);
+    const until = endDate ? ` hasta el ${dateLabelFormatter.format(endDate)}` : ", sin fecha de fin";
+
+    return `Se creará una sesión ${formatWeekdayList(recurrence.daysOfWeek)} a las ${
+      formData.time || "10:00"
+    }${until}.`;
+  })();
+
   return createPortal(
     <div className="fixed inset-0 z-[100] pointer-events-none">
       {/* Backdrop — transparent without blur or darkening */}
@@ -239,10 +290,16 @@ export default function NewAppointmentModal({
         >
           <div className="flex flex-col">
             <h2 className="text-base font-bold text-on-surface tracking-tight">
-              {bookingType === "INDIVIDUAL" ? "Agendar Cita" : "Crear Sesión de Grupo"}
+              {bookingType === "INDIVIDUAL"
+                ? "Agendar Cita"
+                : isRecurringClass
+                  ? "Programar Clase Semanal"
+                  : "Crear Sesión de Grupo"}
             </h2>
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Selecciona el servicio, cliente y horario de la reserva
+              {isRecurringClass
+                ? "Se programa una vez y aparece cada semana en la agenda"
+                : "Selecciona el servicio, cliente y horario de la reserva"}
             </p>
           </div>
           <button
@@ -557,6 +614,130 @@ export default function NewAppointmentModal({
               </div>
             </div>
 
+            {/* Repetición semanal — solo para clases de grupo. Es lo que evita
+              tener que recrear a mano la clase de los martes cada semana. */}
+            {bookingType === "GROUP" && (
+              <div className="rounded-xl border border-outline-variant/60 bg-surface-container-low/40 p-3 flex flex-col gap-3">
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={recurrence.enabled}
+                    onChange={(e) =>
+                      setRecurrence((prev) => ({ ...prev, enabled: e.target.checked }))
+                    }
+                    className="mt-0.5 w-4 h-4 shrink-0 accent-primary cursor-pointer"
+                  />
+                  <span className="flex flex-col">
+                    <span className="text-xs font-semibold text-on-surface flex items-center gap-1.5">
+                      <Repeat className="w-3.5 h-3.5 text-on-surface shrink-0" />
+                      Repetir todas las semanas
+                    </span>
+                    <span className="text-[11px] text-on-surface-variant mt-0.5">
+                      La clase se crea sola cada semana en la agenda.
+                    </span>
+                  </span>
+                </label>
+
+                {recurrence.enabled && (
+                  <div className="flex flex-col gap-3 pl-6.5">
+                    <div>
+                      <span className="text-[11px] font-medium text-on-surface-variant">
+                        Se repite los
+                      </span>
+                      <div className="flex gap-1 mt-1.5">
+                        {WEEKDAY_CHIPS.map((day) => {
+                          const isSelected = recurrence.daysOfWeek.includes(day.value);
+                          return (
+                            <button
+                              key={day.value}
+                              type="button"
+                              onClick={() => toggleRecurrenceDay(day.value)}
+                              aria-pressed={isSelected}
+                              aria-label={day.name}
+                              title={day.name}
+                              className={`w-7 h-7 rounded-full text-[11px] font-semibold transition-colors cursor-pointer border ${
+                                isSelected
+                                  ? "bg-primary text-on-primary border-primary"
+                                  : "bg-surface-container-lowest text-on-surface-variant border-outline-variant/70 hover:bg-surface-container-high/60"
+                              }`}
+                            >
+                              {day.short}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="recurrenceEnd"
+                        className="text-[11px] font-medium text-on-surface-variant"
+                      >
+                        Termina
+                      </label>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        {/* Nativo a propósito: el calendario propio se abre en un
+                          popover y este campo vive dentro de la zona con scroll
+                          del modal, que lo recortaría. */}
+                        <input
+                          id="recurrenceEnd"
+                          type="date"
+                          value={recurrence.endDate}
+                          min={formData.date}
+                          onChange={(e) =>
+                            setRecurrence((prev) => ({ ...prev, endDate: e.target.value }))
+                          }
+                          className="flex-1 min-w-0 px-3 py-1.5 text-sm bg-surface-container-lowest border border-outline-variant/70 rounded-lg text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
+                        {recurrence.endDate ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setRecurrence((prev) => ({ ...prev, endDate: "" }))}
+                            className="shrink-0 text-[11px] font-medium cursor-pointer"
+                          >
+                            Sin fin
+                          </Button>
+                        ) : (
+                          <span className="shrink-0 text-[11px] text-on-surface-variant">
+                            Sin fecha de fin
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {groupClients.length > 0 && (
+                      <label className="flex items-start gap-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={recurrence.repeatClients}
+                          onChange={(e) =>
+                            setRecurrence((prev) => ({
+                              ...prev,
+                              repeatClients: e.target.checked,
+                            }))
+                          }
+                          className="mt-0.5 w-4 h-4 shrink-0 accent-primary cursor-pointer"
+                        />
+                        <span className="text-[11px] text-on-surface">
+                          Apuntar a estos {groupClients.length === 1 ? "cliente" : "clientes"} en
+                          todas las sesiones
+                          <span className="block text-on-surface-variant">
+                            Si lo desmarcas, cada semana nace vacía y vas apuntando a quien venga.
+                          </span>
+                        </span>
+                      </label>
+                    )}
+
+                    <p className="text-[11px] text-on-surface-variant border-t border-outline-variant/40 pt-2">
+                      {recurrenceSummary}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Motivo real del backend: hueco ocupado, fuera de horario,
               teléfono inválido, límite de plan alcanzado... */}
             {submitError && (
@@ -584,7 +765,13 @@ export default function NewAppointmentModal({
               disabled={isSubmitting}
               className="px-5 text-xs font-semibold shadow-sm cursor-pointer"
             >
-              {isSubmitting ? "Guardando..." : "Reservar Cita"}
+              {isSubmitting
+                ? "Guardando..."
+                : isRecurringClass
+                  ? "Programar clase semanal"
+                  : bookingType === "GROUP"
+                    ? "Crear sesión"
+                    : "Reservar Cita"}
             </Button>
           </div>
         </form>

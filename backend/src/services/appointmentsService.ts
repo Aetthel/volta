@@ -1,18 +1,31 @@
 import prisma from "../config/db.js";
 // @ts-ignore - botService is an existing JS module
 import { sendWelcomeMessage, sendConsentMessage } from "./botService.js";
-import { normalizeString, normalizePhone } from "../utils/index.js";
+import { resolveOrCreateClient } from "./clientsService.js";
+import { ensureSchedulesMaterialized } from "./classSchedulesService.js";
+import { normalizePhone } from "../utils/index.js";
 import { validateBusinessHours } from "../utils/businessHours.js";
 import { logger } from "../utils/logger.js";
 import type { CreateAppointmentInput, UpdateAppointmentInput } from "../validators/index.js";
 
 export const getAppointmentsByBusiness = async (businessId: string) => {
+  // Las clases semanales se materializan a demanda hasta un horizonte móvil: al
+  // abrir la agenda se extiende lo que falte, de forma que la clase de los martes
+  // sigue apareciendo semana tras semana sin ningún proceso programado. Si falla,
+  // la agenda debe pintarse igual con lo que ya existe.
+  try {
+    await ensureSchedulesMaterialized(businessId);
+  } catch (err) {
+    logger.error("[Service] Error materializando clases semanales:", err);
+  }
+
   return prisma.appointment.findMany({
     where: { businessId },
     include: { client: true, service: true },
     orderBy: { appointmentDate: "asc" },
   });
 };
+
 
 export const createAppointment = async (appointmentData: CreateAppointmentInput) => {
   const {
@@ -120,51 +133,13 @@ export const createAppointment = async (appointmentData: CreateAppointmentInput)
   const finalClientName = (clientName || serviceName || "Sesión de Grupo").trim();
   const inputPhone = clientPhone ? normalizePhone(clientPhone) : "";
 
-  // 3. Try to find client by exact phone number first (if phone provided)
-  let client: any = null;
-  if (inputPhone) {
-    client = await prisma.client.findFirst({
-      where: {
-        businessId,
-        phone: inputPhone,
-      },
-    });
-  }
-
-  // 4. Fall back to searching by name and surname if phone didn't match
-  if (!client && finalClientName) {
-    const parts = finalClientName.split(/\s+/);
-    const firstName = parts[0] || "Sesión";
-    const surname = parts.slice(1).join(" ");
-
-    client = await prisma.client.findFirst({
-      where: {
-        businessId,
-        name: { equals: firstName, mode: "insensitive" },
-        surname: { equals: surname || "", mode: "insensitive" },
-      },
-    });
-  }
-
-  if (!client) {
-    const parts = finalClientName.split(/\s+/);
-    const firstName = parts[0] || "Sesión";
-    const surname = parts.slice(1).join(" ");
-
-    client = await prisma.client.create({
-      data: {
-        name: firstName,
-        surname: surname || "",
-        email: `${normalizeString(firstName)}${surname ? "." + normalizeString(surname).split(" ")[0] : ""}@email.com`,
-        phone: inputPhone || "",
-        lopdStatus: "Pendiente",
-        businessId,
-        frequentService: reqService || null,
-        lastVisit: new Date(),
-      },
-    });
-    logger.info(`[Service] Automatically registered client: ${client.id}`);
-  }
+  // 3. Resolve the client (by phone, then by name) or register them on the fly
+  const client = await resolveOrCreateClient(
+    businessId,
+    finalClientName,
+    inputPhone,
+    reqService
+  );
 
   const appointment = await prisma.appointment.create({
     data: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { formatPhoneNumber } from "@/lib/utils";
 
@@ -47,6 +47,28 @@ export interface NewAppointmentFormData {
   stylist: string;
 }
 
+/**
+ * Repetición semanal de una clase de grupo.
+ *
+ * `daysOfWeek` sigue el convenio de Date.getDay() (0 = domingo), el mismo que usan
+ * el horario del negocio y el backend, así que no hay que traducir índices.
+ */
+export interface GroupRecurrence {
+  enabled: boolean;
+  daysOfWeek: number[];
+  endDate: string;
+  repeatClients: boolean;
+}
+
+/** Día de la semana de un "YYYY-MM-DD", sin que el huso lo corra un día. */
+const weekdayOfIsoDay = (isoDay: string): number | null => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDay);
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day)).getDay();
+};
+
 export function useNewAppointmentForm(
   isOpen: boolean,
   initialDate?: string,
@@ -78,6 +100,16 @@ export function useNewAppointmentForm(
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [recurrence, setRecurrence] = useState<GroupRecurrence>({
+    enabled: false,
+    daysOfWeek: [],
+    endDate: "",
+    repeatClients: true,
+  });
+  // Mientras el jefe no toque los días, el patrón sigue a la fecha elegida: quien
+  // abre el modal sobre un martes espera ver marcado el martes.
+  const daysTouched = useRef(false);
+
   // Prefill date and time when modal opens
   useEffect(() => {
     if (!isOpen) return;
@@ -85,6 +117,8 @@ export function useNewAppointmentForm(
     setSubmitError(null);
     setIsSubmitting(false);
     setGroupClients([]);
+    daysTouched.current = false;
+    setRecurrence({ enabled: false, daysOfWeek: [], endDate: "", repeatClients: true });
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -113,6 +147,29 @@ export function useNewAppointmentForm(
       setServices([]);
     }
   }, [businessId]);
+
+  // La fecha elegida siembra el día que se repite. Deja de mandar en cuanto el
+  // jefe marca los días a mano (p. ej. martes y jueves con la misma clase).
+  useEffect(() => {
+    if (daysTouched.current) return;
+
+    const weekday = weekdayOfIsoDay(formData.date);
+    setRecurrence((prev) => {
+      const next = weekday === null ? [] : [weekday];
+      if (prev.daysOfWeek.length === next.length && prev.daysOfWeek[0] === next[0]) return prev;
+      return { ...prev, daysOfWeek: next };
+    });
+  }, [formData.date]);
+
+  const toggleRecurrenceDay = useCallback((day: number) => {
+    daysTouched.current = true;
+    setRecurrence((prev) => ({
+      ...prev,
+      daysOfWeek: prev.daysOfWeek.includes(day)
+        ? prev.daysOfWeek.filter((d) => d !== day)
+        : [...prev.daysOfWeek, day].sort((a, b) => a - b),
+    }));
+  }, []);
 
   // Load clients and services on modal open
   useEffect(() => {
@@ -198,6 +255,8 @@ export function useNewAppointmentForm(
 
   const resetFormAndClose = () => {
     setGroupClients([]);
+    daysTouched.current = false;
+    setRecurrence({ enabled: false, daysOfWeek: [], endDate: "", repeatClients: true });
     setFormData({
       clientName: "",
       clientPhone: "",
@@ -232,6 +291,56 @@ export function useNewAppointmentForm(
     const appointmentDateStr = localDate.toISOString();
 
     const isGroup = bookingType === "GROUP";
+    const isRecurring = isGroup && recurrence.enabled;
+
+    if (isRecurring && recurrence.daysOfWeek.length === 0) {
+      setSubmitError("Selecciona al menos un día de la semana para repetir la clase.");
+      return;
+    }
+
+    // Clase semanal: en vez de una cita se programa la serie, y el backend crea
+    // las sesiones de los próximos meses y las va extendiendo sola.
+    if (isRecurring) {
+      setIsSubmitting(true);
+      try {
+        const res = await fetch("/api/backend/class-schedules", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessId,
+            service: formData.service,
+            daysOfWeek: recurrence.daysOfWeek,
+            startTime: formattedTime,
+            startDate: formData.date,
+            endDate: recurrence.endDate || null,
+            repeatClients: recurrence.repeatClients,
+            attendees: groupClients.map((client) => ({
+              name: client.name,
+              phone: client.phone || null,
+              clientId: client.id || null,
+            })),
+          }),
+        });
+
+        const payload = await res.json().catch(() => null);
+
+        if (!res.ok) {
+          throw new Error(extractErrorMessage(payload, "No se ha podido programar la clase."));
+        }
+
+        onSave?.({ ...payload, recurring: true, service: formData.service });
+        resetFormAndClose();
+      } catch (err) {
+        console.error("Error creating class schedule:", err);
+        setSubmitError(
+          err instanceof Error ? err.message : "Error inesperado al programar la clase."
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     const groupNames = groupClients.map((c) => c.name).join(", ");
     const finalClientName = isGroup
       ? (groupNames || (formData.clientName.trim() ? formData.clientName.trim() : formData.service || "Clase de Grupo"))
@@ -367,6 +476,9 @@ export function useNewAppointmentForm(
     setBookingType,
     formData,
     setFormData,
+    recurrence,
+    setRecurrence,
+    toggleRecurrenceDay,
     groupClients,
     handleAddManualGroupClient,
     handleRemoveGroupClient,
