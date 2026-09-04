@@ -158,7 +158,10 @@ function HeaderContent({}: HeaderProps) {
           {/* Backdrop overlay */}
           <div className="fixed inset-0 z-30" onClick={() => setIsDropdownOpen(false)} />
 
-          <div className="absolute right-0 mt-2 w-64 sm:w-72 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xl py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right overflow-hidden">
+          {/* `top-full` explícito: sin él el panel se coloca en la posición
+              estática del contenedor flex, que es su borde superior, y sube
+              tapando el avatar en lugar de abrirse debajo. */}
+          <div className="absolute top-full right-0 mt-2 w-64 sm:w-72 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xl py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150 origin-top-right overflow-hidden">
             {/* Active User Header Card */}
             <div className="px-4 py-3 border-b border-outline-variant/30 bg-surface-container-low/40">
               <div className="flex items-center gap-3">
