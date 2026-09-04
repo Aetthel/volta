@@ -1,16 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  Clock,
-  Grid3x3,
-  List,
-  Filter,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, Clock, Grid3x3, List, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +98,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               size="icon"
               onClick={() => navigateDate("prev")}
               className="h-8 w-8 rounded-lg bg-surface"
-              aria-label="Fecha anterior"
+              aria-label="Anterior"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -124,7 +115,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               size="icon"
               onClick={() => navigateDate("next")}
               className="h-8 w-8 rounded-lg bg-surface"
-              aria-label="Fecha siguiente"
+              aria-label="Siguiente"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -223,8 +214,10 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
               onClick={onOpenQuotaUpgrade}
               className={cn(
                 "whitespace-nowrap shrink-0 bg-surface",
-                isQuotaExceeded && "border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
-                isQuotaWarning && "border-amber-500/50 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
+                isQuotaExceeded &&
+                  "border-rose-500/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10",
+                isQuotaWarning &&
+                  "border-amber-500/50 text-amber-700 dark:text-amber-300 hover:bg-amber-500/10"
               )}
               title="Citas realizadas este mes. Pulsa para pasar a Plan Pro con citas ilimitadas."
             >
@@ -238,7 +231,11 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           {/* Color Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 whitespace-nowrap shrink-0 bg-surface"
+              >
                 <Filter className="h-4 w-4" />
                 Colores
                 {selectedColors.length > 0 && (
@@ -261,10 +258,16 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                     <div
                       style={
                         color.bg.startsWith("#")
-                          ? { backgroundColor: color.bg, borderColor: color.border || "rgba(0,0,0,0.1)" }
+                          ? {
+                              backgroundColor: color.bg,
+                              borderColor: color.border || "rgba(0,0,0,0.1)",
+                            }
                           : undefined
                       }
-                      className={cn("h-3 w-3 rounded border", !color.bg.startsWith("#") && color.bg)}
+                      className={cn(
+                        "h-3 w-3 rounded border",
+                        !color.bg.startsWith("#") && color.bg
+                      )}
                     />
                     {color.name}
                   </div>
@@ -276,7 +279,11 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           {/* Tag Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 whitespace-nowrap shrink-0 bg-surface"
+              >
                 <Filter className="h-4 w-4" />
                 Etiquetas
                 {selectedTags.length > 0 && (
@@ -304,7 +311,11 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           {/* Category Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2 whitespace-nowrap shrink-0 bg-surface">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 whitespace-nowrap shrink-0 bg-surface"
+              >
                 <Filter className="h-4 w-4" />
                 Categorías
                 {selectedCategories.length > 0 && (
@@ -330,7 +341,12 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           </DropdownMenu>
 
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-2 whitespace-nowrap shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="gap-2 whitespace-nowrap shrink-0"
+            >
               <X className="h-4 w-4" />
               Limpiar
             </Button>

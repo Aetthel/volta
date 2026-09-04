@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, afterEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../index.js";
 import prisma from "../../config/db.js";
@@ -34,6 +34,10 @@ const futureDate = () => {
 };
 
 describe("public booking portal", () => {
+  beforeEach(() => {
+    vi.spyOn(prisma.businessHoliday, "findMany").mockResolvedValue([]);
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -72,7 +76,11 @@ describe("public booking portal", () => {
 
     it("never returns the code in the response body", async () => {
       vi.spyOn(prisma.business, "findUnique").mockResolvedValue(openBusiness as any);
-      vi.spyOn(prisma.client, "findFirst").mockResolvedValue({ id: "c1", name: "Ana", surname: "G" } as any);
+      vi.spyOn(prisma.client, "findFirst").mockResolvedValue({
+        id: "c1",
+        name: "Ana",
+        surname: "G",
+      } as any);
       vi.spyOn(prisma.bookingVerification, "count").mockResolvedValue(0);
       vi.spyOn(prisma.bookingVerification, "updateMany").mockResolvedValue({ count: 0 } as any);
       vi.spyOn(prisma.bookingVerification, "create").mockResolvedValue({} as any);
@@ -98,7 +106,10 @@ describe("public booking portal", () => {
     });
 
     it("does not start a verification for a business with bookings disabled", async () => {
-      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, enablePublicBooking: false } as any);
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
+        ...openBusiness,
+        enablePublicBooking: false,
+      } as any);
       const sendSpy = vi.spyOn(whatsappManager, "sendMessage").mockResolvedValue({} as any);
 
       const res = await request(app)
@@ -219,7 +230,10 @@ describe("public booking portal", () => {
     });
 
     it("books with the verified identity and ignores a tampered phone in the body", async () => {
-      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, hours: [] } as any);
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
+        ...openBusiness,
+        hours: [],
+      } as any);
       vi.spyOn(prisma.service, "findUnique").mockResolvedValue({
         id: "s1",
         businessId: BUSINESS_ID,
@@ -270,7 +284,10 @@ describe("public booking portal", () => {
     });
 
     it("returns 409 without creating anything when the slot is full", async () => {
-      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({ ...openBusiness, hours: [] } as any);
+      vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
+        ...openBusiness,
+        hours: [],
+      } as any);
       vi.spyOn(prisma.service, "findUnique").mockResolvedValue({
         id: "s1",
         businessId: BUSINESS_ID,
@@ -285,9 +302,7 @@ describe("public booking portal", () => {
       vi.spyOn(prisma, "$transaction").mockImplementation(async (fn: any) =>
         fn({
           appointment: {
-            findMany: async () => [
-              { appointmentDate: target, service: { duration: 30 } },
-            ],
+            findMany: async () => [{ appointmentDate: target, service: { duration: 30 } }],
             create: async () => ({}),
           },
           client: { upsert: clientUpsert, update: async () => ({}) },

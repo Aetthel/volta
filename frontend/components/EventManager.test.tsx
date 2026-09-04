@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, within } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EventManager } from "./EventManager";
 
 vi.mock("next-auth/react", () => ({
@@ -53,7 +53,13 @@ const confirmDialog = () => screen.queryByRole("alertdialog");
 
 describe("EventManager — campos Fecha y Hora del modal de cita", () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(START);
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("replaces the start/end datetime inputs with a Fecha field and an Hora field", () => {
@@ -164,7 +170,9 @@ describe("EventManager — campos Fecha y Hora del modal de cita", () => {
     openEditModal();
     fireEvent.click(screen.getByRole("button", { name: /^Eliminar$/i }));
 
-    expect(within(confirmDialog()!).getByText(/Juan Herrera - Corte de Cabello/)).toBeInTheDocument();
+    expect(
+      within(confirmDialog()!).getByText(/Juan Herrera - Corte de Cabello/)
+    ).toBeInTheDocument();
   });
 
   it("cancelling the confirmation keeps the appointment and reopens nothing", () => {
