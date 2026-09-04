@@ -2,12 +2,13 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
 import { Plus, ShieldCheck, MessageCircle } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import QueryActionTrigger from "@/components/QueryActionTrigger";
 import TrialBanner from "@/components/TrialBanner";
 import Header from "@/components/Header";
 import { Alert } from "@/components/ui/volta-ui";
@@ -68,13 +69,13 @@ export default function ClientesPage() {
     }
   }, [session]);
 
-  const handleOpenNewClientModal = (e?: React.MouseEvent<HTMLButtonElement>) => {
+  const handleOpenNewClientModal = useCallback((e?: React.MouseEvent<HTMLButtonElement>) => {
     setEditingClient(null);
     if (e?.currentTarget) {
       setClientModalTriggerRect(e.currentTarget.getBoundingClientRect());
     }
     setIsClientModalOpen(true);
-  };
+  }, []);
 
   const handleEditClient = (client: ClientItem) => {
     setEditingClient(client);
@@ -95,6 +96,19 @@ export default function ClientesPage() {
           setIsAppointmentModalOpen(true);
         }}
       />
+
+      {/* Entradas desde el buscador global (⌘K): "Nuevo cliente" abre el modal
+          de alta y un cliente concreto llega con su nombre ya filtrado. */}
+      <Suspense fallback={null}>
+        <QueryActionTrigger value="nuevo-cliente" onTrigger={() => handleOpenNewClientModal()} />
+        <QueryActionTrigger
+          param="buscar"
+          onTrigger={(nombre) => {
+            setSearchQuery(nombre);
+            setCurrentPage(1);
+          }}
+        />
+      </Suspense>
 
       {/* Main Content Canvas */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">

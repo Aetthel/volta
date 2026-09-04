@@ -10,7 +10,9 @@ import {
   Check,
   UserPlus,
   ArrowRight,
+  Search,
 } from "lucide-react";
+import { openGlobalSearch } from "@/lib/search/openSearch";
 import { apiClient } from "@/lib/apiClient";
 import { Avatar, AvatarGroup } from "@/components/ui/volta-ui";
 
@@ -121,7 +123,19 @@ function HeaderContent({}: HeaderProps) {
   }, [teamMembers, currentUserId, currentUserName, currentUserEmail, currentUserRole, workerPhoto]);
 
   return (
-    <div className="relative shrink-0 select-none">
+    <div className="relative shrink-0 select-none flex items-center gap-1.5">
+      {/* ═══════════════ SEARCH TRIGGER (solo móvil: en escritorio
+          el acceso al buscador está en el Sidebar) ═══════════════ */}
+      <button
+        type="button"
+        onClick={openGlobalSearch}
+        className="md:hidden p-2 rounded-full text-on-surface-variant/80 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+        title="Buscar en Volta"
+        aria-label="Buscar en Volta"
+      >
+        <Search className="w-5 h-5" strokeWidth={2} />
+      </button>
+
       {/* ═══════════════ RESCALABLE AVATAR STACK ═══════════════ */}
       <button
         type="button"

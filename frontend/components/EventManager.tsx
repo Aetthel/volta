@@ -39,6 +39,11 @@ export interface EventManagerProps {
   availableTags?: string[];
   onOpenNewModal?: (prefilledDate?: Date) => void;
   /**
+   * Día en el que abrir el calendario. Solo se aplica al montar: para saltar a
+   * otra fecha desde fuera, remonta el componente con una `key` distinta.
+   */
+  initialDate?: Date;
+  /**
    * Días marcados como cerrados en Ajustes. Se pintan en gris y no admiten
    * citas ni actividades de grupo. Sin este prop el calendario se comporta como
    * si el negocio abriera todos los días.
@@ -69,6 +74,7 @@ export function EventManager({
   onOpenNewModal,
   isDayClosed,
   getClosedLabel,
+  initialDate,
 }: EventManagerProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -94,7 +100,7 @@ export function EventManager({
     navigateDate,
     goToToday,
     getFormattedTitle,
-  } = useCalendarNavigation(new Date(), defaultView);
+  } = useCalendarNavigation(initialDate ?? new Date(), defaultView);
 
   // Custom Filter Hook
   const {

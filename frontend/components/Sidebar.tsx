@@ -27,6 +27,7 @@ import { useAlerts } from "@/lib/alerts";
 import { WorkspaceSwitcher } from "./sidebar/WorkspaceSwitcher";
 import { SidebarNav, type NavGroupData, type NavItemData } from "./sidebar/SidebarNav";
 import { CommandPaletteModal } from "./sidebar/CommandPaletteModal";
+import { OPEN_SEARCH_EVENT } from "@/lib/search/openSearch";
 
 import UpgradeProModal from "@/components/UpgradeProModal";
 
@@ -138,6 +139,14 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // El Header (y cualquier otro punto de entrada) abre el buscador por evento:
+  // el estado vive aquí, junto al modal.
+  useEffect(() => {
+    const openSearch = () => setIsSearchOpen(true);
+    window.addEventListener(OPEN_SEARCH_EVENT, openSearch);
+    return () => window.removeEventListener(OPEN_SEARCH_EVENT, openSearch);
   }, []);
 
   const handleResizeStart = (e: React.MouseEvent) => {
@@ -362,6 +371,9 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
         onClose={() => setIsSearchOpen(false)}
         searchInputVal={searchInputVal}
         setSearchInputVal={setSearchInputVal}
+        role={role}
+        businessId={businessId}
+        subscriptionStatus={subscriptionStatus}
       />
 
       {/* Embedded Upgrade Modal for Pro features or Demo Registration */}

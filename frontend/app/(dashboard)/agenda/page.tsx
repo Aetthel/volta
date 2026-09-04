@@ -2,12 +2,13 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useSession } from "next-auth/react";
 import dynamicImport from "next/dynamic";
 import { Plus } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import QueryActionTrigger from "@/components/QueryActionTrigger";
 import { Button, Skeleton } from "@/components/ui/volta-ui";
 import { EventManager, Event } from "@/components/EventManager";
 import TrialBanner from "@/components/TrialBanner";
@@ -87,6 +88,21 @@ function formatShortClientName(fullName: string): string {
   return `${parts[0]} ${parts[1]}`;
 }
 
+/**
+ * "2026-09-12" -> Date local de ese día.
+ *
+ * `new Date("2026-09-12")` se interpreta como UTC y en husos negativos cae en
+ * el día anterior, así que se construye por componentes.
+ */
+function parseIsoDay(isoDay: string): Date | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDay);
+  if (!match) return undefined;
+
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
 export default function AgendaPage() {
   const { data: session } = useSession();
   const businessId = session?.user?.businessId || "";
@@ -98,6 +114,8 @@ export default function AgendaPage() {
 
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  // Día al que ha saltado el usuario desde el buscador global (YYYY-MM-DD).
+  const [focusedDay, setFocusedDay] = useState<string>("");
   const [prefilledDate, setPrefilledDate] = useState<string>("");
   const [prefilledTime, setPrefilledTime] = useState<string>("");
 
@@ -315,6 +333,16 @@ export default function AgendaPage() {
       <Sidebar onNewAppointmentClick={() => handleOpenNewModalWithDate()} />
       <BottomNav />
 
+      {/* Entradas desde el buscador global (⌘K): "Nueva cita" abre el modal y
+          una cita concreta llega con su día en ?fecha=YYYY-MM-DD. */}
+      <Suspense fallback={null}>
+        <QueryActionTrigger
+          value="nueva-cita"
+          onTrigger={() => handleOpenNewModalWithDate()}
+        />
+        <QueryActionTrigger param="fecha" onTrigger={setFocusedDay} />
+      </Suspense>
+
       <div className="flex-1 min-w-0 flex flex-col min-h-screen md:ml-[240px]">
         <TrialBanner />
         <main className="flex-1 flex flex-col w-full">
@@ -325,6 +353,10 @@ export default function AgendaPage() {
             </div>
           ) : (
             <EventManager
+              // El calendario fija su fecha al montar: cambiar la key es lo que
+              // hace que un salto desde el buscador (?fecha=) surta efecto.
+              key={focusedDay || "hoy"}
+              initialDate={focusedDay ? parseIsoDay(focusedDay) : undefined}
               events={events}
               onEventCreate={handleEventCreate}
               onEventUpdate={handleEventUpdate}
