@@ -48,6 +48,11 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
 
   return (
     <div className="w-full h-full overflow-auto">
+      {closed && (
+        <div className="border-b border-outline-variant/30 bg-surface-container-high/50 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-on-surface-variant/70">
+          {getClosedLabel?.(currentDate) ?? "Cerrado"} — el negocio no abre este día
+        </div>
+      )}
       <div className="flex min-w-[500px] relative">
         {/* Time Column */}
         <div className="w-16 sm:w-24 flex-shrink-0 border-r border-outline-variant/30 select-none bg-surface-container-lowest/40">
@@ -96,22 +101,20 @@ export const CalendarDayView: React.FC<CalendarDayViewProps> = ({
           ))}
 
           {/* Proportional Height Event Cards */}
-          {laidOutEvents.map(
-            ({ event, top, height, leftOffsetPercent, widthPercent }) => (
-              <TimeGridEventCard
-                key={event.id}
-                event={event}
-                top={top}
-                height={height}
-                leftOffsetPercent={leftOffsetPercent}
-                widthPercent={widthPercent}
-                onEventClick={onEventClick}
-                onDragStart={onDragStart}
-                onDragEnd={onDragEnd}
-                getColorClasses={getColorClasses}
-              />
-            )
-          )}
+          {laidOutEvents.map(({ event, top, height, leftOffsetPercent, widthPercent }) => (
+            <TimeGridEventCard
+              key={event.id}
+              event={event}
+              top={top}
+              height={height}
+              leftOffsetPercent={leftOffsetPercent}
+              widthPercent={widthPercent}
+              onEventClick={onEventClick}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              getColorClasses={getColorClasses}
+            />
+          ))}
         </div>
       </div>
     </div>

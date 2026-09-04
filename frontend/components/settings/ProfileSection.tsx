@@ -749,6 +749,7 @@ export default function ProfileSection({ profile, setProfile, setToast }: Profil
 
                 {/* QR Code */}
                 <div className="bg-white p-4 rounded-2xl border border-outline-variant/40 mx-auto w-fit mb-5 shadow-xs">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={twoFactorSetupData.qrCode} alt="Código QR 2FA" className="w-48 h-48" />
                 </div>
 
