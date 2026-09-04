@@ -57,6 +57,7 @@ model Business {
   invoices                   Invoice[]
   bookingVerifications       BookingVerification[]
   alerts                     Alert[]
+  classSchedules             ClassSchedule[]
 }
 
 enum UserRole {
@@ -161,6 +162,10 @@ model Appointment {
   serviceId       String?
   service         Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
   serviceName     String?
+  /// Cuando la sesión nace de una clase semanal, apunta a su programación.
+  /// SetNull a propósito: borrar la programación no debe borrar el histórico.
+  classScheduleId String?
+  classSchedule   ClassSchedule?    @relation(fields: [classScheduleId], references: [id], onDelete: SetNull)
 
   @@index([businessId, appointmentDate])
   @@index([businessId, status])
@@ -168,6 +173,10 @@ model Appointment {
   @@index([businessId, serviceId])
   @@index([clientId])
   @@index([serviceId])
+  /// Una sesión por programación e instante: hace idempotente la materialización
+  /// del horizonte aunque dos peticiones la disparen a la vez. Las citas sueltas
+  /// llevan classScheduleId nulo y en Postgres los nulos no colisionan entre sí.
+  @@unique([classScheduleId, appointmentDate])
 }
 
 enum AppointmentStatus {
@@ -221,11 +230,49 @@ model Service {
   color        String        @default("TEAL")
   isActive     Boolean       @default(true)
   appointments Appointment[]
+  schedules    ClassSchedule[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
   @@index([businessId])
   @@index([businessId, isActive])
+}
+
+/**
+ * Clase de grupo que se repite siempre en los mismos días y hora ("los martes a
+ * las 11:30").
+ *
+ * La programación es la fuente de verdad y las sesiones concretas se
+ * materializan como filas de Appointment hasta un horizonte móvil, para que todo
+ * lo que ya funciona sobre citas —agenda, arrastrar y soltar, aforo,
+ * recordatorios de WhatsApp, reserva online— siga funcionando sin cambios.
+ *
+ * `generatedUntil` es la marca de agua de esa materialización: solo se crean
+ * sesiones posteriores a ella, así que borrar una sesión suelta no la resucita
+ * en la siguiente extensión del horizonte.
+ */
+model ClassSchedule {
+  id             String        @id @default(uuid())
+  businessId     String
+  business       Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  serviceId      String
+  service        Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  daysOfWeek     Int[] // Convenio de Date.getDay(): 0 = Domingo, 1 = Lunes...
+  startTime      String // "11:30", hora local del negocio
+  startDate      DateTime // Primer día en que la clase empieza a aplicar
+  endDate        DateTime? // null = repetición indefinida
+  /// Si el grupo fijo de alumnos se copia en cada sesión o cada semana nace vacía.
+  repeatClients  Boolean       @default(true)
+  /// Grupo fijo de alumnos: [{ name, phone?, clientId? }]
+  attendees      Json?
+  isActive       Boolean       @default(true)
+  generatedUntil DateTime?
+  appointments   Appointment[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([businessId, isActive])
+  @@index([serviceId])
 }
 
 enum AlertType {

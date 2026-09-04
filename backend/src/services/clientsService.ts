@@ -4,8 +4,57 @@ import { sendConsentMessage } from "./botService.js";
 // @ts-ignore - whatsappService is an existing JS module
 import whatsappManager from "./whatsappService.js";
 import { maskPhone, logger } from "../utils/logger.js";
-import { normalizePhone } from "../utils/index.js";
+import { normalizePhone, normalizeString } from "../utils/index.js";
 import type { CreateClientInput, UpdateClientInput } from "../validators/index.js";
+
+/**
+ * Busca el cliente de una reserva y lo da de alta si no existía.
+ *
+ * Primero por teléfono exacto y, si no hay, por nombre y apellidos; el alta
+ * automática es lo que permite reservar escribiendo solo un nombre. Lo comparten
+ * las citas sueltas y el alta del grupo fijo de una clase semanal.
+ */
+export const resolveOrCreateClient = async (
+  businessId: string,
+  fullName: string,
+  phone: string,
+  frequentService?: string | null
+) => {
+  const parts = fullName.trim().split(/\s+/);
+  const firstName = parts[0] || "Sesión";
+  const surname = parts.slice(1).join(" ");
+
+  if (phone) {
+    const byPhone = await prisma.client.findFirst({ where: { businessId, phone } });
+    if (byPhone) return byPhone;
+  }
+
+  if (fullName.trim()) {
+    const byName = await prisma.client.findFirst({
+      where: {
+        businessId,
+        name: { equals: firstName, mode: "insensitive" },
+        surname: { equals: surname || "", mode: "insensitive" },
+      },
+    });
+    if (byName) return byName;
+  }
+
+  const created = await prisma.client.create({
+    data: {
+      name: firstName,
+      surname: surname || "",
+      email: `${normalizeString(firstName)}${surname ? "." + normalizeString(surname).split(" ")[0] : ""}@email.com`,
+      phone: phone || "",
+      lopdStatus: "Pendiente",
+      businessId,
+      frequentService: frequentService || null,
+      lastVisit: new Date(),
+    },
+  });
+  logger.info(`[Service] Automatically registered client: ${created.id}`);
+  return created;
+};
 
 export const getClientsByBusiness = async (businessId: string) => {
   return prisma.client.findMany({
@@ -100,6 +149,7 @@ export const sendMessage = async (client: { businessId: string; phone: string },
 };
 
 export default {
+  resolveOrCreateClient,
   getClientsByBusiness,
   createClient,
   updateClient,
