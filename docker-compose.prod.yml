@@ -114,6 +114,8 @@ services:
       - AUTH_URL=${FRONTEND_URL}
       - BACKEND_INTERNAL_URL=http://backend:3001
       - AUTH_TRUST_HOST=true
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - EMAIL_FROM=${EMAIL_FROM:-Volta <onboarding@resend.dev>}
       - NODE_ENV=production
     command: pnpm --filter frontend start
     healthcheck:

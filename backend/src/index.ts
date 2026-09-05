@@ -38,7 +38,7 @@ const app = express();
 const PORT = config.port;
 
 app.disable("x-powered-by");
-app.set("trust proxy", true);
+app.set("trust proxy", 1);
 app.use(
   helmet({
     contentSecurityPolicy: {
