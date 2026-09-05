@@ -723,7 +723,7 @@ export default function ProfileSection({ profile, setProfile }: ProfileSectionPr
           <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl animate-in zoom-in-95 duration-200">
             {twoFactorBackupCodes.length === 0 ? (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-neutral-900/10 text-neutral-900 flex items-center justify-center mx-auto mb-4">
                   <QrCode className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-center text-on-surface mb-2">

@@ -56,19 +56,29 @@ describe("Subscription Service", () => {
     });
 
     it("should return mock activation url when API keys are not present", async () => {
-      jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
-        id: "biz-1",
-        name: "Test Salon",
-      });
+      const origKey = process.env.LEMONSQUEEZY_API_KEY;
+      const origStore = process.env.LEMONSQUEEZY_STORE_ID;
+      delete process.env.LEMONSQUEEZY_API_KEY;
+      delete process.env.LEMONSQUEEZY_STORE_ID;
 
-      const res = await subscriptionService.createCheckoutSession({
-        businessId: "biz-1",
-        plan: "PRO",
-      });
+      try {
+        jest.spyOn(prisma.business, "findUnique").mockResolvedValue({
+          id: "biz-1",
+          name: "Test Salon",
+        });
 
-      expect(res.isMock).toBe(true);
-      expect(res.plan).toBe("PRO");
-      expect(res.url).toContain("mock-activate");
+        const res = await subscriptionService.createCheckoutSession({
+          businessId: "biz-1",
+          plan: "PRO",
+        });
+
+        expect(res.isMock).toBe(true);
+        expect(res.plan).toBe("PRO");
+        expect(res.url).toContain("mock-activate");
+      } finally {
+        if (origKey) process.env.LEMONSQUEEZY_API_KEY = origKey;
+        if (origStore) process.env.LEMONSQUEEZY_STORE_ID = origStore;
+      }
     });
   });
 

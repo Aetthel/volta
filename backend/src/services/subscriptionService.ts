@@ -1,11 +1,11 @@
 import prisma from "../config/db.js";
 import crypto from "crypto";
 
-const LEMONSQUEEZY_API_KEY = process.env.LEMONSQUEEZY_API_KEY;
-const LEMONSQUEEZY_STORE_ID = process.env.LEMONSQUEEZY_STORE_ID;
-const LEMONSQUEEZY_WEBHOOK_SECRET = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-const LEMONSQUEEZY_VARIANT_BASIC = process.env.LEMONSQUEEZY_VARIANT_BASIC || "variant_basic";
-const LEMONSQUEEZY_VARIANT_PRO = process.env.LEMONSQUEEZY_VARIANT_PRO || "variant_pro";
+const getApiKey = () => process.env.LEMONSQUEEZY_API_KEY;
+const getStoreId = () => process.env.LEMONSQUEEZY_STORE_ID;
+const getVariantBasic = () => process.env.LEMONSQUEEZY_VARIANT_BASIC || "variant_basic";
+const getVariantPro = () => process.env.LEMONSQUEEZY_VARIANT_PRO || "variant_pro";
+const getWebhookSecret = () => process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
 
 export type SubscriptionPlanType = "BASIC" | "PRO" | "ENTERPRISE";
 
@@ -70,17 +70,19 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
   }
 
   const selectedPlan: SubscriptionPlanType = plan.toUpperCase() === "BASIC" ? "BASIC" : "PRO";
-  const variantId = selectedPlan === "BASIC" ? LEMONSQUEEZY_VARIANT_BASIC : LEMONSQUEEZY_VARIANT_PRO;
+  const variantId = selectedPlan === "BASIC" ? getVariantBasic() : getVariantPro();
+  const apiKey = getApiKey();
+  const storeId = getStoreId();
 
   // Real Lemon Squeezy API integration
-  if (LEMONSQUEEZY_API_KEY && LEMONSQUEEZY_STORE_ID) {
+  if (apiKey && storeId) {
     try {
       const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
         method: "POST",
         headers: {
           Accept: "application/vnd.api+json",
           "Content-Type": "application/vnd.api+json",
-          Authorization: `Bearer ${LEMONSQUEEZY_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           data: {
@@ -103,7 +105,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
               store: {
                 data: {
                   type: "stores",
-                  id: String(LEMONSQUEEZY_STORE_ID),
+                  id: String(storeId),
                 },
               },
               variant: {
@@ -143,9 +145,10 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
 }
 
 export async function processWebhookEvent(payload: any, signature?: string | null) {
-  if (LEMONSQUEEZY_WEBHOOK_SECRET && signature) {
+  const webhookSecret = getWebhookSecret();
+  if (webhookSecret && signature) {
     const rawPayload = typeof payload === "string" ? payload : JSON.stringify(payload);
-    const hmac = crypto.createHmac("sha256", LEMONSQUEEZY_WEBHOOK_SECRET);
+    const hmac = crypto.createHmac("sha256", webhookSecret);
     const digest = Buffer.from(hmac.update(rawPayload).digest("hex"), "utf8");
     const signatureBuffer = Buffer.from(signature, "utf8");
 
@@ -304,7 +307,8 @@ export async function cancelSubscription(businessId: string) {
 
   if (!business) throw new Error("Negocio no encontrado");
 
-  if (LEMONSQUEEZY_API_KEY && business.lemonSqueezySubscriptionId) {
+  const apiKey = getApiKey();
+  if (apiKey && business.lemonSqueezySubscriptionId) {
     try {
       await fetch(
         `https://api.lemonsqueezy.com/v1/subscriptions/${business.lemonSqueezySubscriptionId}`,
@@ -312,7 +316,7 @@ export async function cancelSubscription(businessId: string) {
           method: "DELETE",
           headers: {
             Accept: "application/vnd.api+json",
-            Authorization: `Bearer ${LEMONSQUEEZY_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
           },
         }
       );
