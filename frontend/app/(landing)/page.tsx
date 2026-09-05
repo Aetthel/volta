@@ -1217,7 +1217,7 @@ export default function RootPage() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
+                  <a href="mailto:contacto@aetthel.com" className="hover:text-primary transition-colors">
                     Contacto
                   </a>
                 </li>
@@ -1229,23 +1229,23 @@ export default function RootPage() {
               <h4 className="text-title-md font-bold text-on-surface mb-6">Recursos</h4>
               <ul className="space-y-3 text-body-md text-on-surface-variant">
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Centro de Ayuda
-                  </a>
+                  <Link href="/reembolsos" className="hover:text-primary transition-colors">
+                    Cancelaciones y Reembolsos
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Guías de Negocio
-                  </a>
+                  <Link href="/terminos" className="hover:text-primary transition-colors">
+                    Términos de Servicio
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Webinars
-                  </a>
+                  <Link href="/privacidad" className="hover:text-primary transition-colors">
+                    Centro de Privacidad
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary transition-colors">
-                    Comunidad
+                  <a href="mailto:contacto@aetthel.com" className="hover:text-primary transition-colors">
+                    Soporte Técnico
                   </a>
                 </li>
               </ul>
@@ -1255,18 +1255,18 @@ export default function RootPage() {
           {/* Legal Bar */}
           <div className="border-t border-outline-variant/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-label-md text-on-surface-variant">
-              © {new Date().getFullYear()} Volta Technologies. Todos los derechos reservados.
+              © {new Date().getFullYear()} Volta Technologies / Aetthel. Todos los derechos reservados.
             </p>
-            <div className="flex gap-6 text-label-md text-on-surface-variant">
-              <a href="#" className="hover:text-primary transition-colors">
+            <div className="flex flex-wrap justify-center gap-6 text-label-md text-on-surface-variant">
+              <Link href="/privacidad" className="hover:text-primary transition-colors">
                 Política de Privacidad
-              </a>
-              <a href="#" className="hover:text-primary transition-colors">
+              </Link>
+              <Link href="/terminos" className="hover:text-primary transition-colors">
                 Términos de Servicio
-              </a>
-              <a href="#" className="hover:text-primary transition-colors">
-                Cookies
-              </a>
+              </Link>
+              <Link href="/reembolsos" className="hover:text-primary transition-colors">
+                Política de Reembolso
+              </Link>
             </div>
           </div>
         </div>

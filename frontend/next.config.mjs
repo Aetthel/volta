@@ -28,6 +28,13 @@ const nextConfig = {
     "10.*",
     "172.*",
   ],
+  async rewrites() {
+    return [
+      { source: "/terms", destination: "/terminos" },
+      { source: "/privacy", destination: "/privacidad" },
+      { source: "/refunds", destination: "/reembolsos" },
+    ];
+  },
   async headers() {
     return [
       {

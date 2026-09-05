@@ -9,10 +9,10 @@ export interface LemonSqueezyUserInfo {
 }
 
 export const LEMON_SQUEEZY_PRODUCT_URLS = {
-  // Plan Básico
-  BASIC: "https://volta.lemonsqueezy.com/checkout/buy/c15e2c91-32f9-48d0-999a-a0b966a79709",
-  // Plan Pro
-  PRO: "https://volta.lemonsqueezy.com/checkout/buy/171294d7-e2fc-4755-b587-3b0121ccd5af",
+  // Plan Básico (Variant 2094248)
+  BASIC: "https://volta.lemonsqueezy.com/checkout/buy/3321b367-f2a6-4deb-bc72-102dd40ef8f3",
+  // Plan Pro (Variant 2094249)
+  PRO: "https://volta.lemonsqueezy.com/checkout/buy/651f8338-5657-46c6-8d5c-b97c103ad80e",
 };
 
 /**
