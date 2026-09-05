@@ -266,17 +266,29 @@ input[type="number"] {
 [data-sonner-toast][data-type="success"] {
   border-color: var(--color-primary) !important;
 }
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--color-primary) !important;
+}
 
 [data-sonner-toast][data-type="error"] {
   border-color: var(--color-error) !important;
+}
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--color-error) !important;
 }
 
 [data-sonner-toast][data-type="warning"] {
   border-color: var(--color-outline) !important;
 }
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #f59e0b !important;
+}
 
 [data-sonner-toast][data-type="info"] {
   border-color: var(--color-primary) !important;
+}
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: var(--color-primary) !important;
 }
 
 [data-sonner-toast] [data-close-button] {
