@@ -15,12 +15,8 @@ const envSchema = z.object({
   LOPD_HMAC_SECRET: z.string().min(1, "LOPD_HMAC_SECRET es requerida").default("test-lopd-hmac-secret"),
   BOOKING_JWT_SECRET: z
     .string()
-    .optional()
-    .transform((val) =>
-      val && val.trim().length > 0
-        ? val
-        : process.env.BACKEND_JWT_SECRET || "test-booking-jwt-secret"
-    ),
+    .min(1, "BOOKING_JWT_SECRET es requerida")
+    .default("test-booking-jwt-secret"),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
   EVOLUTION_API_URL: z.string().default("http://localhost:8080"),
   EVOLUTION_API_KEY: z.string().default("volta_dev_evolution_key_2026"),
@@ -45,8 +41,7 @@ try {
       API_KEY: process.env.API_KEY || "test-api-key",
       BACKEND_JWT_SECRET: process.env.BACKEND_JWT_SECRET || "test-jwt-secret",
       LOPD_HMAC_SECRET: process.env.LOPD_HMAC_SECRET || "test-lopd-hmac-secret",
-      BOOKING_JWT_SECRET:
-        process.env.BOOKING_JWT_SECRET || process.env.BACKEND_JWT_SECRET || "test-booking-jwt-secret",
+      BOOKING_JWT_SECRET: process.env.BOOKING_JWT_SECRET || "test-booking-jwt-secret",
       FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
       EVOLUTION_API_URL: process.env.EVOLUTION_API_URL || "http://localhost:8080",
       EVOLUTION_API_KEY: process.env.EVOLUTION_API_KEY || "volta_dev_evolution_key_2026",
@@ -102,7 +97,7 @@ const isBuildOrTest =
 if (
   process.env.NODE_ENV === "production" &&
   !isBuildOrTest &&
-  (!config.bookingJwtSecret || config.bookingJwtSecret === "test-booking-jwt-secret")
+  config.bookingJwtSecret === "test-booking-jwt-secret"
 ) {
   console.error(
     " \x1b[31m[FATAL] BOOKING_JWT_SECRET no esta definida: el portal publico de reservas emitiria tokens firmados con el secreto por defecto. \x1b[0m"
