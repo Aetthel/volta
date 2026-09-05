@@ -236,3 +236,56 @@ input[type="number"] {
 .animate-indeterminate-slide {
   animation: indeterminate-slide 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Volta Notification Toaster & Toast Theme Overrides */
+[data-sonner-toaster] {
+  --normal-bg: var(--color-surface-container-lowest) !important;
+  --normal-border: var(--color-outline-variant) !important;
+  --normal-text: var(--color-on-surface) !important;
+  --border-radius: var(--radius-xl, 0.625rem) !important;
+}
+
+[data-sonner-toast] {
+  background: var(--color-surface-container-lowest) !important;
+  color: var(--color-on-surface) !important;
+  border: 1px solid var(--color-outline-variant) !important;
+  border-radius: var(--radius-xl, 0.625rem) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.05) !important;
+  font-family: var(--font-sans) !important;
+}
+
+[data-sonner-toast] [data-title] {
+  color: var(--color-on-surface) !important;
+  font-weight: 600 !important;
+}
+
+[data-sonner-toast] [data-description] {
+  color: var(--color-on-surface-variant) !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  border-color: var(--color-primary) !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border-color: var(--color-error) !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  border-color: var(--color-outline) !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  border-color: var(--color-primary) !important;
+}
+
+[data-sonner-toast] [data-close-button] {
+  background: var(--color-surface-container-low) !important;
+  color: var(--color-on-surface-variant) !important;
+  border: 1px solid var(--color-outline-variant) !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: var(--color-surface-container-high) !important;
+  color: var(--color-on-surface) !important;
+}

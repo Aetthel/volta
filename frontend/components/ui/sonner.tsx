@@ -9,7 +9,7 @@ type ToasterProps = React.ComponentProps<typeof Sonner>;
 export const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
-      theme="system"
+      theme="light"
       position="top-right"
       richColors={false}
       closeButton
@@ -40,23 +40,23 @@ export const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-surface-container-lowest group-[.toaster]:text-on-surface group-[.toaster]:border group-[.toaster]:border-outline-variant/60 group-[.toaster]:shadow-xl group-[.toaster]:rounded-xl group-[.toaster]:font-sans group-[.toaster]:p-4 group-[.toaster]:gap-3",
-          title: "group-[.toast]:font-semibold group-[.toast]:text-on-surface text-sm",
-          description: "group-[.toast]:text-on-surface-variant group-[.toast]:text-xs mt-0.5 leading-relaxed",
+            "group toast !bg-surface-container-lowest !text-on-surface !border !border-outline-variant/60 shadow-xl rounded-xl font-sans p-4 gap-3",
+          title: "!text-on-surface font-semibold text-sm",
+          description: "!text-on-surface-variant text-xs mt-0.5 leading-relaxed",
           actionButton:
-            "group-[.toast]:bg-primary group-[.toast]:text-on-primary hover:group-[.toast]:bg-primary-container group-[.toast]:rounded-lg font-medium text-xs px-3 py-1.5 active:scale-[0.98] transition-all",
+            "!bg-primary !text-on-primary hover:!bg-primary-container rounded-lg font-medium text-xs px-3 py-1.5 active:scale-[0.98] transition-all",
           cancelButton:
-            "group-[.toast]:bg-surface-container-high group-[.toast]:text-on-surface-variant hover:group-[.toast]:bg-surface-container-highest group-[.toast]:rounded-lg text-xs px-3 py-1.5 transition-colors",
+            "!bg-surface-container-high !text-on-surface-variant hover:!bg-surface-container-highest rounded-lg text-xs px-3 py-1.5 transition-colors",
           closeButton:
-            "group-[.toast]:border-outline-variant/60 group-[.toast]:bg-surface-container-low group-[.toast]:text-on-surface-variant hover:group-[.toast]:text-on-surface group-[.toast]:transition-colors",
+            "!border-outline-variant/60 !bg-surface-container-low !text-on-surface-variant hover:!text-on-surface transition-colors",
           success:
-            "group-[.toaster]:border-primary/40 group-[.toaster]:bg-surface-container-lowest",
+            "!border-primary/40 !bg-surface-container-lowest",
           error:
-            "group-[.toaster]:border-error/40 group-[.toaster]:bg-surface-container-lowest",
+            "!border-error/40 !bg-surface-container-lowest",
           warning:
-            "group-[.toaster]:border-amber-500/40 group-[.toaster]:bg-surface-container-lowest",
+            "!border-amber-500/40 !bg-surface-container-lowest",
           info:
-            "group-[.toaster]:border-primary/40 group-[.toaster]:bg-surface-container-lowest",
+            "!border-primary/40 !bg-surface-container-lowest",
         },
       }}
       icons={{
