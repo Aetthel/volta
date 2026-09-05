@@ -73,7 +73,7 @@ export default function PersonalizationSection({
               </h3>
             </div>
             {savedBadge && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 animate-in fade-in">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary animate-in fade-in">
                 <Check className="w-3.5 h-3.5" />
                 <span>Guardado</span>
               </span>
@@ -130,7 +130,7 @@ export default function PersonalizationSection({
               <h3 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight">Escala Tipográfica</h3>
             </div>
             {savedBadge && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 animate-in fade-in">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary animate-in fade-in">
                 <Check className="w-3.5 h-3.5" />
                 <span>Guardado</span>
               </span>
@@ -188,7 +188,7 @@ export default function PersonalizationSection({
               <h3 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight">Radio de Bordes</h3>
             </div>
             {savedBadge && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 animate-in fade-in">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary animate-in fade-in">
                 <Check className="w-3.5 h-3.5" />
                 <span>Guardado</span>
               </span>

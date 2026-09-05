@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { Button, Alert, Badge } from "./volta-ui";
+import { Button, Alert, Badge, Toaster, toast } from "./volta-ui";
 
 describe("volta-ui Components", () => {
   describe("Button", () => {
@@ -34,6 +34,21 @@ describe("volta-ui Components", () => {
     it("renders badge content", () => {
       render(<Badge variant="secondary">Profesional</Badge>);
       expect(screen.getByText("Profesional")).toBeInTheDocument();
+    });
+  });
+
+  describe("Toaster & Toast Notifications", () => {
+    it("renders Toaster without crashing", () => {
+      const { container } = render(<Toaster />);
+      expect(container).toBeDefined();
+    });
+
+    it("triggers whatsapp toast method successfully", () => {
+      const toastId = toast.whatsapp({
+        phone: "+34600123456",
+        message: "Recordatorio enviado con éxito",
+      });
+      expect(toastId).toBeDefined();
     });
   });
 });
