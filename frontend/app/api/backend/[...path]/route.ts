@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "backend/logger";
 import { auth } from "@/auth";
 import { signToken } from "@/lib/crypto";
 import type { Session } from "next-auth";
@@ -75,7 +76,7 @@ async function proxyRequest(
   const apiKey = process.env.API_KEY;
   const jwtSecret = process.env.BACKEND_JWT_SECRET;
   if (!apiKey || !jwtSecret) {
-    console.error("[Proxy] FATAL: API_KEY or BACKEND_JWT_SECRET environment variable is not set.");
+    logger.error("[Proxy] FATAL: API_KEY or BACKEND_JWT_SECRET environment variable is not set.");
     return NextResponse.json(
       { error: "Proxy misconfiguration: Secret keys not set." },
       { status: 503 }
@@ -202,8 +203,8 @@ async function proxyRequest(
   }
 
   if (!backendResponse) {
-    console.error(
-      `[Proxy Error] Error al conectar con ${destinationUrl} tras ${maxRetries} intentos:`,
+    logger.error(
+      `[Proxy Error] Error al conectar con ${destinationUrl} tras ${maxRetries} intentos`,
       lastError
     );
     return NextResponse.json({ error: "Error interno en el servidor proxy." }, { status: 500 });
@@ -225,7 +226,7 @@ async function proxyRequest(
       });
     }
   } catch (error) {
-    console.error(`[Proxy Error] Error al procesar respuesta de ${destinationUrl}:`, error);
+    logger.error(`[Proxy Error] Error al procesar respuesta de ${destinationUrl}`, error);
     return NextResponse.json(
       { error: "Error al procesar la respuesta del servidor." },
       { status: 500 }

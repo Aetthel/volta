@@ -9,7 +9,8 @@
     "./db": "./src/config/db.ts",
     "./bot": "./src/services/botService.ts",
     "./whatsapp": "./src/services/whatsappService.ts",
-    "./auth-security": "./src/services/authSecurityService.ts"
+    "./auth-security": "./src/services/authSecurityService.ts",
+    "./logger": "./src/utils/logger.ts"
   },
   "scripts": {
     "dev": "tsx watch src/index.ts",

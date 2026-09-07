@@ -1,5 +1,6 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import prisma from "backend/db";
+import { logger } from "backend/logger";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { authConfig } from "./auth.config";
@@ -93,7 +94,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
             if (!verifiedUser) {
               if (process.env.NODE_ENV !== "production") {
-                console.log("[NextAuth] Verification login token rejected");
+                logger.info("[NextAuth] Verification login token rejected");
               }
               return null;
             }
@@ -118,7 +119,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!user) {
             if (process.env.NODE_ENV !== "production") {
-              console.log("[NextAuth] User not found");
+              logger.info("[NextAuth] User not found");
             }
             return null;
           }
@@ -127,7 +128,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!isPasswordValid) {
             if (process.env.NODE_ENV !== "production") {
-              console.log("[NextAuth] Invalid password");
+              logger.info("[NextAuth] Invalid password");
             }
             return null;
           }
@@ -163,7 +164,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // nunca llegase a mostrarse.
           if (error instanceof CredentialsSignin) throw error;
 
-          console.error("[NextAuth] Error during authorize:", error);
+          logger.error("[NextAuth] Error during authorize", error);
           return null;
         }
       },
