@@ -1,4 +1,4 @@
-import { logger } from "../utils/logger.js";
+import { logger } from "../utils/logger";
 import path from "path";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";

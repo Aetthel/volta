@@ -1,4 +1,4 @@
-import { logger } from "../utils/logger.js";
+import { logger } from "../utils/logger";
 import { PrismaClient } from "../generated/client/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 // pg@8 no incluye declaraciones propias y aquí no está instalado @types/pg, así que
