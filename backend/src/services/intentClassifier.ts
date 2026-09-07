@@ -1,4 +1,3 @@
-// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { logger } from "../utils/logger.js";
 

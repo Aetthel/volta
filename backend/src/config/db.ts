@@ -1,6 +1,9 @@
 import { PrismaClient } from "../generated/client/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-// @ts-ignore - pg types
+// pg@8 no incluye declaraciones propias y aquí no está instalado @types/pg, así que
+// el import es implícitamente `any` (TS7016). Se usa @ts-expect-error en lugar de
+// @ts-ignore para que tsc avise si algún día se añaden los tipos y sobre esta línea.
+// @ts-expect-error
 import pkg from "pg";
 import config from "./index";
 

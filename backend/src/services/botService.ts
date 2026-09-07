@@ -1,10 +1,8 @@
 import prisma from "../config/db.js";
 import whatsappManager from "./whatsappService.js";
-// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { computeHmac } from "../utils/crypto.js";
 import { maskPhone, logger } from "../utils/logger.js";
-// @ts-ignore - whatsappQueue is an existing JS module
 import { enqueueWhatsAppMessage } from "../queues/whatsappQueue.js";
 
 export interface FormatMessageData {

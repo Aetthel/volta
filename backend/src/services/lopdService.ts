@@ -1,7 +1,5 @@
 import prisma from "../config/db.js";
-// @ts-ignore - botService is an existing JS module
 import { sendWelcomeMessage } from "./botService.js";
-// @ts-ignore - privacyPolicy is an existing JS module
 import { CURRENT_POLICY_VERSION } from "../policies/privacyPolicy.js";
 import { logger } from "../utils/logger.js";
 

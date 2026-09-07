@@ -1,6 +1,5 @@
 import prisma from "../config/db.js";
 import { Prisma } from "../generated/client/index.js";
-// @ts-ignore - botService is an existing JS module
 import { sendConsentMessage } from "./botService.js";
 import { resolveOrCreateClient } from "./clientsService.js";
 import { normalizePhone } from "../utils/index.js";

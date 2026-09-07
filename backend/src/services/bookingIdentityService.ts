@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import prisma from "../config/db.js";
-// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import whatsappManager from "./whatsappService.js";
 import { computeHmac, signToken, verifyToken, normalizePhone } from "../utils/index.js";

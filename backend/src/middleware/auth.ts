@@ -1,6 +1,5 @@
 import type { Response, NextFunction, RequestHandler } from "express";
 import crypto from "crypto";
-// @ts-ignore - config is an existing JS module
 import config from "../config/index.js";
 import { verifyToken } from "../utils/crypto.js";
 import prisma from "../config/db.js";

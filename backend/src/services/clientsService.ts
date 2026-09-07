@@ -1,7 +1,5 @@
 import prisma from "../config/db.js";
-// @ts-ignore - botService is an existing JS module
 import { sendConsentMessage } from "./botService.js";
-// @ts-ignore - whatsappService is an existing JS module
 import whatsappManager from "./whatsappService.js";
 import { maskPhone, logger } from "../utils/logger.js";
 import { normalizePhone, normalizeString } from "../utils/index.js";
