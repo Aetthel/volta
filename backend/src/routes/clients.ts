@@ -7,6 +7,7 @@ import { asyncHandler } from "../utils/index.js";
 const router = express.Router();
 
 router.get("/", authenticate, validateId("businessId"), asyncHandler(clientsController.getClients));
+router.get("/:id", authenticate, validateId("id"), asyncHandler(clientsController.getClient));
 
 router.post(
   "/",

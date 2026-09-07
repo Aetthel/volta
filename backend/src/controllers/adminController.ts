@@ -1,4 +1,5 @@
 import * as adminService from "../services/adminService.js";
+import prisma from "../config/db.js";
 import { ApiResponse } from "../utils/index.js";
 import type { Request, Response } from "express";
 
@@ -25,9 +26,11 @@ export const createBusiness = async (req: Request, res: Response) => {
 
 export const deleteBusiness = async (req: Request, res: Response) => {
   const { id } = req.params as { id: string };
-  const business = await adminService.getAllBusinesses();
-  const exists = business.some((b) => b.id === id);
-  if (!exists) {
+  const business = await prisma.business.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  if (!business) {
     return res.status(404).json({ error: "Negocio no encontrado" });
   }
   await adminService.deleteBusiness(id);

@@ -47,6 +47,7 @@ describe("POST /api/users/register", () => {
     });
 
     vi.spyOn(prisma.user, "findFirst").mockResolvedValue(null);
+    vi.spyOn(prisma.user, "update").mockResolvedValue({} as any);
     vi.spyOn(prisma, "$transaction").mockImplementation(async (cb: any) => {
       return cb({
         business: {

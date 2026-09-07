@@ -180,8 +180,25 @@ export const updateAppointment = async (
   if (updateData.clientPhone) data.clientPhone = updateData.clientPhone;
   if (updateData.appointmentDate) data.appointmentDate = new Date(updateData.appointmentDate);
   if (updateData.status) data.status = updateData.status;
+  if (typeof updateData.attended === "boolean") data.attended = updateData.attended;
 
-  if (updateData.serviceName !== undefined) {
+  if (updateData.serviceId !== undefined) {
+    data.serviceId = updateData.serviceId;
+    if (updateData.serviceId && businessId) {
+      const dbService = await prisma.service.findFirst({
+        where: {
+          id: updateData.serviceId,
+          businessId,
+          isActive: true,
+        },
+      });
+      if (dbService) {
+        data.serviceName = dbService.name;
+      }
+    } else if (!updateData.serviceId) {
+      data.serviceName = null;
+    }
+  } else if (updateData.serviceName !== undefined) {
     data.serviceName = updateData.serviceName;
     if (updateData.serviceName && businessId) {
       const dbService = await prisma.service.findFirst({

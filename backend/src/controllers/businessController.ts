@@ -56,6 +56,11 @@ export const updateBusiness = async (req: AuthRequest, res: Response) => {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
+  const business = await businessService.getBusinessById(id);
+  if (!business) {
+    return res.status(404).json({ error: "Negocio no encontrado" });
+  }
+
   const updateData: Record<string, any> = {};
   if (name !== undefined) updateData.name = name;
   if (email !== undefined) updateData.email = email;
@@ -81,6 +86,11 @@ export const getHours = async (req: AuthRequest, res: Response) => {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
   }
 
+  const business = await businessService.getBusinessById(id);
+  if (!business) {
+    return res.status(404).json({ error: "Negocio no encontrado" });
+  }
+
   const hours = await businessService.getBusinessHours(id);
   if (hours.length === 0) {
     return ApiResponse.success(res, defaultHours);
@@ -94,6 +104,11 @@ export const getHolidays = async (req: AuthRequest, res: Response) => {
 
   if (req.user?.role !== "ADMIN" && id !== req.user?.businessId) {
     return res.status(403).json({ error: "Acceso denegado a este negocio" });
+  }
+
+  const business = await businessService.getBusinessById(id);
+  if (!business) {
+    return res.status(404).json({ error: "Negocio no encontrado" });
   }
 
   const preferences = await businessService.getBusinessHolidays(id);

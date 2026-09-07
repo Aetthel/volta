@@ -31,19 +31,37 @@ export const createClient = async (req: AuthRequest, res: Response) => {
   return ApiResponse.created(res, client);
 };
 
+export const getClient = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params as { id: string };
+
+  const client = await clientsService.getClientById(id);
+  if (!client) {
+    return res.status(404).json({ error: "Cliente no encontrado" });
+  }
+
+  // Verify tenant isolation
+  if (req.user?.role !== "ADMIN" && client.businessId !== req.user?.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este cliente" });
+  }
+
+  return ApiResponse.success(res, client);
+};
+
 export const updateClient = async (req: AuthRequest, res: Response) => {
   const { id } = req.params as { id: string };
 
+  const client = await clientsService.getClientById(id);
+  if (!client) {
+    return res.status(404).json({ error: "Cliente no encontrado" });
+  }
+
   // Verify tenant isolation
-  if (req.user?.role !== "ADMIN") {
-    const client = await clientsService.getClientById(id);
-    if (!client || client.businessId !== req.user?.businessId) {
-      return res.status(403).json({ error: "Acceso denegado a este cliente" });
-    }
+  if (req.user?.role !== "ADMIN" && client.businessId !== req.user?.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este cliente" });
   }
 
   const { name, surname, email, phone, lastVisit, frequentService } = req.body;
-  const client = await clientsService.updateClient(id, {
+  const updatedClient = await clientsService.updateClient(id, {
     name,
     surname,
     email,
@@ -51,18 +69,20 @@ export const updateClient = async (req: AuthRequest, res: Response) => {
     lastVisit,
     frequentService,
   });
-  return ApiResponse.success(res, client);
+  return ApiResponse.success(res, updatedClient);
 };
 
 export const deleteClient = async (req: AuthRequest, res: Response) => {
   const { id } = req.params as { id: string };
 
+  const client = await clientsService.getClientById(id);
+  if (!client) {
+    return res.status(404).json({ error: "Cliente no encontrado" });
+  }
+
   // Verify tenant isolation
-  if (req.user?.role !== "ADMIN") {
-    const client = await clientsService.getClientById(id);
-    if (!client || client.businessId !== req.user?.businessId) {
-      return res.status(403).json({ error: "Acceso denegado a este cliente" });
-    }
+  if (req.user?.role !== "ADMIN" && client.businessId !== req.user?.businessId) {
+    return res.status(403).json({ error: "Acceso denegado a este cliente" });
   }
 
   await clientsService.deleteClient(id);
@@ -119,6 +139,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 
 export default {
   getClients,
+  getClient,
   createClient,
   updateClient,
   deleteClient,

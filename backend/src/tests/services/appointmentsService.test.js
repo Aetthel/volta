@@ -10,6 +10,7 @@ describe("appointmentsService", () => {
   describe("getAppointmentsByBusiness", () => {
     it("should query findMany for the given businessId", async () => {
       const mockAppts = [{ id: "a1", clientName: "Ana" }];
+      jest.spyOn(prisma.classSchedule, "findMany").mockResolvedValue([]);
       jest.spyOn(prisma.appointment, "findMany").mockResolvedValue(mockAppts);
 
       const res = await appointmentsService.getAppointmentsByBusiness("biz-1");
@@ -87,6 +88,62 @@ describe("appointmentsService", () => {
           service: "Corte",
         })
       ).rejects.toThrow("ocupado");
+    });
+  });
+
+  describe("updateAppointment", () => {
+    it("should update attended status and client details", async () => {
+      jest.spyOn(prisma.appointment, "update").mockResolvedValue({
+        id: "a1",
+        attended: false,
+        status: "SENT",
+      });
+
+      const res = await appointmentsService.updateAppointment("a1", {
+        attended: false,
+        status: "SENT",
+      });
+
+      expect(prisma.appointment.update).toHaveBeenCalledWith({
+        where: { id: "a1" },
+        data: expect.objectContaining({
+          attended: false,
+          status: "SENT",
+        }),
+      });
+      expect(res.attended).toBe(false);
+    });
+
+    it("should link serviceName when serviceId is provided and exists", async () => {
+      jest.spyOn(prisma.service, "findFirst").mockResolvedValue({
+        id: "srv-1",
+        name: "Corte y Peinado",
+        businessId: "biz-1",
+        isActive: true,
+      });
+      jest.spyOn(prisma.appointment, "update").mockResolvedValue({
+        id: "a1",
+        serviceId: "srv-1",
+        serviceName: "Corte y Peinado",
+      });
+
+      const res = await appointmentsService.updateAppointment(
+        "a1",
+        { serviceId: "srv-1" },
+        "biz-1"
+      );
+
+      expect(prisma.service.findFirst).toHaveBeenCalledWith({
+        where: { id: "srv-1", businessId: "biz-1", isActive: true },
+      });
+      expect(prisma.appointment.update).toHaveBeenCalledWith({
+        where: { id: "a1" },
+        data: expect.objectContaining({
+          serviceId: "srv-1",
+          serviceName: "Corte y Peinado",
+        }),
+      });
+      expect(res.serviceName).toBe("Corte y Peinado");
     });
   });
 

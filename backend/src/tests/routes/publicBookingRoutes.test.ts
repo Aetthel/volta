@@ -36,6 +36,7 @@ const futureDate = () => {
 describe("public booking portal", () => {
   beforeEach(() => {
     vi.spyOn(prisma.businessHoliday, "findMany").mockResolvedValue([]);
+    vi.spyOn(prisma, "$queryRaw").mockResolvedValue([]);
   });
 
   afterEach(() => {

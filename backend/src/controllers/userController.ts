@@ -71,10 +71,14 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
   const { id } = req.params as { id: string };
   const { name, email, password, role, businessId } = req.body;
 
+  const targetUser = await userService.getUserById(id);
+  if (!targetUser) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
+  }
+
   // If not admin, check target user ownership and request params
   if (req.user.role !== "ADMIN") {
-    const targetUser = await userService.getUserById(id);
-    if (!targetUser || targetUser.businessId !== req.user.businessId) {
+    if (targetUser.businessId !== req.user.businessId) {
       return res.status(403).json({ error: "Acceso denegado" });
     }
     if (businessId !== undefined && businessId !== req.user.businessId) {
@@ -124,12 +128,19 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 
   const { id } = req.params as { id: string };
 
+  const targetUser = await userService.getUserById(id);
+  if (!targetUser) {
+    return res.status(404).json({ error: "Usuario no encontrado" });
+  }
+
   // If not admin, check target user ownership
-  if (req.user.role !== "ADMIN") {
-    const targetUser = await userService.getUserById(id);
-    if (!targetUser || targetUser.businessId !== req.user.businessId) {
-      return res.status(403).json({ error: "Acceso denegado" });
-    }
+  if (req.user.role !== "ADMIN" && targetUser.businessId !== req.user.businessId) {
+    return res.status(403).json({ error: "Acceso denegado" });
+  }
+
+  // Prevent users from deleting their own account
+  if (req.user.id === id) {
+    return res.status(400).json({ error: "No puedes eliminar tu propia cuenta" });
   }
 
   await userService.deleteUser(id);

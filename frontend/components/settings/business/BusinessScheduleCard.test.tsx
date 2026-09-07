@@ -80,20 +80,24 @@ describe("BusinessScheduleCard", () => {
     // Guardado de festivos al marcar checkbox
     const sanJuanCheckbox = screen.getByRole("checkbox", { name: /Cerrar por San Juan/i });
     fireEvent.click(sanJuanCheckbox);
-    expect(updateHolidays).toHaveBeenCalledWith(
-      "biz-1",
-      expect.arrayContaining([
-        expect.objectContaining({ holidayKey: "SAN_JUAN", isObserved: true }),
-      ])
-    );
+    await waitFor(() => {
+      expect(updateHolidays).toHaveBeenCalledWith(
+        "biz-1",
+        expect.arrayContaining([
+          expect.objectContaining({ holidayKey: "SAN_JUAN", isObserved: true }),
+        ])
+      );
+    });
 
     // Guardado de horario al cambiar estado de apertura
     const abrirButtons = screen.getAllByRole("button", { name: "Abrir" });
     fireEvent.click(abrirButtons[0]);
-    expect(updateHours).toHaveBeenCalledWith(
-      "biz-1",
-      expect.arrayContaining([expect.objectContaining({ dayOfWeek: 0, isClosed: false })])
-    );
+    await waitFor(() => {
+      expect(updateHours).toHaveBeenCalledWith(
+        "biz-1",
+        expect.arrayContaining([expect.objectContaining({ dayOfWeek: 0, isClosed: false })])
+      );
+    });
   });
 
   it("muestra los días de la semana y los festivos agrupados por ámbito", async () => {

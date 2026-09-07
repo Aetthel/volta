@@ -135,6 +135,7 @@ export async function handleWhatsAppWebhook(req: Request, res: Response) {
             await prisma.alert.create({
               data: {
                 userId: targetUserId,
+                businessId,
                 type: "NOTIFICACION",
                 category: "APPOINTMENT",
                 title: `Cita Confirmada: ${clientName}`,
@@ -156,6 +157,7 @@ export async function handleWhatsAppWebhook(req: Request, res: Response) {
             await prisma.alert.create({
               data: {
                 userId: targetUserId,
+                businessId,
                 type: "AVISO",
                 category: "APPOINTMENT",
                 title: `Cita Cancelada: ${clientName}`,
@@ -171,6 +173,7 @@ export async function handleWhatsAppWebhook(req: Request, res: Response) {
             await prisma.alert.create({
               data: {
                 userId: targetUserId,
+                businessId,
                 type: "EMERGENTE",
                 category: "APPOINTMENT",
                 title: `Solicitud de Cambio de Cita: ${clientName}`,
@@ -187,6 +190,7 @@ export async function handleWhatsAppWebhook(req: Request, res: Response) {
             await prisma.alert.create({
               data: {
                 userId: targetUserId,
+                businessId,
                 type: "AVISO",
                 category: "WHATSAPP",
                 title: `Mensaje de WhatsApp: ${clientName}`,

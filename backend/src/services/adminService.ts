@@ -8,13 +8,49 @@ import { formatCurrency } from "../utils/formatters.js";
  */
 export const deleteBusinessCascade = async (businessId: string, tx?: any) => {
   const executor = tx || prisma;
-  await executor.alert.deleteMany({ where: { user: { businessId } } });
-  await executor.appointment.deleteMany({ where: { businessId } });
-  await executor.client.deleteMany({ where: { businessId } });
-  await executor.service.deleteMany({ where: { businessId } });
-  await executor.businessHours.deleteMany({ where: { businessId } });
-  await executor.user.deleteMany({ where: { businessId } });
-  await executor.business.delete({ where: { id: businessId } });
+  if (executor.alert?.deleteMany) {
+    await executor.alert.deleteMany({
+      where: {
+        OR: [{ businessId }, { user: { businessId } }],
+      },
+    });
+  }
+  if (executor.appointment?.deleteMany) {
+    await executor.appointment.deleteMany({ where: { businessId } });
+  }
+  if (executor.classScheduleAttendee?.deleteMany) {
+    await executor.classScheduleAttendee.deleteMany({ where: { schedule: { businessId } } });
+  }
+  if (executor.classSchedule?.deleteMany) {
+    await executor.classSchedule.deleteMany({ where: { businessId } });
+  }
+  if (executor.client?.deleteMany) {
+    await executor.client.deleteMany({ where: { businessId } });
+  }
+  if (executor.service?.deleteMany) {
+    await executor.service.deleteMany({ where: { businessId } });
+  }
+  if (executor.businessHours?.deleteMany) {
+    await executor.businessHours.deleteMany({ where: { businessId } });
+  }
+  if (executor.businessHoliday?.deleteMany) {
+    await executor.businessHoliday.deleteMany({ where: { businessId } });
+  }
+  if (executor.lopdConsentLog?.deleteMany) {
+    await executor.lopdConsentLog.deleteMany({ where: { businessId } });
+  }
+  if (executor.bookingVerification?.deleteMany) {
+    await executor.bookingVerification.deleteMany({ where: { businessId } });
+  }
+  if (executor.subscriptionInvoice?.deleteMany) {
+    await executor.subscriptionInvoice.deleteMany({ where: { businessId } });
+  }
+  if (executor.user?.deleteMany) {
+    await executor.user.deleteMany({ where: { businessId } });
+  }
+  if (executor.business?.delete) {
+    await executor.business.delete({ where: { id: businessId } });
+  }
 };
 
 export const getAllBusinesses = async () => {

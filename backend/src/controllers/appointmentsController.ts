@@ -50,10 +50,10 @@ export const updateAppointment = async (req: AuthRequest, res: Response) => {
     return res.status(403).json({ error: "Acceso denegado a esta cita" });
   }
 
-  const { clientName, clientPhone, appointmentDate, status, serviceName } = req.body;
+  const { clientName, clientPhone, appointmentDate, status, serviceName, serviceId, attended } = req.body;
   const updated = await appointmentsService.updateAppointment(
     id,
-    { clientName, clientPhone, appointmentDate, status, serviceName },
+    { clientName, clientPhone, appointmentDate, status, serviceName, serviceId, attended },
     appt.businessId
   );
   return ApiResponse.success(res, updated);

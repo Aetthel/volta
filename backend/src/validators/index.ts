@@ -83,6 +83,8 @@ export const updateAppointmentSchema = z.object({
     .optional(),
   status: z.enum(["PENDING", "SENT", "ERROR"]).optional(),
   serviceName: z.string().optional().nullable(),
+  serviceId: z.string().optional().nullable(),
+  attended: z.boolean().optional(),
 });
 export type UpdateAppointmentInput = z.infer<typeof updateAppointmentSchema>;
 
