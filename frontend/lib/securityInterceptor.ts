@@ -3,6 +3,12 @@
 import { signOut } from "next-auth/react";
 
 let interceptorInitialized = false;
+let isSigningOut = false;
+
+export function resetSecurityInterceptorForTesting() {
+  interceptorInitialized = false;
+  isSigningOut = false;
+}
 
 export function setupSecurityInterceptor() {
   if (typeof window === "undefined" || interceptorInitialized) return;
@@ -19,27 +25,43 @@ export function setupSecurityInterceptor() {
       url.includes("/api/auth") ||
       url.includes("/api/backend/users/register") ||
       url.includes("/api/backend/demo") ||
-      url.includes("/api/backend/public")
+      url.includes("/api/backend/public") ||
+      url.includes("/api/backend/lopd")
     ) {
       return originalFetch(...args);
     }
 
     const response = await originalFetch(...args);
 
-    if (response.status === 403 || response.status === 401) {
-      try {
-        const clone = response.clone();
-        const data = await clone.json();
+    if (response.status === 401 || response.status === 403) {
+      if (!isSigningOut) {
+        try {
+          const clone = response.clone();
+          const data = await clone.json().catch(() => null);
 
-        if (
-          data &&
-          (data.code === "TRIAL_EXPIRED" || data.code === "PERMISSIONS_REVOKED")
-        ) {
-          console.warn("[SecurityGuard] Expulsión por prueba finalizada o permisos revocados:", data.code);
-          signOut({ callbackUrl: "/" });
+          // If 401 (session expired / unauthorized) or specific 403 expulsion codes
+          const isExpulsion =
+            response.status === 401 ||
+            data?.code === "TRIAL_EXPIRED" ||
+            data?.code === "PERMISSIONS_REVOKED" ||
+            data?.code === "SESSION_ORPHANED" ||
+            data?.code === "UNAUTHORIZED";
+
+          if (isExpulsion) {
+            isSigningOut = true;
+            console.warn(
+              "[SecurityGuard] Sesión expirada o permisos no válidos (HTTP %d, código: %s). Redirigiendo a login.",
+              response.status,
+              data?.code || "UNAUTHORIZED"
+            );
+            await signOut({ callbackUrl: "/login" });
+          }
+        } catch (e) {
+          if (response.status === 401) {
+            isSigningOut = true;
+            await signOut({ callbackUrl: "/login" });
+          }
         }
-      } catch (e) {
-        // Ignorar si la respuesta no contiene un payload JSON válido
       }
     }
 

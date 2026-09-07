@@ -27,10 +27,13 @@ export default function SecurityGuard() {
           if (
             data.code === "TRIAL_EXPIRED" ||
             data.code === "PERMISSIONS_REVOKED" ||
-            data.redirect === "/"
-          ) {
-            console.warn("[SecurityGuard] Expulsando usuario al Landing Page (Prueba o permisos expirados)");
-            signOut({ callbackUrl: "/" });
+            data.code === "SESSION_ORPHANED" ||
+            data.code === "UNAUTHORIZED" ||
+            data.redirect;
+
+          if (isExpulsion) {
+            console.warn("[SecurityGuard] Expulsando usuario al Login (Sesión expirada o permisos no válidos)");
+            signOut({ callbackUrl: "/login" });
           }
         }
       } catch (e) {

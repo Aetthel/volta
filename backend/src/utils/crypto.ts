@@ -29,7 +29,7 @@ export function signToken<T extends Record<string, unknown>>(payload: T, secret:
  * Verifies a base64url-encoded JWT token and returns its decoded payload.
  * Returns null if signature is invalid or token is expired.
  */
-export function verifyToken<T = JwtPayload>(token: string, secret: string): T | null {
+export function verifyToken<T = JwtPayload>(token: string, secret: string, clockToleranceSeconds = 0): T | null {
   try {
     if (!token || typeof token !== "string") return null;
     const parts = token.split(".");
@@ -47,7 +47,7 @@ export function verifyToken<T = JwtPayload>(token: string, secret: string): T | 
     if (!crypto.timingSafeEqual(sigBuffer, expectedBuffer)) return null;
 
     const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as JwtPayload;
-    if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) return null;
+    if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp + clockToleranceSeconds) return null;
     return payload as T;
   } catch {
     return null;

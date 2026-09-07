@@ -63,7 +63,10 @@ async function proxyRequest(
   if (!isPublicRoute) {
     session = await auth();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized", code: "UNAUTHORIZED", redirect: "/login" },
+        { status: 401 }
+      );
     }
 
     const isAdminRoute = pathParts[0] === "admin";

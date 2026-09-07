@@ -41,8 +41,10 @@ export const authConfig: NextAuthConfig = {
     },
     async jwt({ token, user, trigger, session }: { token: JWT; user?: User; trigger?: string; session?: any }) {
       if (user) {
+        const userId = user.id || (token.sub as string);
         token.role = user.role;
-        token.id = user.id;
+        token.id = userId;
+        token.sub = userId;
         token.businessId = user.businessId;
         token.businessName = user.businessName || null;
         token.businessLogoUrl = user.businessLogoUrl || null;
@@ -125,7 +127,7 @@ export const authConfig: NextAuthConfig = {
           session.user = {} as any;
         }
         session.user.role = token.role;
-        session.user.id = token.id;
+        session.user.id = (token.id as string) || (token.sub as string);
         session.user.businessId = token.businessId;
         session.user.businessName = token.businessName || null;
         session.user.businessLogoUrl = token.businessLogoUrl || null;

@@ -34,7 +34,8 @@ export const authenticate: RequestHandler = async (
   }
 
   const token = authHeader.substring(7);
-  const decoded = verifyToken<Record<string, any>>(token, JWT_SECRET);
+  // Allow 30 seconds tolerance for clock skew between frontend and backend in production
+  const decoded = verifyToken<Record<string, any>>(token, JWT_SECRET, 30);
   if (!decoded) {
     return res.status(401).json({ error: "Acceso no autorizado: Token inválido o expirado" });
   }

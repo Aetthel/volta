@@ -17,7 +17,7 @@ export function signToken(payload: object, secret: string): string {
 /**
  * Verifies a base64url-encoded JWT token and returns its decoded payload.
  */
-export function verifyToken(token: string, secret: string): Record<string, unknown> | null {
+export function verifyToken(token: string, secret: string, clockToleranceSeconds = 0): Record<string, unknown> | null {
   try {
     if (!token) return null;
     const parts = token.split(".");
@@ -31,7 +31,7 @@ export function verifyToken(token: string, secret: string): Record<string, unkno
     if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature)))
       return null;
     const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-    if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) return null;
+    if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp + clockToleranceSeconds) return null;
     return payload;
   } catch (err) {
     return null;
