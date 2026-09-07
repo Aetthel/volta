@@ -8,6 +8,10 @@ import { jest } from "@jest/globals";
 const loadService = async ({ resendApiKey = "", emailFrom = "Volta <test@volta.dev>" } = {}) => {
   jest.resetModules();
 
+  // OJO: `unstable_mockModule` delega en `vi.doMock` desde el shim
+  // src/tests/jest-globals-compat.ts, así que estas rutas se resuelven contra ESE
+  // fichero, no contra este. Por eso llevan un nivel menos que los `import()`
+  // dinámicos de abajo, que sí se resuelven de forma normal.
   jest.unstable_mockModule("../config/index.js", () => ({
     default: { resendApiKey, emailFrom },
   }));
@@ -16,8 +20,8 @@ const loadService = async ({ resendApiKey = "", emailFrom = "Volta <test@volta.d
     logger: { info: jest.fn(), error: jest.fn(), warn: jest.fn() },
   }));
 
-  const service = await import("./emailService.js");
-  const { logger } = await import("../utils/logger.js");
+  const service = await import("../../services/emailService.js");
+  const { logger } = await import("../../utils/logger.js");
   return { service, logger };
 };
 
