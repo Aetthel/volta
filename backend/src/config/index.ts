@@ -8,15 +8,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Always attempt to load env variables from the root .env file without overriding Docker env vars
 dotenv.config({ path: path.resolve(__dirname, "../../../.env"), override: false });
 
+// Los secretos NO llevan .default(): zod aplica el default antes de validar, así que
+// un default aquí haría que una variable ausente pasara la validación silenciosamente
+// y el proceso arrancara firmando JWT/HMAC con un valor conocido. Deben ser requeridos
+// siempre; los valores de desarrollo viven en .env.example y los de test en el bloque
+// de bypass de abajo.
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL es requerida"),
-  API_KEY: z.string().min(1, "API_KEY es requerida").default("test-api-key"),
-  BACKEND_JWT_SECRET: z.string().min(1, "BACKEND_JWT_SECRET es requerida").default("test-jwt-secret"),
-  LOPD_HMAC_SECRET: z.string().min(1, "LOPD_HMAC_SECRET es requerida").default("test-lopd-hmac-secret"),
+  DATABASE_URL: z.string({ error: "DATABASE_URL es requerida" }).min(1, "DATABASE_URL es requerida"),
+  API_KEY: z.string({ error: "API_KEY es requerida" }).min(1, "API_KEY es requerida"),
+  BACKEND_JWT_SECRET: z
+    .string({ error: "BACKEND_JWT_SECRET es requerida" })
+    .min(1, "BACKEND_JWT_SECRET es requerida"),
+  LOPD_HMAC_SECRET: z
+    .string({ error: "LOPD_HMAC_SECRET es requerida" })
+    .min(1, "LOPD_HMAC_SECRET es requerida"),
   BOOKING_JWT_SECRET: z
-    .string()
-    .min(1, "BOOKING_JWT_SECRET es requerida")
-    .default("test-booking-jwt-secret"),
+    .string({ error: "BOOKING_JWT_SECRET es requerida" })
+    .min(1, "BOOKING_JWT_SECRET es requerida"),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
   EVOLUTION_API_URL: z.string().default("http://localhost:8080"),
   EVOLUTION_API_KEY: z.string().default("volta_dev_evolution_key_2026"),
@@ -51,7 +59,11 @@ try {
       EMAIL_FROM: process.env.EMAIL_FROM || "Volta <onboarding@resend.dev>",
     };
   } else {
-    console.error(`\x1b[31m[FATAL] Error de validación en variables de entorno:\x1b[0m`, err.errors || err.message);
+    // zod v4 expone las incidencias en `issues` (`errors` ya no existe).
+    const detalle = Array.isArray(err?.issues)
+      ? err.issues.map((i: z.core.$ZodIssue) => `  - ${i.path.join(".")}: ${i.message}`).join("\n")
+      : err?.message;
+    console.error(`\x1b[31m[FATAL] Error de validación en variables de entorno:\x1b[0m\n${detalle}`);
     process.exit(1);
   }
 }
