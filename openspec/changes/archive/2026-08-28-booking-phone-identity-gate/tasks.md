@@ -57,3 +57,7 @@
 - [x] 7.2 Suite de backend (`jest`) y de frontend (`vitest`) en verde
 - [x] 7.3 Build de producción de Next.js sin errores de tipos
 - [ ] 7.4 Prueba manual del recorrido completo en `/booking/:businessId` con un teléfono ya registrado y con uno nuevo, verificando que la cita aparece en la agenda del negocio
+  - Pendiente al archivar. El resto de la propuesta está implementado y sus specs
+    consolidados en `openspec/specs/`. Queda como verificación manual abierta, y
+    conviene rehacerla porque la migración de `fetch` a `apiClient` tocó después
+    `BookingIdentityGate.tsx` y `app/booking/[businessId]/page.tsx`.
