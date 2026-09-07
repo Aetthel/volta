@@ -80,7 +80,12 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
       if (!nextForm.name?.trim()) return; // Don't persist empty business name
       setSaveStatus("saving");
       try {
-        const res = await apiClient.business.update(businessId, nextForm);
+        // El endpoint devuelve el negocio actualizado sin envoltorio; `email` es
+        // opcional en el modelo Business.
+        const res = await apiClient.business.update<{ name: string; email: string | null }>(
+          businessId,
+          nextForm
+        );
         if (res.error) throw new Error(res.error);
 
         setProfile((prev) => ({ ...prev, ...nextForm }));

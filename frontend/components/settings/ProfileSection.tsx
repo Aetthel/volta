@@ -178,10 +178,15 @@ export default function ProfileSection({ profile, setProfile }: ProfileSectionPr
 
       setPersonalSaveStatus("saving");
       try {
-        const res = await apiClient.team.update(session.user.id, {
-          name: nextForm.name.trim(),
-          email: nextForm.email.trim().toLowerCase(),
-        });
+        // El endpoint devuelve el usuario actualizado (sin la contraseña) y sin
+        // envoltorio.
+        const res = await apiClient.team.update<{ name: string; email: string }>(
+          session.user.id,
+          {
+            name: nextForm.name.trim(),
+            email: nextForm.email.trim().toLowerCase(),
+          }
+        );
         if (res.error) throw new Error(res.error);
 
         if (update && res.data) {

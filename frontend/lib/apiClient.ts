@@ -37,9 +37,9 @@ export interface VerifyOtpResult {
 
 export class ApiError extends Error {
   public status: number;
-  public data?: any;
+  public data?: unknown;
 
-  constructor(message: string, status: number, data?: any) {
+  constructor(message: string, status: number, data?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -82,15 +82,17 @@ class ApiClient {
         data: data as T,
         status: response.status,
       };
-    } catch (err: any) {
-      if (err.name === "AbortError") {
+    } catch (err) {
+      // Un fetch abortado rechaza con DOMException, que hereda de Error, así que
+      // `instanceof Error` cubre tanto ese caso como los fallos de red normales.
+      if (err instanceof Error && err.name === "AbortError") {
         return {
           error: "Petición cancelada.",
           status: 499,
         };
       }
       return {
-        error: err?.message || "Error de conexión con el servidor.",
+        error: (err instanceof Error && err.message) || "Error de conexión con el servidor.",
         status: 500,
       };
     }
@@ -147,62 +149,62 @@ class ApiClient {
   // --- Domain Namespaces ---
 
   public clients = {
-    getAll: <T = any>(businessId: string, search?: string) =>
+    getAll: <T = unknown>(businessId: string, search?: string) =>
       this.get<T>("/clients", { businessId, search }),
-    getById: <T = any>(id: string) => this.get<T>(`/clients/${id}`),
-    create: <T = any>(data: any) => this.post<T>("/clients", data),
-    update: <T = any>(id: string, data: any) => this.put<T>(`/clients/${id}`, data),
-    delete: <T = any>(id: string) => this.delete<T>(`/clients/${id}`),
+    getById: <T = unknown>(id: string) => this.get<T>(`/clients/${id}`),
+    create: <T = unknown>(data: unknown) => this.post<T>("/clients", data),
+    update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/clients/${id}`, data),
+    delete: <T = unknown>(id: string) => this.delete<T>(`/clients/${id}`),
   };
 
   public team = {
-    getAll: <T = any>(businessId: string) => this.get<T>("/users", { businessId }),
-    invite: <T = any>(data: any) => this.post<T>("/users", data),
-    update: <T = any>(id: string, data: any) => this.put<T>(`/users/${id}`, data),
-    delete: <T = any>(id: string) => this.delete<T>(`/users/${id}`),
+    getAll: <T = unknown>(businessId: string) => this.get<T>("/users", { businessId }),
+    invite: <T = unknown>(data: unknown) => this.post<T>("/users", data),
+    update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/users/${id}`, data),
+    delete: <T = unknown>(id: string) => this.delete<T>(`/users/${id}`),
   };
 
   public services = {
-    getAll: <T = any>(businessId: string) => this.get<T>("/services", { businessId }),
-    create: <T = any>(data: any) => this.post<T>("/services", data),
-    update: <T = any>(id: string, data: any) => this.put<T>(`/services/${id}`, data),
-    delete: <T = any>(id: string) => this.delete<T>(`/services/${id}`),
+    getAll: <T = unknown>(businessId: string) => this.get<T>("/services", { businessId }),
+    create: <T = unknown>(data: unknown) => this.post<T>("/services", data),
+    update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/services/${id}`, data),
+    delete: <T = unknown>(id: string) => this.delete<T>(`/services/${id}`),
   };
 
   public business = {
-    getById: <T = any>(id: string) => this.get<T>(`/business/${id}`),
-    update: <T = any>(id: string, data: any) => this.put<T>(`/business/${id}`, data),
-    getHours: <T = any>(id: string) => this.get<T>(`/business/${id}/hours`),
-    updateHours: <T = any>(id: string, hours: any) => this.put<T>(`/business/${id}/hours`, hours),
-    getHolidays: <T = any>(id: string) => this.get<T>(`/business/${id}/holidays`),
-    updateHolidays: <T = any>(id: string, holidays: any) =>
+    getById: <T = unknown>(id: string) => this.get<T>(`/business/${id}`),
+    update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/business/${id}`, data),
+    getHours: <T = unknown>(id: string) => this.get<T>(`/business/${id}/hours`),
+    updateHours: <T = unknown>(id: string, hours: unknown) => this.put<T>(`/business/${id}/hours`, hours),
+    getHolidays: <T = unknown>(id: string) => this.get<T>(`/business/${id}/holidays`),
+    updateHolidays: <T = unknown>(id: string, holidays: unknown) =>
       this.put<T>(`/business/${id}/holidays`, holidays),
   };
 
   public whatsapp = {
-    getStatus: <T = any>(businessId: string) => this.get<T>("/whatsapp/status", { businessId }),
-    init: <T = any>(businessId: string) => this.post<T>("/whatsapp/init", { businessId }),
-    disconnect: <T = any>(businessId: string) => this.post<T>("/whatsapp/disconnect", { businessId }),
-    getTemplates: <T = any>(businessId: string) => this.get<T>("/whatsapp/templates", { businessId }),
-    saveTemplates: <T = any>(data: any) => this.post<T>("/whatsapp/templates", data),
+    getStatus: <T = unknown>(businessId: string) => this.get<T>("/whatsapp/status", { businessId }),
+    init: <T = unknown>(businessId: string) => this.post<T>("/whatsapp/init", { businessId }),
+    disconnect: <T = unknown>(businessId: string) => this.post<T>("/whatsapp/disconnect", { businessId }),
+    getTemplates: <T = unknown>(businessId: string) => this.get<T>("/whatsapp/templates", { businessId }),
+    saveTemplates: <T = unknown>(data: unknown) => this.post<T>("/whatsapp/templates", data),
   };
 
   public appointments = {
-    getAll: <T = any>(businessId: string, startDate?: string, endDate?: string) =>
+    getAll: <T = unknown>(businessId: string, startDate?: string, endDate?: string) =>
       this.get<T>("/appointments", { businessId, startDate, endDate }),
-    create: <T = any>(data: any) => this.post<T>("/appointments", data),
-    update: <T = any>(id: string, data: any) => this.put<T>(`/appointments/${id}`, data),
-    delete: <T = any>(id: string) => this.delete<T>(`/appointments/${id}`),
+    create: <T = unknown>(data: unknown) => this.post<T>("/appointments", data),
+    update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/appointments/${id}`, data),
+    delete: <T = unknown>(id: string) => this.delete<T>(`/appointments/${id}`),
   };
 
   public auth = {
     verifyOtp: <T = VerifyOtpResult>(data: { email: string; code: string }) =>
       this.post<T>("/auth-security/verify-otp", data),
-    resendOtp: <T = any>(data: { email: string }) =>
+    resendOtp: <T = unknown>(data: { email: string }) =>
       this.post<T>("/auth-security/resend-otp", data),
-    forgotPassword: <T = any>(data: { email: string }) =>
+    forgotPassword: <T = unknown>(data: { email: string }) =>
       this.post<T>("/auth-security/forgot-password", data),
-    resetPassword: <T = any>(data: { email: string; token: string; newPassword: string }) =>
+    resetPassword: <T = unknown>(data: { email: string; token: string; newPassword: string }) =>
       this.post<T>("/auth-security/reset-password", data),
     setupTwoFactor: <T = { secret: string; qrCode: string; otpAuthUrl: string }>() =>
       this.post<T>("/auth-security/2fa/setup"),
@@ -210,9 +212,9 @@ class ApiClient {
       secret: string;
       code: string;
     }) => this.post<T>("/auth-security/2fa/enable", data),
-    disableTwoFactor: <T = any>(data: { password: string }) =>
+    disableTwoFactor: <T = unknown>(data: { password: string }) =>
       this.post<T>("/auth-security/2fa/disable", data),
-    changePassword: <T = any>(data: { currentPassword: string; newPassword: string }) =>
+    changePassword: <T = unknown>(data: { currentPassword: string; newPassword: string }) =>
       this.post<T>("/auth-security/change-password", data),
   };
 }
