@@ -63,6 +63,10 @@ pnpm-debug.log*
 
 # Testing
 coverage/
+# Artefactos de Playwright: los genera cada ejecución (test-results/ es el
+# outputDir por defecto; playwright-report/ aparece si se usa el reporter html).
+test-results/
+playwright-report/
 
 # Editor/IDE
 .vscode/
