@@ -36,6 +36,17 @@ const envSchema = z.object({
 
 export type EnvConfig = z.infer<typeof envSchema>;
 
+// Lo único que el bypass de tests/build necesita aportar: las claves sin default en
+// el esquema. El resto de valores sale de reparsear con el propio esquema, para que
+// sus defaults no estén duplicados aquí.
+const BYPASS_FALLBACKS: Record<string, string> = {
+  DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy",
+  API_KEY: "test-api-key",
+  BACKEND_JWT_SECRET: "test-jwt-secret",
+  LOPD_HMAC_SECRET: "test-lopd-hmac-secret",
+  BOOKING_JWT_SECRET: "test-booking-jwt-secret",
+};
+
 let parsedEnv: EnvConfig;
 try {
   parsedEnv = envSchema.parse(process.env);
@@ -44,20 +55,12 @@ try {
     console.warn(
       `[WARN] Environment validation bypassed during ${process.env.NODE_ENV === "test" ? "tests" : "Next.js build"}`
     );
-    parsedEnv = {
-      DATABASE_URL: process.env.DATABASE_URL || "postgresql://dummy:dummy@localhost:5432/dummy",
-      API_KEY: process.env.API_KEY || "test-api-key",
-      BACKEND_JWT_SECRET: process.env.BACKEND_JWT_SECRET || "test-jwt-secret",
-      LOPD_HMAC_SECRET: process.env.LOPD_HMAC_SECRET || "test-lopd-hmac-secret",
-      BOOKING_JWT_SECRET: process.env.BOOKING_JWT_SECRET || "test-booking-jwt-secret",
-      FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
-      EVOLUTION_API_URL: process.env.EVOLUTION_API_URL || "http://localhost:8080",
-      EVOLUTION_API_KEY: process.env.EVOLUTION_API_KEY || "volta_dev_evolution_key_2026",
-      GROQ_API_KEY: process.env.GROQ_API_KEY || "",
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-      RESEND_API_KEY: process.env.RESEND_API_KEY || "",
-      EMAIL_FROM: process.env.EMAIL_FROM || "Volta <onboarding@resend.dev>",
-    };
+    // Se descartan las variables vacías para que un `VAR=""` caiga en el fallback o
+    // en el default del esquema, igual que hacía el `process.env.X || "..."` previo.
+    const envDefinidas = Object.fromEntries(
+      Object.entries(process.env).filter(([, value]) => value !== undefined && value !== "")
+    );
+    parsedEnv = envSchema.parse({ ...BYPASS_FALLBACKS, ...envDefinidas });
   } else {
     // zod v4 expone las incidencias en `issues` (`errors` ya no existe).
     const detalle = Array.isArray(err?.issues)
