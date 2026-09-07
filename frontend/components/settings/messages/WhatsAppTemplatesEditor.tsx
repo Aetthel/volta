@@ -26,6 +26,11 @@ interface WhatsAppTemplatesEditorProps {
   profileName: string;
 }
 
+/** El endpoint puede responder 200 con `error` en el cuerpo. */
+interface TemplatesResponse extends Partial<MessageTemplates> {
+  error?: string;
+}
+
 export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = ({
   businessId,
   profileName,
@@ -42,18 +47,23 @@ export const WhatsAppTemplatesEditor: React.FC<WhatsAppTemplatesEditorProps> = (
 
   const fetchTemplates = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id") return;
-    try {
-      const res = await apiClient.whatsapp.getTemplates<any>(businessId);
-      if (res.data && !res.data.error) {
-        const businessTitle = profileName || "nuestro negocio";
-        const defWelcome = `Hola {nombre}, bienvenido/a a ${businessTitle}. Por favor confirma tu política de privacidad en: {link_lopd}`;
-        const defReminder = `Hola {nombre}, te recordamos tu cita de {servicio} para {fecha} a las {hora}. ¡Te esperamos en ${businessTitle}!`;
-        setTemplates({
-          welcomeMessage: res.data.welcomeMessage || defWelcome,
-          reminderMessage: res.data.reminderMessage || defReminder,
-        });
-      }
-    } catch {}
+    // apiClient no lanza: el catch vacío no atrapaba nada y un fallo de carga dejaba
+    // el editor con las plantillas por defecto, indistinguible de no tener ninguna
+    // guardada. `saveToServer`, más abajo, ya seguía este patrón.
+    const res = await apiClient.whatsapp.getTemplates<TemplatesResponse>(businessId);
+    if (res.error || res.data?.error) {
+      toast.error("No se pudieron cargar las plantillas guardadas.");
+      return;
+    }
+    if (res.data) {
+      const businessTitle = profileName || "nuestro negocio";
+      const defWelcome = `Hola {nombre}, bienvenido/a a ${businessTitle}. Por favor confirma tu política de privacidad en: {link_lopd}`;
+      const defReminder = `Hola {nombre}, te recordamos tu cita de {servicio} para {fecha} a las {hora}. ¡Te esperamos en ${businessTitle}!`;
+      setTemplates({
+        welcomeMessage: res.data.welcomeMessage || defWelcome,
+        reminderMessage: res.data.reminderMessage || defReminder,
+      });
+    }
   }, [businessId, profileName]);
 
   useEffect(() => {

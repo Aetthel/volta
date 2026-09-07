@@ -16,6 +16,13 @@ interface WhatsAppConnectionCardProps {
   hasWhatsApp: boolean;
 }
 
+/** El endpoint puede responder 200 con `error` en el cuerpo. */
+interface WhatsAppStatusResponse {
+  status: string;
+  qrCode: string | null;
+  error?: string;
+}
+
 export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
   businessId,
   hasWhatsApp,
@@ -26,16 +33,21 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
   const [loadingQr, setLoadingQr] = useState(false);
   const [pollingActive, setPollingActive] = useState(false);
 
+  // apiClient no lanza nunca: los fallos llegan en `res.error`. Un catch vacío aquí
+  // no atrapaba nada y dejaba el estado en "DISCONNECTED" sin que el usuario supiera
+  // que la consulta había fallado.
   const fetchWhatsappStatus = useCallback(async () => {
     if (!businessId || businessId === "mock-business-id" || !hasWhatsApp) return;
-    try {
-      const res = await apiClient.whatsapp.getStatus<any>(businessId);
-      if (res.data && !res.data.error) {
-        setWhatsappStatus(res.data.status);
-        setQrCode(res.data.qrCode);
-        setPollingActive(res.data.status === "WAITING_QR");
-      }
-    } catch {}
+    const res = await apiClient.whatsapp.getStatus<WhatsAppStatusResponse>(businessId);
+    if (res.error || res.data?.error) {
+      toast.error("No se pudo consultar el estado de WhatsApp.");
+      return;
+    }
+    if (res.data) {
+      setWhatsappStatus(res.data.status);
+      setQrCode(res.data.qrCode);
+      setPollingActive(res.data.status === "WAITING_QR");
+    }
   }, [businessId, hasWhatsApp]);
 
   useEffect(() => {
@@ -45,17 +57,18 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
   useEffect(() => {
     if (!pollingActive || !businessId || !hasWhatsApp) return;
     const interval = setInterval(async () => {
-      try {
-        const res = await apiClient.whatsapp.getStatus<any>(businessId);
-        if (res.data && !res.data.error) {
-          setWhatsappStatus(res.data.status);
-          setQrCode(res.data.qrCode);
-          if (res.data.status === "CONNECTED" || res.data.status === "DISCONNECTED") {
-            setPollingActive(false);
-            setQrCode(null);
-          }
-        }
-      } catch {}
+      const res = await apiClient.whatsapp.getStatus<WhatsAppStatusResponse>(businessId);
+      // Silencio deliberado, a diferencia del resto: mientras se espera el QR un
+      // fallo puntual es esperable y avisar cada 4 s sería spam. Se reintenta solo
+      // en el siguiente tick.
+      if (res.error || res.data?.error || !res.data) return;
+
+      setWhatsappStatus(res.data.status);
+      setQrCode(res.data.qrCode);
+      if (res.data.status === "CONNECTED" || res.data.status === "DISCONNECTED") {
+        setPollingActive(false);
+        setQrCode(null);
+      }
     }, 4000);
     return () => clearInterval(interval);
   }, [pollingActive, businessId, hasWhatsApp]);
@@ -67,7 +80,13 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
     }
     setLoadingQr(true);
     try {
-      await apiClient.whatsapp.init(businessId);
+      const res = await apiClient.whatsapp.init(businessId);
+      // Sin esta comprobación, un fallo de init dejaba la tarjeta en "esperando QR"
+      // y arrancaba el sondeo igualmente, sin QR que llegara nunca.
+      if (res.error) {
+        toast.error("No se pudo iniciar la conexión con WhatsApp.");
+        return;
+      }
       setWhatsappStatus("WAITING_QR");
       setPollingActive(true);
     } finally {
@@ -83,13 +102,17 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
     ) {
       return;
     }
-    try {
-      await apiClient.whatsapp.disconnect(businessId);
-      setWhatsappStatus("DISCONNECTED");
-      setQrCode(null);
-      setPollingActive(false);
-      toast.success("WhatsApp desconectado correctamente.");
-    } catch {}
+    // El resultado se descartaba y se anunciaba el éxito siempre, así que un fallo
+    // de desconexión se le presentaba al usuario como una desconexión correcta.
+    const res = await apiClient.whatsapp.disconnect(businessId);
+    if (res.error) {
+      toast.error("No se pudo desconectar WhatsApp. Inténtalo de nuevo.");
+      return;
+    }
+    setWhatsappStatus("DISCONNECTED");
+    setQrCode(null);
+    setPollingActive(false);
+    toast.success("WhatsApp desconectado correctamente.");
   };
 
   return (
