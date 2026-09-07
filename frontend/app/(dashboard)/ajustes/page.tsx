@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 export const dynamic = "force-dynamic";
 
@@ -214,9 +215,9 @@ function AjustesContent() {
   // Fetch business profile on mount
   useEffect(() => {
     if (!businessId || businessId === "mock-business-id") return;
-    fetch(`/api/backend/business/${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
+    apiClient
+      .business.getById<Record<string, any>>(businessId)
+      .then(({ data }) => {
         if (data && !data.error) {
           const savedWorkerPhoto =
             typeof window !== "undefined" ? localStorage.getItem("stylist_worker_photo") || "" : "";
@@ -517,22 +518,17 @@ function AdminProfileSection() {
     const payload: Record<string, string> = { name: adminForm.name, email: adminForm.email };
     if (adminForm.password) payload.password = adminForm.password;
 
-    fetch(`/api/backend/users/${session.user.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error al guardar");
-        return data;
-      })
-      .then(async (updatedUser) => {
-        update({ name: updatedUser.name, email: updatedUser.email });
+    apiClient.team
+      .update<{ name: string; email: string }>(session.user.id, payload)
+      .then((res) => {
+        if (res.error || !res.data) {
+          toast.error(res.error || "Error al guardar ajustes");
+          return;
+        }
+        update({ name: res.data.name, email: res.data.email });
         toast.success("¡Ajustes de administrador guardados!");
         setAdminForm((prev) => ({ ...prev, password: "" }));
       })
-      .catch((err) => toast.error(err.message || "Error al guardar ajustes"))
       .finally(() => setSavingAdmin(false));
   };
 

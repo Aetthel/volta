@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, Loader2, MessageCircle, ShieldCheck } from "lucide-react";
@@ -146,15 +147,18 @@ export default function BookingIdentityGate({
 
       const cleanPhone = phone.replace(/\s+/g, "");
       try {
-        const res = await fetch(`/api/backend/public/booking/${businessId}/identity/start`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: cleanPhone, fullName: name ?? undefined }),
+        const res = await apiClient.post<{
+          state?: string;
+          maskedPhone?: string;
+          expiresInSeconds?: number;
+        }>(`/public/booking/${businessId}/identity/start`, {
+          phone: cleanPhone,
+          fullName: name ?? undefined,
         });
-        const data = await res.json();
+        const data = res.data;
 
-        if (!res.ok) {
-          setError(data.error || "No hemos podido enviarte el código.");
+        if (res.error || !data) {
+          setError(res.error || "No hemos podido enviarte el código.");
           return;
         }
 
@@ -184,15 +188,18 @@ export default function BookingIdentityGate({
 
       const cleanPhone = phone.replace(/\s+/g, "");
       try {
-        const res = await fetch(`/api/backend/public/booking/${businessId}/identity/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone: cleanPhone, code: candidate }),
+        const res = await apiClient.post<{
+          bookingToken: string;
+          expiresAt: string;
+          displayName: string;
+        }>(`/public/booking/${businessId}/identity/verify`, {
+          phone: cleanPhone,
+          code: candidate,
         });
-        const data = await res.json();
+        const data = res.data;
 
-        if (!res.ok) {
-          setError(data.error || "El código no es válido.");
+        if (res.error || !data) {
+          setError(res.error || "El código no es válido.");
           setCode("");
           return;
         }

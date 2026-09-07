@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 import { useState, useCallback, FormEvent, Fragment, useMemo } from "react";
 import { useRouter } from "next/navigation";
@@ -368,28 +369,22 @@ export default function RegisterPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/backend/users/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          businessName,
-          phone,
-          businessType: selectedSector?.label || sector,
-        }),
+      const res = await apiClient.post<{ emailSent?: boolean }>("/users/register", {
+        name,
+        email,
+        password,
+        businessName,
+        phone,
+        businessType: selectedSector?.label || sector,
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Error al registrar la cuenta");
+      if (res.error) {
+        setError(res.error);
         setIsLoading(false);
         return;
       }
 
-      setEmailSent(data?.emailSent !== false);
+      setEmailSent(res.data?.emailSent !== false);
       setIsLoading(false);
       setCurrentStep(4);
     } catch (err: unknown) {

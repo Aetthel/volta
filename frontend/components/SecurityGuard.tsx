@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { setupSecurityInterceptor } from "@/lib/securityInterceptor";
+import { apiClient } from "@/lib/apiClient";
 
 export default function SecurityGuard() {
   const { data: session, status } = useSession();
@@ -17,9 +18,12 @@ export default function SecurityGuard() {
 
     const checkPermissions = async () => {
       try {
-        const res = await fetch("/api/backend/users/check-permissions");
+        const res = await apiClient.get("/users/check-permissions");
         if (res.status === 403 || res.status === 401) {
-          const data = await res.json().catch(() => ({}));
+          const data = (res.errorData ?? {}) as {
+            code?: string;
+            redirect?: string;
+          };
           if (
             data.code === "TRIAL_EXPIRED" ||
             data.code === "PERMISSIONS_REVOKED" ||

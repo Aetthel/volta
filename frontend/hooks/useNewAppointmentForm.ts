@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { formatPhoneNumber } from "@/lib/utils";
+import { apiClient } from "@/lib/apiClient";
 
 const normalizeString = (str: string) => {
   return str
@@ -130,10 +131,9 @@ export function useNewAppointmentForm(
   const fetchServices = useCallback(async (selectServiceName?: string) => {
     if (!businessId) return;
     try {
-      const res = await fetch(`/api/backend/services?businessId=${businessId}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        setServices(data);
+      const res = await apiClient.services.getAll(businessId);
+      if (Array.isArray(res.data)) {
+        setServices(res.data);
         if (selectServiceName) {
           setFormData((prev) => ({ ...prev, service: selectServiceName }));
         }
@@ -174,17 +174,13 @@ export function useNewAppointmentForm(
     if (!isOpen || !businessId) return;
 
     // Fetch clients
-    fetch(`/api/backend/clients?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setClientsList(data);
-        }
-      })
-      .catch((e) => {
-        console.error("Error loading clients:", e);
+    apiClient.clients.getAll(businessId).then((res) => {
+      if (Array.isArray(res.data)) {
+        setClientsList(res.data);
+      } else {
         setClientsList([]);
-      });
+      }
+    });
 
     // Fetch services
     fetchServices();
@@ -301,32 +297,28 @@ export function useNewAppointmentForm(
     if (isRecurring) {
       setIsSubmitting(true);
       try {
-        const res = await fetch("/api/backend/class-schedules", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            businessId,
-            service: formData.service,
-            daysOfWeek: recurrence.daysOfWeek,
-            startTime: formattedTime,
-            startDate: formData.date,
-            endDate: recurrence.endDate || null,
-            repeatClients: recurrence.repeatClients,
-            attendees: groupClients.map((client) => ({
-              name: client.name,
-              phone: client.phone || null,
-              clientId: client.id || null,
-            })),
-          }),
+        const res = await apiClient.post("/class-schedules", {
+          businessId,
+          service: formData.service,
+          daysOfWeek: recurrence.daysOfWeek,
+          startTime: formattedTime,
+          startDate: formData.date,
+          endDate: recurrence.endDate || null,
+          repeatClients: recurrence.repeatClients,
+          attendees: groupClients.map((client) => ({
+            name: client.name,
+            phone: client.phone || null,
+            clientId: client.id || null,
+          })),
         });
 
-        const payload = await res.json().catch(() => null);
-
-        if (!res.ok) {
-          throw new Error(extractErrorMessage(payload, "No se ha podido programar la clase."));
+        if (res.error) {
+          // `errorData` conserva el `details[]` de validación; sin él sólo se
+          // vería el mensaje genérico.
+          throw new Error(extractErrorMessage(res.errorData, "No se ha podido programar la clase."));
         }
 
-        onSave?.({ ...payload, recurring: true, service: formData.service });
+        onSave?.({ ...(res.data as object), recurring: true, service: formData.service });
         resetFormAndClose();
       } catch (err) {
         console.error("Error creating class schedule:", err);
@@ -349,28 +341,20 @@ export function useNewAppointmentForm(
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/backend/appointments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          clientName: finalClientName,
-          clientPhone: finalClientPhone,
-          appointmentDate: appointmentDateStr,
-          businessId: businessId,
-          service: formData.service,
-        }),
+      const res = await apiClient.appointments.create({
+        clientName: finalClientName,
+        clientPhone: finalClientPhone,
+        appointmentDate: appointmentDateStr,
+        businessId: businessId,
+        service: formData.service,
       });
 
-      const payload = await res.json().catch(() => null);
-
-      if (!res.ok) {
-        throw new Error(extractErrorMessage(payload, "No se ha podido guardar la cita."));
+      if (res.error) {
+        throw new Error(extractErrorMessage(res.errorData, "No se ha podido guardar la cita."));
       }
 
       onSave?.({
-        ...payload,
+        ...(res.data as object),
         service: formData.service,
       });
 

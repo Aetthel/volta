@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -41,14 +42,11 @@ export default function BillingSection() {
   const fetchBillingData = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/backend/subscription/current");
-      if (res.ok) {
-        const data = await res.json();
-        setSubscriptionData(data);
-        setInvoices(data.invoices || []);
+      const res = await apiClient.get<{ invoices?: unknown[] }>("/subscription/current");
+      if (!res.error && res.data) {
+        setSubscriptionData(res.data);
+        setInvoices((res.data.invoices as never[]) || []);
       }
-    } catch (err) {
-      console.error("Error loading billing data:", err);
     } finally {
       setIsLoading(false);
     }
@@ -69,19 +67,14 @@ export default function BillingSection() {
 
     try {
       setIsCancelling(true);
-      const res = await fetch("/api/backend/subscription/cancel", {
-        method: "POST",
-      });
+      const res = await apiClient.post("/subscription/cancel");
 
-      if (res.ok) {
+      if (!res.error) {
         toast.success("Suscripción cancelada al término del periodo actual");
         fetchBillingData();
       } else {
-        const errData = await res.json();
-        toast.error(errData.error || "No se pudo cancelar la suscripción");
+        toast.error(res.error);
       }
-    } catch {
-      toast.error("Error de conexión al cancelar la suscripción");
     } finally {
       setIsCancelling(false);
     }

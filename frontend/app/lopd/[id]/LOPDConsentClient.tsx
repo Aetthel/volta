@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -62,26 +63,23 @@ export default function LOPDConsentClient() {
       return;
     }
 
-    fetch(`/api/backend/lopd/${clientId}`, {
-      headers: { "x-lopd-token": token, "x-lopd-exp": exp },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Cliente no encontrado o enlace inválido.");
-        return res.json();
+    apiClient
+      .get<any>(`/lopd/${clientId}`, undefined, {
+        headers: { "x-lopd-token": token, "x-lopd-exp": exp },
       })
-      .then((resData) => {
-        setData(resData);
-        if (resData.lopdStatus === "Aceptado") {
+      .then((res) => {
+        if (res.error || !res.data) {
+          setError("Cliente no encontrado o enlace inválido.");
+          setLoading(false);
+          return;
+        }
+        setData(res.data);
+        if (res.data.lopdStatus === "Aceptado") {
           setAccepted(true);
         }
-        if (resData.lopdStatus === "Rechazado") {
+        if (res.data.lopdStatus === "Rechazado") {
           setRejected(true);
         }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching LOPD details:", err);
-        setError(err.message || "Error al cargar la información del consentimiento.");
         setLoading(false);
       });
   }, [clientId, searchParams]);
@@ -94,20 +92,21 @@ export default function LOPDConsentClient() {
     const token = sessionStorage.getItem("lopd_token");
     const exp = sessionStorage.getItem("lopd_exp");
 
-    fetch(`/api/backend/lopd/${clientId}/${action}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-lopd-token": token || "",
-        "x-lopd-exp": exp || "",
-      },
-      // Se devuelve la versión que esta página tiene renderizada, para que el
-      // registro refleje el texto que el cliente vio y no el vigente al pulsar.
-      body: JSON.stringify({ policyVersion: data.policy?.version }),
-    })
+    apiClient
+      .post(
+        `/lopd/${clientId}/${action}`,
+        // Se devuelve la versión que esta página tiene renderizada, para que el
+        // registro refleje el texto que el cliente vio y no el vigente al pulsar.
+        { policyVersion: data.policy?.version },
+        {
+          headers: {
+            "x-lopd-token": token || "",
+            "x-lopd-exp": exp || "",
+          },
+        }
+      )
       .then((res) => {
-        if (!res.ok) throw new Error("No se pudo procesar tu respuesta.");
-        return res.json();
+        if (res.error) throw new Error("No se pudo procesar tu respuesta.");
       })
       .then(() => {
         if (action === "accept") setAccepted(true);

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { apiClient } from "@/lib/apiClient";
 
 export type AlertCategory = "APPOINTMENT" | "WHATSAPP" | "CLIENT" | "BILLING" | "SYSTEM";
 
@@ -40,118 +41,74 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Silencio deliberado ante un fallo: esto se refresca en intervalo (más abajo),
+  // así que avisar en cada vuelta sería spam. Se reintenta en el siguiente tick.
   const fetchAlerts = useCallback(async () => {
     if (status === "unauthenticated") return;
-    try {
-      const res = await fetch("/api/backend/alerts");
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setAlerts(data);
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching alerts:", e);
+    const res = await apiClient.get<AlertItem[]>("/alerts");
+    if (Array.isArray(res.data)) {
+      setAlerts(res.data);
     }
   }, [status]);
 
+  // Las cinco mutaciones siguientes actualizan el estado de forma optimista y
+  // recargan desde el servidor si la petición falla, para volver al estado real.
   const markAsRead = async (id: string) => {
-    try {
-      setAlerts((prev) =>
-        prev.map((alert) => (alert.id === id ? { ...alert, isRead: true } : alert))
-      );
+    setAlerts((prev) => prev.map((alert) => (alert.id === id ? { ...alert, isRead: true } : alert)));
 
-      const res = await fetch(`/api/backend/alerts/${id}/read`, {
-        method: "PUT",
-      });
-
-      if (!res.ok) {
-        fetchAlerts();
-      }
-    } catch (e) {
-      console.error("Error marking alert as read:", e);
+    const res = await apiClient.put(`/alerts/${id}/read`);
+    if (res.error) {
       fetchAlerts();
     }
   };
 
   const markAllAsRead = async (category?: string) => {
-    try {
-      setAlerts((prev) =>
-        prev.map((alert) =>
-          !category || category === "TODAS" || alert.category === category
-            ? { ...alert, isRead: true }
-            : alert
-        )
-      );
+    setAlerts((prev) =>
+      prev.map((alert) =>
+        !category || category === "TODAS" || alert.category === category
+          ? { ...alert, isRead: true }
+          : alert
+      )
+    );
 
-      const url = category && category !== "TODAS"
-        ? `/api/backend/alerts/read-all?category=${encodeURIComponent(category)}`
-        : "/api/backend/alerts/read-all";
+    const path =
+      category && category !== "TODAS"
+        ? `/alerts/read-all?category=${encodeURIComponent(category)}`
+        : "/alerts/read-all";
 
-      const res = await fetch(url, {
-        method: "PUT",
-      });
-
-      if (!res.ok) {
-        fetchAlerts();
-      }
-    } catch (e) {
-      console.error("Error marking all alerts as read:", e);
+    const res = await apiClient.put(path);
+    if (res.error) {
       fetchAlerts();
     }
   };
 
   const archiveAlert = async (id: string) => {
-    try {
-      setAlerts((prev) =>
-        prev.map((alert) => (alert.id === id ? { ...alert, isArchived: true } : alert))
-      );
+    setAlerts((prev) =>
+      prev.map((alert) => (alert.id === id ? { ...alert, isArchived: true } : alert))
+    );
 
-      const res = await fetch(`/api/backend/alerts/${id}/archive`, {
-        method: "PUT",
-      });
-
-      if (!res.ok) {
-        fetchAlerts();
-      }
-    } catch (e) {
-      console.error("Error archiving alert:", e);
+    const res = await apiClient.put(`/alerts/${id}/archive`);
+    if (res.error) {
       fetchAlerts();
     }
   };
 
   const unarchiveAlert = async (id: string) => {
-    try {
-      setAlerts((prev) =>
-        prev.map((alert) => (alert.id === id ? { ...alert, isArchived: false } : alert))
-      );
+    setAlerts((prev) =>
+      prev.map((alert) => (alert.id === id ? { ...alert, isArchived: false } : alert))
+    );
 
-      const res = await fetch(`/api/backend/alerts/${id}/unarchive`, {
-        method: "PUT",
-      });
-
-      if (!res.ok) {
-        fetchAlerts();
-      }
-    } catch (e) {
-      console.error("Error unarchiving alert:", e);
+    const res = await apiClient.put(`/alerts/${id}/unarchive`);
+    if (res.error) {
       fetchAlerts();
     }
   };
 
   const deleteAlert = async (id: string) => {
-    try {
-      setAlerts((prev) => prev.filter((alert) => alert.id !== id));
+    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
 
-      const res = await fetch(`/api/backend/alerts/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        fetchAlerts();
-      }
-    } catch (e) {
-      console.error("Error deleting alert:", e);
+    const res = await apiClient.delete(`/alerts/${id}`);
+    if (res.error) {
       fetchAlerts();
     }
   };

@@ -71,6 +71,7 @@ import {
   Skeleton,
 } from "@/components/ui/volta-ui";
 import { cn, formatCurrency, toAmount } from "@/lib/utils";
+import { apiClient } from "@/lib/apiClient";
 
 interface AppointmentItem {
   id: string;
@@ -121,46 +122,35 @@ export default function DashboardPage() {
     if (!businessId) return;
     setIsLoading(true);
 
-    const p1 = fetch(`/api/backend/appointments?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAppointments(data);
+    Promise.all([
+      apiClient.appointments.getAll(businessId),
+      apiClient.clients.getAll(businessId),
+      apiClient.services.getAll(businessId),
+      apiClient.business.getById<{ whatsappStatus?: string; qrCode?: string }>(businessId),
+    ])
+      .then(([appointmentsRes, clientsRes, servicesRes, businessRes]) => {
+        // Los fallos se registraban en consola y nada más: la pantalla se quedaba
+        // vacía sin distinguir "no hay citas" de "no se han podido cargar".
+        if (appointmentsRes.error || clientsRes.error || servicesRes.error || businessRes.error) {
+          toast.error("No se pudieron cargar todos los datos del inicio.");
+        }
+        if (Array.isArray(appointmentsRes.data)) {
+          setAppointments(appointmentsRes.data);
+        }
+        if (Array.isArray(clientsRes.data)) {
+          setClients(clientsRes.data);
+        }
+        if (Array.isArray(servicesRes.data)) {
+          setServices(servicesRes.data);
+        }
+        if (businessRes.data) {
+          if (businessRes.data.whatsappStatus) setWhatsappStatus(businessRes.data.whatsappStatus);
+          if (businessRes.data.qrCode) setQrCode(businessRes.data.qrCode);
         }
       })
-      .catch((e) => console.error("Error loading appointments:", e));
-
-    const p2 = fetch(`/api/backend/clients?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setClients(data);
-        }
-      })
-      .catch((e) => console.error("Error loading clients:", e));
-
-    const p3 = fetch(`/api/backend/services?businessId=${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setServices(data);
-        }
-      })
-      .catch((e) => console.error("Error loading services:", e));
-
-    const p4 = fetch(`/api/backend/business/${businessId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data) {
-          if (data.whatsappStatus) setWhatsappStatus(data.whatsappStatus);
-          if (data.qrCode) setQrCode(data.qrCode);
-        }
-      })
-      .catch((e) => console.error("Error loading business status:", e));
-
-    Promise.all([p1, p2, p3, p4]).finally(() => {
-      setIsLoading(false);
-    });
+      .finally(() => {
+        setIsLoading(false);
+      });
   }, [businessId]);
 
   useEffect(() => {
@@ -174,39 +164,26 @@ export default function DashboardPage() {
   }, [session]);
 
   const handleUpdateStatus = (id: string, newStatus: "PENDING" | "SENT" | "ERROR") => {
-    fetch(`/api/backend/appointments/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error updating status");
-        return res.json();
-      })
-      .then(() => fetchData())
-      .catch((err) => console.error("Error updating appointment status:", err));
+    apiClient.appointments.update(id, { status: newStatus }).then((res) => {
+      if (res.error) {
+        toast.error("No se pudo actualizar el estado de la cita.");
+        return;
+      }
+      fetchData();
+    });
   };
 
   const handleDeleteAppointment = (id: string) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta cita? Esta acción no se puede deshacer."))
       return;
-    fetch(`/api/backend/appointments/${id}`, {
-      method: "DELETE",
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error deleting appointment");
-        return res.json();
-      })
-      .then(() => {
-        toast.success("Cita eliminada correctamente");
-        fetchData();
-      })
-      .catch((err) => {
-        console.error("Error deleting appointment:", err);
+    apiClient.appointments.delete(id).then((res) => {
+      if (res.error) {
         toast.error("Error al eliminar la cita");
-      });
+        return;
+      }
+      toast.success("Cita eliminada correctamente");
+      fetchData();
+    });
   };
 
   const handleSaveAppointment = () => {

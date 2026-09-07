@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 export const dynamic = "force-dynamic";
 
@@ -58,16 +59,10 @@ export default function AdminPage() {
         payload.targetRole = alertForm.targetRole;
       }
 
-      const res = await fetch("/api/backend/alerts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await apiClient.post<{ success?: boolean }>("/alerts", payload);
 
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = res.data;
+      if (!res.error && data?.success) {
         setAlertStatus({ success: true });
         setAlertForm({
           title: "",
@@ -76,7 +71,7 @@ export default function AdminPage() {
           targetRole: "",
         });
       } else {
-        setAlertStatus({ error: data.error || "Ocurrió un error al enviar la alerta." });
+        setAlertStatus({ error: res.error || "Ocurrió un error al enviar la alerta." });
       }
     } catch (err: any) {
       setAlertStatus({ error: err.message || "Error de red al conectar con el servidor." });
@@ -98,9 +93,9 @@ export default function AdminPage() {
 
   const fetchAdminData = () => {
     setIsLoading(true);
-    fetch("/api/backend/admin/dashboard")
-      .then((res) => res.json())
-      .then((data) => {
+    apiClient
+      .get<Record<string, any>>("/admin/dashboard")
+      .then(({ data }) => {
         if (data && !data.error) {
           setKpis({
             totalRevenue: data.totalRevenue,

@@ -17,6 +17,7 @@ import { useBusinessSchedule } from "@/lib/hooks/useBusinessSchedule";
 import NewAppointmentModal from "@/components/NewAppointmentModal";
 import AddClientModal from "@/components/AddClientModal";
 import { getServicePalette } from "@/lib/serviceColors";
+import { apiClient } from "@/lib/apiClient";
 
 interface ServiceItem {
   id?: string;
@@ -137,31 +138,29 @@ export default function AgendaPage() {
     setIsLoading(true);
 
     Promise.all([
-      fetch(`/api/backend/users?businessId=${businessId}`)
-        .then((res) => res.json())
-        .catch(() => []),
-      fetch(`/api/backend/appointments?businessId=${businessId}`)
-        .then((res) => res.json())
-        .catch(() => []),
-      fetch(`/api/backend/clients?businessId=${businessId}`)
-        .then((res) => res.json())
-        .catch(() => []),
-      fetch(`/api/backend/services?businessId=${businessId}`)
-        .then((res) => res.json())
-        .catch(() => []),
+      apiClient.team.getAll(businessId),
+      apiClient.appointments.getAll(businessId),
+      apiClient.clients.getAll(businessId),
+      apiClient.services.getAll(businessId),
     ])
-      .then(([usersData, appointmentsData, clientsData, servicesData]) => {
-        if (Array.isArray(appointmentsData)) {
-          setRawDbAppointments(appointmentsData);
+      .then(([usersRes, appointmentsRes, clientsRes, servicesRes]) => {
+        // Antes cada fallo caía en `.catch(() => [])`, y un cuerpo de error con
+        // status 500 pasaba el `res.json()` y lo descartaba el guard de abajo: la
+        // agenda se quedaba con los datos anteriores sin avisar de nada.
+        if (usersRes.error || appointmentsRes.error || clientsRes.error || servicesRes.error) {
+          toast.error("No se pudieron cargar todos los datos de la agenda.");
         }
-        if (Array.isArray(clientsData)) {
-          setClients(clientsData);
+        if (Array.isArray(appointmentsRes.data)) {
+          setRawDbAppointments(appointmentsRes.data);
         }
-        if (Array.isArray(servicesData)) {
-          setServices(servicesData);
+        if (Array.isArray(clientsRes.data)) {
+          setClients(clientsRes.data);
         }
-        if (Array.isArray(usersData)) {
-          setWorkers(usersData);
+        if (Array.isArray(servicesRes.data)) {
+          setServices(servicesRes.data);
+        }
+        if (Array.isArray(usersRes.data)) {
+          setWorkers(usersRes.data);
         }
       })
       .finally(() => {
@@ -228,20 +227,16 @@ export default function AgendaPage() {
 
   const handleEventCreate = async (newEvent: Omit<Event, "id">) => {
     try {
-      const res = await fetch("/api/backend/appointments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientName: newEvent.title.split("-")[0]?.trim() || newEvent.title,
-          serviceName: newEvent.category || "Servicio General",
-          appointmentDate: newEvent.startTime.toISOString(),
-          businessId,
-          status: newEvent.tags?.[0] || "Pendiente",
-          notes: newEvent.description,
-        }),
+      const res = await apiClient.appointments.create({
+        clientName: newEvent.title.split("-")[0]?.trim() || newEvent.title,
+        serviceName: newEvent.category || "Servicio General",
+        appointmentDate: newEvent.startTime.toISOString(),
+        businessId,
+        status: newEvent.tags?.[0] || "Pendiente",
+        notes: newEvent.description,
       });
 
-      if (res.ok) {
+      if (!res.error) {
         toast.success("Cita creada correctamente");
         fetchDashboardData();
       } else {
@@ -264,17 +259,13 @@ export default function AgendaPage() {
 
       // El backend expone PUT /appointments/:id; sin el id en la ruta Express
       // no encontraba handler y la reprogramación se perdía en silencio.
-      const res = await fetch(`/api/backend/appointments/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          appointmentDate: newDate,
-          clientName: updatedEvent.title?.split("-")[0]?.trim() || existing.clientName,
-          serviceName: updatedEvent.category || existing.serviceName,
-        }),
+      const res = await apiClient.appointments.update(id, {
+        appointmentDate: newDate,
+        clientName: updatedEvent.title?.split("-")[0]?.trim() || existing.clientName,
+        serviceName: updatedEvent.category || existing.serviceName,
       });
 
-      if (res.ok) {
+      if (!res.error) {
         toast.success("Cita actualizada correctamente");
         fetchDashboardData();
       } else {
@@ -289,11 +280,9 @@ export default function AgendaPage() {
   const deleteSingleAppointment = async (id: string) => {
     try {
       // Mismo motivo que en el update: el id va en la ruta, no en la query.
-      const res = await fetch(`/api/backend/appointments/${id}`, {
-        method: "DELETE",
-      });
+      const res = await apiClient.appointments.delete(id);
 
-      if (res.ok) {
+      if (!res.error) {
         toast.success("Cita eliminada correctamente");
         fetchDashboardData();
       } else {
@@ -327,13 +316,12 @@ export default function AgendaPage() {
 
   const handleDeleteWholeSeries = async (classScheduleId: string) => {
     try {
-      const res = await fetch(`/api/backend/class-schedules/${classScheduleId}`, {
-        method: "DELETE",
-      });
+      const res = await apiClient.delete<{ deletedSessions?: number }>(
+        `/class-schedules/${classScheduleId}`
+      );
 
-      if (res.ok) {
-        const payload = await res.json().catch(() => null);
-        const removed = payload?.deletedSessions;
+      if (!res.error) {
+        const removed = res.data?.deletedSessions;
         if (typeof removed === "number") {
           toast.success(`Clase semanal cancelada (${removed} sesiones eliminadas)`);
         } else {

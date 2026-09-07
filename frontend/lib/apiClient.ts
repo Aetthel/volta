@@ -5,6 +5,13 @@
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
+  /**
+   * Cuerpo crudo de una respuesta de error. `error` se queda con el mensaje
+   * principal, pero algunos endpoints devuelven además `details[]` con los fallos
+   * de validación campo a campo, y quien llama necesita el objeto entero para
+   * poder mostrarlos en vez de un mensaje genérico.
+   */
+  errorData?: unknown;
   status: number;
 }
 
@@ -74,6 +81,7 @@ class ApiClient {
       if (!response.ok) {
         return {
           error: data?.error || data?.message || `Error ${response.status}: ${response.statusText}`,
+          errorData: data,
           status: response.status,
         };
       }

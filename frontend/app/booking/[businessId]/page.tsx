@@ -1,4 +1,5 @@
 "use client";
+import { apiClient } from "@/lib/apiClient";
 
 import { useCallback, useEffect, useState, use } from "react";
 import { AlertCircle, ShieldCheck } from "lucide-react";
@@ -56,17 +57,18 @@ export default function PublicBookingPage({
   useEffect(() => {
     if (!businessId) return;
 
-    fetch(`/api/backend/public/booking/${businessId}/profile`)
-      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (!ok || data.error) {
-          setError(data.error || "No se ha podido encontrar el negocio solicitado.");
+    apiClient
+      .get<PublicBusinessProfile & { error?: string }>(
+        `/public/booking/${businessId}/profile`
+      )
+      .then((res) => {
+        if (res.error || !res.data || res.data.error) {
+          setError(res.error || res.data?.error || "No se ha podido encontrar el negocio solicitado.");
         } else {
-          setProfile(data);
-          applyBusinessTheme(data.themeColor);
+          setProfile(res.data);
+          applyBusinessTheme(res.data.themeColor);
         }
       })
-      .catch(() => setError("Error al cargar la información del negocio."))
       .finally(() => setLoading(false));
   }, [businessId]);
 

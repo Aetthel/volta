@@ -282,9 +282,9 @@ function HeaderContent({}: HeaderProps) {
                     session?.user?.subscriptionStatus === "DEMO_SANDBOX"
                   ) {
                     try {
-                      await fetch(`/api/backend/demo?businessId=${session.user.businessId}`, {
-                        method: "DELETE",
-                      });
+                      await apiClient.delete(
+                        `/demo?businessId=${session.user.businessId}`
+                      );
                     } catch (e) {
                       // Best-effort cleanup
                     }
