@@ -773,7 +773,6 @@ export default function RootPage() {
 
                 <div className="mt-8 space-y-3">
                   {session?.user ? (
-                    /* TODO: Insertar URL del producto de Lemon Squeezy aquí */
                     (() => {
                       const url = buildLemonSqueezyCheckoutUrl(
                         LEMON_SQUEEZY_PRODUCT_URLS.BASIC,
@@ -859,7 +858,6 @@ export default function RootPage() {
 
                 <div className="mt-8 space-y-3">
                   {session?.user ? (
-                    /* TODO: Insertar URL del producto de Lemon Squeezy aquí */
                     (() => {
                       const url = buildLemonSqueezyCheckoutUrl(
                         LEMON_SQUEEZY_PRODUCT_URLS.PRO,

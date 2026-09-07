@@ -21,7 +21,6 @@ function TrialBannerContent() {
   const trialExpiresAtStr = session?.user?.trialExpiresAt;
   const sandboxExpiresAtStr = session?.user?.sandboxExpiresAt;
 
-  // TODO: Insertar URL del producto de Lemon Squeezy aquí
   const checkoutUrl = buildLemonSqueezyCheckoutUrl(
     LEMON_SQUEEZY_PRODUCT_URLS.PRO,
     session?.user
@@ -140,7 +139,6 @@ function TrialBannerContent() {
 
           {/* Action Button & Dismiss */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* TODO: Insertar URL del producto de Lemon Squeezy aquí */}
             <a
               href={checkoutUrl}
               onClick={(e) => openLemonSqueezyOverlay(checkoutUrl, e)}
