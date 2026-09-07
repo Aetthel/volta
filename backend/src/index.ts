@@ -1,3 +1,4 @@
+import { logger } from "./utils/logger.js";
 import config from "./config/index.js";
 import * as dbInit from "./config/dbInit.js";
 import express, { type Request, type Response, type NextFunction } from "express";
@@ -62,7 +63,7 @@ if (process.env.NODE_ENV !== "test") {
     try {
       await runSentinel();
     } catch (err) {
-      console.error("[Sentinel] Unhandled error in cron:", err);
+      logger.error("[Sentinel] Unhandled error in cron", err);
     }
   });
 
@@ -71,10 +72,10 @@ if (process.env.NODE_ENV !== "test") {
     try {
       const result = await cleanupExpiredDemos();
       if (result && result.deletedCount > 0) {
-        console.log(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
+        logger.info(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
       }
     } catch (err) {
-      console.error("[Demo Cleanup] Error:", err);
+      logger.error("[Demo Cleanup] Error", err);
     }
   });
 
@@ -84,7 +85,7 @@ if (process.env.NODE_ENV !== "test") {
     try {
       await purgeExpiredConsentIdentifiers();
     } catch (err) {
-      console.error("[LOPD Purge] Error:", err);
+      logger.error("[LOPD Purge] Error", err);
     }
   });
 
@@ -95,7 +96,7 @@ if (process.env.NODE_ENV !== "test") {
     try {
       await purgeExpiredVerifications();
     } catch (err) {
-      console.error("[Booking Verification Purge] Error:", err);
+      logger.error("[Booking Verification Purge] Error", err);
     }
   });
 }
@@ -219,17 +220,17 @@ async function initActiveWhatsappClients() {
       select: { id: true },
     });
     if (connectedBusinesses.length > 0) {
-      console.log(
+      logger.info(
         `[WhatsApp] Auto-initializing ${connectedBusinesses.length} connected clients on startup...`
       );
       for (const biz of connectedBusinesses) {
         await whatsappManager.initClient(biz.id).catch((err: any) => {
-          console.error(`[WhatsApp] Auto-init failed for ${biz.id}:`, err);
+          logger.error(`[WhatsApp] Auto-init failed for ${biz.id}`, err);
         });
       }
     }
   } catch (err) {
-    console.error("[WhatsApp] Error auto-initializing clients on startup:", err);
+    logger.error("[WhatsApp] Error auto-initializing clients on startup", err);
   }
 }
 
@@ -238,21 +239,21 @@ const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.arg
 
 function setupGracefulShutdown(serverInstance?: Server | null) {
   const shutdown = async (signal: string) => {
-    console.log(`[API] Recibida señal ${signal}. Iniciando Graceful Shutdown...`);
+    logger.info(`[API] Recibida señal ${signal}. Iniciando Graceful Shutdown...`);
     if (serverInstance) {
       serverInstance.close(() => {
-        console.log("[API] Servidor HTTP cerrado.");
+        logger.info("[API] Servidor HTTP cerrado.");
       });
     }
     try {
       if (redisClient) {
         await redisClient.quit();
-        console.log("[API] Conexión a Redis cerrada.");
+        logger.info("[API] Conexión a Redis cerrada.");
       }
       await prisma.$disconnect();
-      console.log("[API] Conexión a Prisma/Postgres cerrada.");
+      logger.info("[API] Conexión a Prisma/Postgres cerrada.");
     } catch (err) {
-      console.error("[API] Error al cerrar conexiones:", err);
+      logger.error("[API] Error al cerrar conexiones", err);
     } finally {
       process.exit(0);
     }
@@ -267,19 +268,19 @@ if (isMain) {
     .ensureMockBusinessesExist()
     .then(() => {
       const server = app.listen(PORT, () => {
-        console.log(`[API] Server running on port ${PORT}`);
+        logger.info(`[API] Server running on port ${PORT}`);
         initActiveWhatsappClients();
         try {
           createWhatsAppWorker();
         } catch (err) {
-          console.error("[API] Failed to initialize WhatsApp BullMQ worker:", err);
+          logger.error("[API] Failed to initialize WhatsApp BullMQ worker", err);
         }
       });
 
       setupGracefulShutdown(server);
     })
     .catch((err: any) => {
-      console.error("[API] Failed to initialize database on startup:", err);
+      logger.error("[API] Failed to initialize database on startup", err);
       process.exit(1);
     });
 }

@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import { PrismaClient } from "../generated/client/index.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 // pg@8 no incluye declaraciones propias y aquí no está instalado @types/pg, así que
@@ -33,7 +34,7 @@ const gracefulShutdown = async (): Promise<void> => {
     await prisma.$disconnect();
     await pool.end();
   } catch (err) {
-    console.error("Error durante la desconexión de la base de datos:", err);
+    logger.error("Error durante la desconexión de la base de datos", err);
   }
 };
 

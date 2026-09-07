@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import path from "path";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
@@ -52,8 +53,8 @@ try {
   parsedEnv = envSchema.parse(process.env);
 } catch (err: any) {
   if (process.env.NEXT_PHASE === "phase-production-build" || process.env.NODE_ENV === "test") {
-    console.warn(
-      `[WARN] Environment validation bypassed during ${process.env.NODE_ENV === "test" ? "tests" : "Next.js build"}`
+    logger.warn(
+      `Environment validation bypassed during ${process.env.NODE_ENV === "test" ? "tests" : "Next.js build"}`
     );
     // Se descartan las variables vacías para que un `VAR=""` caiga en el fallback o
     // en el default del esquema, igual que hacía el `process.env.X || "..."` previo.
@@ -66,7 +67,7 @@ try {
     const detalle = Array.isArray(err?.issues)
       ? err.issues.map((i: z.core.$ZodIssue) => `  - ${i.path.join(".")}: ${i.message}`).join("\n")
       : err?.message;
-    console.error(`\x1b[31m[FATAL] Error de validación en variables de entorno:\x1b[0m\n${detalle}`);
+    logger.error(`[FATAL] Error de validación en variables de entorno:\n${detalle}`);
     process.exit(1);
   }
 }
@@ -114,15 +115,15 @@ if (
   !isBuildOrTest &&
   config.bookingJwtSecret === "test-booking-jwt-secret"
 ) {
-  console.error(
-    " \x1b[31m[FATAL] BOOKING_JWT_SECRET no esta definida: el portal publico de reservas emitiria tokens firmados con el secreto por defecto. \x1b[0m"
+  logger.error(
+    "[FATAL] BOOKING_JWT_SECRET tiene el valor por defecto de pruebas: el portal público de reservas emitiría tokens firmados con un secreto conocido."
   );
   process.exit(1);
 }
 
 if (process.env.NODE_ENV === "production" && !isBuildOrTest && !config.resendApiKey) {
-  console.warn(
-    "\x1b[33m[WARN] RESEND_API_KEY no está definida: los correos de recuperación de contraseña y verificación NO se enviarán, solo se registrarán en el log.\x1b[0m"
+  logger.warn(
+    "RESEND_API_KEY no está definida: los correos de recuperación de contraseña y verificación NO se enviarán, solo se registrarán en el log."
   );
 }
 

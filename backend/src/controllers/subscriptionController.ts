@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import * as subscriptionService from "../services/subscriptionService.js";
 import { ApiResponse } from "../utils/index.js";
 import type { Request, Response } from "express";
@@ -82,7 +83,7 @@ export async function handleWebhook(req: Request & { rawBody?: string }, res: Re
     const result = await subscriptionService.processWebhookEvent(payload, signature);
     return res.status(200).json({ received: true, result });
   } catch (err: any) {
-    console.error("[LemonSqueezy Webhook Error]", err.message);
+    logger.error("[LemonSqueezy Webhook Error]", err.message);
     return res.status(400).json({ error: err.message });
   }
 }

@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import type { Response, NextFunction, RequestHandler } from "express";
 import prisma from "../config/db.js";
 import type { AuthRequest } from "../types/index.js";
@@ -119,7 +120,7 @@ export const checkSubscriptionLimits = (action: SubscriptionAction): RequestHand
 
       return next();
     } catch (error) {
-      console.error("Error en middleware checkSubscriptionLimits:", error);
+      logger.error("Error en middleware checkSubscriptionLimits", error);
       return res.status(500).json({ error: "Error interno al validar límites de suscripción." });
     }
   };

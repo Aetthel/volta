@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import * as userService from "../services/userService.js";
 import { ApiResponse } from "../utils/index.js";
 import prisma from "../config/db.js";
@@ -201,7 +202,7 @@ export const registerUser = async (req: Request, res: Response) => {
     const delivery = await authSecurityService.sendUserVerificationOtp(user);
     emailSent = Boolean(delivery.emailSent);
   } catch (otpErr) {
-    console.error("[UserController] Error sending initial OTP email:", otpErr);
+    logger.error("[UserController] Error sending initial OTP email", otpErr);
   }
 
   const { password: _, ...sanitizedUser } = user;

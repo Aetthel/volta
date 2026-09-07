@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import prisma from "./db.js";
 import bcrypt from "bcryptjs";
 
@@ -17,7 +18,7 @@ async function ensureMockBusinessesExist() {
       });
 
       if (!existingAdmin) {
-        console.log("[dbInit] No admin found. Creating initial admin.");
+        logger.info("[dbInit] No admin found. Creating initial admin.");
         const hashedAdminPass = await bcrypt.hash(initialAdminPassword, 10);
         await prisma.user.create({
           data: {
@@ -28,10 +29,10 @@ async function ensureMockBusinessesExist() {
           },
         });
       } else {
-        console.log("[dbInit] Admin user already exists. Skipping initial admin creation.");
+        logger.info("[dbInit] Admin user already exists. Skipping initial admin creation.");
       }
     } else {
-      console.log(
+      logger.info(
         "[dbInit] INITIAL_ADMIN_EMAIL or INITIAL_ADMIN_PASSWORD not set. No default admin will be created."
       );
     }
@@ -39,7 +40,7 @@ async function ensureMockBusinessesExist() {
     // If database has 0 businesses, create a default demonstration business
     const businessCount = await prisma.business.count();
     if (businessCount === 0) {
-      console.log("[dbInit] No business found in database. Seeding default demo business...");
+      logger.info("[dbInit] No business found in database. Seeding default demo business...");
       const demoBusiness = await prisma.business.create({
         data: {
           name: "Volta Hair Studio",
@@ -73,12 +74,12 @@ async function ensureMockBusinessesExist() {
           business: { connect: { id: demoBusiness.id } },
         },
       });
-      console.log(`[dbInit] Demo business and user created successfully (ID: ${demoBusiness.id})`);
+      logger.info(`[dbInit] Demo business and user created successfully (ID: ${demoBusiness.id})`);
     }
 
-    console.log("[API] Database initialization checks completed.");
+    logger.info("[API] Database initialization checks completed.");
   } catch (err) {
-    console.error("[API] Error during database initialization:", err);
+    logger.error("[API] Error during database initialization", err);
     throw err; // Propagate error so bootstrap sequence knows it failed
   }
 }

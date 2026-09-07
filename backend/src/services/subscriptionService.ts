@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import prisma from "../config/db.js";
 import crypto from "crypto";
 
@@ -121,7 +122,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
 
       const data = (await response.json()) as any;
       if (!response.ok || !data?.data?.attributes?.url) {
-        console.error("[LemonSqueezy] Checkout error:", data);
+        logger.error("[LemonSqueezy] Checkout error", data);
         throw new Error(data?.errors?.[0]?.detail || "Error al crear sesión en Lemon Squeezy");
       }
 
@@ -131,7 +132,7 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
         plan: selectedPlan,
       };
     } catch (err: any) {
-      console.warn("[LemonSqueezy] Falling back to local mock checkout:", err.message);
+      logger.warn("[LemonSqueezy] Falling back to local mock checkout", err.message);
     }
   }
 
@@ -174,7 +175,7 @@ export async function processWebhookEvent(payload: any, signature?: string | nul
     }
   }
 
-  console.log(`[LemonSqueezy Webhook] Received event: ${eventName} for business: ${businessId}`);
+  logger.info(`[LemonSqueezy Webhook] Received event: ${eventName} for business: ${businessId}`);
 
   if (!businessId) {
     const customerId = String(attributes.customer_id || "");
@@ -321,7 +322,7 @@ export async function cancelSubscription(businessId: string) {
         }
       );
     } catch (err) {
-      console.error("[LemonSqueezy] Error cancelling remote subscription:", err);
+      logger.error("[LemonSqueezy] Error cancelling remote subscription", err);
     }
   }
 

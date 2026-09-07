@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger.js";
 import type { Response, NextFunction, RequestHandler } from "express";
 import crypto from "crypto";
 import config from "../config/index.js";
@@ -80,7 +81,7 @@ export const authenticate: RequestHandler = async (
         }
       }
     } catch (e) {
-      console.error("Auth middleware business check error:", e);
+      logger.error("Auth middleware business check error", e);
     }
   }
 
