@@ -169,7 +169,10 @@ class EvolutionApiClient {
 
   cleanPhoneForWhatsApp(phone?: string | null): string {
     if (!phone) return "";
-    const digits = phone.replace(/\D/g, "");
+    let digits = phone.replace(/\D/g, "");
+    if (digits.startsWith("00") && digits.length > 2) {
+      digits = digits.slice(2);
+    }
     if (
       digits.length === 9 &&
       (digits.startsWith("6") || digits.startsWith("7") || digits.startsWith("9"))

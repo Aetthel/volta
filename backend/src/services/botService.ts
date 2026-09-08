@@ -4,6 +4,7 @@ import config from "../config/index.js";
 import { computeHmac } from "../utils/crypto.js";
 import { maskPhone, logger } from "../utils/logger.js";
 import { enqueueWhatsAppMessage } from "../queues/whatsappQueue.js";
+import { BUSINESS_TIME_ZONE } from "../utils/timezone.js";
 
 export interface FormatMessageData {
   clientName?: string | null;
@@ -28,11 +29,16 @@ export function formatMessage(template: string | null | undefined, data: FormatM
   if (data.appointmentDate) {
     const date = new Date(data.appointmentDate);
     dateStr = date.toLocaleDateString("es-ES", {
+      timeZone: BUSINESS_TIME_ZONE,
       weekday: "long",
       day: "numeric",
       month: "long",
     });
-    timeStr = date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    timeStr = date.toLocaleTimeString("es-ES", {
+      timeZone: BUSINESS_TIME_ZONE,
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }
 
   return template
@@ -66,7 +72,7 @@ export async function sendWelcomeMessage(appointmentId: string): Promise<void> {
       },
     });
 
-    if (!appt) return;
+    if (!appt || appt.attended === false) return;
 
     if (!appt.client || appt.client.lopdStatus !== "Aceptado") {
       logger.info(
@@ -122,6 +128,7 @@ export async function runSentinel(): Promise<void> {
     const appointments = await prisma.appointment.findMany({
       where: {
         status: "PENDING",
+        attended: { not: false },
         appointmentDate: {
           gte: windowStart,
           lte: windowEnd,
@@ -152,10 +159,14 @@ export async function runSentinel(): Promise<void> {
           logger.warn(
             `[Sentinel] Skipping reminder to ${maskPhone(appt.clientPhone)}: Business ${appt.business.name} WhatsApp status is ${appt.business.whatsappStatus}`
           );
-          await prisma.appointment.update({
-            where: { id: appt.id },
-            data: { status: "ERROR" },
-          });
+          const isImminent =
+            new Date(appt.appointmentDate).getTime() - Date.now() <= 2 * 60 * 60 * 1000;
+          if (isImminent) {
+            await prisma.appointment.update({
+              where: { id: appt.id },
+              data: { status: "ERROR" },
+            });
+          }
           continue;
         }
 

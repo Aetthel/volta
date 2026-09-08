@@ -212,6 +212,7 @@ export default function BookingWizard({
 
   const handleBookingSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (submitting) return;
     if (!selectedService || !selectedTime) return;
     // El backend ya lo rechaza, pero así el visitante no gasta un envío para
     // recibir un error que aquí se puede explicar antes.

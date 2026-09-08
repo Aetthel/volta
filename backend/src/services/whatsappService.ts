@@ -83,6 +83,12 @@ export class WhatsAppManager {
     } catch (err: any) {
       logger.error(`[WhatsApp] Failed to initialize Evolution instance for ${businessId}:`, err.message);
       await this.updateStatus(businessId, "DISCONNECTED", null);
+
+      if (process.env.NODE_ENV !== "production") {
+        logger.info(`[WhatsApp] [DEV] Bypassing initClient failure for ${businessId}`);
+        return { simulated: true };
+      }
+
       throw err;
     }
   }
@@ -139,6 +145,11 @@ export class WhatsAppManager {
 
   async sendMessage(businessId: string, phone: string, message: string): Promise<any> {
     const cleanPhone = this.cleanPhoneForWhatsApp(phone);
+
+    if (!cleanPhone || cleanPhone.length < 9) {
+      logger.warn(`[WhatsApp] Invalid phone number provided: "${phone}"`);
+      throw new Error(`Número de teléfono no válido: ${phone}`);
+    }
 
     try {
       logger.info(`[WhatsApp] Sending message via Evolution API to ${cleanPhone}...`);

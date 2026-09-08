@@ -52,7 +52,7 @@ export function createWhatsAppWorker(): Worker<WhatsAppJobPayload, any, WhatsApp
           if (
             appointmentId &&
             name === "SENTINEL_REMINDER" &&
-            job.attemptsMade >= (job.opts.attempts || 3)
+            (job.attemptsMade + 1) >= (job.opts.attempts || 3)
           ) {
             await prisma.appointment
               .update({

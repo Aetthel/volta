@@ -4,6 +4,8 @@ import { validateBusinessHours, calculateAvailableSlots } from "../utils/busines
 import { getHolidayForDate, getObservedHolidays } from "../utils/holidays.js";
 import { zonedTimeToUtc } from "../utils/timezone.js";
 import * as bookingIdentityService from "../services/bookingIdentityService.js";
+import { sendWelcomeMessage, sendConsentMessage } from "../services/botService.js";
+import { logger } from "../utils/logger.js";
 import { z } from "zod";
 import type { Request, Response } from "express";
 import type { BookingRequest } from "../middleware/bookingSession.js";
@@ -410,6 +412,16 @@ export const createPublicBooking = async (req: BookingRequest, res: Response) =>
 
       return { appointment, client, service };
     });
+
+    if (result.client.lopdStatus === "Aceptado") {
+      sendWelcomeMessage(result.appointment.id).catch((err: unknown) => {
+        logger.error("[PublicBooking] Error sending welcome message:", err);
+      });
+    } else if (result.client.lopdStatus !== "Rechazado") {
+      sendConsentMessage(businessId, result.client).catch((err: unknown) => {
+        logger.error("[PublicBooking] Error sending LOPD consent request:", err);
+      });
+    }
 
     return ApiResponse.created(res, result);
   } catch (error: any) {
