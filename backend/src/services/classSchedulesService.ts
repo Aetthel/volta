@@ -327,12 +327,33 @@ const scheduleSelection = {
 } satisfies Prisma.ClassScheduleSelect;
 
 /**
+ * Materializaciones en curso, por negocio. Varias pestañas abriendo la agenda a la
+ * vez disparaban cada una su propia tanda: el índice único las hacía idempotentes,
+ * pero repetían igualmente las lecturas y escrituras. Comparten la que ya corre.
+ */
+const materializacionesEnCurso = new Map<string, Promise<number>>();
+
+/**
  * Extiende el horizonte de todas las clases activas del negocio.
  *
  * Se dispara al listar la agenda, así que no hace falta un proceso programado: la
- * clase de los martes sigue apareciendo mientras alguien use el panel.
+ * clase de los martes sigue apareciendo mientras alguien use el panel. Crear o
+ * editar un horario materializa aparte y de forma síncrona, así que esta vía sólo
+ * cubre el avance diario del horizonte.
  */
 export const ensureSchedulesMaterialized = async (businessId: string): Promise<number> => {
+  const enCurso = materializacionesEnCurso.get(businessId);
+  if (enCurso) return enCurso;
+
+  const tarea = materializarHorizonte(businessId).finally(() => {
+    materializacionesEnCurso.delete(businessId);
+  });
+
+  materializacionesEnCurso.set(businessId, tarea);
+  return tarea;
+};
+
+const materializarHorizonte = async (businessId: string): Promise<number> => {
   const horizonEnd = civilDateToUtcMidnight(addCivilDays(todayCivilDate(), HORIZON_WEEKS * 7));
 
   const pending = await prisma.classSchedule.findMany({

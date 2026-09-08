@@ -55,6 +55,22 @@ describe("appointmentsService", () => {
       );
     });
 
+    it("devuelve las citas sin esperar a la materialización del horizonte", async () => {
+      // Antes se hacía `await`: si la materialización tardaba (o se quedaba
+      // colgada, como aquí), la agenda no pintaba nada hasta que terminara.
+      let materializacionColgada = false;
+      jest.spyOn(prisma.classSchedule, "findMany").mockImplementation(() => {
+        materializacionColgada = true;
+        return new Promise(() => {}); // nunca resuelve
+      });
+      jest.spyOn(prisma.appointment, "findMany").mockResolvedValue([{ id: "a1" }]);
+
+      const res = await appointmentsService.getAppointmentsByBusiness("biz-hang");
+
+      expect(res).toEqual([{ id: "a1" }]);
+      expect(materializacionColgada).toBe(true);
+    });
+
     it("sin rango no añade filtro de fecha: los agregados siguen viendo el histórico", async () => {
       jest.spyOn(prisma.classSchedule, "findMany").mockResolvedValue([]);
       jest.spyOn(prisma.appointment, "findMany").mockResolvedValue([]);
