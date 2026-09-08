@@ -1,4 +1,5 @@
 import { logger } from "./utils/logger.js";
+import { ejecutarConLock } from "./utils/cronLock.js";
 import config from "./config/index.js";
 import * as dbInit from "./config/dbInit.js";
 import express, { type Request, type Response, type NextFunction } from "express";
@@ -60,9 +61,11 @@ app.use(
 
 if (process.env.NODE_ENV !== "test") {
   // Schedule the Sentinel to scan for upcoming 24h appointments every 15 minutes
+  // TTL por debajo del intervalo: una instancia se lleva la ventana y las demás
+  // la omiten, pero el cerrojo caduca a tiempo para la vuelta siguiente.
   cron.schedule("*/15 * * * *", async () => {
     try {
-      await runSentinel();
+      await ejecutarConLock("sentinel", 14 * 60, runSentinel);
     } catch (err) {
       logger.error("[Sentinel] Unhandled error in cron", err);
     }
@@ -71,10 +74,12 @@ if (process.env.NODE_ENV !== "test") {
   // Clean up expired demos every 5 minutes
   cron.schedule("*/5 * * * *", async () => {
     try {
-      const result = await cleanupExpiredDemos();
-      if (result && result.deletedCount > 0) {
-        logger.info(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
-      }
+      await ejecutarConLock("demo-cleanup", 4 * 60, async () => {
+        const result = await cleanupExpiredDemos();
+        if (result && result.deletedCount > 0) {
+          logger.info(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
+        }
+      });
     } catch (err) {
       logger.error("[Demo Cleanup] Error", err);
     }
@@ -84,7 +89,7 @@ if (process.env.NODE_ENV !== "test") {
   // from the Sentinel window so a long scan never overlaps with the evening send.
   cron.schedule("30 3 * * *", async () => {
     try {
-      await purgeExpiredConsentIdentifiers();
+      await ejecutarConLock("lopd-purge", 23 * 60 * 60, purgeExpiredConsentIdentifiers);
     } catch (err) {
       logger.error("[LOPD Purge] Error", err);
     }
@@ -95,7 +100,7 @@ if (process.env.NODE_ENV !== "test") {
   // stop being necessary once the code has expired.
   cron.schedule("45 3 * * *", async () => {
     try {
-      await purgeExpiredVerifications();
+      await ejecutarConLock("booking-verification-purge", 23 * 60 * 60, purgeExpiredVerifications);
     } catch (err) {
       logger.error("[Booking Verification Purge] Error", err);
     }
