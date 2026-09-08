@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { validateBusinessHours, calculateAvailableSlots } from "../../utils/businessHours.js";
+import { zonedTimeToUtc } from "../../utils/timezone.js";
 
 describe("Business Hours & Slot Validation Utilities", () => {
   const mockBusinessHours = [
@@ -11,14 +12,14 @@ describe("Business Hours & Slot Validation Utilities", () => {
   describe("validateBusinessHours", () => {
     test("returns valid: true for appointment inside open hours", () => {
       // 2026-07-27 is Monday (day 1), 10:00 AM
-      const validDate = new Date("2026-07-27T10:00:00");
+      const validDate = zonedTimeToUtc(2026, 7, 27, 10, 0);
       const result = validateBusinessHours(mockBusinessHours as any, validDate, 30);
       expect(result.valid).toBe(true);
     });
 
     test("returns valid: false if business is closed on that day", () => {
       // 2026-07-26 is Sunday (day 0)
-      const sundayDate = new Date("2026-07-26T10:00:00");
+      const sundayDate = zonedTimeToUtc(2026, 7, 26, 10, 0);
       const result = validateBusinessHours(mockBusinessHours as any, sundayDate, 30);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("cerrado");
@@ -26,7 +27,7 @@ describe("Business Hours & Slot Validation Utilities", () => {
 
     test("returns valid: false if appointment starts before open time", () => {
       // Monday 08:30 AM
-      const earlyDate = new Date("2026-07-27T08:30:00");
+      const earlyDate = zonedTimeToUtc(2026, 7, 27, 8, 30);
       const result = validateBusinessHours(mockBusinessHours as any, earlyDate, 30);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("apertura");
@@ -34,7 +35,7 @@ describe("Business Hours & Slot Validation Utilities", () => {
 
     test("returns valid: false if appointment ends after close time", () => {
       // Monday 19:45 PM for 30 min duration (ends 20:15)
-      const lateDate = new Date("2026-07-27T19:45:00");
+      const lateDate = zonedTimeToUtc(2026, 7, 27, 19, 45);
       const result = validateBusinessHours(mockBusinessHours as any, lateDate, 30);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("cierre");

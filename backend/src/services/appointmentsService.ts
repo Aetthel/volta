@@ -77,7 +77,7 @@ export const createAppointment = async (appointmentData: CreateAppointmentInput)
 
   // 1. Business Hours Validation
   if (business.hours && business.hours.length > 0) {
-    const hoursCheck = validateBusinessHours(business.hours, reqDate, duration);
+    const hoursCheck = validateBusinessHours(business.hours, appointmentDate, duration);
     if (!hoursCheck.valid) {
       const error = new Error(hoursCheck.reason) as Error & { statusCode?: number };
       error.statusCode = 400;

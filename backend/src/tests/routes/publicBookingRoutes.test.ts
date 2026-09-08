@@ -4,6 +4,7 @@ import app from "../../index.js";
 import prisma from "../../config/db.js";
 import whatsappManager from "../../services/whatsappService.js";
 import { issueBookingToken } from "../../services/bookingIdentityService.js";
+import { zonedTimeToUtc } from "../../utils/timezone.js";
 
 const BUSINESS_ID = "biz-1";
 const OTHER_BUSINESS_ID = "biz-2";
@@ -299,7 +300,10 @@ describe("public booking portal", () => {
       } as any);
 
       const clientUpsert = vi.fn();
-      const target = new Date(futureDate());
+      const [dPart, tPart] = futureDate().split("T");
+      const [y, m, d] = dPart!.split("-").map(Number);
+      const [h, min] = tPart!.split(":").map(Number);
+      const target = zonedTimeToUtc(y!, m!, d!, h!, min!);
       vi.spyOn(prisma, "$transaction").mockImplementation(async (fn: any) =>
         fn({
           appointment: {
