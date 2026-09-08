@@ -2,6 +2,7 @@ import prisma from "../config/db.js";
 import { ApiResponse, normalizePhone } from "../utils/index.js";
 import { validateBusinessHours, calculateAvailableSlots } from "../utils/businessHours.js";
 import { getHolidayForDate, getObservedHolidays } from "../utils/holidays.js";
+import { zonedTimeToUtc } from "../utils/timezone.js";
 import * as bookingIdentityService from "../services/bookingIdentityService.js";
 import { z } from "zod";
 import type { Request, Response } from "express";
@@ -162,6 +163,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     where: {
       businessId,
       status: { not: "ERROR" },
+      attended: { not: false },
       appointmentDate: {
         gte: dayStart,
         lte: dayEnd,
@@ -289,7 +291,21 @@ export const createPublicBooking = async (req: BookingRequest, res: Response) =>
     return res.status(404).json({ error: "Servicio no disponible" });
   }
 
-  const targetDate = new Date(appointmentDate);
+  let targetDate: Date;
+  if (
+    typeof appointmentDate === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(appointmentDate) &&
+    !appointmentDate.includes("Z") &&
+    !/[+-]\d{2}/.test(appointmentDate.slice(10))
+  ) {
+    const [dPart, tPart] = appointmentDate.split("T");
+    const [y, m, d] = dPart!.split("-").map(Number);
+    const [h, min] = tPart!.split(":").map(Number);
+    targetDate = zonedTimeToUtc(y!, m!, d!, h!, min!);
+  } else {
+    targetDate = new Date(appointmentDate);
+  }
+
   if (isNaN(targetDate.getTime())) {
     return res.status(400).json({ error: "Fecha de cita no válida" });
   }
@@ -331,6 +347,7 @@ export const createPublicBooking = async (req: BookingRequest, res: Response) =>
         where: {
           businessId,
           status: { not: "ERROR" },
+          attended: { not: false },
           appointmentDate: {
             gte: dayStart,
             lte: dayEnd,
@@ -340,6 +357,7 @@ export const createPublicBooking = async (req: BookingRequest, res: Response) =>
       });
 
       const overlappingCount = existingAppointments.filter((appt) => {
+        if (appt.attended === false) return false;
         const apptStart = new Date(appt.appointmentDate);
         const apptDuration = appt.service?.duration || 30;
         const apptEnd = new Date(apptStart.getTime() + apptDuration * 60 * 1000);

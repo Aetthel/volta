@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { authenticate, requireRole } from "../middleware/auth.js";
 import { signToken } from "../utils/crypto.js";
+import prisma from "../config/db.js";
 
 const MOCK_API_KEY = process.env.API_KEY || "test-api-key";
 const MOCK_JWT_SECRET = process.env.BACKEND_JWT_SECRET || "test-jwt-secret";
@@ -58,6 +59,11 @@ describe("authenticate middleware", () => {
   });
 
   it("should call next with valid API key and valid JWT token", async () => {
+    vi.spyOn(prisma.business, "findUnique").mockResolvedValue({
+      id: "biz-1",
+      subscriptionStatus: "ACTIVE",
+    } as any);
+
     const payload = { id: "user-1", role: "ADMIN", businessId: "biz-1", email: "admin@test.com" };
     const token = signToken(payload, MOCK_JWT_SECRET);
     req.header.mockImplementation((name: string) => {

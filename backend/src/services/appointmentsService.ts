@@ -99,6 +99,7 @@ export const createAppointment = async (appointmentData: CreateAppointmentInput)
     where: {
       businessId,
       status: { not: "ERROR" },
+      attended: { not: false },
       appointmentDate: {
         gte: dayStart,
         lte: dayEnd,
@@ -107,6 +108,7 @@ export const createAppointment = async (appointmentData: CreateAppointmentInput)
     select: {
       id: true,
       appointmentDate: true,
+      attended: true,
       service: {
         select: { duration: true },
       },
@@ -114,6 +116,7 @@ export const createAppointment = async (appointmentData: CreateAppointmentInput)
   });
 
   const overlappingCount = existingAppointments.filter((appt) => {
+    if (appt.attended === false) return false;
     const apptStart = new Date(appt.appointmentDate);
     const apptDuration = appt.service?.duration || 30;
     const apptEnd = new Date(apptStart.getTime() + apptDuration * 60 * 1000);

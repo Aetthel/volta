@@ -67,6 +67,29 @@ describe("Business Hours & Slot Validation Utilities", () => {
       expect(slots).toContain("10:00");
     });
 
+    test("does not block slot when existing appointment is cancelled (attended: false)", () => {
+      const dateStr = "2026-07-27"; // Monday
+      const existingAppointments = [
+        {
+          appointmentDate: "2026-07-27T09:00:00",
+          status: "PENDING",
+          attended: false,
+          service: { duration: 30 },
+        },
+      ];
+
+      const slots = calculateAvailableSlots(
+        mockBusinessHours as any,
+        existingAppointments as any,
+        dateStr,
+        30,
+        1,
+        30
+      );
+
+      expect(slots).toContain("09:00");
+    });
+
     test("returns empty array for closed day", () => {
       const sundayDateStr = "2026-07-26"; // Sunday
       const slots = calculateAvailableSlots(mockBusinessHours as any, [], sundayDateStr, 30, 1, 30);

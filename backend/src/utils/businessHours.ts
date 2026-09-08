@@ -2,6 +2,8 @@
  * Business Hours & Time Slot Validation Utility
  */
 
+import { utcToCivilDateTime } from "./timezone.js";
+
 export interface BusinessHourRecord {
   dayOfWeek: number;
   openTime: string;
@@ -11,6 +13,7 @@ export interface BusinessHourRecord {
 
 export interface AppointmentSlotCheck {
   status?: string;
+  attended?: boolean;
   appointmentDate: string | Date;
   service?: {
     duration?: number;
@@ -43,7 +46,26 @@ export function validateBusinessHours(
     return { valid: false, reason: "Fecha de cita no válida" };
   }
 
-  const dayOfWeek = date.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+  let dayOfWeek: number;
+  let startMinutes: number;
+
+  if (
+    typeof appointmentDate === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(appointmentDate) &&
+    !appointmentDate.includes("Z") &&
+    !/[+-]\d{2}/.test(appointmentDate.slice(10))
+  ) {
+    const [dPart, tPart] = appointmentDate.split("T");
+    const [y, m, d] = dPart!.split("-").map(Number);
+    const [h, min] = tPart!.split(":").map(Number);
+    dayOfWeek = new Date(Date.UTC(y!, m! - 1, d!)).getUTCDay();
+    startMinutes = h! * 60 + min!;
+  } else {
+    const civil = utcToCivilDateTime(date);
+    dayOfWeek = civil.dayOfWeek;
+    startMinutes = civil.hours * 60 + civil.minutes;
+  }
+
   const dayHours = businessHoursList.find((h) => h.dayOfWeek === dayOfWeek);
 
   if (!dayHours || dayHours.isClosed) {
@@ -56,7 +78,6 @@ export function validateBusinessHours(
   const openMinutes = openHour * 60 + openMin;
   const closeMinutes = closeHour * 60 + closeMin;
 
-  const startMinutes = date.getHours() * 60 + date.getMinutes();
   const endMinutes = startMinutes + Number(durationMinutes || 30);
 
   if (startMinutes < openMinutes) {
@@ -116,6 +137,7 @@ export function calculateAvailableSlots(
     // Count overlapping active appointments
     const overlappingCount = (existingAppointments || []).filter((appt) => {
       if (appt.status === "ERROR") return false;
+      if (appt.attended === false) return false;
       const apptStart = new Date(appt.appointmentDate);
       const apptDuration = appt.service?.duration || 30;
       const apptEnd = new Date(apptStart.getTime() + apptDuration * 60 * 1000);

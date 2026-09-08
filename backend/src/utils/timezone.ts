@@ -88,6 +88,12 @@ export interface CivilDate {
   day: number;
 }
 
+export interface CivilDateTime extends CivilDate {
+  dayOfWeek: number; // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+  hours: number;
+  minutes: number;
+}
+
 /** Instante UTC -> fecha civil en la zona del negocio. */
 export const utcToCivilDate = (
   date: Date | string | number,
@@ -98,6 +104,25 @@ export const utcToCivilDate = (
     Number(parts.find((part) => part.type === type)?.value ?? 0);
 
   return { year: read("year"), month: read("month"), day: read("day") };
+};
+
+/** Instante UTC -> fecha y hora civiles completas en la zona del negocio. */
+export const utcToCivilDateTime = (
+  date: Date | string | number,
+  timeZone: string = BUSINESS_TIME_ZONE
+): CivilDateTime => {
+  const parts = getFormatter(timeZone).formatToParts(new Date(date));
+  const read = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value ?? 0);
+
+  const year = read("year");
+  const month = read("month");
+  const day = read("day");
+  const hours = read("hour") % 24;
+  const minutes = read("minute");
+  const dayOfWeek = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+
+  return { year, month, day, dayOfWeek, hours, minutes };
 };
 
 /** "YYYY-MM-DD" de una fecha civil, la misma clave que usa el catálogo de festivos. */
@@ -169,6 +194,7 @@ export default {
   BUSINESS_TIME_ZONE,
   zonedTimeToUtc,
   utcToCivilDate,
+  utcToCivilDateTime,
   civilDateKey,
   civilDateToUtcMidnight,
   utcMidnightToCivilDate,
