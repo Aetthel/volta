@@ -140,6 +140,10 @@ model Client {
   @@unique([businessId, phone])
   @@index([businessId, email])
   @@index([businessId, lopdStatus])
+  // El listado de clientes ordena por createdAt desc. Sin este compuesto, Postgres
+  // resuelve el filtro con @@index([businessId]) y luego ordena en memoria todas las
+  // filas del negocio en cada petición.
+  @@index([businessId, createdAt])
   @@index([businessId])
 }
 
