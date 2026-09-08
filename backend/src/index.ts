@@ -124,15 +124,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use(
-  express.json({
-    limit: "50mb",
-    verify: (req: Request, _res: Response, buf: Buffer) => {
-      (req as any).rawBody = buf;
-    },
-  })
-);
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// El webhook de Lemon Squeezy verifica la firma sobre el cuerpo sin parsear.
+const capturarRawBody = (req: Request, _res: Response, buf: Buffer) => {
+  (req as any).rawBody = buf;
+};
+
+// El único cuerpo legítimamente grande de toda la API es la actualización del
+// negocio, que hoy lleva el logo como data URI en base64: un fichero de 5 MB (el
+// tope que aplica el formulario) son ~6,7 MB ya codificados. Se le da su propio
+// límite y el resto de la API se queda en 1 MB, en lugar de dejar que cualquier
+// petición autenticada pueda reservar 50 MB de memoria del proceso.
+// body-parser marca `req._body` al parsear, así que el parser global de después
+// no vuelve a intentarlo sobre esta ruta.
+app.use("/api/business", express.json({ limit: "8mb", verify: capturarRawBody }));
+
+app.use(express.json({ limit: "1mb", verify: capturarRawBody }));
+app.use(express.urlencoded({ limit: "1mb", extended: true }));
 
 /**
  * Health check endpoint verifying DB & Redis status
