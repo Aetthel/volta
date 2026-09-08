@@ -13,6 +13,7 @@ import { purgeExpiredConsentIdentifiers } from "./services/lopdService.js";
 import { purgeExpiredVerifications } from "./services/bookingIdentityService.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { RedisStore } from "rate-limit-redis";
 import { fileURLToPath } from "url";
 
 // Import modular routers
@@ -181,22 +182,57 @@ app.get("/health", async (_req: Request, res: Response) => {
   });
 });
 
+/**
+ * El contador vive en Redis y no en la memoria del proceso: en memoria se perdía
+ * en cada reinicio o despliegue —bastaba esperar a uno para renovar la cuota— y
+ * con más de una réplica cada una llevaría su propio recuento, multiplicando el
+ * límite real por el número de instancias.
+ *
+ * Sin Redis (tests, o si la conexión no llegó a crearse) se devuelve `undefined`
+ * y express-rate-limit usa su almacén en memoria, que sigue siendo mejor que no
+ * limitar.
+ */
+const crearStoreRedis = (prefix: string) =>
+  redisClient
+    ? new RedisStore({
+        prefix,
+        // ioredis tipa `call` con sobrecargas que no encajan directamente con la
+        // firma variádica que espera el store; el contrato real (comando + args
+        // como strings) sí coincide.
+        sendCommand: (...args: string[]) =>
+          redisClient!.call(args[0], ...args.slice(1)) as Promise<never>,
+      })
+    : undefined;
+
+const mensajeLimite = {
+  error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde.",
+};
+
 // Rate limiting for public LOPD routes
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 100 : 2000,
-  message: { error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde." },
+  message: mensajeLimite,
   standardHeaders: true,
   legacyHeaders: false,
+  store: crearStoreRedis("rl:public:"),
+  // Redis se configura con `offlineQueue: false`, así que si está caído los
+  // comandos fallan al instante. Sin esto, un Redis inaccesible convertiría cada
+  // petición en un 500: el limitador dejaría de proteger Y tumbaría la API.
+  passOnStoreError: true,
 });
 
 // Global rate limiting for all API routes
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 1000 : 10000,
-  message: { error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde." },
+  message: mensajeLimite,
   standardHeaders: true,
   legacyHeaders: false,
+  // Prefijo propio: si compartieran espacio de claves, el tráfico del portal
+  // público consumiría la cuota global y viceversa.
+  store: crearStoreRedis("rl:global:"),
+  passOnStoreError: true,
 });
 
 // Mount modular routers
