@@ -21,6 +21,50 @@ describe("appointmentsService", () => {
       });
       expect(res).toEqual(mockAppts);
     });
+
+    it("acota por fecha cuando se pasa un rango, para poder usar el índice", async () => {
+      jest.spyOn(prisma.classSchedule, "findMany").mockResolvedValue([]);
+      jest.spyOn(prisma.appointment, "findMany").mockResolvedValue([]);
+
+      const startDate = new Date("2026-09-01T00:00:00Z");
+      const endDate = new Date("2026-10-01T00:00:00Z");
+      await appointmentsService.getAppointmentsByBusiness("biz-1", { startDate, endDate });
+
+      expect(prisma.appointment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            businessId: "biz-1",
+            // `lt` y no `lte`: el extremo es exclusivo.
+            appointmentDate: { gte: startDate, lt: endDate },
+          },
+        })
+      );
+    });
+
+    it("admite un rango abierto por un solo extremo", async () => {
+      jest.spyOn(prisma.classSchedule, "findMany").mockResolvedValue([]);
+      jest.spyOn(prisma.appointment, "findMany").mockResolvedValue([]);
+
+      const startDate = new Date("2026-09-01T00:00:00Z");
+      await appointmentsService.getAppointmentsByBusiness("biz-1", { startDate });
+
+      expect(prisma.appointment.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { businessId: "biz-1", appointmentDate: { gte: startDate } },
+        })
+      );
+    });
+
+    it("sin rango no añade filtro de fecha: los agregados siguen viendo el histórico", async () => {
+      jest.spyOn(prisma.classSchedule, "findMany").mockResolvedValue([]);
+      jest.spyOn(prisma.appointment, "findMany").mockResolvedValue([]);
+
+      await appointmentsService.getAppointmentsByBusiness("biz-1", {});
+
+      const { where } = prisma.appointment.findMany.mock.calls[0][0];
+      expect(where).toEqual({ businessId: "biz-1" });
+      expect(where.appointmentDate).toBeUndefined();
+    });
   });
 
   describe("createAppointment", () => {

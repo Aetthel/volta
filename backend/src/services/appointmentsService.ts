@@ -7,7 +7,17 @@ import { validateBusinessHours } from "../utils/businessHours.js";
 import { logger } from "../utils/logger.js";
 import type { CreateAppointmentInput, UpdateAppointmentInput } from "../validators/index.js";
 
-export const getAppointmentsByBusiness = async (businessId: string) => {
+export interface AppointmentDateRange {
+  /** Inclusivo. */
+  startDate?: Date;
+  /** Exclusivo, para no depender de la precisión del extremo del día. */
+  endDate?: Date;
+}
+
+export const getAppointmentsByBusiness = async (
+  businessId: string,
+  range: AppointmentDateRange = {}
+) => {
   // Las clases semanales se materializan a demanda hasta un horizonte móvil: al
   // abrir la agenda se extiende lo que falte, de forma que la clase de los martes
   // sigue apareciendo semana tras semana sin ningún proceso programado. Si falla,
@@ -18,8 +28,18 @@ export const getAppointmentsByBusiness = async (businessId: string) => {
     logger.error("[Service] Error materializando clases semanales:", err);
   }
 
+  // El rango es opcional a propósito: sin él el comportamiento es el de siempre
+  // (histórico completo), porque hay consumidores —métricas de inicio, recuento de
+  // citas por cliente, buscador global— que agregan sobre todas las citas. Cuando
+  // se acota, el filtro cae sobre @@index([businessId, appointmentDate]).
+  const { startDate, endDate } = range;
+  const dateFilter =
+    startDate || endDate
+      ? { appointmentDate: { ...(startDate && { gte: startDate }), ...(endDate && { lt: endDate }) } }
+      : {};
+
   return prisma.appointment.findMany({
-    where: { businessId },
+    where: { businessId, ...dateFilter },
     include: { client: true, service: true },
     orderBy: { appointmentDate: "asc" },
   });
