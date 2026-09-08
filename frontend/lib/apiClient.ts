@@ -2,6 +2,8 @@
  * Cliente HTTP estandarizado y tipado para la comunicación del Frontend con el API Proxy del Backend
  */
 
+import { leerConCache, invalidarCache } from "./apiCache";
+
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
@@ -68,6 +70,14 @@ class ApiClient {
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string>),
     };
+
+    // Cualquier escritura puede invalidar lecturas cacheadas, y se hace aquí para
+    // que valga también para los métodos que se añadan más adelante. Va antes del
+    // fetch a propósito: si se hiciera después, una lectura lanzada mientras la
+    // escritura está en vuelo repoblaría la caché con los datos previos.
+    if (options.method && options.method !== "GET") {
+      invalidarCache();
+    }
 
     try {
       const response = await fetch(url, {
@@ -158,7 +168,9 @@ class ApiClient {
 
   public clients = {
     getAll: <T = unknown>(businessId: string, search?: string) =>
-      this.get<T>("/clients", { businessId, search }),
+      leerConCache(`clients:${businessId}:${search ?? ""}`, () =>
+        this.get<T>("/clients", { businessId, search })
+      ),
     getById: <T = unknown>(id: string) => this.get<T>(`/clients/${id}`),
     create: <T = unknown>(data: unknown) => this.post<T>("/clients", data),
     update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/clients/${id}`, data),
@@ -166,21 +178,24 @@ class ApiClient {
   };
 
   public team = {
-    getAll: <T = unknown>(businessId: string) => this.get<T>("/users", { businessId }),
+    getAll: <T = unknown>(businessId: string) =>
+      leerConCache(`team:${businessId}`, () => this.get<T>("/users", { businessId })),
     invite: <T = unknown>(data: unknown) => this.post<T>("/users", data),
     update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/users/${id}`, data),
     delete: <T = unknown>(id: string) => this.delete<T>(`/users/${id}`),
   };
 
   public services = {
-    getAll: <T = unknown>(businessId: string) => this.get<T>("/services", { businessId }),
+    getAll: <T = unknown>(businessId: string) =>
+      leerConCache(`services:${businessId}`, () => this.get<T>("/services", { businessId })),
     create: <T = unknown>(data: unknown) => this.post<T>("/services", data),
     update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/services/${id}`, data),
     delete: <T = unknown>(id: string) => this.delete<T>(`/services/${id}`),
   };
 
   public business = {
-    getById: <T = unknown>(id: string) => this.get<T>(`/business/${id}`),
+    getById: <T = unknown>(id: string) =>
+      leerConCache(`business:${id}`, () => this.get<T>(`/business/${id}`)),
     update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/business/${id}`, data),
     getHours: <T = unknown>(id: string) => this.get<T>(`/business/${id}/hours`),
     updateHours: <T = unknown>(id: string, hours: unknown) => this.put<T>(`/business/${id}/hours`, hours),
@@ -199,7 +214,9 @@ class ApiClient {
 
   public appointments = {
     getAll: <T = unknown>(businessId: string, startDate?: string, endDate?: string) =>
-      this.get<T>("/appointments", { businessId, startDate, endDate }),
+      leerConCache(`appointments:${businessId}:${startDate ?? ""}:${endDate ?? ""}`, () =>
+        this.get<T>("/appointments", { businessId, startDate, endDate })
+      ),
     create: <T = unknown>(data: unknown) => this.post<T>("/appointments", data),
     update: <T = unknown>(id: string, data: unknown) => this.put<T>(`/appointments/${id}`, data),
     delete: <T = unknown>(id: string) => this.delete<T>(`/appointments/${id}`),
