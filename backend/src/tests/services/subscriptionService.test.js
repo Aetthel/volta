@@ -151,6 +151,43 @@ describe("Subscription Service", () => {
       expect(res.gracePeriodExpiresAt).toBeDefined();
       expect(prisma.business.update).toHaveBeenCalled();
     });
+
+    it("should correctly verify HMAC signature and process Buffer payload", async () => {
+      const secret = "test_webhook_secret_123";
+      process.env.LEMONSQUEEZY_WEBHOOK_SECRET = secret;
+
+      const rawJson = JSON.stringify({
+        meta: {
+          event_name: "subscription_created",
+          custom_data: {
+            business_id: "biz-1",
+            plan: "PRO",
+          },
+        },
+        data: {
+          id: "sub-999",
+          attributes: {
+            customer_id: "cust-999",
+            total: 4000,
+            currency: "EUR",
+          },
+        },
+      });
+
+      const bufferPayload = Buffer.from(rawJson, "utf8");
+      const crypto = await import("crypto");
+      const signature = crypto.createHmac("sha256", secret).update(rawJson).digest("hex");
+
+      jest.spyOn(prisma.business, "update").mockResolvedValue({ id: "biz-1" });
+      jest.spyOn(prisma.invoice, "count").mockResolvedValue(0);
+      jest.spyOn(prisma.invoice, "create").mockResolvedValue({ id: "inv-1" });
+
+      const res = await subscriptionService.processWebhookEvent(bufferPayload, signature);
+      expect(res.processed).toBe(true);
+      expect(res.status).toBe("ACTIVE");
+
+      delete process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+    });
   });
 
   describe("activateMockSubscription", () => {

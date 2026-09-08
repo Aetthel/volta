@@ -103,6 +103,8 @@ export const checkSubscriptionLimits = (action: SubscriptionAction): RequestHand
           const monthlyAppointmentsCount = await prisma.appointment.count({
             where: {
               businessId,
+              status: { not: "ERROR" },
+              attended: { not: false },
               appointmentDate: { gte: startOfMonth },
             },
           });

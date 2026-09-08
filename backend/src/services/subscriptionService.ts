@@ -148,7 +148,14 @@ export async function createCheckoutSession({ businessId, plan = "PRO", userEmai
 export async function processWebhookEvent(payload: any, signature?: string | null) {
   const webhookSecret = getWebhookSecret();
   if (webhookSecret && signature) {
-    const rawPayload = typeof payload === "string" ? payload : JSON.stringify(payload);
+    let rawPayload: string;
+    if (Buffer.isBuffer(payload)) {
+      rawPayload = payload.toString("utf8");
+    } else if (typeof payload === "string") {
+      rawPayload = payload;
+    } else {
+      rawPayload = JSON.stringify(payload);
+    }
     const hmac = crypto.createHmac("sha256", webhookSecret);
     const digest = Buffer.from(hmac.update(rawPayload).digest("hex"), "utf8");
     const signatureBuffer = Buffer.from(signature, "utf8");
@@ -158,7 +165,11 @@ export async function processWebhookEvent(payload: any, signature?: string | nul
     }
   }
 
-  const parsedPayload = typeof payload === "string" ? JSON.parse(payload) : payload;
+  const parsedPayload = Buffer.isBuffer(payload)
+    ? JSON.parse(payload.toString("utf8"))
+    : typeof payload === "string"
+    ? JSON.parse(payload)
+    : payload;
   const eventName = parsedPayload?.meta?.event_name;
   const customData = parsedPayload?.meta?.custom_data || {};
   const attributes = parsedPayload?.data?.attributes || {};

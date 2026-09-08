@@ -42,8 +42,8 @@ export const deleteBusinessCascade = async (businessId: string, tx?: any) => {
   if (executor.bookingVerification?.deleteMany) {
     await executor.bookingVerification.deleteMany({ where: { businessId } });
   }
-  if (executor.subscriptionInvoice?.deleteMany) {
-    await executor.subscriptionInvoice.deleteMany({ where: { businessId } });
+  if (executor.invoice?.deleteMany) {
+    await executor.invoice.deleteMany({ where: { businessId } });
   }
   if (executor.user?.deleteMany) {
     await executor.user.deleteMany({ where: { businessId } });
