@@ -1,4 +1,5 @@
 import { logger } from "./utils/logger.js";
+import { ejecutarConLock } from "./utils/cronLock.js";
 import config from "./config/index.js";
 import * as dbInit from "./config/dbInit.js";
 import express, { type Request, type Response, type NextFunction } from "express";
@@ -13,6 +14,7 @@ import { purgeExpiredConsentIdentifiers } from "./services/lopdService.js";
 import { purgeExpiredVerifications } from "./services/bookingIdentityService.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { RedisStore } from "rate-limit-redis";
 import { fileURLToPath } from "url";
 
 // Import modular routers
@@ -59,9 +61,11 @@ app.use(
 
 if (process.env.NODE_ENV !== "test") {
   // Schedule the Sentinel to scan for upcoming 24h appointments every 15 minutes
+  // TTL por debajo del intervalo: una instancia se lleva la ventana y las demás
+  // la omiten, pero el cerrojo caduca a tiempo para la vuelta siguiente.
   cron.schedule("*/15 * * * *", async () => {
     try {
-      await runSentinel();
+      await ejecutarConLock("sentinel", 14 * 60, runSentinel);
     } catch (err) {
       logger.error("[Sentinel] Unhandled error in cron", err);
     }
@@ -70,10 +74,12 @@ if (process.env.NODE_ENV !== "test") {
   // Clean up expired demos every 5 minutes
   cron.schedule("*/5 * * * *", async () => {
     try {
-      const result = await cleanupExpiredDemos();
-      if (result && result.deletedCount > 0) {
-        logger.info(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
-      }
+      await ejecutarConLock("demo-cleanup", 4 * 60, async () => {
+        const result = await cleanupExpiredDemos();
+        if (result && result.deletedCount > 0) {
+          logger.info(`[Demo Cleanup] Deleted ${result.deletedCount} expired demo(s)`);
+        }
+      });
     } catch (err) {
       logger.error("[Demo Cleanup] Error", err);
     }
@@ -83,7 +89,7 @@ if (process.env.NODE_ENV !== "test") {
   // from the Sentinel window so a long scan never overlaps with the evening send.
   cron.schedule("30 3 * * *", async () => {
     try {
-      await purgeExpiredConsentIdentifiers();
+      await ejecutarConLock("lopd-purge", 23 * 60 * 60, purgeExpiredConsentIdentifiers);
     } catch (err) {
       logger.error("[LOPD Purge] Error", err);
     }
@@ -94,7 +100,7 @@ if (process.env.NODE_ENV !== "test") {
   // stop being necessary once the code has expired.
   cron.schedule("45 3 * * *", async () => {
     try {
-      await purgeExpiredVerifications();
+      await ejecutarConLock("booking-verification-purge", 23 * 60 * 60, purgeExpiredVerifications);
     } catch (err) {
       logger.error("[Booking Verification Purge] Error", err);
     }
@@ -124,15 +130,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use(
-  express.json({
-    limit: "50mb",
-    verify: (req: Request, _res: Response, buf: Buffer) => {
-      (req as any).rawBody = buf;
-    },
-  })
-);
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// El webhook de Lemon Squeezy verifica la firma sobre el cuerpo sin parsear.
+const capturarRawBody = (req: Request, _res: Response, buf: Buffer) => {
+  (req as any).rawBody = buf;
+};
+
+// El único cuerpo legítimamente grande de toda la API es la actualización del
+// negocio, que hoy lleva el logo como data URI en base64: un fichero de 5 MB (el
+// tope que aplica el formulario) son ~6,7 MB ya codificados. Se le da su propio
+// límite y el resto de la API se queda en 1 MB, en lugar de dejar que cualquier
+// petición autenticada pueda reservar 50 MB de memoria del proceso.
+// body-parser marca `req._body` al parsear, así que el parser global de después
+// no vuelve a intentarlo sobre esta ruta.
+app.use("/api/business", express.json({ limit: "8mb", verify: capturarRawBody }));
+
+app.use(express.json({ limit: "1mb", verify: capturarRawBody }));
+app.use(express.urlencoded({ limit: "1mb", extended: true }));
 
 /**
  * Health check endpoint verifying DB & Redis status
@@ -174,22 +187,57 @@ app.get("/health", async (_req: Request, res: Response) => {
   });
 });
 
+/**
+ * El contador vive en Redis y no en la memoria del proceso: en memoria se perdía
+ * en cada reinicio o despliegue —bastaba esperar a uno para renovar la cuota— y
+ * con más de una réplica cada una llevaría su propio recuento, multiplicando el
+ * límite real por el número de instancias.
+ *
+ * Sin Redis (tests, o si la conexión no llegó a crearse) se devuelve `undefined`
+ * y express-rate-limit usa su almacén en memoria, que sigue siendo mejor que no
+ * limitar.
+ */
+const crearStoreRedis = (prefix: string) =>
+  redisClient
+    ? new RedisStore({
+        prefix,
+        // ioredis tipa `call` con sobrecargas que no encajan directamente con la
+        // firma variádica que espera el store; el contrato real (comando + args
+        // como strings) sí coincide.
+        sendCommand: (...args: string[]) =>
+          redisClient!.call(args[0], ...args.slice(1)) as Promise<never>,
+      })
+    : undefined;
+
+const mensajeLimite = {
+  error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde.",
+};
+
 // Rate limiting for public LOPD routes
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 100 : 2000,
-  message: { error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde." },
+  message: mensajeLimite,
   standardHeaders: true,
   legacyHeaders: false,
+  store: crearStoreRedis("rl:public:"),
+  // Redis se configura con `offlineQueue: false`, así que si está caído los
+  // comandos fallan al instante. Sin esto, un Redis inaccesible convertiría cada
+  // petición en un 500: el limitador dejaría de proteger Y tumbaría la API.
+  passOnStoreError: true,
 });
 
 // Global rate limiting for all API routes
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "production" ? 1000 : 10000,
-  message: { error: "Demasiadas peticiones. Por favor, inténtelo de nuevo más tarde." },
+  message: mensajeLimite,
   standardHeaders: true,
   legacyHeaders: false,
+  // Prefijo propio: si compartieran espacio de claves, el tráfico del portal
+  // público consumiría la cuota global y viceversa.
+  store: crearStoreRedis("rl:global:"),
+  passOnStoreError: true,
 });
 
 // Mount modular routers

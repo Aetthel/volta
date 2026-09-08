@@ -7,19 +7,46 @@ import { validateBusinessHours } from "../utils/businessHours.js";
 import { logger } from "../utils/logger.js";
 import type { CreateAppointmentInput, UpdateAppointmentInput } from "../validators/index.js";
 
-export const getAppointmentsByBusiness = async (businessId: string) => {
-  // Las clases semanales se materializan a demanda hasta un horizonte móvil: al
-  // abrir la agenda se extiende lo que falte, de forma que la clase de los martes
-  // sigue apareciendo semana tras semana sin ningún proceso programado. Si falla,
-  // la agenda debe pintarse igual con lo que ya existe.
-  try {
-    await ensureSchedulesMaterialized(businessId);
-  } catch (err) {
+export interface AppointmentDateRange {
+  /** Inclusivo. */
+  startDate?: Date;
+  /** Exclusivo, para no depender de la precisión del extremo del día. */
+  endDate?: Date;
+}
+
+export const getAppointmentsByBusiness = async (
+  businessId: string,
+  range: AppointmentDateRange = {}
+) => {
+  // Las clases semanales se materializan a demanda hasta un horizonte móvil, de
+  // forma que la clase de los martes sigue apareciendo semana tras semana sin
+  // ningún proceso programado.
+  //
+  // Se lanza SIN esperarla: crear o editar un horario ya materializa de forma
+  // síncrona en su propio endpoint, así que por aquí sólo pasa el avance diario
+  // del horizonte —el extremo lejano de 16 semanas, que nadie está mirando al
+  // abrir la agenda—. Esperarla obligaba a la primera carga de cada día a pagar
+  // una lectura, un createMany y un update por cada clase activa antes de
+  // devolver una sola cita.
+  //
+  // Es idempotente por el índice único (classScheduleId, appointmentDate), así
+  // que repetirla o solaparla no duplica sesiones.
+  void ensureSchedulesMaterialized(businessId).catch((err) => {
     logger.error("[Service] Error materializando clases semanales:", err);
-  }
+  });
+
+  // El rango es opcional a propósito: sin él el comportamiento es el de siempre
+  // (histórico completo), porque hay consumidores —métricas de inicio, recuento de
+  // citas por cliente, buscador global— que agregan sobre todas las citas. Cuando
+  // se acota, el filtro cae sobre @@index([businessId, appointmentDate]).
+  const { startDate, endDate } = range;
+  const dateFilter =
+    startDate || endDate
+      ? { appointmentDate: { ...(startDate && { gte: startDate }), ...(endDate && { lt: endDate }) } }
+      : {};
 
   return prisma.appointment.findMany({
-    where: { businessId },
+    where: { businessId, ...dateFilter },
     include: { client: true, service: true },
     orderBy: { appointmentDate: "asc" },
   });

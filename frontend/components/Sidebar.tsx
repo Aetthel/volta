@@ -79,10 +79,10 @@ export default function Sidebar({ onNewAppointmentClick }: SidebarProps) {
     businessData.name ||
     session?.user?.businessName ||
     "Mi Negocio";
-  const businessLogo =
-    businessData.logoUrl ||
-    session?.user?.businessLogoUrl ||
-    null;
+  // Única fuente: la API. El logo ya no viaja en la sesión (era un data URI en
+  // base64 dentro de la cookie). Hasta que resuelve la petición, `Avatar` pinta
+  // las iniciales del negocio.
+  const businessLogo = businessData.logoUrl || null;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);

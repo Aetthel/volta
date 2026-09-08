@@ -36,7 +36,10 @@ function toSessionUser(user: any) {
     role: user.role,
     businessId: user.businessId,
     businessName: user.business?.name || null,
-    businessLogoUrl: user.business?.logoUrl || null,
+    // `business.logoUrl` NO se incluye a propósito: se guarda como data URI en
+    // base64 (hasta ~6,7 MB) y acabaría dentro del JWT, es decir, dentro de la
+    // cookie que el navegador reenvía en CADA petición al dominio. El Sidebar lo
+    // obtiene de `GET /business/:id`, que es donde debe viajar un binario.
     subscriptionStatus: user.business?.subscriptionStatus || "TRIALING",
     trialExpiresAt: user.business?.trialExpiresAt
       ? user.business.trialExpiresAt.toISOString()

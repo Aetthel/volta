@@ -47,7 +47,6 @@ export const authConfig: NextAuthConfig = {
         token.sub = userId;
         token.businessId = user.businessId;
         token.businessName = user.businessName || null;
-        token.businessLogoUrl = user.businessLogoUrl || null;
         token.subscriptionStatus = user.subscriptionStatus || "TRIALING";
         token.trialExpiresAt = user.trialExpiresAt || null;
         token.sandboxExpiresAt = user.sandboxExpiresAt || null;
@@ -89,12 +88,6 @@ export const authConfig: NextAuthConfig = {
           session.businessName ||
           session.user?.businessName ||
           session.user?.business?.name;
-        const businessLogoUrl =
-          session.businessLogoUrl !== undefined
-            ? session.businessLogoUrl
-            : session.user?.businessLogoUrl !== undefined
-              ? session.user?.businessLogoUrl
-              : session.user?.business?.logoUrl;
         const businessId =
           session.businessId ||
           session.user?.businessId ||
@@ -116,9 +109,17 @@ export const authConfig: NextAuthConfig = {
         if (subscriptionStatus) token.subscriptionStatus = subscriptionStatus;
         if (trialExpiresAt !== undefined) token.trialExpiresAt = trialExpiresAt;
         if (businessName) token.businessName = businessName;
-        if (businessLogoUrl !== undefined) token.businessLogoUrl = businessLogoUrl;
         if (emailVerified !== undefined) token.emailVerified = emailVerified;
       }
+
+      // Los tokens emitidos antes de este cambio llevan el logo en base64 dentro.
+      // El JWT se rehidrata desde la cookie en cada petición, así que dejar de
+      // escribirlo no basta: sin este borrado esas sesiones seguirían arrastrando
+      // el binario hasta caducar (30 días por defecto).
+      if ("businessLogoUrl" in token) {
+        delete (token as Record<string, unknown>).businessLogoUrl;
+      }
+
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
@@ -130,7 +131,6 @@ export const authConfig: NextAuthConfig = {
         session.user.id = (token.id as string) || (token.sub as string);
         session.user.businessId = token.businessId;
         session.user.businessName = token.businessName || null;
-        session.user.businessLogoUrl = token.businessLogoUrl || null;
         session.user.subscriptionStatus = token.subscriptionStatus || "TRIALING";
         session.user.trialExpiresAt = token.trialExpiresAt || null;
         session.user.sandboxExpiresAt = token.sandboxExpiresAt || null;

@@ -7,7 +7,6 @@ declare module "next-auth" {
       role?: string;
       businessId?: string | null;
       businessName?: string | null;
-      businessLogoUrl?: string | null;
       subscriptionStatus?: string;
       trialExpiresAt?: string | null;
       sandboxExpiresAt?: string | null;
@@ -25,7 +24,6 @@ declare module "next-auth" {
     role?: string;
     businessId?: string | null;
     businessName?: string | null;
-    businessLogoUrl?: string | null;
     subscriptionStatus?: string;
     trialExpiresAt?: string | null;
     sandboxExpiresAt?: string | null;
@@ -44,7 +42,6 @@ declare module "@auth/core/types" {
       role?: string;
       businessId?: string | null;
       businessName?: string | null;
-      businessLogoUrl?: string | null;
       subscriptionStatus?: string;
       trialExpiresAt?: string | null;
       sandboxExpiresAt?: string | null;
@@ -62,7 +59,6 @@ declare module "@auth/core/types" {
     role?: string;
     businessId?: string | null;
     businessName?: string | null;
-    businessLogoUrl?: string | null;
     subscriptionStatus?: string;
     trialExpiresAt?: string | null;
     sandboxExpiresAt?: string | null;
@@ -80,7 +76,6 @@ declare module "next-auth/jwt" {
     role?: string;
     businessId?: string | null;
     businessName?: string | null;
-    businessLogoUrl?: string | null;
     subscriptionStatus?: string;
     trialExpiresAt?: string | null;
     sandboxExpiresAt?: string | null;
@@ -99,7 +94,6 @@ declare module "@auth/core/jwt" {
     role?: string;
     businessId?: string | null;
     businessName?: string | null;
-    businessLogoUrl?: string | null;
     subscriptionStatus?: string;
     trialExpiresAt?: string | null;
     sandboxExpiresAt?: string | null;

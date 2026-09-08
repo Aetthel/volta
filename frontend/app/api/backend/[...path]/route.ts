@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { logger } from "backend/logger";
 import { auth } from "@/auth";
 import { signToken } from "@/lib/crypto";
+import { jsonResponseComprimida } from "@/lib/httpCompression";
 import type { Session } from "next-auth";
 
 // Use db service name for backend inside Docker container, fallback to localhost for host development
@@ -217,7 +218,11 @@ async function proxyRequest(
     const contentType = backendResponse.headers.get("content-type") || "application/json";
     if (contentType.includes("application/json")) {
       const responseData: Record<string, unknown> = await backendResponse.json();
-      return NextResponse.json(responseData, { status: backendResponse.status });
+      return jsonResponseComprimida(
+        responseData,
+        backendResponse.status,
+        request.headers.get("accept-encoding")
+      );
     } else {
       const responseData = await backendResponse.text();
       return new Response(responseData, {
