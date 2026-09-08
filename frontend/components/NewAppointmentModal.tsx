@@ -15,7 +15,7 @@ import {
   Repeat,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { Button, Alert, SegmentedControl } from "@/components/ui/volta-ui";
+import { Button, Alert, SegmentedControl, Badge } from "@/components/ui/volta-ui";
 import { Calendar } from "@/components/ui/calendar";
 import UserAvatar from "@/components/UserAvatar";
 import { useNewAppointmentForm } from "@/hooks/useNewAppointmentForm";
@@ -502,9 +502,9 @@ export default function NewAppointmentModal({
                             </span>
                           </div>
                         </div>
-                        <span className="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-semibold">
+                        <Badge variant="success" appearance="light" size="xs" shape="pill">
                           Registrado
-                        </span>
+                        </Badge>
                       </button>
                     ))}
                   </div>

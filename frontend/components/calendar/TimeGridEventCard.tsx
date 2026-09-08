@@ -243,12 +243,12 @@ export const TimeGridEventCard: React.FC<TimeGridEventCardProps> = ({
               </div>
               <div className="flex flex-wrap gap-1">
                 {event.category && (
-                  <Badge variant="secondary" className="text-[10px] h-5">
+                  <Badge variant="secondary" size="xs" shape="pill">
                     {event.category}
                   </Badge>
                 )}
                 {event.tags?.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-[10px] h-5">
+                  <Badge key={tag} variant="outline" appearance="outline" size="xs" shape="pill">
                     {tag}
                   </Badge>
                 ))}

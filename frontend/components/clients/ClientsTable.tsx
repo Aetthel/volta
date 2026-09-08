@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Avatar, Empty, Skeleton } from "@/components/ui/volta-ui";
+import { Avatar, Empty, Skeleton, Badge } from "@/components/ui/volta-ui";
 import { formatDateTimeParts } from "@/lib/utils";
 import { formatPhoneForDisplay, type ClientItem, type ClientColumn } from "@/lib/hooks/useClientsList";
 
@@ -257,9 +257,9 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
                   {visibleColumns.has("servicio") && (
                     <TableCell className="py-4">
                       {client.frequentService ? (
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container-high/60 text-on-surface-variant">
+                        <Badge variant="secondary" appearance="light" shape="pill" size="sm">
                           {client.frequentService}
-                        </span>
+                        </Badge>
                       ) : (
                         <span className="text-xs text-on-surface-variant/50">—</span>
                       )}
@@ -269,9 +269,15 @@ export const ClientsTable: React.FC<ClientsTableProps> = ({
                   {/* Citas Totales Column */}
                   {visibleColumns.has("citas") && (
                     <TableCell className="py-4">
-                      <span className="inline-flex items-center justify-center min-w-6 h-6 px-2.5 rounded-full text-xs font-semibold bg-surface-container-high/60 text-on-surface">
+                      <Badge
+                        variant="secondary"
+                        appearance="light"
+                        shape="pill"
+                        size="xs"
+                        className="font-semibold min-w-6"
+                      >
                         {apptCount}
-                      </span>
+                      </Badge>
                     </TableCell>
                   )}
 

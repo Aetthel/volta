@@ -22,7 +22,7 @@ import {
   X,
   ArrowRight,
 } from "lucide-react";
-import { Button, Badge, Skeleton, toast } from "@/components/ui/volta-ui";
+import { Button, Badge, BadgeDot, Skeleton, toast } from "@/components/ui/volta-ui";
 import { SectionHeading } from "./SectionHeading";
 import type { Invoice } from "@/types/domain";
 import { cn } from "@/lib/utils";
@@ -176,10 +176,10 @@ export default function BillingSection() {
                 </div>
               </div>
               {isBasicCurrent && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <Badge variant="success" appearance="light" shape="pill" size="sm" className="shrink-0">
+                  <BadgeDot className="bg-emerald-500" />
                   Plan Actual
-                </span>
+                </Badge>
               )}
             </div>
 
@@ -263,9 +263,14 @@ export default function BillingSection() {
         >
           {/* Badge Recomendado */}
           <div className="absolute -top-3 right-6">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-primary text-white px-3 py-1 rounded-full shadow-xs">
+            <Badge
+              variant="primary"
+              shape="pill"
+              size="xs"
+              className="font-extrabold uppercase tracking-wider px-3 py-1 shadow-xs"
+            >
               Recomendado
-            </span>
+            </Badge>
           </div>
 
           <div>
@@ -283,10 +288,10 @@ export default function BillingSection() {
                 </div>
               </div>
               {isProCurrent && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <Badge variant="success" appearance="light" shape="pill" size="sm" className="shrink-0">
+                  <BadgeDot className="bg-emerald-500" />
                   Plan Actual
-                </span>
+                </Badge>
               )}
             </div>
 
@@ -450,9 +455,15 @@ export default function BillingSection() {
                         {Number(inv.amount).toFixed(2)}€
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                          <CheckCircle2 className="w-3 h-3" /> Pagada
-                        </span>
+                        <Badge
+                          variant="success"
+                          appearance="light"
+                          shape="pill"
+                          size="xs"
+                          className="font-bold uppercase gap-1"
+                        >
+                          <CheckCircle2 className="size-3" /> Pagada
+                        </Badge>
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         {inv.invoiceUrl ? (

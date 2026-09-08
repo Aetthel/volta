@@ -110,7 +110,7 @@ export const BusinessServicesCatalog: React.FC<BusinessServicesCatalogProps> = (
               description="Servicios disponibles para agendar citas en el salón o por reserva online."
               className="mb-0"
               trailing={
-                <Badge variant="secondary" className="text-xs font-bold px-2 py-0.5">
+                <Badge variant="secondary" appearance="light" shape="pill" size="sm" className="font-bold">
                   {services.length} {services.length === 1 ? "servicio" : "servicios"}
                 </Badge>
               }

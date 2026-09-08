@@ -273,7 +273,10 @@ export default function RootPage() {
             <div className="flex flex-col items-start text-left z-10">
               <Badge
                 variant="secondary"
-                className="px-3 py-1 text-label-md font-semibold mb-6 border border-secondary/20 gap-1.5"
+                appearance="light"
+                shape="pill"
+                size="md"
+                className="mb-6 border border-secondary/20 gap-1.5"
               >
                 <ShieldCheck className="w-4 h-4 text-primary" />
                 Gestión Profesional para tu Negocio
@@ -358,9 +361,15 @@ export default function RootPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">
+                      <Badge
+                        variant="success"
+                        appearance="light"
+                        size="xs"
+                        shape="pill"
+                        className="text-[9px] font-bold"
+                      >
                         Confirmada
-                      </span>
+                      </Badge>
                       <span className="text-[10px] text-on-surface-variant hidden sm:inline">
                         Consulta
                       </span>
@@ -383,9 +392,15 @@ export default function RootPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-bold">
+                      <Badge
+                        variant="success"
+                        appearance="light"
+                        size="xs"
+                        shape="pill"
+                        className="text-[9px] font-bold"
+                      >
                         Confirmada
-                      </span>
+                      </Badge>
                       <span className="text-[10px] text-on-surface-variant hidden sm:inline">
                         Sesión
                       </span>
@@ -408,9 +423,15 @@ export default function RootPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold">
+                      <Badge
+                        variant="warning"
+                        appearance="light"
+                        size="xs"
+                        shape="pill"
+                        className="text-[9px] font-bold"
+                      >
                         Pendiente
-                      </span>
+                      </Badge>
                       <span className="text-[10px] text-on-surface-variant hidden sm:inline">
                         Revisión
                       </span>
@@ -533,8 +554,11 @@ export default function RootPage() {
               {/* Description */}
               <div className="order-1 md:order-2">
                 <Badge
-                  variant="secondary"
-                  className="bg-primary/10 text-primary px-3 py-1 text-label-md font-semibold mb-6 border-none"
+                  variant="primary"
+                  appearance="light"
+                  size="md"
+                  shape="pill"
+                  className="mb-6 font-semibold"
                 >
                   Precisión
                 </Badge>
@@ -581,7 +605,13 @@ export default function RootPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
               {/* Description */}
               <div>
-                <Badge variant="secondary" className="px-3 py-1 text-label-md font-semibold mb-6">
+                <Badge
+                  variant="secondary"
+                  appearance="light"
+                  size="md"
+                  shape="pill"
+                  className="mb-6 font-semibold"
+                >
                   Analítica
                 </Badge>
                 <h2 className="font-display text-headline-lg md:text-[32px] text-on-surface font-bold mb-6">
@@ -805,7 +835,9 @@ export default function RootPage() {
               <Card className="bg-primary p-8 shadow-xl relative flex flex-col lg:-mt-4 lg:mb-4 transform lg:scale-105 z-10 text-on-primary border-none overflow-visible">
                 <Badge
                   variant="secondary"
-                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 py-1 text-label-md uppercase tracking-wider font-bold shadow-md border-none"
+                  size="md"
+                  shape="pill"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 uppercase tracking-wider font-bold shadow-md"
                 >
                   MÁS POPULAR
                 </Badge>

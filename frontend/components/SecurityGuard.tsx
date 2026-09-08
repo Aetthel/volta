@@ -24,12 +24,12 @@ export default function SecurityGuard() {
             code?: string;
             redirect?: string;
           };
-          if (
+          const isExpulsion =
             data.code === "TRIAL_EXPIRED" ||
             data.code === "PERMISSIONS_REVOKED" ||
             data.code === "SESSION_ORPHANED" ||
             data.code === "UNAUTHORIZED" ||
-            data.redirect;
+            Boolean(data.redirect);
 
           if (isExpulsion) {
             console.warn("[SecurityGuard] Expulsando usuario al Login (Sesión expirada o permisos no válidos)");

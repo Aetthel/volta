@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, RefreshCw, CheckCircle2, AlertCircle, Clock, CreditCard, Mail } from "lucide-react";
 import FaceIcon from "@/components/FaceIcon";
+import { Badge } from "@/components/ui/badge";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -37,10 +38,10 @@ export default function ReembolsosPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <div className="mb-10 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 mb-4">
-            <RefreshCw className="w-3.5 h-3.5" />
+          <Badge variant="warning" appearance="light" shape="pill" size="md" className="gap-2 mb-4">
+            <RefreshCw className="size-3.5" />
             Transparencia y Garantía de Satisfacción
-          </div>
+          </Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
             Política de Cancelación y Reembolso
           </h1>

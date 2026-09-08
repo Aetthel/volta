@@ -21,6 +21,7 @@ import {
   Textarea,
   Button,
   Badge,
+  BadgeDot,
   FieldGroup,
   Field,
   FieldLabel,
@@ -223,8 +224,11 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
                   {profile.name || "Nombre del Negocio"}
                 </h2>
                 <Badge
-                  variant="default"
-                  className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                  variant="primary"
+                  appearance="light"
+                  shape="pill"
+                  size="sm"
+                  className="font-semibold"
                 >
                   {profile.businessType || "Peluquería / Salón"}
                 </Badge>
@@ -284,15 +288,15 @@ export const BusinessGeneralForm: React.FC<BusinessGeneralFormProps> = ({
             description="Tus clientes pueden acceder a este enlace o escanear el QR en tu local para agendar citas de forma autónoma las 24 horas."
             className="mb-0"
             trailing={
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  profile.enablePublicBooking !== false
-                    ? "bg-secondary-container text-on-secondary-container"
-                    : "bg-surface-variant text-on-surface-variant"
-                }`}
+              <Badge
+                variant={profile.enablePublicBooking !== false ? "success" : "neutral"}
+                appearance="light"
+                shape="pill"
+                size="sm"
               >
+                <BadgeDot className={profile.enablePublicBooking !== false ? "bg-emerald-500" : undefined} />
                 {profile.enablePublicBooking !== false ? "Activa" : "Desactivada"}
-              </span>
+              </Badge>
             }
           />
 

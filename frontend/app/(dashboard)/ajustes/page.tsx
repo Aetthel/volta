@@ -15,7 +15,7 @@ import {
   RADIUS_SCALES,
 } from "@/lib/theme";
 import type { BusinessProfile } from "@/types/settings";
-import { toast } from "@/components/ui/volta-ui";
+import { toast, Badge } from "@/components/ui/volta-ui";
 
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
@@ -381,9 +381,15 @@ function AjustesContent() {
                           <div className="text-primary flex items-center justify-center">
                             <IconComponent className="w-6 h-6 transition-transform duration-200 group-hover:scale-110" strokeWidth={1.8} />
                           </div>
-                          <span className="text-[11px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full bg-surface-container-low text-on-surface-variant/80 border border-outline-variant/50 group-hover:border-primary/30 group-hover:text-primary transition-colors">
+                          <Badge
+                            variant="neutral"
+                            appearance="outline"
+                            size="xs"
+                            shape="pill"
+                            className="text-[11px] font-semibold tracking-wide uppercase group-hover:border-primary/30 group-hover:text-primary transition-colors"
+                          >
                             {cat.categoryTag}
-                          </span>
+                          </Badge>
                         </div>
 
                         {/* Title & Description */}

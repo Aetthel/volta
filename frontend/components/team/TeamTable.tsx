@@ -12,15 +12,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Avatar, Empty, Skeleton } from "@/components/ui/volta-ui";
+import { Avatar, Empty, Skeleton, Badge, BadgeDot } from "@/components/ui/volta-ui";
 import {
   formatDate,
   getRoleLabel,
-  getRoleBadgeClasses,
   type TeamMember,
   type TeamColumn,
 } from "@/lib/hooks/useTeamList";
 import type { WorkerToEdit } from "@/components/InviteWorkerModal";
+
+const getRoleBadgeConfig = (role: string): { variant: "info" | "primary" | "secondary" | "neutral"; appearance: "light" } => {
+  switch (role) {
+    case "ADMIN":
+      return { variant: "info", appearance: "light" };
+    case "JEFE":
+      return { variant: "primary", appearance: "light" };
+    case "EMPLEADO":
+      return { variant: "secondary", appearance: "light" };
+    default:
+      return { variant: "neutral", appearance: "light" };
+  }
+};
 
 interface TeamTableProps {
   isLoading: boolean;
@@ -163,13 +175,14 @@ export const TeamTable: React.FC<TeamTableProps> = ({
                   {/* Rol Column */}
                   {visibleColumns.has("rol") && (
                     <TableCell className="py-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${getRoleBadgeClasses(
-                          member.role
-                        )}`}
+                      <Badge
+                        {...getRoleBadgeConfig(member.role)}
+                        shape="pill"
+                        size="sm"
+                        className="font-semibold"
                       >
                         {getRoleLabel(member.role)}
-                      </span>
+                      </Badge>
                     </TableCell>
                   )}
 
@@ -185,10 +198,10 @@ export const TeamTable: React.FC<TeamTableProps> = ({
                   {/* Estado Column */}
                   {visibleColumns.has("estado") && (
                     <TableCell className="py-4">
-                      <div className="inline-flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 select-none">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                      <Badge variant="success" appearance="light" shape="pill" size="sm">
+                        <BadgeDot className="bg-emerald-500" />
                         <span>Activo</span>
-                      </div>
+                      </Badge>
                     </TableCell>
                   )}
 

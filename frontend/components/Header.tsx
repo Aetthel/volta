@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { openGlobalSearch } from "@/lib/search/openSearch";
 import { apiClient } from "@/lib/apiClient";
-import { Avatar, AvatarGroup } from "@/components/ui/volta-ui";
+import { Avatar, AvatarGroup, Badge } from "@/components/ui/volta-ui";
 
 interface HeaderProps {
   searchPlaceholder?: string;
@@ -179,9 +179,15 @@ function HeaderContent({}: HeaderProps) {
                   <p className="text-xs text-on-surface-variant/70 truncate">
                     {currentUserEmail}
                   </p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold tracking-wide uppercase">
+                  <Badge
+                    variant="primary"
+                    appearance="light"
+                    size="xs"
+                    shape="pill"
+                    className="mt-1 font-semibold tracking-wide uppercase"
+                  >
                     {getRoleLabel(currentUserRole)}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             </div>

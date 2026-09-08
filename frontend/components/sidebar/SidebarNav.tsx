@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { hasFeatureAccess, PlanFeature } from "@/lib/permissions";
+import { Badge } from "@/components/ui/badge";
 
 export type NavItemData = {
   id: string;
@@ -28,9 +29,15 @@ function renderBadge(badge?: number | string) {
   if (badge === undefined || badge === null) return null;
 
   return (
-    <span className="inline-flex items-center justify-center px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 shadow-2xs whitespace-nowrap leading-tight">
+    <Badge
+      variant="primary"
+      appearance="light"
+      shape="pill"
+      size="xs"
+      className="shadow-2xs whitespace-nowrap leading-tight text-[11px]"
+    >
       {badge}
-    </span>
+    </Badge>
   );
 }
 

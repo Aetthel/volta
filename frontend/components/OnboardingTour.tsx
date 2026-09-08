@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronRight, ChevronLeft, X, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/volta-ui";
+import { Button, Badge } from "@/components/ui/volta-ui";
 
 export interface TourStep {
   targetSelector: string; // e.g. '[data-tour="metrics-grid"]'
@@ -206,9 +206,9 @@ export default function OnboardingTour({
       >
         {/* Step Indicator Header */}
         <div className="flex items-center justify-between mb-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+          <Badge variant="primary" appearance="light" shape="pill" size="sm" className="font-semibold">
             Paso {currentStepIndex + 1} de {steps.length}
-          </span>
+          </Badge>
           <button
             onClick={onClose}
             className="text-on-surface-variant hover:text-on-surface p-1.5 rounded-full hover:bg-surface-container transition-colors cursor-pointer"

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Card, Avatar } from "@/components/ui/volta-ui";
+import { Card, Avatar, Badge } from "@/components/ui/volta-ui";
 import { Clock, CalendarIcon } from "lucide-react";
 
 export interface UpcomingAppointment {
@@ -48,9 +48,15 @@ export const UpcomingAppointmentsList: React.FC<UpcomingAppointmentsListProps> =
               </div>
 
               <div className="flex flex-col items-end gap-1.5 shrink-0">
-                <div className="px-2 py-0.5 bg-surface-container-low rounded text-on-surface-variant font-bold text-body-xs border border-outline-variant/30 select-none">
+                <Badge
+                  variant="neutral"
+                  appearance="outline"
+                  size="xs"
+                  shape="pill"
+                  className="font-bold select-none"
+                >
                   {app.time}
-                </div>
+                </Badge>
                 <div className="flex items-center gap-1 text-primary text-body-xs font-semibold">
                   <Clock className="w-3 h-3 text-primary" />
                   <span>{app.duration}</span>

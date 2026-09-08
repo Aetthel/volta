@@ -12,7 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { Alert, Button, Card, Avatar } from "@/components/ui/volta-ui";
+import { Alert, Button, Card, Avatar, Badge } from "@/components/ui/volta-ui";
 import { Calendar } from "@/components/ui/calendar";
 import type { BookingIdentity } from "@/hooks/useBookingSession";
 
@@ -283,10 +283,16 @@ export default function BookingWizard({
               )}
             </div>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-label-md font-semibold rounded-full border border-primary/20">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <Badge
+            variant="primary"
+            appearance="light"
+            shape="pill"
+            size="lg"
+            className="font-semibold text-label-md py-1.5 px-3"
+          >
+            <CheckCircle2 className="size-3.5" />
             {identity.name}
-          </span>
+          </Badge>
         </div>
 
         {/* Indicador de pasos */}
@@ -355,9 +361,15 @@ export default function BookingWizard({
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-title-md text-on-surface">{srv.name}</span>
                       {srv.capacity > 1 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-body-xs bg-secondary-container text-on-secondary-container rounded-md font-semibold">
+                        <Badge
+                          variant="secondary"
+                          appearance="light"
+                          size="xs"
+                          shape="pill"
+                          className="gap-1 font-semibold"
+                        >
                           <Users className="w-3 h-3" /> Aforo: {srv.capacity} personas
-                        </span>
+                        </Badge>
                       )}
                     </div>
                     {srv.description && (

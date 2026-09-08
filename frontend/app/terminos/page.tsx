@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Shield, FileText, CheckCircle2, HelpCircle } from "lucide-react";
 import FaceIcon from "@/components/FaceIcon";
+import { Badge } from "@/components/ui/badge";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -37,10 +38,10 @@ export default function TerminosPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <div className="mb-10 text-center sm:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 mb-4">
-            <FileText className="w-3.5 h-3.5" />
+          <Badge variant="primary" appearance="light" shape="pill" size="md" className="gap-2 mb-4">
+            <FileText className="size-3.5" />
             Última actualización: Septiembre 2026
-          </div>
+          </Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
             Términos y Condiciones del Servicio
           </h1>

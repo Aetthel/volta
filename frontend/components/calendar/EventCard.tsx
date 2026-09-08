@@ -109,12 +109,12 @@ export const EventCard: React.FC<EventCardProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {event.category && (
-                    <Badge variant="secondary" className="text-[10px] h-5">
+                    <Badge variant="secondary" appearance="light" shape="pill" size="xs">
                       {event.category}
                     </Badge>
                   )}
                   {event.tags?.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-[10px] h-5">
+                    <Badge key={tag} variant="neutral" appearance="outline" shape="pill" size="xs">
                       {tag}
                     </Badge>
                   ))}
@@ -163,12 +163,12 @@ export const EventCard: React.FC<EventCardProps> = ({
         {isHovered && (
           <div className="mt-2 flex flex-wrap gap-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
             {event.category && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" appearance="light" shape="pill" size="xs">
                 {event.category}
               </Badge>
             )}
             {event.tags?.map((tag) => (
-              <Badge key={tag} variant="outline" className="text-xs">
+              <Badge key={tag} variant="neutral" appearance="outline" shape="pill" size="xs">
                 {tag}
               </Badge>
             ))}
@@ -227,12 +227,12 @@ export const EventCard: React.FC<EventCardProps> = ({
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {event.category && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" appearance="light" shape="pill" size="xs">
                       {event.category}
                     </Badge>
                   )}
                   {event.tags?.map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs">
+                    <Badge key={tag} variant="neutral" appearance="outline" shape="pill" size="xs">
                       {tag}
                     </Badge>
                   ))}

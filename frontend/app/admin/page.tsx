@@ -23,7 +23,7 @@ import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
 import TrialBanner from "@/components/TrialBanner";
 import MetricCard from "@/components/MetricCard";
-import { Button, PageHeader, Skeleton, Alert } from "@/components/ui/volta-ui";
+import { Button, PageHeader, Skeleton, Alert, Badge } from "@/components/ui/volta-ui";
 import { formatCurrency } from "@/lib/utils";
 
 export default function AdminPage() {
@@ -345,9 +345,9 @@ export default function AdminPage() {
                   <h3 className="font-title-lg text-title-lg text-on-surface font-semibold">
                     Ranking de Locales
                   </h3>
-                  <span className="font-label-md text-primary bg-secondary-container/50 rounded-full px-2 py-[2px] font-bold">
+                  <Badge variant="primary" appearance="light" shape="pill" size="sm" className="font-bold">
                     Top 3
-                  </span>
+                  </Badge>
                 </div>
 
                 {/* List */}

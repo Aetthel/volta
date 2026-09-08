@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { MessageSquare, Loader2, Lock, QrCode } from "lucide-react";
 import dynamic from "next/dynamic";
-import { Button, Badge, toast } from "@/components/ui/volta-ui";
+import { Button, Badge, BadgeDot, toast } from "@/components/ui/volta-ui";
 import { SectionHeading } from "../SectionHeading";
 import { apiClient } from "@/lib/apiClient";
 
@@ -132,26 +132,29 @@ export const WhatsAppConnectionCard: React.FC<WhatsAppConnectionCardProps> = ({
             trailing={
               <>
                 {whatsappStatus === "CONNECTED" ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <Badge variant="success" appearance="light" shape="pill" size="md">
+                    <BadgeDot className="bg-emerald-500 animate-pulse" />
                     Conectado y Activo
-                  </span>
+                  </Badge>
                 ) : whatsappStatus === "WAITING_QR" ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                  <Badge variant="warning" appearance="light" shape="pill" size="md">
+                    <BadgeDot className="bg-amber-500 animate-ping" />
                     Esperando Escaneo QR
-                  </span>
+                  </Badge>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant border border-outline-variant/60">
-                    <span className="w-2 h-2 rounded-full bg-on-surface-variant/40" />
+                  <Badge variant="neutral" appearance="light" shape="pill" size="md">
+                    <BadgeDot className="bg-on-surface-variant/40" />
                     Desconectado
-                  </span>
+                  </Badge>
                 )}
 
                 {!hasWhatsApp && (
                   <Badge
-                    variant="outline"
-                    className="text-label-sm font-bold text-primary border-primary/30"
+                    variant="primary"
+                    appearance="outline"
+                    shape="pill"
+                    size="sm"
+                    className="font-bold border-primary/30"
                   >
                     PLAN PRO
                   </Badge>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Clock, Loader2, Sparkles, Check } from "lucide-react";
 import type { BusinessHours } from "@/types/settings";
-import { Skeleton, toast } from "@/components/ui/volta-ui";
+import { Skeleton, toast, Badge } from "@/components/ui/volta-ui";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/apiClient";
 
@@ -152,9 +152,9 @@ export const BusinessHoursGrid: React.FC<BusinessHoursGridProps> = ({ businessId
 
               <div className="flex items-center gap-2 flex-1 justify-end">
                 {h.isClosed ? (
-                  <span className="text-xs font-bold text-error bg-error/10 px-2.5 py-0.5 rounded-full">
+                  <Badge variant="destructive" appearance="light" size="xs" shape="pill">
                     Cerrado
-                  </span>
+                  </Badge>
                 ) : (
                   <div className="flex items-center gap-1.5 text-xs">
                     <input

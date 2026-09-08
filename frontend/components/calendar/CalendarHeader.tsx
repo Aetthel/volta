@@ -4,7 +4,7 @@ import React from "react";
 import { ChevronLeft, ChevronRight, Calendar, Clock, Grid3x3, List, Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge, BadgeButton } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -239,7 +239,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 <Filter className="h-4 w-4" />
                 Colores
                 {selectedColors.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                  <Badge variant="primary" appearance="light" shape="pill" size="xs" className="ml-1">
                     {selectedColors.length}
                   </Badge>
                 )}
@@ -287,7 +287,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 <Filter className="h-4 w-4" />
                 Etiquetas
                 {selectedTags.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                  <Badge variant="primary" appearance="light" shape="pill" size="xs" className="ml-1">
                     {selectedTags.length}
                   </Badge>
                 )}
@@ -319,7 +319,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
                 <Filter className="h-4 w-4" />
                 Categorías
                 {selectedCategories.length > 0 && (
-                  <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                  <Badge variant="primary" appearance="light" shape="pill" size="xs" className="ml-1">
                     {selectedCategories.length}
                   </Badge>
                 )}
@@ -360,41 +360,59 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           {selectedColors.map((colorValue) => {
             const color = getColorClasses(colorValue);
             return (
-              <Badge key={colorValue} variant="secondary" className="gap-1">
-                <div className={cn("h-2 w-2 rounded-full", color.bg)} />
+              <Badge
+                key={colorValue}
+                variant="secondary"
+                appearance="light"
+                shape="pill"
+                size="sm"
+                className="gap-1.5"
+              >
+                <span className={cn("size-2 rounded-full shrink-0", color.bg)} />
                 {color.name}
-                <button
+                <BadgeButton
                   onClick={() => toggleColor(colorValue)}
-                  className="ml-1 hover:text-on-surface cursor-pointer"
                   aria-label={`Eliminar filtro ${color.name}`}
                 >
-                  <X className="h-3 w-3" />
-                </button>
+                  <X className="size-3" />
+                </BadgeButton>
               </Badge>
             );
           })}
           {selectedTags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1">
+            <Badge
+              key={tag}
+              variant="secondary"
+              appearance="light"
+              shape="pill"
+              size="sm"
+              className="gap-1.5"
+            >
               {tag}
-              <button
+              <BadgeButton
                 onClick={() => toggleTag(tag)}
-                className="ml-1 hover:text-on-surface cursor-pointer"
                 aria-label={`Eliminar filtro ${tag}`}
               >
-                <X className="h-3 w-3" />
-              </button>
+                <X className="size-3" />
+              </BadgeButton>
             </Badge>
           ))}
           {selectedCategories.map((category) => (
-            <Badge key={category} variant="secondary" className="gap-1">
+            <Badge
+              key={category}
+              variant="secondary"
+              appearance="light"
+              shape="pill"
+              size="sm"
+              className="gap-1.5"
+            >
               {category}
-              <button
+              <BadgeButton
                 onClick={() => toggleCategory(category)}
-                className="ml-1 hover:text-on-surface cursor-pointer"
                 aria-label={`Eliminar filtro ${category}`}
               >
-                <X className="h-3 w-3" />
-              </button>
+                <X className="size-3" />
+              </BadgeButton>
             </Badge>
           ))}
         </div>

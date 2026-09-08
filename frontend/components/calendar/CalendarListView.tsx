@@ -73,7 +73,7 @@ export const CalendarListView: React.FC<CalendarListViewProps> = ({
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {event.category && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" size="xs" shape="pill">
                                 {event.category}
                               </Badge>
                             )}
@@ -98,7 +98,9 @@ export const CalendarListView: React.FC<CalendarListViewProps> = ({
                                 <Badge
                                   key={tag}
                                   variant="outline"
-                                  className="text-[10px] h-4 sm:text-xs sm:h-5"
+                                  appearance="outline"
+                                  size="xs"
+                                  shape="pill"
                                 >
                                   {tag}
                                 </Badge>

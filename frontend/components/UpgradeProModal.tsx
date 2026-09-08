@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { useSession, signOut } from "next-auth/react";
 import { X, Lock, Check, ArrowRight, UserPlus } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/volta-ui";
+import { Button, Badge } from "@/components/ui/volta-ui";
 import {
   LEMON_SQUEEZY_PRODUCT_URLS,
   buildLemonSqueezyCheckoutUrl,
@@ -70,9 +70,15 @@ export default function UpgradeProModal({
               <Lock className="w-9 h-9 text-primary" strokeWidth={1.75} />
             )}
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full">
+          <Badge
+            variant="primary"
+            appearance="light"
+            size="sm"
+            shape="pill"
+            className="font-bold uppercase tracking-wider"
+          >
             {isRegisterMode ? "Modo Demostración" : "Ventaja Exclusiva Pro"}
-          </span>
+          </Badge>
           <h3 className="text-2xl font-bold text-on-surface tracking-tight">{title}</h3>
           <p className="text-sm text-on-surface-variant leading-relaxed">{description}</p>
         </div>

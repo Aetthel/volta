@@ -35,7 +35,9 @@ export const LocationCard: React.FC<LocationCardProps> = ({
               {business.name}
             </h3>
           </div>
-          <Badge variant="secondary">{business.role}</Badge>
+          <Badge variant="secondary" appearance="light" shape="pill" size="sm">
+            {business.role}
+          </Badge>
         </div>
 
         {/* Details list */}

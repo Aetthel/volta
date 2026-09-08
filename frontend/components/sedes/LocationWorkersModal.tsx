@@ -10,6 +10,7 @@ import {
   CardFooter,
   Input,
   Button,
+  Badge,
   Select,
   FieldGroup,
   Field,
@@ -104,15 +105,15 @@ export const LocationWorkersModal: React.FC<LocationWorkersModalProps> = ({
                   <div>
                     <div className="font-semibold text-on-surface flex items-center gap-2">
                       <span>{w.name}</span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                          w.role === "JEFE"
-                            ? "bg-primary/10 text-primary border border-primary/20"
-                            : "bg-surface-container text-on-surface-variant border border-outline-variant/60"
-                        }`}
+                      <Badge
+                        variant={w.role === "JEFE" ? "primary" : "secondary"}
+                        appearance={w.role === "JEFE" ? "light" : "outline"}
+                        size="xs"
+                        shape="pill"
+                        className="font-bold uppercase"
                       >
                         {w.role}
-                      </span>
+                      </Badge>
                     </div>
                     <div className="text-xs text-on-surface-variant">{w.email}</div>
                   </div>

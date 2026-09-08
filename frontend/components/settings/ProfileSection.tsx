@@ -400,8 +400,11 @@ export default function ProfileSection({ profile, setProfile }: ProfileSectionPr
                 {personalForm.name || session?.user?.name || "Usuario de Volta"}
               </h2>
               <Badge
-                variant="default"
-                className="text-label-sm font-semibold px-2.5 py-0.5 rounded-full"
+                variant="primary"
+                appearance="light"
+                shape="pill"
+                size="sm"
+                className="font-semibold"
               >
                 {role === "ADMIN"
                   ? "Administrador Global"
@@ -541,12 +544,11 @@ export default function ProfileSection({ profile, setProfile }: ProfileSectionPr
                 className="mb-0"
                 trailing={
                   <Badge
-                    variant={twoFactorEnabled ? "default" : "outline"}
-                    className={cn(
-                      "text-label-sm font-bold px-2 py-0.5 rounded-full uppercase tracking-wide",
-                      twoFactorEnabled &&
-                        "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
-                    )}
+                    variant={twoFactorEnabled ? "success" : "neutral"}
+                    appearance="light"
+                    shape="pill"
+                    size="xs"
+                    className="font-bold uppercase tracking-wide"
                   >
                     {twoFactorEnabled ? "Activado" : "Desactivado"}
                   </Badge>
