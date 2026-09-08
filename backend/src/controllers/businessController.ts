@@ -1,4 +1,5 @@
 import * as businessService from "../services/businessService.js";
+import { cacheService } from "../services/cacheService.js";
 import { ApiResponse } from "../utils/index.js";
 import {
   getHolidayCatalogue,
@@ -139,6 +140,7 @@ export const updateHolidays = async (req: AuthRequest, res: Response) => {
   }
 
   await businessService.updateBusinessHolidays(id, holidaysData);
+  await cacheService.del(`volta:cache:biz:${id}:schedule`);
 
   const preferences = await businessService.getBusinessHolidays(id);
   const currentYear = new Date().getFullYear();
@@ -168,6 +170,9 @@ export const updateHours = async (req: AuthRequest, res: Response) => {
   }
 
   await businessService.updateBusinessHours(id, hoursData);
+  // El portal público cachea horario y festivos juntos para no repetirlos en cada
+  // consulta de disponibilidad.
+  await cacheService.del(`volta:cache:biz:${id}:schedule`);
   const updatedHours = await businessService.getBusinessHours(id);
 
   return ApiResponse.success(res, updatedHours);

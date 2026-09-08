@@ -1,9 +1,14 @@
 import prisma from "../config/db.js";
 import { ApiResponse, normalizePhone } from "../utils/index.js";
-import { validateBusinessHours, calculateAvailableSlots } from "../utils/businessHours.js";
+import {
+  validateBusinessHours,
+  calculateAvailableSlots,
+  type BusinessHourRecord,
+} from "../utils/businessHours.js";
 import { getHolidayForDate, getObservedHolidays } from "../utils/holidays.js";
 import { zonedTimeToUtc } from "../utils/timezone.js";
 import * as bookingIdentityService from "../services/bookingIdentityService.js";
+import { cacheService } from "../services/cacheService.js";
 import { sendWelcomeMessage, sendConsentMessage } from "../services/botService.js";
 import { logger } from "../utils/logger.js";
 import { z } from "zod";
@@ -16,6 +21,44 @@ const createBookingSchema = z.object({
   appointmentDate: z.string().min(1, "Fecha de cita no válida"),
   clientEmail: z.string().email("Formato de correo no válido").optional().or(z.literal("")),
 });
+
+/**
+ * Horario semanal y festivos observados del negocio, cacheados.
+ *
+ * `getAvailableSlots` es el endpoint más caro del portal público —lo llama un
+ * visitante sin autenticar por cada fecha que pulsa— y de sus consultas, estas dos
+ * devuelven datos que sólo cambian cuando el negocio edita sus ajustes.
+ *
+ * Se cachean SOLO estas entradas estáticas: las citas del día se leen siempre
+ * frescas, porque cachear los huecos calculados ofrecería como libre un hueco que
+ * alguien acaba de reservar.
+ *
+ * Ninguno de los dos modelos tiene campos DateTime, así que el viaje por JSON
+ * hasta Redis y de vuelta no pierde información.
+ */
+interface HorarioYFestivos {
+  businessHours: BusinessHourRecord[];
+  holidayPreferences: { holidayKey: string; isObserved: boolean }[];
+}
+
+const getHorarioYFestivos = async (businessId: string): Promise<HorarioYFestivos> => {
+  const clave = `volta:cache:biz:${businessId}:schedule`;
+
+  const cacheado = await cacheService.get<HorarioYFestivos>(clave);
+  if (cacheado) return cacheado;
+
+  const [businessHours, holidayPreferences] = await Promise.all([
+    prisma.businessHours.findMany({ where: { businessId } }),
+    prisma.businessHoliday.findMany({
+      where: { businessId },
+      select: { holidayKey: true, isObserved: true },
+    }),
+  ]);
+
+  const datos = { businessHours, holidayPreferences };
+  await cacheService.set(clave, datos, 300);
+  return datos;
+};
 
 const isBookingOpen = (business: any) =>
   business &&
@@ -125,14 +168,7 @@ export const getAvailableSlots = async (req: Request, res: Response) => {
     return res.status(403).json({ error: "Las reservas públicas no están disponibles." });
   }
 
-  const businessHours = await prisma.businessHours.findMany({
-    where: { businessId },
-  });
-
-  const holidayPreferences = await prisma.businessHoliday.findMany({
-    where: { businessId },
-    select: { holidayKey: true, isObserved: true },
-  });
+  const { businessHours, holidayPreferences } = await getHorarioYFestivos(businessId);
 
   const [holidayYear, holidayMonth, holidayDay] = String(date).split("-").map(Number);
   const holiday = getHolidayForDate(

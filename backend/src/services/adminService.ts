@@ -1,4 +1,5 @@
 import prisma from "../config/db.js";
+import { cacheService } from "./cacheService.js";
 import bcrypt from "bcryptjs";
 import { formatCurrency } from "../utils/formatters.js";
 
@@ -156,9 +157,16 @@ export const createBusiness = async ({ name, email, phone, address }: CreateBusi
 };
 
 export const deleteBusiness = async (id: string) => {
-  return prisma.$transaction(async (tx) => {
+  const resultado = await prisma.$transaction(async (tx) => {
     await deleteBusinessCascade(id, tx);
   });
+
+  // Este borrado se salta los endpoints de negocio, que son los que invalidan al
+  // editar horario o festivos. Sin esto, el portal público seguiría sirviendo el
+  // horario de un negocio ya eliminado durante lo que quede de TTL.
+  await cacheService.invalidatePattern(`volta:cache:biz:${id}:*`);
+
+  return resultado;
 };
 
 export const getDashboardData = async () => {
