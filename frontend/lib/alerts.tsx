@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 import { apiClient } from "@/lib/apiClient";
 
 export type AlertCategory = "APPOINTMENT" | "WHATSAPP" | "CLIENT" | "BILLING" | "SYSTEM";
@@ -114,19 +115,18 @@ function AlertsProviderClient({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    if (status !== "unauthenticated") {
-      setIsLoading(true);
-      fetchAlerts().finally(() => setIsLoading(false));
+    if (status === "unauthenticated") setAlerts([]);
+  }, [status]);
 
-      const interval = setInterval(() => {
-        fetchAlerts();
-      }, 20000);
+  // El sondeo se detiene con la pestaña oculta y se ejecuta al volver a ella, así
+  // que las notificaciones están al día justo cuando alguien va a mirarlas, en vez
+  // de refrescarse cada 20 s durante horas en segundo plano.
+  const refrescarAlertas = useCallback(() => {
+    setIsLoading(true);
+    fetchAlerts().finally(() => setIsLoading(false));
+  }, [fetchAlerts]);
 
-      return () => clearInterval(interval);
-    } else {
-      setAlerts([]);
-    }
-  }, [status, fetchAlerts]);
+  useVisiblePolling(refrescarAlertas, 20000, status !== "unauthenticated");
 
   const activeAlerts = useMemo(() => alerts.filter((a) => !a.isArchived), [alerts]);
   const unreadAlerts = useMemo(() => activeAlerts.filter((a) => !a.isRead), [activeAlerts]);

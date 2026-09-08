@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { setupSecurityInterceptor } from "@/lib/securityInterceptor";
 import { apiClient } from "@/lib/apiClient";
+import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 
 export default function SecurityGuard() {
   const { data: session, status } = useSession();
@@ -13,56 +14,42 @@ export default function SecurityGuard() {
     setupSecurityInterceptor();
   }, []);
 
-  useEffect(() => {
-    if (status !== "authenticated" || !session?.user) return;
+  const checkPermissions = useCallback(async () => {
+    try {
+      const res = await apiClient.get("/users/check-permissions");
+      if (res.status === 403 || res.status === 401) {
+        const data = (res.errorData ?? {}) as {
+          code?: string;
+          redirect?: string;
+        };
+        const isExpulsion =
+          data.code === "TRIAL_EXPIRED" ||
+          data.code === "PERMISSIONS_REVOKED" ||
+          data.code === "SESSION_ORPHANED" ||
+          data.code === "UNAUTHORIZED" ||
+          Boolean(data.redirect);
 
-    const checkPermissions = async () => {
-      try {
-        const res = await apiClient.get("/users/check-permissions");
-        if (res.status === 403 || res.status === 401) {
-          const data = (res.errorData ?? {}) as {
-            code?: string;
-            redirect?: string;
-          };
-          const isExpulsion =
-            data.code === "TRIAL_EXPIRED" ||
-            data.code === "PERMISSIONS_REVOKED" ||
-            data.code === "SESSION_ORPHANED" ||
-            data.code === "UNAUTHORIZED" ||
-            Boolean(data.redirect);
-
-          if (isExpulsion) {
-            console.warn("[SecurityGuard] Expulsando usuario al Login (Sesión expirada o permisos no válidos)");
-            signOut({ callbackUrl: "/login" });
-          }
+        if (isExpulsion) {
+          console.warn(
+            "[SecurityGuard] Expulsando usuario al Login (Sesión expirada o permisos no válidos)"
+          );
+          signOut({ callbackUrl: "/login" });
         }
-      } catch (e) {
-        // Red o timeouts temporales no expulsan de forma imprevista
       }
-    };
+    } catch (e) {
+      // Red o timeouts temporales no expulsan de forma imprevista
+    }
+  }, []);
 
-    // 1. Verificación inicial de permisos
-    checkPermissions();
-
-    // 2. Intervalo de comprobación en segundo plano cada 30 segundos
-    const interval = setInterval(() => {
-      checkPermissions();
-    }, 30000);
-
-    // 3. Comprobación cuando el usuario vuelve a enfocar la pestaña del navegador
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        checkPermissions();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [session, status]);
+  // El hook comprueba al montar y al recuperar el foco, y detiene el intervalo
+  // mientras la pestaña está oculta: una pestaña en segundo plano no necesita
+  // vigilancia, y al volver se revalida antes de que el usuario toque nada. Ese
+  // chequeo al recuperar el foco ya existía aquí, y es lo que hace seguro pausar.
+  useVisiblePolling(
+    checkPermissions,
+    30000,
+    status === "authenticated" && Boolean(session?.user)
+  );
 
   return null;
 }
