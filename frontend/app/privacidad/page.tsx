@@ -1,7 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Shield, Lock, CheckCircle2, Eye, Server, UserCheck } from "lucide-react";
-import FaceIcon from "@/components/FaceIcon";
-import { Badge } from "@/components/ui/badge";
+import LandingNavbar from "@/components/LandingNavbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,35 +11,12 @@ export const metadata: Metadata = {
 export default function PrivacidadPage() {
   return (
     <div className="min-h-screen bg-surface text-on-surface font-sans selection:bg-primary/20">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-outline-variant/60 bg-surface/80 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold">
-              <FaceIcon className="w-5 h-5 fill-current" />
-            </div>
-            <span className="font-extrabold text-lg text-on-surface tracking-tight group-hover:text-primary transition-colors">
-              Volta
-            </span>
-          </Link>
-
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-on-surface-variant hover:text-primary py-2 px-3 rounded-lg hover:bg-surface-container transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver al inicio
-          </Link>
-        </div>
-      </header>
+      {/* Header Navigation */}
+      <LandingNavbar />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-12">
         <div className="mb-10 text-center sm:text-left">
-          <Badge variant="success" appearance="light" shape="pill" size="md" className="gap-2 mb-4">
-            <Shield className="size-3.5" />
-            Cumplimiento RGPD (UE 2016/679) & LOPDGDD (3/2018)
-          </Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
             Política de Privacidad y Protección de Datos
           </h1>
