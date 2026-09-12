@@ -16,9 +16,9 @@ export default function TerminosPage() {
       <LandingNavbar />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-12">
+      <main className="max-w-container-max mx-auto px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 pt-28 pb-12">
         <div className="mb-10 text-center sm:text-left">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-on-surface tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-on-surface tracking-tight">
             Términos y Condiciones del Servicio
           </h1>
           <p className="text-sm text-on-surface-variant mt-2 max-w-2xl leading-relaxed">

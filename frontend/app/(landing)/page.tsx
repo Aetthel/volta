@@ -1019,7 +1019,7 @@ export default function RootPage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10"
+                className="w-full sm:w-auto bg-transparent border border-white/40 text-white hover:bg-white/15 hover:border-white/60 hover:text-white"
                 onClick={handleVerDemo}
                 disabled={isCreatingDemo}
               >

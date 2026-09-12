@@ -439,7 +439,7 @@ export default function RegisterPage() {
           {currentStep === 1 && (
             <div className="animate-in fade-in duration-200">
               <div className="mb-8 sm:mb-10">
-                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-normal text-on-surface tracking-tight mb-2 sm:mb-3">
+                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-on-surface tracking-tight mb-2 sm:mb-3">
                   ¿A qué sector pertenece tu negocio?
                 </h1>
                 <p className="text-base sm:text-lg text-on-surface-variant font-normal leading-relaxed">
@@ -515,7 +515,7 @@ export default function RegisterPage() {
           {currentStep === 2 && (
             <div className="animate-in fade-in duration-200">
               <div className="mb-8 sm:mb-10">
-                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-normal text-on-surface tracking-tight mb-2 sm:mb-3">
+                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-on-surface tracking-tight mb-2 sm:mb-3">
                   Detalles de tu establecimiento
                 </h1>
                 <p className="text-base sm:text-lg text-on-surface-variant font-normal leading-relaxed">
@@ -607,7 +607,7 @@ export default function RegisterPage() {
           {currentStep === 3 && (
             <div className="animate-in fade-in duration-200">
               <div className="mb-8 sm:mb-10">
-                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-normal text-on-surface tracking-tight mb-2 sm:mb-3">
+                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-on-surface tracking-tight mb-2 sm:mb-3">
                   Crea tu cuenta de administrador
                 </h1>
                 <p className="text-base sm:text-lg text-on-surface-variant font-normal leading-relaxed">
@@ -765,7 +765,7 @@ export default function RegisterPage() {
           {currentStep === 4 && (
             <div className="animate-in fade-in duration-200">
               <div className="mb-8 sm:mb-10">
-                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-normal text-on-surface tracking-tight mb-2 sm:mb-3">
+                <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-on-surface tracking-tight mb-2 sm:mb-3">
                   ¡Casi todo listo!
                 </h1>
                 <p className="text-base sm:text-lg text-on-surface-variant font-normal leading-relaxed">
