@@ -58,27 +58,27 @@ export default function LandingNavbar() {
 
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
-          <a
+          <Link
             href="/#features"
             onClick={(e) => handleNavClick(e, "features")}
             className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
           >
             Características
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#pricing"
             onClick={(e) => handleNavClick(e, "pricing")}
             className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
           >
             Precios
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#testimonials"
             onClick={(e) => handleNavClick(e, "testimonials")}
             className="text-body-md font-medium text-on-surface-variant hover:text-primary transition-colors duration-200 cursor-pointer"
           >
             Testimonios
-          </a>
+          </Link>
         </div>
 
         {/* Action Buttons & Mobile Toggle */}
@@ -107,27 +107,27 @@ export default function LandingNavbar() {
       {/* Mobile Dropdown Menu Drawer */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-outline-variant/20 bg-surface/95 backdrop-blur-lg px-6 py-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
-          <a
+          <Link
             href="/#features"
             onClick={(e) => handleNavClick(e, "features")}
             className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10 cursor-pointer"
           >
             Características
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#pricing"
             onClick={(e) => handleNavClick(e, "pricing")}
             className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10 cursor-pointer"
           >
             Precios
-          </a>
-          <a
+          </Link>
+          <Link
             href="/#testimonials"
             onClick={(e) => handleNavClick(e, "testimonials")}
             className="text-body-md font-semibold text-on-surface hover:text-primary py-2 transition-colors border-b border-outline-variant/10 cursor-pointer"
           >
             Testimonios
-          </a>
+          </Link>
           <div className="flex flex-col gap-2 pt-2">
             <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
               <Button variant="primary" className="w-full justify-center">
