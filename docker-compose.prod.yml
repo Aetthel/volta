@@ -28,7 +28,8 @@ services:
       - LEMONSQUEEZY_WEBHOOK_SECRET=${LEMONSQUEEZY_WEBHOOK_SECRET:-}
       - LEMONSQUEEZY_VARIANT_BASIC=${LEMONSQUEEZY_VARIANT_BASIC:-}
       - LEMONSQUEEZY_VARIANT_PRO=${LEMONSQUEEZY_VARIANT_PRO:-}
-    command: sh -c "cd /app/backend && npx prisma migrate deploy && pnpm --filter backend start"
+    command: sh -c "cd /app/backend && npx prisma migrate deploy && exec pnpm --filter backend start"
+    stop_grace_period: 5s
     healthcheck:
       test:
         [
@@ -117,7 +118,10 @@ services:
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - EMAIL_FROM=${EMAIL_FROM:-Volta <onboarding@resend.dev>}
       - NODE_ENV=production
-    command: pnpm --filter frontend start
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+    command: node frontend/.next/standalone/frontend/server.js
+    stop_grace_period: 3s
     healthcheck:
       test:
         [
